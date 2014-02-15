@@ -1,5 +1,5 @@
 /*
-    libcl2 - common library version 3
+    libcl3 - common library version 3
     Copyright (C) 2013	Simon Brennecke
 
     This program is free software: you can redistribute it and/or modify
@@ -16,41 +16,41 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_system_def_h_
-#define	_include_cl3_system_def_h_
-
-#ifndef	NULL
-	#define	NULL	(0U)
+#ifndef INSIDE_CL3
+#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
 #endif
 
-#define	CLASS
+#include "system_compiler.h"
+
+#if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_LLVM)
+
+#include "system_types_typeinfo.h"
+#include "error.h"
+
+#include <cxxabi.h>
 
 namespace	cl3
 {
 	namespace	system
 	{
-		namespace	def
+		namespace	types
 		{
-			template<class T>
-			inline static void SWAP(T& a, T& b)
+			namespace	typeinfo
 			{
-				T tmp = a;
-				a = b;
-				b = tmp;
-			}
+				using namespace system::memory;
 
-			const static us PAGE_SIZE = 4096U;
+				TUniquePtr<char[],false> UnifyTypename(const char* name);
+
+				TUniquePtr<char[],false> TRTTI::Name() const
+				{
+					TUniquePtr<char[],false> name;
+					CL3_OBJECT_ERROR((name = abi::__cxa_demangle(sys_type_info->name(), NULL, NULL, NULL)).Array() == NULL, error::TCoreException, "name decoding failed");
+					TUniquePtr<char[],false> ret(UnifyTypename(name.Array()).Claim());
+					return ret;
+				}
+			}
 		}
 	}
 }
-
-#define __PASTE2(x, y) x##y
-#define __PASTE(x, y)  __PASTE2(x, y)
-
-#define	MIN(a,b)	( ((a) < (b)) ? (a) : (b) )
-#define	MAX(a,b)	( ((a) > (b)) ? (a) : (b) )
-#define	IN_RANGE(v, low, high)	(((v) >= (low)) && ((v) <= (high)))
-
-#define	CL3_OPT__SYSTEM_ALIGN	16	//	the minimum memory alignment which is enforced automatically by the system libraries
 
 #endif

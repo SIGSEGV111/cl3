@@ -1,5 +1,5 @@
 /*
-    libcl2 - common library version 3
+    libcl3 - common library version 3
     Copyright (C) 2013	Simon Brennecke
 
     This program is free software: you can redistribute it and/or modify
@@ -16,17 +16,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_system_process_h_
-#define	_include_cl3_system_process_h_
-
-namespace	cl3
-{
-	namespace	system
-	{
-		namespace	process
-		{
-		}
-	}
-}
-
+#ifndef INSIDE_CL3
+#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
 #endif
+
+#include "system_compiler.h"
+#include "system_memory.h"
+#include "system_context.h"
+
+using namespace cl3::system::memory;
+using namespace cl3::system::context;
+
+void* operator new(size_t sz)   { return OptionStack<IDynamicAllocator>().Current()->Alloc(sz); }
+void* operator new[](size_t sz) { return OptionStack<IDynamicAllocator>().Current()->Alloc(sz); }
+
+void operator delete(void* ptr)   { return OptionStack<IDynamicAllocator>().Current()->Free(ptr); }
+void operator delete[](void* ptr) { return OptionStack<IDynamicAllocator>().Current()->Free(ptr); }

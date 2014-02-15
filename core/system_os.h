@@ -1,6 +1,6 @@
 /*
-    libcl2 - common library version 2
-    Copyright (C) 2010	Simon Brennecke
+    libcl3 - common library version 3
+    Copyright (C) 2013	Simon Brennecke
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,11 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_system_os_h_
-#define	_include_cl3_system_os_h_
+#ifndef	_include_cl3_core_system_os_h_
+#define	_include_cl3_core_system_os_h_
 
-#include "def.h"
-#include "compiler.h"
+#include "system_def.h"
 
 namespace	cl3
 {
@@ -62,79 +61,71 @@ namespace	cl3
 				OS_VERSION_WINDOWS_NT_61,	//	Windows 7
 			};
 
-			#define	OS_POSIX	1	//	Linux, Unix, SunOS, MacOS ...
-			#define	OS_WINDOWS	2	//	Windows 9x + NT
+			#define	CL3_OS_POSIX	1	//	Linux, Unix, SunOS, MacOS ...
+			#define	CL3_OS_WINDOWS	2	//	Windows 9x, NT, mobile, etc...
 
-			#ifndef _OS
-				#if (_CXX == CXX_MSVC)
-					#define _OS	OS_WINDOWS
+			#define	CL3_OS_TYPE_POSIX_OTHER	0
+			#define	CL3_OS_TYPE_POSIX_LINUX	1
+			#define	CL3_OS_TYPE_POSIX_MACOS	2
+
+			#define	CL3_OS_TYPE_WINDOWS_OTHER	0
+			#define	CL3_OS_TYPE_WINDOWS_9X		1
+			#define	CL3_OS_TYPE_WINDOWS_NT		2
+
+			#ifdef __linux__
+				#define	CL3_OS		CL3_OS_POSIX
+				#define	CL3_OS_TYPE CL3_OS_TYPE_POSIX_LINUX
+			#endif
+
+			#ifndef CL3_OS
+				#if (CL3_CXX == CL3_CXX_MSVC)
+					#define CL3_OS CL3_OS_WINDOWS
 				#endif
-
-				#if (_CXX == CXX_GNU)
-					#define _OS	OS_POSIX
+				#if (CL3_CXX == CL3_CXX_GCC)
+					#define CL3_OS CL3_OS_POSIX
 				#endif
 			#endif
 
-			#ifndef _OS
+			#ifndef CL3_OS
 				#error "unknown operating system"
 			#endif
 
-			#define	OST_POSIX_OTHER	0
-			#define	OST_POSIX_LINUX	1
-			#define	OST_POSIX_MACOS	2
-
-			#define	OST_WINDOWS_OTHER	0
-			#define	OST_WINDOWS_NT		1
-
-			#ifndef _OST
-				#if (_OS == OS_POSIX)
-					#define	OS_CLASS		cl2::os::OS_CLASS_POSIX
-
-					#ifdef __linux__
-						#define	_OST	OST_POSIX_LINUX
-
-						#define	OS_DERIVATIVE	cl2::os::OS_DERIVATIVE_POSIX_LINUX
-					#endif
-				#elif (_OS == OS_WINDOWS)
-					#define	_OST	OST_WINDOWS_NT
-
-					#define	OS_CLASS		cl2::os::OS_CLASS_WINDOWS
-					#define	OS_DERIVATIVE	cl2::os::OS_DERIVATIVE_WINDOWS_NT
+			#ifndef CL3_OS_TYPE
+				#if (CL3_OS == CL3_OS_WINDOWS)
+					#define	CL3_OS_TYPE	CL3_OS_TYPE_WINDOWS_NT
 				#endif
-			#endif
 
-			#ifndef _OST
-				#if (_OS == OS_POSIX)
-					#define _OST OST_POSIX_OTHER
-				#elif (_OS == OS_WINDOWS)
-					#define _OST OST_WINDOWS_OTHER
+				#if (CL3_OS == CL3_OS_POSIX)
+					#define CL3_OS_TYPE CL3_OS_TYPE_POSIX_OTHER
 				#else
-					#error "unknown operating system"
+					#error "unknown operating system variant"
 				#endif
 			#endif
 
-			#if (_OS == OS_POSIX)
-				#include <unistd.h>
-				#include <signal.h>
-
+			#if (CL3_OS == CL3_OS_POSIX)
 				#define	PATHNAME_SEPARATOR	'/'
 				#define	DEBUGGER_BREAK	IFDBG(CL2_DBGLVL_BASIC, ::raise(SIGTRAP))
 			#endif
 
-			#if (_OS == OS_WINDOWS)
+			#if (CL3_OS == CL3_OS_WINDOWS)
 				#define	PATHNAME_SEPARATOR	'\\'
 				#define	DEBUGGER_BREAK	IFDBG(CL2_DBGLVL_BASIC, _CrtDbgBreak())
 			#endif
 
 			#ifndef PATH_MAX
-			#define	PATH_MAX	256
-			#endif
-
-			#if (_OS == OS_WINDOWS)
-				#include <WinSock2.h>
+				#define	PATH_MAX	256
 			#endif
 		}
 	}
 }
+
+#if (CL3_OS == CL3_OS_POSIX)
+	#include <unistd.h>
+	#include <signal.h>
+#endif
+
+#if (CL3_OS == CL3_OS_WINDOWS)
+	#include <WinSock2.h>
+#endif
 
 #endif

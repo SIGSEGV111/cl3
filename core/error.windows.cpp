@@ -1,5 +1,5 @@
 /*
-    libcl2 - common library version 3
+    libcl3 - common library version 3
     Copyright (C) 2013	Simon Brennecke
 
     This program is free software: you can redistribute it and/or modify
@@ -16,15 +16,34 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_system_cpu_h_
-#define	_include_cl3_system_cpu_h_
+#ifndef INSIDE_CL3
+#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#endif
+
+#include "system_os.h"
+
+#if (CL3_OS == CL3_OS_WINDOWS)
+
+#include <windows.h>
+#include "error.h"
 
 namespace	cl3
 {
-	namespace	system
+	namespace	error
 	{
-		namespace	cpu
+		CLASS	TSyscallException::TSyscallException	() : errno(GetLastError()), message(NULL)
 		{
+			FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_MAX_WIDTH_MASK, NULL, errno, 0, (LPSTR)&message, 0, NULL);
+		}
+
+		CLASS	TSyscallException::TSyscallException	(const TSyscallException& other) : errno(other.errno)
+		{
+		}
+
+		CLASS	TSyscallException::~TSyscallException	()
+		{
+			if(message)
+				LocalFree(message);
 		}
 	}
 }

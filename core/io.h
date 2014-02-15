@@ -1,5 +1,5 @@
 /*
-    libcl2 - common library version 3
+    libcl3 - common library version 3
     Copyright (C) 2013	Simon Brennecke
 
     This program is free software: you can redistribute it and/or modify
@@ -16,16 +16,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_system_io_h_
-#define	_include_cl3_system_io_h_
+#ifndef	_include_cl3_core_io_h_
+#define	_include_cl3_core_io_h_
 
 namespace	cl3
 {
-	namespace	system
+	namespace	io
 	{
-		namespace	io
-		{
-		}
 	}
 }
 

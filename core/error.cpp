@@ -1,5 +1,5 @@
 /*
-    libcl2 - common library version 3
+    libcl3 - common library version 3
     Copyright (C) 2013	Simon Brennecke
 
     This program is free software: you can redistribute it and/or modify
@@ -16,57 +16,68 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef INSIDE_CL3
+#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#endif
+
 #include <stdio.h>
+#include <string.h>
+#include <malloc.h>
+#include <stdarg.h>
 #include "error.h"
+#include "util.h"
+#include "system_types_typeinfo.h"
 
 namespace	cl3
 {
-	namespace	system
+	namespace	error
 	{
-		namespace	error
+		CLASS	TCoreException::TCoreException	(const char* format, ...) : message(NULL), object(NULL), codefile(NULL), function(NULL), expression(NULL), inner(NULL), codeline(0)
 		{
-			static char* mkstrcpy(const char* str)
-			{
-				size_t l = strlen(str) + 1;
-				char* cpy = (char*)malloc(l);
-				if(cpy == NULL) throw "TCoreException: out of memory (mkstrcpy)";
-				memcpy(cpy, str, l);
-				return cpy;
-			}
+			va_list list;
+			va_start(list, format);
+			int l = vsnprintf(NULL, 0, format, list) + 1;
+			va_end(list);
+			if(l <= 0) throw "TCoreException: printf format error (ctor)";
 
-			CLASS	TCoreException::TCoreException	(const char* format, ...) : message(NULL), object(NULL), codefile(NULL), classname(NULL), function(NULL), condition(NULL), inner(NULL), codeline(0)
-			{
-				va_list list;
-				va_start(list, format);
-				int l = vsnprintf(NULL, 0, format, list) + 1;
-				va_end(list);
-				if(l <= 0) throw "TCoreException: printf format error (ctor)";
+			va_start(list, format);
+			message = (char*)malloc(l);
+			if(message == NULL) { va_end(list); throw "TCoreException: out of memory (ctor)"; }
+			vsnprintf(message, l, format, list);
+			va_end(list);
+		}
 
-				va_start(list, format);
-				message = (char*)malloc(l);
-				if(message == NULL) { va_end(list); throw "TCoreException: out of memory (ctor)"; }
-				vsnprintf(message, l, format, list);
-				va_end(list);
-			}
+		CLASS	TCoreException::TCoreException	(const TCoreException& e) : message(util::mkstrcpy(e.message).Claim()), object(e.object), codefile(e.codefile), function(e.function), expression(e.expression), inner(e.inner), codeline(e.codeline)
+		{}
 
-			CLASS	TCoreException::TCoreException	(const TCoreException& e) : message(mkstrcpy(e.message)), object(e.object), codefile(e.codefile), classname(e.classname), function(e.function), condition(e.condition), inner(e.inner), codeline(e.codeline)
-			{}
+		CLASS	TCoreException::~TCoreException	()
+		{
+			free(message);
+		}
 
-			CLASS	TCoreException::~TCoreException	()
-			{
-				free(message);
-			}
+		void	TCoreException::Set	(const void* object, const char* codefile, const char* function, const char* expression, TCoreException* inner, unsigned codeline)
+		{
+			this->object    = object;
+			this->codefile  = codefile;
+			this->function  = function;
+			this->expression = expression;
+			this->inner     = inner;
+			this->codeline  = codeline;
+		}
 
-			void	TCoreException::Set	(void* object, const char* codefile, const char* classname, const char* function, const char* condition, TCoreException* inner, unsigned codeline)
-			{
-				this->object    = object;
-				this->codefile  = codefile;
-				this->classname = classname;
-				this->function  = function;
-				this->condition = condition;
-				this->inner     = inner;
-				this->codeline  = codeline;
-			}
+		CLASS	TCoreArgumentException::TCoreArgumentException	(const system::types::typeinfo::TRTTI* argrtti, const char* argname, const char* argvalue) :
+				TCoreException("function call argument or parameter is invalid (type: \"%s\", name: \"%s\", value: \"%s\")", argrtti != NULL ? argrtti->Name().Array() : "<?>", argname, argvalue),
+				argrtti(argrtti), argname(argname), argvalue(util::mkstrcpy(argvalue).Claim())
+		{
+		}
+
+		CLASS	TCoreArgumentException::TCoreArgumentException	(const TCoreArgumentException& ae) : TCoreException(ae), argrtti(ae.argrtti), argname(ae.argname), argvalue(util::mkstrcpy(ae.argvalue).Claim())
+		{
+		}
+
+		CLASS	TCoreArgumentException::~TCoreArgumentException	()
+		{
+			free(argvalue);
 		}
 	}
 }
