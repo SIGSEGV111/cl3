@@ -2,3 +2,4 @@
 *.hpp.gch
 *.so
 test/test-core
+*.a
