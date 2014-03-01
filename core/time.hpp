@@ -22,27 +22,26 @@
 #include "system_os.hpp"
 #include "system_compiler.hpp"
 #include "system_types.hpp"
-#include <time.h>
+
+#if (CL3_OS == CL3_OS_WINDOWS)	//	windows doesn't know about POSIX struct timespec and timeval....
+struct timespec
+{
+	time_t tv_sec;        /* seconds */
+	long   tv_nsec;       /* nanoseconds */
+};
+struct timeval
+{
+	time_t      tv_sec;     /* seconds */
+	suseconds_t tv_usec;    /* microseconds */
+};
+#else
+#include <sys/time.h>
+#endif
 
 namespace	cl3
 {
 	namespace	time
 	{
-		#if (CL3_OS == CL3_OS_WINDOWS)	//	windows doesn't know about POSIX struct timespec and timeval....
-		struct timespec
-		{
-			time_t tv_sec;        /* seconds */
-			long   tv_nsec;       /* nanoseconds */
-		};
-		struct timeval
-		{
-			time_t      tv_sec;     /* seconds */
-			suseconds_t tv_usec;    /* microseconds */
-		};
-
-		#endif
-
-		extern int timezone;
 		using namespace system::types;
 
 		enum	EUnit
@@ -72,7 +71,7 @@ namespace	cl3
 			TIME_CLOCK_THREAD_SYS	//	as above but only the portion spent in kernel-mode
 		};
 
-		class	CL3PUBT	TTime	//	always UTC
+		class	CL3PUBT	TTime	//	always unixtime / UTC
 		{
 			private:
 				void	Normalize	();
@@ -103,7 +102,6 @@ namespace	cl3
 				CL3PUBF	static TTime	ConvertFrom	(EUnit unit, double value);
 
 				CL3PUBF	static	TTime	Now			(EClock clock = TIME_CLOCK_REALTIME);
-				CL3PUBF	TTime			LocalTime	() const;
 				CL3PUBF	s64				UnixTimeI	() const;
 				CL3PUBF	double			UnixTimeF	() const;
 				CL3PUBF	static	TTime	UnixTime	(double unixtime);

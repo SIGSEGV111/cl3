@@ -2,7 +2,7 @@
 
 GTEST_DIR=$(CURDIR)/gtest
 CXX=$(shell which clang)
-CXX_OPT=-fPIC -g -O0 -Wall -Wextra -Werror -Winvalid-pch -I.tmp -Iinclude
+CXX_OPT=-fPIC -g -O1 -Wall -Wextra -Werror -Winvalid-pch -I.tmp -Iinclude
 OBJS=$(shell ls -1 *.cpp | sed 's/\(.*\)\.cpp/\.tmp\/\1\.o/' -)
 PCHS=$(shell ls -1 *.hpp | sed 's/\(.*\)\.hpp/\.tmp\/\1\.hpp\.gch/' -)
 

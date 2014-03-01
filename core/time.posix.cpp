@@ -31,7 +31,6 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <time.h>
-#include <stdio.h>
 
 namespace	cl3
 {
@@ -92,6 +91,14 @@ namespace	cl3
 			CL3_SYSERR(clock_gettime(id, &ts));
 			return TTime((s64)ts.tv_sec, (s64)ts.tv_nsec * (s64)1000000000);
 		}
+
+		/*TTime	TTime::LocalTime	() const
+		{
+			struct ::timeval tv;
+			struct ::timezone tz;
+			::gettimeofday(&tv, &tz);
+			return TTime(sec - (tz.tz_minuteswest * 60LL), asec);
+		}*/
 	}
 }
 

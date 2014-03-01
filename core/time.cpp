@@ -26,8 +26,6 @@ namespace cl3
 {
 	namespace	time
 	{
-		int timezone;
-
 		void	TTime::Normalize	()
 		{
 			if(asec <= -1000000000000000000LL)
@@ -243,11 +241,6 @@ namespace cl3
 		TTime	TTime::UnixTime		(s64 unixtime)
 		{
 			return TTime(unixtime, 0);
-		}
-
-		TTime	TTime::LocalTime	() const
-		{
-			return TTime(sec - timezone, asec);
 		}
 
 		TTime::operator timespec	() const

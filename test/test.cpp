@@ -51,14 +51,14 @@ namespace
 	{
 		using namespace cl3::time;
 
-		TEST(cl3_core, Time_Copy)
+		TEST(coreTime, Copy)
 		{
 			const TTime t1(8589934592LL,1000000000LL);
 			const TTime t2(t1);
 			EXPECT_TRUE(t1 == t2);
 		}
 
-		TEST(cl3_core, Time_InitFrom_sint64)
+		TEST(coreTime, InitFrom_sint64)
 		{
 			{
 				const TTime t1 = TTime::UnixTime((s64)8589934592LL);
@@ -72,7 +72,7 @@ namespace
 			}
 		}
 
-		TEST(cl3_core, Time_InitFrom_float64)
+		TEST(coreTime, InitFrom_float64)
 		{
 			{
 				const double ux_in = 1024.0009765625;
@@ -100,7 +100,7 @@ namespace
 			}
 		}
 
-		TEST(cl3_core, Time_ConvertTo_timespec)
+		TEST(coreTime, ConvertTo_timespec)
 		{
 			{
 				const TTime t1(8589934592LL, 654743500000000LL);
@@ -116,7 +116,7 @@ namespace
 			}
 		}
 
-		TEST(cl3_core, Time_ConvertTo_timeval)
+		TEST(coreTime, ConvertTo_timeval)
 		{
 			{
 				const TTime t1(8589934592LL, 654743500000000000LL);
@@ -132,7 +132,7 @@ namespace
 			}
 		}
 
-		TEST(cl3_core, Time_ConvertTo_sint64)
+		TEST(coreTime, ConvertTo_sint64)
 		{
 			{
 				const TTime t1(8589934592LL, 654743500000000LL);
@@ -148,7 +148,7 @@ namespace
 			}
 		}
 
-		TEST(cl3_core, Time_ConvertTo_float64)
+		TEST(coreTime, ConvertTo_float64)
 		{
 			{
 				const TTime t1(1024LL, 976562500000000LL);
@@ -164,7 +164,7 @@ namespace
 			}
 		}
 
-		TEST(cl3_core, Time_Roundtrip_timespec)
+		TEST(coreTime, Roundtrip_timespec)
 		{
 			{
 				const TTime t1(8589934592LL,1000000000LL);
@@ -180,7 +180,7 @@ namespace
 			}
 		}
 
-		TEST(cl3_core, Time_Roundtrip_timeval)
+		TEST(coreTime, Roundtrip_timeval)
 		{
 			{
 				const TTime t1(8589934592LL, 45678000000000000LL);
@@ -196,7 +196,7 @@ namespace
 			}
 		}
 
-		TEST(cl3_core, Time_Roundtrip_sint64)
+		TEST(coreTime, Roundtrip_sint64)
 		{
 			{
 				const TTime t1(8589934592LL,0);
@@ -212,7 +212,7 @@ namespace
 			}
 		}
 
-		TEST(cl3_core, Time_Roundtrip_float64)
+		TEST(coreTime, Roundtrip_float64)
 		{
 			{
 				const double ux_in  = 1024.0009765625;
@@ -226,7 +226,7 @@ namespace
 			}
 		}
 
-		TEST(cl3_core, Time_Overflow)
+		TEST(coreTime, Overflow)
 		{
 			{
 				const TTime t1(0,1000000000000000000ULL);
@@ -240,7 +240,7 @@ namespace
 			}
 		}
 
-		TEST(cl3_core, Time_BasicMath)
+		TEST(coreTime, BasicMath)
 		{
 			{
 				const TTime t1(1,1);
@@ -256,7 +256,7 @@ namespace
 			}
 		}
 
-		TEST(cl3_core, Time_BasicMath_Overflow)
+		TEST(coreTime, BasicMath_Overflow)
 		{
 			{
 				const TTime t1(1,1);
@@ -272,7 +272,7 @@ namespace
 			}
 		}
 
-		TEST(cl3_core, Time_ConvertToI)
+		TEST(coreTime, ConvertToI)
 		{
 			{
 				const TTime t1(1,123456789123456789LL);
@@ -312,7 +312,7 @@ namespace
 			}
 		}
 
-		TEST(cl3_core, Time_ConvertToF)
+		TEST(coreTime, ConvertToF)
 		{
 			{
 				const TTime t1(1,123456789123456789LL);
@@ -352,7 +352,7 @@ namespace
 			}
 		}
 
-		TEST(cl3_core, Time_Compare)
+		TEST(coreTime, Compare)
 		{
 			const TTime t1(1,5);
 			const TTime t2(2,2);
@@ -394,6 +394,19 @@ namespace
 
 			EXPECT_TRUE(t1 != t7);
 			EXPECT_FALSE(t1 == t7);
+		}
+
+		TEST(coreTime, Now)
+		{
+			const TTime ts = TTime::Now();
+			::usleep(10000L);	// sleep 10ms
+			const TTime te = TTime::Now();
+			EXPECT_TRUE(ts < te);
+			const TTime td_out = te - ts;
+			const TTime td_min(0, 9000000000000000);	//  9ms
+			const TTime td_max(0,50000000000000000);	// 50ms
+			EXPECT_TRUE(td_out > td_min);
+			EXPECT_TRUE(td_out < td_max);
 		}
 	}
 }
