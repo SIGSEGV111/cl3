@@ -1,5 +1,5 @@
 .tmp
 *.hpp.gch
 *.so
-test/test-core
+exe
 *.a
