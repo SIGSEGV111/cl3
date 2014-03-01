@@ -20,12 +20,12 @@
 #error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
 #endif
 
-#include "system_compiler.h"
+#include "system_compiler.hpp"
 
 #if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_LLVM)
 
-#include "system_types_typeinfo.h"
-#include "error.h"
+#include "system_types_typeinfo.hpp"
+#include "error.hpp"
 
 #include <cxxabi.h>
 

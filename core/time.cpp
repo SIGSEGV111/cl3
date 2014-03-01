@@ -20,7 +20,7 @@
 #error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
 #endif
 
-#include "time.h"
+#include "time.hpp"
 
 namespace cl3
 {
@@ -28,22 +28,39 @@ namespace cl3
 	{
 		int timezone;
 
+		void	TTime::Normalize	()
+		{
+			if(asec <= -1000000000000000000LL)
+			{
+				const s64 f = asec / 1000000000000000000LL;
+				sec -= f;
+				asec += f * 1000000000000000000LL;
+			}
+			else if(asec >= 1000000000000000000LL)
+			{
+				const s64 f = asec / 1000000000000000000LL;
+				sec += f;
+				asec -= f * 1000000000000000000LL;
+			}
+
+			if(asec < 0 && sec > 0)
+			{
+				sec--;
+				asec += 1000000000000000000LL;
+			}
+			else if(asec > 0 && sec < 0)
+			{
+				sec++;
+				asec -= 1000000000000000000LL;
+			}
+		}
+
 		TTime&	TTime::operator+=	(const TTime op)
 		{
 			sec += op.sec;
 			asec += op.asec;
 
-			while(asec < 0)
-			{
-				sec--;
-				asec += 1000000000000000000LL;
-			}
-
-			while(asec >= 1000000000000000000LL)
-			{
-				sec++;
-				asec -= 1000000000000000000LL;
-			}
+			Normalize();
 
 			return *this;
 		}
@@ -53,17 +70,7 @@ namespace cl3
 			sec -= op.sec;
 			asec -= op.asec;
 
-			while(asec < 0)
-			{
-				sec--;
-				asec += 1000000000000000000LL;
-			}
-
-			while(asec >= 1000000000000000000LL)
-			{
-				sec++;
-				asec -= 1000000000000000000LL;
-			}
+			Normalize();
 
 			return *this;
 		}
@@ -256,9 +263,7 @@ namespace cl3
 
 		CLASS	TTime::TTime		(s64 Seconds, s64 Attoseconds) : sec(Seconds), asec(Attoseconds)
 		{
-			u64 add_sec = asec / 1000000000000000000LL;
-			asec -= add_sec * 1000000000000000000LL;
-			sec += add_sec;
+			Normalize();
 		}
 	};
 };

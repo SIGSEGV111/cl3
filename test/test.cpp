@@ -16,72 +16,165 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <cl3/core/system_types_typeinfo.h>
-#include <cl3/core/system_types.h>
-#include <cl3/core/event.h>
-#include <cl3/core/io_collection.h>
+#include <cl3/core/time.hpp>
+#include <gtest/gtest.h>
+#include <iostream>
 
+using namespace ::testing;
 using namespace std;
-using namespace cl3::event;
 
-namespace	test
+namespace	cl3
 {
-	template<class T>
-	struct B {};
-
-	B<char> b;
-
-	template<class X, B<char>* b>
-	struct A
+	namespace	time
 	{
-	};
-
-	int array[] = { 10, 0 };
-
-	template<class T, class A, int j>
-	struct	TTest
-	{
-		int x,y,z;
-
-		TTest() {}
-
-		TEvent<TTest, int> on_x_change;
-	};
-
-	TTest<int,int,10> object;
-
-	void static_func(TEvent<TTest<int,int,10>,int>& event, TTest<int,int,10>& sender, int data, char& rdata)
-	{
-		printf("hey! (%c)\n", rdata);
+		ostream& operator<<(ostream& os, TTime t)
+		{
+			os<<"{ "<<t.Seconds()<<"; "<<t.Attoseconds()<<" }";
+			return os;
+		}
 	}
 }
 
-using namespace test;
-
-int main(int argc, char* argv[])
+namespace
 {
-	try
+	namespace	time
 	{
-		object.on_x_change.Register(&static_func, 'a');
-		object.on_x_change.Register(&static_func, 'b');
-		printf("%zd receivers\n", object.on_x_change.Raise(object, 10));
-		object.on_x_change.Unregister(&static_func, 'b');
-		printf("%zd receivers\n", object.on_x_change.Raise(object, 10));
+		using namespace cl3::time;
 
-		int* x = new int(10);
-		*x = 17;
-		delete x;
-		const cl3::system::types::typeinfo::TRTTI& rtti = cl3::system::types::typeinfo::TCTTI< TTest< A<B<int>,&b>, int[], 1045678> >::rtti;
-		printf("%s\n%08x\n", rtti.Name().Array(), rtti.Hash());
-		return 0;
-	}
-	catch(const cl3::error::TCoreException& e)
-	{
-		return 1;
-	}
-	catch(...)
-	{
-		return 2;
+		TEST(cl3_core, Time_Copy)
+		{
+			TTime t1(1,1000000000);
+			TTime t2(t1);
+			EXPECT_TRUE(t1 == t2);
+		}
+
+		TEST(cl3_core, Time_Roundtrip_CL_UX_CL)
+		{
+			TTime t1(1,1000000000);
+			timespec ts = t1;
+			TTime t2 = ts;
+			EXPECT_TRUE(t1 == t2);
+		}
+
+		TEST(cl3_core, Time_Overflow)
+		{
+			{
+				TTime t1(0,1000000000000000000ULL);
+				TTime t2(1,0);
+				EXPECT_TRUE(t1 == t2);
+			}
+			{
+				TTime t1(0,9223372036854775807ULL);
+				TTime t2(9, 223372036854775807ULL);
+				EXPECT_TRUE(t1 == t2);
+			}
+		}
+
+		TEST(cl3_core, Time_BasicMath)
+		{
+			{
+				TTime t1(1,1);
+				TTime t2(2,2);
+				TTime tr(3,3);
+				EXPECT_TRUE(tr == t1 + t2);
+			}
+			{
+				TTime t1(2,2);
+				TTime t2(1,1);
+				TTime tr(1,1);
+				EXPECT_TRUE(tr == t1 - t2);
+			}
+		}
+
+		TEST(cl3_core, Time_BasicMath_Overflow)
+		{
+			{
+				TTime t1(1,1);
+				TTime t2(2,999999999999999999ULL);
+				TTime tr(4,0);
+				EXPECT_TRUE(tr == t1 + t2);
+			}
+			{
+				TTime t1(2, 0);
+				TTime t2(0,-3);
+				TTime tr(1,1000000000000000000ULL-3ULL);
+				EXPECT_TRUE(tr == t1 + t2);
+			}
+		}
+
+		TEST(cl3_core, Time_InitFromFloat)
+		{
+			const TTime td(0,1000);
+			{
+				TTime t1(1,900000000000000000LL);
+				TTime t2(1.9);
+				EXPECT_TRUE(t1 + td > t2);
+				EXPECT_TRUE(t1 - td < t2);
+			}
+			{
+				TTime t1(1,100000000000000000LL);
+				TTime t2(1.1);
+				EXPECT_TRUE(t1 + td > t2);
+				EXPECT_TRUE(t1 - td < t2);
+			}
+			{
+				TTime t1(1,500000000000000000LL);
+				TTime t2(1.5);
+				EXPECT_TRUE(t1 + td > t2);
+				EXPECT_TRUE(t1 - td < t2);
+			}
+			{
+				TTime t1(1,700000000000000000LL);
+				TTime t2(1.7);
+				EXPECT_TRUE(t1 + td > t2);
+				EXPECT_TRUE(t1 - td < t2);
+			}
+			{
+				TTime t1(1,300000000000000000LL);
+				TTime t2(1.3);
+				EXPECT_TRUE(t1 + td > t2);
+				EXPECT_TRUE(t1 - td < t2);
+			}
+		}
+
+		TEST(cl3_core, Time_ConvertToI)
+		{
+			{
+				const TTime t1(1,123456789123456789LL);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_ATTOSECONDS)  == 1123456789123456789LL);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_FEMTOSECONDS) == 1123456789123456LL);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_PICOSECONDS)  == 1123456789123LL);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_NANOSECONDS)  == 1123456789LL);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_MICROSECONDS) == 1123456LL);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_MILLISECONDS) == 1123LL);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_SECONDS)  == 1);
+			}
+			{
+				//	1 day, 1 hour, 54 minutes, 17 seconds, 250 milliseconds
+				const TTime t1(86400LL+3600LL+3240LL+17LL,250000000000000000LL);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_SECONDS) == 86400LL+3600LL+3240LL+17LL);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_MINUTES) == 1554);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_HOURS)   == 25);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_DAYS)    == 1);
+			}
+			{
+				const TTime t1(-1,-123456789123456789LL);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_ATTOSECONDS)  == -1123456789123456789LL);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_FEMTOSECONDS) == -1123456789123456LL);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_PICOSECONDS)  == -1123456789123LL);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_NANOSECONDS)  == -1123456789LL);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_MICROSECONDS) == -1123456LL);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_MILLISECONDS) == -1123LL);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_SECONDS)  == -1);
+			}
+			{
+				//	-1 day, -1 hour, -54 minutes, -17 seconds, -250 milliseconds
+				const TTime t1(-(86400LL+3600LL+3240LL+17LL),-250000000000000000LL);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_SECONDS) == -(86400LL+3600LL+3240LL+17LL));
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_MINUTES) == -1554);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_HOURS)   == -25);
+				EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_DAYS)    == -1);
+			}
+		}
 	}
 }

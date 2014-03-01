@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "system_memory.h"
-#include "io_collection_bitmask.h"
+#include "system_memory.hpp"
+#include "io_collection_bitmask.hpp"
 #include <malloc.h>
 #include <string.h>
 

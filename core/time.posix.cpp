@@ -20,13 +20,13 @@
 #error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
 #endif
 
-#include "system_os.h"
+#include "system_os.hpp"
 
 #if (CL3_OS == CL3_OS_POSIX)
 
-#include "time.h"
-#include "error.h"
-#include "system_types_typeinfo.h"
+#include "time.hpp"
+#include "error.hpp"
+#include "system_types_typeinfo.hpp"
 
 #include <sys/time.h>
 #include <sys/resource.h>

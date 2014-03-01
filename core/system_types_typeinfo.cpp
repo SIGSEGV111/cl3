@@ -20,9 +20,9 @@
 #error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
 #endif
 
-#include "system_types.h"
-#include "system_types_typeinfo.h"
-#include "util.h"
+#include "system_types.hpp"
+#include "system_types_typeinfo.hpp"
+#include "util.hpp"
 #include <string.h>
 
 namespace	cl3

@@ -1,16 +1,37 @@
-.PHONY: all clean
+.PHONY: all clean pch
 
-export CXX=clang
-export CXX_OPT=-fPIC -g -DINSIDE_CL3 -O3
+CXX=$(shell which clang)
+CXX_OPT_INT=-fPIC -g -O3 -Wall -Wextra -Werror -Winvalid-pch -I.tmp -DINSIDE_CL3
+CXX_OPT_EXT=-fPIC -g -O3 -Wall -Wextra -Werror -Winvalid-pch -I.tmp
+OBJS=$(shell ls -1 *.cpp | sed 's/\(.*\)\.cpp/\.tmp\/\1\.o/' -)
+PCHS=$(shell ls -1 *.hpp | sed 's/\.hpp/\.hpp\.gch/' -)
+DHHS=$(shell ls -1 *.hpp | sed 's/\(.*\)\.hpp/\.tmp\/\1\.dhh/' -)
 
-all: libcl3-core.so
+all: libcl3-core.so libcl3-core.a $(PCHS)
 
 clean:
-	rm -vf libcl3-core.so *.o
+	rm -vf libcl3-core.so .tmp/* *.hpp.gch
 
-%.o: %.cpp
-	$(CXX) -c $(CXX_OPT) $+
+pch: $(PCHS)
 
-libcl3-core.so: error.o error.posix.o error.windows.o io_collection_bitmask.o io_collection_list.o system_compiler.o system_context.o system_memory.o system_types_typeinfo.o system_types_typeinfo.gcc+llvm.o time.o time.posix.o time.windows.o util.o
-	$(CXX) -lstdc++ -lrt -shared $(CXX_OPT) $+ -o $@
+# pull in dependencies
+-include $(OBJS:.o=.dcc)
+-include $(DHHS)
 
+.tmp/%.dcc: %.cpp
+	$(CXX) $(CXX_OPT_INT) -MM $< | sed 's/\(.*\):/\.tmp\/\1:/' - > $@
+
+.tmp/%.o: %.cpp .tmp/%.dcc
+	$(CXX) $(CXX_OPT_INT) -c $< -o $@
+
+.tmp/%.dhh: %.hpp
+	$(CXX) $(CXX_OPT_INT) -MM $< | sed 's/\.o:/\.hpp\.gch:/' - >  $@
+
+%.hpp.gch: %.hpp
+	$(CXX) $(CXX_OPT_EXT) $< -o $@
+
+libcl3-core.so: $(OBJS)
+	$(CXX) -lstdc++ -lrt -shared $(CXX_OPT_INT) $(OBJS) -o $@
+
+libcl3-core.a: $(OBJS)
+	ar rcs $@ $(OBJS)

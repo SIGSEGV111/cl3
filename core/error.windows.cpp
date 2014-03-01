@@ -20,12 +20,12 @@
 #error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
 #endif
 
-#include "system_os.h"
+#include "system_os.hpp"
 
 #if (CL3_OS == CL3_OS_WINDOWS)
 
 #include <windows.h>
-#include "error.h"
+#include "error.hpp"
 
 namespace	cl3
 {

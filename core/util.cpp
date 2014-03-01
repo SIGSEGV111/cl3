@@ -23,9 +23,9 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include "util.h"
-#include "system_memory.h"
-#include "error.h"
+#include "util.hpp"
+#include "system_memory.hpp"
+#include "error.hpp"
 
 namespace	cl3
 {
@@ -45,10 +45,10 @@ namespace	cl3
 			TUniquePtr<char[],false> buffer((char*)system::memory::safe_malloc(sz_need + 1));	// one byte extra for '\0'
 
 			va_start(list, format);
-			const int sz_used = vsnprintf(buffer.Array(), sz_need + 1, format, list);
+			/*const int sz_used =*/ vsnprintf(buffer.Array(), sz_need + 1, format, list);
 			va_end(list);
 
-			CL3_IFDBG(CL3_ERROR(sz_used != sz_need || sz_used < 0, error::TCoreException, "your ::vsnprintf() implementation is broken, *OR* the memory that was referenced by the format string changed, which is an indicator for unguarded multi-threaded access to the same memory in your application - the output of the mprintf() function will be of limited use."));
+			//CL3_IFDBG(CL3_ERROR(sz_used != sz_need || sz_used < 0, error::TCoreException, "your ::vsnprintf() implementation is broken, *OR* the memory that was referenced by the format string changed, which is an indicator for unguarded multi-threaded access to the same memory in your application - the output of the mprintf() function will be of limited use."));
 
 			return buffer;
 		}

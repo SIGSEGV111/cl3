@@ -20,9 +20,9 @@
 #error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
 #endif
 
-#include "system_memory.h"
-#include "error.h"
-#include "system_types_typeinfo.h"
+#include "system_memory.hpp"
+#include "error.hpp"
+#include "system_types_typeinfo.hpp"
 #include <malloc.h>
 
 namespace	cl3

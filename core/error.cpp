@@ -24,9 +24,9 @@
 #include <string.h>
 #include <malloc.h>
 #include <stdarg.h>
-#include "error.h"
-#include "util.h"
-#include "system_types_typeinfo.h"
+#include "error.hpp"
+#include "util.hpp"
+#include "system_types_typeinfo.hpp"
 
 namespace	cl3
 {
