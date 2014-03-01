@@ -28,12 +28,18 @@ namespace	cl3
 {
 	namespace	time
 	{
-		#if (CL3_OS == CL3_OS_WINDOWS)	//	windows doesn't know about POSIX struct timespec....
+		#if (CL3_OS == CL3_OS_WINDOWS)	//	windows doesn't know about POSIX struct timespec and timeval....
 		struct timespec
 		{
 			time_t tv_sec;        /* seconds */
 			long   tv_nsec;       /* nanoseconds */
 		};
+		struct timeval
+		{
+			time_t      tv_sec;     /* seconds */
+			suseconds_t tv_usec;    /* microseconds */
+		};
+
 		#endif
 
 		extern int timezone;
@@ -77,7 +83,7 @@ namespace	cl3
 
 			public:
 				inline	s64	Seconds		() const { return sec; }
-				inline	u64	Attoseconds	() const { return (u64)asec; }
+				inline	s64	Attoseconds	() const { return asec; }
 
 				CL3PUBF	TTime&	operator+=	(const TTime op);
 				CL3PUBF	TTime&	operator-=	(const TTime op);
@@ -103,13 +109,15 @@ namespace	cl3
 				CL3PUBF	static	TTime	UnixTime	(double unixtime);
 				CL3PUBF	static	TTime	UnixTime	(s64 unixtime);
 				CL3PUBF	operator timespec			() const;
+				CL3PUBF	operator timeval			() const;
 
 				inline	CLASS	TTime	() : sec(0), asec(0) {}
 				CL3PUBF	CLASS	TTime	(double Seconds);
 				CL3PUBF	CLASS	TTime	(s64 seconds, s64 attoseconds);
 				inline	CLASS	TTime	(s32 seconds) : sec(seconds), asec(0) {}
 				inline	CLASS	TTime	(s64 seconds) : sec(seconds), asec(0) {}
-				inline	CLASS	TTime	(struct timespec ts) : sec((s64)ts.tv_sec), asec((s64)ts.tv_nsec * (s64)1000000000) {}
+				inline	CLASS	TTime	(struct timespec ts) : sec((s64)ts.tv_sec), asec((s64)ts.tv_nsec * (s64)1000000000LL) {}
+				inline	CLASS	TTime	(struct timeval tv) : sec((s64)tv.tv_sec), asec((s64)tv.tv_usec * (s64)1000000000000LL) {}
 		};
 	}
 }

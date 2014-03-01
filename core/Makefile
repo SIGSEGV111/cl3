@@ -1,4 +1,4 @@
-.PHONY: all clean pch
+.PHONY: all clean pch testrun
 
 CXX=$(shell which clang)
 CXX_OPT_INT=-fPIC -g -O3 -Wall -Wextra -Werror -Winvalid-pch -I.tmp -DINSIDE_CL3
@@ -35,3 +35,6 @@ libcl3-core.so: $(OBJS)
 
 libcl3-core.a: $(OBJS)
 	ar rcs $@ $(OBJS)
+
+testrun:
+	$(MAKE) run -C ../test

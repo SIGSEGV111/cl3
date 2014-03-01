@@ -233,7 +233,9 @@ namespace cl3
 		TTime	TTime::UnixTime		(double unixtime)
 		{
 			s64 sec = (s64)unixtime;
-			s64 asec = (s64)((unixtime - (double)sec) * 1000000000000000000.0);
+			unixtime -= sec;
+			unixtime *= 1000000000000000000.0;
+			s64 asec = (s64)unixtime;
 
 			return TTime(sec, asec);
 		}
@@ -251,6 +253,12 @@ namespace cl3
 		TTime::operator timespec	() const
 		{
 			timespec t = { (time_t)(sec), (long)(asec / 1000000000LL) };
+			return t;
+		}
+
+		TTime::operator timeval		() const
+		{
+			timeval t = { (time_t)(sec), (long)(asec / 1000000000000LL) };
 			return t;
 		}
 

@@ -32,6 +32,16 @@ namespace	cl3
 			os<<"{ "<<t.Seconds()<<"; "<<t.Attoseconds()<<" }";
 			return os;
 		}
+
+		bool operator==(const timespec ts1, const timespec ts2)
+		{
+			return ts1.tv_sec == ts2.tv_sec && ts1.tv_nsec == ts2.tv_nsec;
+		}
+
+		bool operator==(const timeval tv1, const timeval tv2)
+		{
+			return tv1.tv_sec == tv2.tv_sec && tv1.tv_usec == tv2.tv_usec;
+		}
 	}
 }
 
@@ -43,17 +53,177 @@ namespace
 
 		TEST(cl3_core, Time_Copy)
 		{
-			const TTime t1(1,1000000000);
+			const TTime t1(8589934592LL,1000000000LL);
 			const TTime t2(t1);
 			EXPECT_TRUE(t1 == t2);
 		}
 
-		TEST(cl3_core, Time_Roundtrip_CL_UX_CL)
+		TEST(cl3_core, Time_InitFrom_sint64)
 		{
-			const TTime t1(1,1000000000);
-			const timespec ts = t1;
-			const TTime t2 = ts;
-			EXPECT_TRUE(t1 == t2);
+			{
+				const TTime t1 = TTime::UnixTime((s64)8589934592LL);
+				const TTime t2(8589934592LL,0);
+				EXPECT_TRUE(t1 == t2);
+			}
+			{
+				const TTime t1 = TTime::UnixTime((s64)-8589934592LL);
+				const TTime t2(-8589934592LL,0);
+				EXPECT_TRUE(t1 == t2);
+			}
+		}
+
+		TEST(cl3_core, Time_InitFrom_float64)
+		{
+			{
+				const double ux_in = 1024.0009765625;
+				const TTime t1(1024LL, 976562500000000LL);
+				const TTime t2(ux_in);
+				EXPECT_TRUE(t1 == t2);
+			}
+			{
+				const double ux_in = -1024.0009765625;
+				const TTime t1(-1024LL, -976562500000000LL);
+				const TTime t2(ux_in);
+				EXPECT_TRUE(t1 == t2);
+			}
+			{
+				const double ux_in = 1024.0009765625;
+				const TTime t1 = TTime::UnixTime(ux_in);
+				const TTime t2(1024LL, 976562500000000LL);
+				EXPECT_TRUE(t1 == t2);
+			}
+			{
+				const double ux_in = -1024.0009765625;
+				const TTime t1 = TTime::UnixTime(ux_in);
+				const TTime t2(-1024LL, -976562500000000LL);
+				EXPECT_TRUE(t1 == t2);
+			}
+		}
+
+		TEST(cl3_core, Time_ConvertTo_timespec)
+		{
+			{
+				const TTime t1(8589934592LL, 654743500000000LL);
+				const timespec ts_out = t1;
+				const timespec ts_exp = { 8589934592LL, 654743LL };
+				EXPECT_TRUE(ts_out == ts_exp);
+			}
+			{
+				const TTime t1(-8589934592LL, -654743500000000LL);
+				const timespec ts_out = t1;
+				const timespec ts_exp = { -8589934592LL, -654743LL };
+				EXPECT_TRUE(ts_out == ts_exp);
+			}
+		}
+
+		TEST(cl3_core, Time_ConvertTo_timeval)
+		{
+			{
+				const TTime t1(8589934592LL, 654743500000000000LL);
+				const timeval tv_out = t1;
+				const timeval tv_exp = { 8589934592LL, 654743LL };
+				EXPECT_TRUE(tv_out == tv_exp);
+			}
+			{
+				const TTime t1(-8589934592LL, -654743500000000000LL);
+				const timeval tv_out = t1;
+				const timeval tv_exp = { -8589934592LL, -654743LL };
+				EXPECT_TRUE(tv_out == tv_exp);
+			}
+		}
+
+		TEST(cl3_core, Time_ConvertTo_sint64)
+		{
+			{
+				const TTime t1(8589934592LL, 654743500000000LL);
+				const s64 ux_out = t1.UnixTimeI();
+				const s64 ux_exp = 8589934592LL;
+				EXPECT_TRUE(ux_out == ux_exp);
+			}
+			{
+				const TTime t1(-8589934592LL, -654743500000000LL);
+				const s64 ux_out = t1.UnixTimeI();
+				const s64 ux_exp = -8589934592LL;
+				EXPECT_TRUE(ux_out == ux_exp);
+			}
+		}
+
+		TEST(cl3_core, Time_ConvertTo_float64)
+		{
+			{
+				const TTime t1(1024LL, 976562500000000LL);
+				const f64 ux_out = t1.UnixTimeF();
+				const f64 ux_exp = 1024.0009765625;
+				EXPECT_TRUE(ux_out == ux_exp);
+			}
+			{
+				const TTime t1(-1024LL, -976562500000000LL);
+				const f64 ux_out = t1.UnixTimeF();
+				const f64 ux_exp = -1024.0009765625;
+				EXPECT_TRUE(ux_out == ux_exp);
+			}
+		}
+
+		TEST(cl3_core, Time_Roundtrip_timespec)
+		{
+			{
+				const TTime t1(8589934592LL,1000000000LL);
+				const timespec ts = t1;
+				const TTime t2 = ts;
+				EXPECT_TRUE(t1 == t2);
+			}
+			{
+				const TTime t1(-8589934592LL,-1000000000LL);
+				const timespec ts = t1;
+				const TTime t2 = ts;
+				EXPECT_TRUE(t1 == t2);
+			}
+		}
+
+		TEST(cl3_core, Time_Roundtrip_timeval)
+		{
+			{
+				const TTime t1(8589934592LL, 45678000000000000LL);
+				const timeval tv = t1;
+				const TTime t2 = tv;
+				EXPECT_TRUE(t1 == t2);
+			}
+			{
+				const TTime t1(-8589934592LL, -45678000000000000LL);
+				const timeval tv = t1;
+				const TTime t2 = tv;
+				EXPECT_TRUE(t1 == t2);
+			}
+		}
+
+		TEST(cl3_core, Time_Roundtrip_sint64)
+		{
+			{
+				const TTime t1(8589934592LL,0);
+				const s64 tt = t1.UnixTimeI();;
+				const TTime t2 = tt;
+				EXPECT_TRUE(t1 == t2);
+			}
+			{
+				const TTime t1(-8589934592LL,0);
+				const s64 tt = t1.UnixTimeI();;
+				const TTime t2 = tt;
+				EXPECT_TRUE(t1 == t2);
+			}
+		}
+
+		TEST(cl3_core, Time_Roundtrip_float64)
+		{
+			{
+				const double ux_in  = 1024.0009765625;
+				const double ux_out = TTime::UnixTime(ux_in).UnixTimeF();
+				EXPECT_TRUE(ux_out == ux_in);
+			}
+			{
+				const double ux_in  = -1024.0009765625;
+				const double ux_out = TTime::UnixTime(ux_in).UnixTimeF();
+				EXPECT_TRUE(ux_out == ux_in);
+			}
 		}
 
 		TEST(cl3_core, Time_Overflow)
@@ -99,41 +269,6 @@ namespace
 				const TTime t2(0,-3);
 				const TTime tr(1,1000000000000000000ULL-3ULL);
 				EXPECT_TRUE(tr == t1 + t2);
-			}
-		}
-
-		TEST(cl3_core, Time_InitFromFloat)
-		{
-			const TTime td(0,1000);
-			{
-				const TTime t1(1,900000000000000000LL);
-				const TTime t2(1.9);
-				EXPECT_TRUE(t1 + td > t2);
-				EXPECT_TRUE(t1 - td < t2);
-			}
-			{
-				const TTime t1(1,100000000000000000LL);
-				const TTime t2(1.1);
-				EXPECT_TRUE(t1 + td > t2);
-				EXPECT_TRUE(t1 - td < t2);
-			}
-			{
-				const TTime t1(1,500000000000000000LL);
-				const TTime t2(1.5);
-				EXPECT_TRUE(t1 + td > t2);
-				EXPECT_TRUE(t1 - td < t2);
-			}
-			{
-				const TTime t1(1,700000000000000000LL);
-				const TTime t2(1.7);
-				EXPECT_TRUE(t1 + td > t2);
-				EXPECT_TRUE(t1 - td < t2);
-			}
-			{
-				const TTime t1(1,300000000000000000LL);
-				const TTime t2(1.3);
-				EXPECT_TRUE(t1 + td > t2);
-				EXPECT_TRUE(t1 - td < t2);
 			}
 		}
 
@@ -200,12 +335,12 @@ namespace
 			{
 				const TTime t1(-1,-123456789123456789LL);
 				EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_ATTOSECONDS)  == -1123456789123456789.0);
-				EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_FEMTOSECONDS) == -1123456789123456.7890);
-				EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_PICOSECONDS)  == -1123456789123.4567890);
-				EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_NANOSECONDS)  == -1123456789.1234567890);
-				EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_MICROSECONDS) == -1123456.7891234567890);
-				EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_MILLISECONDS) == -1123.4567891234567890);
-				EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_SECONDS)      == -1.1234567891234567890);
+				EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_FEMTOSECONDS) == -1123456789123456.789);
+				EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_PICOSECONDS)  == -1123456789123.456789);
+				EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_NANOSECONDS)  == -1123456789.123456789);
+				EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_MICROSECONDS) == -1123456.789123456789);
+				EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_MILLISECONDS) == -1123.456789123456789);
+				EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_SECONDS)      == -1.123456789123456789);
 			}
 			{
 				//	-1 day, -1 hour, -54 minutes, -17 seconds, -250 milliseconds
