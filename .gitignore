@@ -1,0 +1,4 @@
+.tmp
+*.hpp.gch
+*.so
+test/test-core
