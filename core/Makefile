@@ -36,5 +36,5 @@ libcl3-core.so: $(OBJS)
 libcl3-core.a: $(OBJS)
 	ar rcs $@ $(OBJS)
 
-test:
+test: libcl3-core.so
 	$(MAKE) test-core -C ../test

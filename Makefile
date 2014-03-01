@@ -10,8 +10,8 @@ clean:
 core:
 	$(MAKE) -C core
 
-mm:
+mm: core
 	$(MAKE) -C mm
 
-test:
+test: core mm
 	$(MAKE) -C test

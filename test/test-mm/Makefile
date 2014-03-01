@@ -19,7 +19,8 @@ clean:
 .tmp/%.o: %.cpp $(PCHS)
 	$(CXX) $(CXX_OPT) -c $< -o $@
 
-exe: $(OBJS) $(PCHS)
+exe: $(OBJS)
+	$(MAKE) libcl3-mm.so -C ../../mm
 	$(CXX) -L../lib -lstdc++ -lrt -pthread $(CXX_OPT) $(OBJS) -lcl3-core -lcl3-mm -lgtest ../lib/libgtest_main.a -o $@
 
 run: exe

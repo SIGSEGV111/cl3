@@ -31,10 +31,11 @@ pch: $(PCHS)
 	$(CXX) $(CXX_OPT_EXT) $< -o $@
 
 libcl3-mm.so: $(OBJS)
+	$(MAKE) libcl3-core.so -C ../core
 	$(CXX) -Llib -lcl3-core -lstdc++ -lrt -shared $(CXX_OPT_INT) $(OBJS) -o $@
 
 libcl3-mm.a: $(OBJS)
 	ar rcs $@ $(OBJS)
 
-test:
+test: libcl3-mm.so
 	$(MAKE) test-mm -C ../test
