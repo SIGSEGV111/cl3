@@ -20,7 +20,7 @@ clean:
 	$(CXX) $(CXX_OPT) -c $< -o $@
 
 exe: $(OBJS) $(PCHS)
-	$(CXX) -L../lib -lstdc++ -lrt -pthread $(CXX_OPT) $(OBJS) -lcl3-mm -lgtest ../lib/libgtest_main.a -o $@
+	$(CXX) -L../lib -lstdc++ -lrt -pthread $(CXX_OPT) $(OBJS) -lcl3-core -lcl3-mm -lgtest ../lib/libgtest_main.a -o $@
 
 run: exe
 	LD_LIBRARY_PATH=$(CURDIR)/../lib ./exe
