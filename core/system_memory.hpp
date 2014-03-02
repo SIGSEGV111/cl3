@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_system_memory_h_
-#define	_include_cl3_core_system_memory_h_
+#ifndef	_include_cl3_core_system_memory_hpp_
+#define	_include_cl3_core_system_memory_hpp_
 
 #include "system_compiler.hpp"
 #include "error.hpp"
@@ -107,7 +107,7 @@ namespace	cl3
 					CLASS	~TUniquePtr	() { if(use_delete) delete[] array; else ::free(array); }
 			};
 
-			class	CL3PUBT	TBadAllocException : public error::TCoreException
+			class	CL3PUBT	TBadAllocException : public error::TException
 			{
 				protected:
 					size_t sz_bytes;

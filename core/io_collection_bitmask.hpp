@@ -16,22 +16,22 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_io_collection_bitmask_h_
-#define	_include_cl3_core_io_collection_bitmask_h_
+#ifndef	_include_cl3_core_io_collection_bitmask_hpp_
+#define	_include_cl3_core_io_collection_bitmask_hpp_
 
 #include "system_compiler.hpp"
 #include "system_types.hpp"
 
 namespace	cl3
 {
+	using namespace system::types;
+
 	namespace	io
 	{
 		namespace	collection
 		{
 			namespace	bitmask
 			{
-				using namespace system::types;
-
 				struct	IBitmask
 				{
 					virtual	GETTER	size_t	Count	() const = 0;

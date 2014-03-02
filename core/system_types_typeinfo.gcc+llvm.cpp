@@ -44,7 +44,7 @@ namespace	cl3
 				TUniquePtr<char[],false> TRTTI::Name() const
 				{
 					TUniquePtr<char[],false> name;
-					CL3_OBJECT_ERROR((name = abi::__cxa_demangle(sys_type_info->name(), NULL, NULL, NULL)).Array() == NULL, error::TCoreException, "name decoding failed");
+					CL3_OBJECT_ERROR((name = abi::__cxa_demangle(sys_type_info->name(), NULL, NULL, NULL)).Array() == NULL, error::TException, "name decoding failed");
 					TUniquePtr<char[],false> ret(UnifyTypename(name.Array()).Claim());
 					return ret;
 				}

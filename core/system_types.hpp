@@ -16,14 +16,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_system_types_h_
-#define	_include_cl3_core_system_types_h_
+#ifndef	_include_cl3_core_system_types_hpp_
+#define	_include_cl3_core_system_types_hpp_
 
 #include "system_compiler.hpp"
 
 #if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_LLVM)
 	#include <stdint.h>
-	#include <sys/types.h>
 
 	namespace	cl3
 	{
@@ -108,25 +107,4 @@
 		};
 	};
 #endif
-
-namespace	cl3
-{
-	namespace	system
-	{
-		namespace	types
-		{
-			struct	IGenericCloneable
-			{
-				virtual	IGenericCloneable*	Clone	() const = 0;
-			};
-
-			template<class T>
-			struct	ICloneable : IGenericCloneable
-			{
-				virtual	T*	Clone	() const = 0;
-			};
-		};
-	};
-};
-
 #endif

@@ -17,6 +17,7 @@
 */
 
 #include <cl3/core/time.hpp>
+#include <cl3/core/system_types.hpp>
 #include <gtest/gtest.h>
 #include <iostream>
 
@@ -47,6 +48,8 @@ namespace	cl3
 
 namespace
 {
+	using namespace cl3::system::types;
+
 	namespace	time
 	{
 		using namespace cl3::time;

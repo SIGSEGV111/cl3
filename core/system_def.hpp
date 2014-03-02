@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_system_def_h_
-#define	_include_cl3_core_system_def_h_
+#ifndef	_include_cl3_core_system_def_hpp_
+#define	_include_cl3_core_system_def_hpp_
 
 #ifndef	NULL
 	#define	NULL	(0U)

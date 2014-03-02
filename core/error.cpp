@@ -32,30 +32,30 @@ namespace	cl3
 {
 	namespace	error
 	{
-		CLASS	TCoreException::TCoreException	(const char* format, ...) : message(NULL), object(NULL), codefile(NULL), function(NULL), expression(NULL), inner(NULL), codeline(0)
+		CLASS	TException::TException	(const char* format, ...) : message(NULL), object(NULL), codefile(NULL), function(NULL), expression(NULL), inner(NULL), codeline(0)
 		{
 			va_list list;
 			va_start(list, format);
 			int l = vsnprintf(NULL, 0, format, list) + 1;
 			va_end(list);
-			if(l <= 0) throw "TCoreException: printf format error (ctor)";
+			if(l <= 0) throw "TException: printf format error (ctor)";
 
 			va_start(list, format);
 			message = (char*)malloc(l);
-			if(message == NULL) { va_end(list); throw "TCoreException: out of memory (ctor)"; }
+			if(message == NULL) { va_end(list); throw "TException: out of memory (ctor)"; }
 			vsnprintf(message, l, format, list);
 			va_end(list);
 		}
 
-		CLASS	TCoreException::TCoreException	(const TCoreException& e) : message(util::mkstrcpy(e.message).Claim()), object(e.object), codefile(e.codefile), function(e.function), expression(e.expression), inner(e.inner), codeline(e.codeline)
+		CLASS	TException::TException	(const TException& e) : message(util::mkstrcpy(e.message).Claim()), object(e.object), codefile(e.codefile), function(e.function), expression(e.expression), inner(e.inner), codeline(e.codeline)
 		{}
 
-		CLASS	TCoreException::~TCoreException	()
+		CLASS	TException::~TException	()
 		{
 			free(message);
 		}
 
-		void	TCoreException::Set	(const void* object, const char* codefile, const char* function, const char* expression, TCoreException* inner, unsigned codeline)
+		void	TException::Set	(const void* object, const char* codefile, const char* function, const char* expression, TException* inner, unsigned codeline)
 		{
 			this->object    = object;
 			this->codefile  = codefile;
@@ -66,12 +66,12 @@ namespace	cl3
 		}
 
 		CLASS	TCoreArgumentException::TCoreArgumentException	(const system::types::typeinfo::TRTTI* argrtti, const char* argname, const char* argvalue) :
-				TCoreException("function call argument or parameter is invalid (type: \"%s\", name: \"%s\", value: \"%s\")", argrtti != NULL ? argrtti->Name().Array() : "<?>", argname, argvalue),
+				TException("function call argument or parameter is invalid (type: \"%s\", name: \"%s\", value: \"%s\")", argrtti != NULL ? argrtti->Name().Array() : "<?>", argname, argvalue),
 				argrtti(argrtti), argname(argname), argvalue(util::mkstrcpy(argvalue).Claim())
 		{
 		}
 
-		CLASS	TCoreArgumentException::TCoreArgumentException	(const TCoreArgumentException& ae) : TCoreException(ae), argrtti(ae.argrtti), argname(ae.argname), argvalue(util::mkstrcpy(ae.argvalue).Claim())
+		CLASS	TCoreArgumentException::TCoreArgumentException	(const TCoreArgumentException& ae) : TException(ae), argrtti(ae.argrtti), argname(ae.argname), argvalue(util::mkstrcpy(ae.argvalue).Claim())
 		{
 		}
 

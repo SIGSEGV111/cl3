@@ -42,11 +42,11 @@ namespace	cl3
 			return buffer;
 		}
 
-		CLASS	TSyscallException::TSyscallException	() : TCoreException("syscall failed (errno: %d, message: \"%s\")", errno, strerror_helper(message_buffer, errno)), err_no(errno)
+		CLASS	TSyscallException::TSyscallException	() : TException("syscall failed (errno: %d, message: \"%s\")", errno, strerror_helper(message_buffer, errno)), err_no(errno)
 		{
 		}
 
-		CLASS	TSyscallException::TSyscallException	(const TSyscallException& other) : TCoreException(other), err_no(other.err_no)
+		CLASS	TSyscallException::TSyscallException	(const TSyscallException& other) : TException(other), err_no(other.err_no)
 		{
 			memcpy(message_buffer, other.message_buffer, sizeof(message_buffer));
 		}

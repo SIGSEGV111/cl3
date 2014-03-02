@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_time_h_
-#define	_include_cl3_core_time_h_
+#ifndef	_include_cl3_core_time_hpp_
+#define	_include_cl3_core_time_hpp_
 
 #include "system_os.hpp"
 #include "system_compiler.hpp"
@@ -40,10 +40,10 @@ struct timeval
 
 namespace	cl3
 {
+	using namespace system::types;
+
 	namespace	time
 	{
-		using namespace system::types;
-
 		enum	EUnit
 		{
 			TIME_UNIT_ATTOSECONDS  = -6,

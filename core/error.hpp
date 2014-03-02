@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_error_h_
-#define	_include_cl3_core_error_h_
+#ifndef	_include_cl3_core_error_hpp_
+#define	_include_cl3_core_error_hpp_
 
 #include "system_os.hpp"
 #include "system_compiler.hpp"
@@ -29,10 +29,10 @@ namespace	cl3
 
 	namespace	error
 	{
-		class	CL3PUBT	TCoreException
+		class	CL3PUBT	TException
 		{
 			private:
-				TCoreException& operator=(const TCoreException&);	//	not available
+				TException& operator=(const TException&);	//	not available
 
 			protected:
 				char* message;			//	exception-specific human-readable description message
@@ -40,17 +40,17 @@ namespace	cl3
 				const char* codefile;	//	sourcecode file (from __FILE__ macro)
 				const char* function;	//	function name in which the exception occurecd (from __FUNCDNAME__ or __PRETTY_FUNCTION__ macro)
 				const char* expression;	//	the expression that triggered the exception (from ERROR(expression, excepclass, args))
-				TCoreException* inner;	//	inner exception (can be NULL)
+				TException* inner;	//	inner exception (can be NULL)
 				unsigned codeline;		//	sourcecode line number (from __LINE__ macro)
 
 			public:
-				CL3PUBF	CLASS	TCoreException	(const char* format, ...);	//	printf-syle ctor
-				CL3PUBF	CLASS	TCoreException	(const TCoreException&);
-				CL3PUBF	virtual	~TCoreException	();
-				CL3PUBF	void	Set	(const void* object, const char* codefile, const char* function, const char* expression, TCoreException* inner, unsigned codeline);
+				CL3PUBF	CLASS	TException	(const char* format, ...);	//	printf-syle ctor
+				CL3PUBF	CLASS	TException	(const TException&);
+				CL3PUBF	virtual	~TException	();
+				CL3PUBF	void	Set	(const void* object, const char* codefile, const char* function, const char* expression, TException* inner, unsigned codeline);
 		};
 
-		class	CL3PUBT	TCoreArgumentException : public TCoreException
+		class	CL3PUBT	TCoreArgumentException : public TException
 		{
 			protected:
 				const system::types::typeinfo::TRTTI* argrtti;	//	datatype of the argument expressed as Run-Time-Type-Info object (can be NULL)
@@ -63,7 +63,7 @@ namespace	cl3
 				CL3PUBF	virtual	~TCoreArgumentException	();
 		};
 
-		class	CL3PUBT	TSyscallException : public TCoreException
+		class	CL3PUBT	TSyscallException : public TException
 		{
 			protected:
 				#if (CL3_OS == CL3_OS_POSIX)

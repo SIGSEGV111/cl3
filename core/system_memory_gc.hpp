@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _include_cl3_core_system_memory_gc_h_
-#define	_include_cl3_core_system_memory_gc_h_
+#ifndef _include_cl3_core_system_memory_gc_hpp_
+#define	_include_cl3_core_system_memory_gc_hpp_
 
 #include "system_compiler.hpp"
 
@@ -110,4 +110,4 @@ namespace	cl3
 	}
 }
 
-#endif	//	_include_cl3_core_system_memory_gc_h_
+#endif	//	_include_cl3_core_system_memory_gc_hpp_

@@ -33,8 +33,8 @@ namespace	cl3
 		{
 			using namespace error;
 
-			CLASS	TBadAllocException::TBadAllocException	(size_t sz_bytes) : TCoreException("memory allocation failed (size: %zd bytes)", sz_bytes), sz_bytes(sz_bytes) {}
-			CLASS	TBadAllocException::TBadAllocException	(const TBadAllocException& bae) : TCoreException(bae), sz_bytes(bae.sz_bytes) {}
+			CLASS	TBadAllocException::TBadAllocException	(size_t sz_bytes) : TException("memory allocation failed (size: %zd bytes)", sz_bytes), sz_bytes(sz_bytes) {}
+			CLASS	TBadAllocException::TBadAllocException	(const TBadAllocException& bae) : TException(bae), sz_bytes(bae.sz_bytes) {}
 			CLASS	TBadAllocException::~TBadAllocException	() {}
 
 			TDefaultAllocator TDefaultAllocator::instance;

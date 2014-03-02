@@ -16,13 +16,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_io_collection_h_
-#define	_include_cl3_core_io_collection_h_
+#ifndef	_include_cl3_core_io_collection_hpp_
+#define	_include_cl3_core_io_collection_hpp_
 
 #include "io_collection_bitmask.hpp"
 #include "io_stream.hpp"
 #include "event.hpp"
-#include "system_types.hpp"
 
 namespace	cl3
 {
@@ -100,7 +99,7 @@ namespace	cl3
 			};
 
 			template<class T>
-			struct	IStaticIterator<const T> : stream::IIn<T>, system::types::ICloneable< IStaticIterator<const T> >
+			struct	IStaticIterator<const T> : stream::IIn<T>
 			{
 				virtual	bool	FindNext	(const IMatcher<T>& matcher) = 0;	//	forward searches thru the collection for an item that matches starting with the next item, if an item was found the function returns thruw and place sthe iterator on that item, otherwise false is returned and the iterator is places on tail
 				virtual	bool	FindPrev	(const IMatcher<T>& matcher) = 0;	//	backward searches thru the collection for an item that matches starting with the previous item,  if an item was found the function returns thruw and place sthe iterator on that item, otherwise false is returned and the iterator is places on head
@@ -115,13 +114,13 @@ namespace	cl3
 			};
 
 			template<class T>
-			struct	IStaticIterator : virtual IStaticIterator<const T>, system::types::ICloneable< IStaticIterator<T> >, stream::IOut<T>
+			struct	IStaticIterator : virtual IStaticIterator<const T>, stream::IOut<T>
 			{
 				virtual	T&			Item	() = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
 			};
 
 			template<class T>
-			struct	IDynamicIterator : IStaticIterator<T>, system::types::ICloneable< IDynamicIterator<T> >
+			struct	IDynamicIterator : IStaticIterator<T>
 			{
 				virtual	void	Insert	(const T& item_insert) = 0;	//	inserts an item before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to it
 				virtual	void	Insert	(const T* arr_items_insert, size_t n_items_insert) = 0;	//	inserts items before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to the first of the inserted items (does nothing if the array is empty)

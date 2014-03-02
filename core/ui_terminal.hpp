@@ -16,13 +16,25 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_io_hpp_
-#define	_include_cl3_core_io_hpp_
+#ifndef	_include_cl3_core_ui_terminal_hpp_
+#define	_include_cl3_core_ui_terminal_hpp_
+
+#include "system_compiler.hpp"
+#include "system_types.hpp"
+#include "io_text.hpp"
 
 namespace	cl3
 {
-	namespace	io
+	using namespace system::types;
+
+	namespace	ui
 	{
+		namespace	terminal
+		{
+			struct	ITerminal : io::text::ITextStream
+			{
+			};
+		}
 	}
 }
 

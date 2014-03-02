@@ -27,13 +27,14 @@
 
 namespace	cl3
 {
+	using namespace system::types;
+
 	namespace	system
 	{
 		namespace	types
 		{
 			namespace	typeinfo
 			{
-				using namespace system::types;
 				using namespace system::memory;
 
 				//	from wikipedia: https://en.wikipedia.org/wiki/Jenkins_hash_function

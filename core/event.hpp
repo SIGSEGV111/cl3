@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_event_h_
-#define	_include_cl3_core_event_h_
+#ifndef	_include_cl3_core_event_hpp_
+#define	_include_cl3_core_event_hpp_
 
 #include "error.hpp"
 #include "system_memory.hpp"
@@ -40,7 +40,8 @@ namespace	cl3
 		template<class TSender, class TData>
 		struct	CL3PUBT	IObservable //: IGenericObservable
 		{
-			virtual	const TEvent<TSender, TData>&	OnChange	() const = 0;
+			typedef TEvent<TSender, TData>	TOnChangeEvent;
+			virtual	const TOnChangeEvent&	OnChange	() const = 0;
 		};
 
 		template<class TSender, class TData>

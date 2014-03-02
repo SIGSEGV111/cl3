@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_io_collection_list_h_
-#define	_include_cl3_core_io_collection_list_h_
+#ifndef	_include_cl3_core_io_collection_list_hpp_
+#define	_include_cl3_core_io_collection_list_hpp_
 
 #include "io_collection.hpp"
 #include "error.hpp"
@@ -33,7 +33,7 @@ namespace	cl3
 				//	index: a negative index starts at the end of the list (e.g. -1 would be the last item (Count()-1), whereas -2 would be the second last item, ...)
 				//	a list preserves the order of the items unless it was explicitly switched into "lose mode" with "allow_reorder" set to "true"
 
-				class	TIndexOutOfBoundsException : public error::TCoreException
+				class	TIndexOutOfBoundsException : public error::TException
 				{
 					protected:
 						ssize_t index;

@@ -16,13 +16,41 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_io_hpp_
-#define	_include_cl3_core_io_hpp_
+#ifndef	_include_cl3_core_io_stream_fd_hpp_
+#define	_include_cl3_core_io_stream_fd_hpp_
+
+#include "system_compiler.hpp"
+#include "system_os.hpp"
+#include "io_stream.hpp"
 
 namespace	cl3
 {
+	using namespace system::types;
+
 	namespace	io
 	{
+		namespace	stream
+		{
+			namespace	fd
+			{
+				#if (CL3_OS == CL3_OS_WINDOWS)
+					typedef void* TFD;
+				#elif (CL3_OS == CL3_OS_POSIX)
+					typedef int TFD;
+				#endif
+
+				//	generic buffered io-stream for interaction with operating systems io-structures (POSIX-fd, Windows HANDLE, etc.)
+				class	TFDStream : IIn<byte>, IOut<byte>
+				{
+					protected:
+						TFD fd;
+						byte* p_buffer;
+						size_t sz_buffer;
+
+					public:
+				};
+			}
+		}
 	}
 }
 

@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_util_h_
-#define	_include_cl3_core_util_h_
+#ifndef	_include_cl3_core_util_hpp_
+#define	_include_cl3_core_util_hpp_
 
 #include "system_compiler.hpp"
 #include "system_memory.hpp"

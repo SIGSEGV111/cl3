@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_system_types_typeinfo_h_
-#define	_include_cl3_core_system_types_typeinfo_h_
+#ifndef	_include_cl3_core_system_types_typeinfo_hpp_
+#define	_include_cl3_core_system_types_typeinfo_hpp_
 
 #include <typeinfo>
 #include "system_types.hpp"

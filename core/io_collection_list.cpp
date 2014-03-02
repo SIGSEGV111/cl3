@@ -26,7 +26,7 @@ namespace	cl3
 		{
 			namespace	list
 			{
-				CLASS	TIndexOutOfBoundsException::TIndexOutOfBoundsException	(ssize_t index, size_t count) : TCoreException("index out of bounds (index = %zd, count = %zu)", index, count), index(index), count(count)
+				CLASS	TIndexOutOfBoundsException::TIndexOutOfBoundsException	(ssize_t index, size_t count) : TException("index out of bounds (index = %zd, count = %zu)", index, count), index(index), count(count)
 				{
 				}
 			}
