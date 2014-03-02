@@ -14,9 +14,9 @@ clean:
 -include $(OBJS:.o=.dcc)
 
 .tmp/%.dcc: %.cpp
-	$(CXX) $(CXX_OPT) -MM $< > $@
+	$(CXX) $(CXX_OPT) -MM $< | sed 's/\(.*\):/\.tmp\/\1:/' - > $@
 
-.tmp/%.o: %.cpp $(PCHS)
+.tmp/%.o: %.cpp
 	$(CXX) $(CXX_OPT) -c $< -o $@
 
 exe: $(OBJS)
