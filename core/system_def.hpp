@@ -45,6 +45,23 @@ namespace	cl3
 				b = tmp;
 			}
 
+			namespace	_
+			{
+				template<bool>
+				struct	__StaticAssert
+				{
+					//	FAIL
+				};
+
+				template<>
+				struct	__StaticAssert<true>
+				{
+					const static int VALUE = 1;
+				};
+			}
+
+			#define	CL3_STATIC_ASSERT(cond)	namespace { enum E { VALUE = cl3::system::def::_::__StaticAssert<(cond)>::VALUE }; }
+
 			const static unsigned long CL3_OPT__PAGE_SIZE = 4096U;	//	the smallest size of a page in the system
 			const static unsigned long CL3_OPT__SYSTEM_ALIGN = 16;	//	the minimum memory alignment which is enforced automatically by the system libraries (malloc & co.)
 

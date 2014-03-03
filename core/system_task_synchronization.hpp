@@ -19,6 +19,7 @@
 #ifndef	_include_cl3_core_system_task_synchronization_hpp_
 #define	_include_cl3_core_system_task_synchronization_hpp_
 
+#include "system_compiler.hpp"
 #include "time.hpp"
 #include "event.hpp"
 
@@ -34,6 +35,8 @@ namespace	cl3
 			{
 				namespace	_
 				{
+					struct	TMutexData;
+
 					enum	EMutexEvent
 					{
 						MUTEX_EVENT_ACQUIRING,
@@ -131,11 +134,12 @@ namespace	cl3
 				class	TMutex : public IMutex
 				{
 					protected:
+						_::TMutexData* data;
 
 					public:
-						void	Acquire	();
-						bool	Acquire	(time::TTime timeout);
-						void	Release	();
+						CL3PUBF	void	Acquire	();
+						CL3PUBF	bool	Acquire	(time::TTime timeout);
+						CL3PUBF	void	Release	();
 				};
 			}
 		}
