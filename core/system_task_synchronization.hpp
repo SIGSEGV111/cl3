@@ -79,19 +79,22 @@ namespace	cl3
 					virtual	bool	WaitFor	(time::TTime timeout) = 0;
 				};
 
-				class	TDemandMutex : public IMutex
+				class	TMutex : public IMutex
 				{
 					private:
-						IMutex* mutex;
+						_::TMutexData* data;
 
-						CLASS	TDemandMutex	(const TDemandMutex&);
+						CLASS	TMutex		(const TMutex&);
+						TMutex&	operator=	(const TMutex&);
 
 					public:
-						void	Acquire	()						{ if(mutex) mutex->Acquire(); }
-						bool	Acquire	(time::TTime timeout)	{ if(mutex) return mutex->Acquire(timeout); else return true; }
-						void	Release	()						{ if(mutex) mutex->Release(); }
+						inline	bool	Enabled	() const { return data != NULL; }
+						CL3PUBF	void	Acquire	();
+						CL3PUBF	bool	Acquire	(time::TTime timeout);
+						CL3PUBF	void	Release	();
 
-						CLASS	TDemandMutex	(IMutex* mutex) : mutex(mutex) {}
+						CL3PUBF	CLASS	TMutex	(bool enabled);
+						CL3PUBF	CLASS	~TMutex	();
 				};
 
 				struct	IInterlocked
@@ -102,13 +105,13 @@ namespace	cl3
 				class	TDemandInterlocked : IInterlocked
 				{
 					private:
-						TDemandMutex dm;
+						TMutex mutex;
 
 					protected:
-						CLASS	TDemandInterlocked	(IMutex* mutex) : dm(mutex) {}
+						CLASS	TDemandInterlocked	(bool enabled) : mutex(enabled) {}
 
 					public:
-						IMutex&	Mutex	() { return dm; }
+						IMutex&	Mutex	() { return mutex; }
 				};
 
 				class	TInterlockedRegion
@@ -128,19 +131,6 @@ namespace	cl3
 
 				#define	CL3_NONCLASS_INTERLOCKED_REGION_BEGIN(mutex)	{ cl3::system::task::synchronization::TInterlockedRegion __interlocked_region(&(mutex));
 				#define	CL3_NONCLASS_INTERLOCKED_REGION_END				}
-
-
-
-				class	TMutex : public IMutex
-				{
-					protected:
-						_::TMutexData* data;
-
-					public:
-						CL3PUBF	void	Acquire	();
-						CL3PUBF	bool	Acquire	(time::TTime timeout);
-						CL3PUBF	void	Release	();
-				};
 			}
 		}
 	}

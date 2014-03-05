@@ -85,6 +85,7 @@ namespace	cl3
 
 				#define CL3_PACK( ... ) __VA_ARGS__ __attribute__((__packed__))
 				#define	CL3_WARN_UNUSED_RESULT	__attribute__((warn_unused_result))
+				#define CL3_UNREACHABLE	__builtin_unreachable()
 
 				template<class T> inline static T AtomicAdd(T& var, T add) { return __sync_fetch_and_add(&var,add); }
 				template<class T> inline static T AtomicSub(T& var, T sub) { return __sync_fetch_and_sub(&var,sub); }

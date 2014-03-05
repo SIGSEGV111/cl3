@@ -58,7 +58,7 @@ namespace	cl3
 			{
 				//	malloc() will not be called when sz_bytes == 0, so p must be initilized to NULL
 				void* p = NULL;
-				CL3_ERROR(sz_bytes != 0 && (p = ::malloc(sz_bytes)) == NULL, TBadAllocException, sz_bytes);
+				CL3_NONCLASS_ERROR(sz_bytes != 0 && (p = ::malloc(sz_bytes)) == NULL, TBadAllocException, sz_bytes);
 				return p;
 			}
 
@@ -66,7 +66,7 @@ namespace	cl3
 			{
 				//	realloc() will not be called when sz_bytes == 0, so p must be initilized to NULL
 				void* p = NULL;
-				CL3_ERROR(sz_bytes != 0 && (p = ::realloc(old, sz_bytes)) == NULL, TBadAllocException, sz_bytes);
+				CL3_NONCLASS_ERROR(sz_bytes != 0 && (p = ::realloc(old, sz_bytes)) == NULL, TBadAllocException, sz_bytes);
 				return p;
 			}
 		}

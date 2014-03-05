@@ -81,7 +81,7 @@ namespace	cl3
 
 		#if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_LLVM)
 			//	general purpose error macro
-			#define	CL3_ERROR(expression, TExceptionClass, ...) do \
+			#define	CL3_NONCLASS_ERROR(expression, TExceptionClass, ...) do \
 			{ \
 				if(expression) \
 				{ \
@@ -92,7 +92,7 @@ namespace	cl3
 			} while(false)
 
 			//	use this macro inside non-static member functions - but only if the object is still valid when the exception is caught
-			#define	CL3_OBJECT_ERROR(expression, TExceptionClass, ...) do \
+			#define	CL3_CLASS_ERROR(expression, TExceptionClass, ...) do \
 			{ \
 				if(expression) \
 				{ \
@@ -103,7 +103,7 @@ namespace	cl3
 			} while(false)
 
 			//	this macro forwards the error - use is if you catch an exception and want to pass if downstream as inner exception
-			#define	CL3_FORWARD_ERROR(inner, TExceptionClass, ...) do \
+			#define	CL3_NONCLASS_FORWARD_ERROR(inner, TExceptionClass, ...) do \
 			{ \
 				TExceptionClass exception(__VA_ARGS__); \
 				exception.Set(NULL, __FILE__, __PRETTY_FUNCTION__, NULL, inner, __LINE__); \
@@ -111,7 +111,7 @@ namespace	cl3
 			} while(false)
 
 			//	same as above but for non-static member functions
-			#define	CL3_FORWARD_OBJECT_ERROR(inner, TExceptionClass, ...) do \
+			#define	CL3_CLASS_FORWARD_ERROR(inner, TExceptionClass, ...) do \
 			{ \
 				TExceptionClass exception(__VA_ARGS__); \
 				exception.Set(this, __FILE__, __PRETTY_FUNCTION__, NULL, inner, __LINE__); \
@@ -119,7 +119,7 @@ namespace	cl3
 			} while(false)
 
 			//	just throw without check for an expression to be true
-			#define CL3_FAIL(TExceptionClass, ...) do \
+			#define CL3_NONCLASS_FAIL(TExceptionClass, ...) do \
 			{ \
 				TExceptionClass exception(__VA_ARGS__); \
 				exception.Set(NULL, __FILE__, __PRETTY_FUNCTION__, NULL, NULL, __LINE__); \
@@ -127,7 +127,7 @@ namespace	cl3
 			} while(false)
 
 		//	just throw without check for an expression to be true
-			#define CL3_OBJECT_FAIL(TExceptionClass, ...) do \
+			#define CL3_CLASS_FAIL(TExceptionClass, ...) do \
 			{ \
 				TExceptionClass exception(__VA_ARGS__); \
 				exception.Set(this, __FILE__, __PRETTY_FUNCTION__, NULL, NULL, __LINE__); \
@@ -136,12 +136,42 @@ namespace	cl3
 		#endif
 
 		#if (CL3_OS == CL3_OS_POSIX)
-			#define	CL3_SYSERR(expression) do \
+			#define	CL3_NONCLASS_SYSERR(expression) do \
 			{ \
 				if( (long)(expression) == -1L ) \
 				{ \
 					cl3::error::TSyscallException exception; \
 					exception.Set(NULL, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
+					throw exception; \
+				} \
+			} while(false)
+
+			#define	CL3_CLASS_SYSERR(expression) do \
+			{ \
+				if( (long)(expression) == -1L ) \
+				{ \
+					cl3::error::TSyscallException exception; \
+					exception.Set(this, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
+					throw exception; \
+				} \
+			} while(false)
+
+			#define	CL3_NONCLASS_PTHREAD_ERROR(expression) do \
+			{ \
+				if( (expression) != 0 ) \
+				{ \
+					cl3::error::TSyscallException exception; \
+					exception.Set(NULL, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
+					throw exception; \
+				} \
+			} while(false)
+
+			#define	CL3_CLASS_PTHREAD_ERROR(expression) do \
+			{ \
+				if( (expression) != 0 ) \
+				{ \
+					cl3::error::TSyscallException exception; \
+					exception.Set(this, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
 					throw exception; \
 				} \
 			} while(false)

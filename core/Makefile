@@ -1,8 +1,8 @@
 .PHONY: all clean pch
 
 CXX=$(shell which clang)
-CXX_OPT_INT=-fPIC -g -O3 -Wall -Wextra -Werror -Winvalid-pch -I.tmp -DINSIDE_CL3
-CXX_OPT_EXT=-fPIC -g -O3 -Wall -Wextra -Werror -Winvalid-pch -I.tmp
+CXX_OPT_INT=-fPIC -g -O1 -Wall -Wextra -Werror -Winvalid-pch -I.tmp -DINSIDE_CL3
+CXX_OPT_EXT=-fPIC -g -O1 -Wall -Wextra -Werror -Winvalid-pch -I.tmp
 OBJS=$(shell ls -1 *.cpp | sed 's/\(.*\)\.cpp/\.tmp\/\1\.o/' -)
 PCHS=$(shell ls -1 *.hpp | sed 's/\.hpp/\.hpp\.gch/' -)
 DHHS=$(shell ls -1 *.hpp | sed 's/\(.*\)\.hpp/\.tmp\/\1\.dhh/' -)

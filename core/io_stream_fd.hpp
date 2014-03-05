@@ -34,9 +34,9 @@ namespace	cl3
 			namespace	fd
 			{
 				#if (CL3_OS == CL3_OS_WINDOWS)
-					typedef void* TFD;
+					typedef void* TFD;	//	HANDLE
 				#elif (CL3_OS == CL3_OS_POSIX)
-					typedef int TFD;
+					typedef int TFD;	//	fd
 				#endif
 
 				//	generic buffered io-stream for interaction with operating systems io-structures (POSIX-fd, Windows HANDLE, etc.)

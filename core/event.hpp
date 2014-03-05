@@ -185,7 +185,7 @@ namespace	cl3
 							return;	//	only remove one registry (the receiver might be registered multiple times)
 						}
 					//	fail if the receiver was not registered
-					CL3_OBJECT_FAIL(error::TCoreArgumentException, "receiver", util::mprintf("%p", receiver).Array());
+					CL3_CLASS_FAIL(error::TCoreArgumentException, "receiver", util::mprintf("%p", receiver).Array());
 				}
 
 				template<class TReceiver>
@@ -203,7 +203,7 @@ namespace	cl3
 							return;
 						}
 					}
-					CL3_OBJECT_FAIL(error::TCoreArgumentException, &system::types::typeinfo::TCTTI<TReceiver>::rtti, "receiver &| func", util::mprintf("%p, %p", receiver, func).Array());
+					CL3_CLASS_FAIL(error::TCoreArgumentException, &system::types::typeinfo::TCTTI<TReceiver>::rtti, "receiver &| func", util::mprintf("%p, %p", receiver, func).Array());
 				}
 
 				template<class TReceiverData>
@@ -221,7 +221,7 @@ namespace	cl3
 							return;
 						}
 					}
-					CL3_OBJECT_FAIL(error::TCoreArgumentException, NULL, "func", util::mprintf("%p", func).Array());
+					CL3_CLASS_FAIL(error::TCoreArgumentException, NULL, "func", util::mprintf("%p", func).Array());
 				}
 
 				template<class TReceiverData>
@@ -239,7 +239,7 @@ namespace	cl3
 							return;
 						}
 					}
-					CL3_OBJECT_FAIL(error::TCoreArgumentException, NULL, "func &| rdata", util::mprintf("%p", func).Array());
+					CL3_CLASS_FAIL(error::TCoreArgumentException, NULL, "func &| rdata", util::mprintf("%p", func).Array());
 				}
 
 				const TEvent<IGenericObservable,void*>&	OnChange	() const

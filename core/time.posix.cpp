@@ -65,30 +65,30 @@ namespace	cl3
 					break;
 
 				case TIME_CLOCK_PROCESS_USER:
-					CL3_SYSERR(getrusage(RUSAGE_SELF, &ru));
+					CL3_NONCLASS_SYSERR(getrusage(RUSAGE_SELF, &ru));
 					return TTime(ru.ru_utime.tv_sec, (s64)ru.ru_utime.tv_usec * (s64)1000000000000);
 
 				case TIME_CLOCK_PROCESS_SYS:
-					CL3_SYSERR(getrusage(RUSAGE_SELF, &ru));
+					CL3_NONCLASS_SYSERR(getrusage(RUSAGE_SELF, &ru));
 					return TTime(ru.ru_stime.tv_sec, (s64)ru.ru_stime.tv_usec * (s64)1000000000000);
 
 				case TIME_CLOCK_THREAD_USER:
-					CL3_SYSERR(getrusage(RUSAGE_THREAD, &ru));
+					CL3_NONCLASS_SYSERR(getrusage(RUSAGE_THREAD, &ru));
 					return TTime(ru.ru_utime.tv_sec, (s64)ru.ru_utime.tv_usec * (s64)1000000000000);
 
 				case TIME_CLOCK_THREAD_SYS:
-					CL3_SYSERR(getrusage(RUSAGE_THREAD, &ru));
+					CL3_NONCLASS_SYSERR(getrusage(RUSAGE_THREAD, &ru));
 					return TTime(ru.ru_stime.tv_sec, (s64)ru.ru_stime.tv_usec * (s64)1000000000000);
 
 				default:
 				{
 					char buffer[16] = {};
 					snprintf(buffer, 16, "%d", clock);
-					CL3_FAIL(error::TCoreArgumentException, &typeinfo::TCTTI<EClock>::rtti, "clock", buffer);
+					CL3_NONCLASS_FAIL(error::TCoreArgumentException, &typeinfo::TCTTI<EClock>::rtti, "clock", buffer);
 				}
 			}
 
-			CL3_SYSERR(clock_gettime(id, &ts));
+			CL3_NONCLASS_SYSERR(clock_gettime(id, &ts));
 			return TTime((s64)ts.tv_sec, (s64)ts.tv_nsec * (s64)1000000000);
 		}
 
