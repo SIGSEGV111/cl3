@@ -20,7 +20,7 @@
 #define	_include_cl3_core_io_collection_list_hpp_
 
 #include "io_collection.hpp"
-#include "error.hpp"
+#include "error-base.hpp"
 
 namespace	cl3
 {

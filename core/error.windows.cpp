@@ -25,7 +25,7 @@
 #if (CL3_OS == CL3_OS_WINDOWS)
 
 #include <windows.h>
-#include "error.hpp"
+#include "error-base.hpp"
 
 namespace	cl3
 {

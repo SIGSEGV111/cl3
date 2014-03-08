@@ -25,7 +25,7 @@
 #if (CL3_OS == CL3_OS_POSIX)
 
 #include "time.hpp"
-#include "error.hpp"
+#include "error-base.hpp"
 #include "system_types_typeinfo.hpp"
 
 #include <sys/time.h>
@@ -79,13 +79,6 @@ namespace	cl3
 				case TIME_CLOCK_THREAD_SYS:
 					CL3_NONCLASS_SYSERR(getrusage(RUSAGE_THREAD, &ru));
 					return TTime(ru.ru_stime.tv_sec, (s64)ru.ru_stime.tv_usec * (s64)1000000000000);
-
-				default:
-				{
-					char buffer[16] = {};
-					snprintf(buffer, 16, "%d", clock);
-					CL3_NONCLASS_FAIL(error::TCoreArgumentException, &typeinfo::TCTTI<EClock>::rtti, "clock", buffer);
-				}
 			}
 
 			CL3_NONCLASS_SYSERR(clock_gettime(id, &ts));

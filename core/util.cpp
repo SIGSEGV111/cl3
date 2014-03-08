@@ -25,7 +25,7 @@
 #include <string.h>
 #include "util.hpp"
 #include "system_memory.hpp"
-#include "error.hpp"
+#include "error-base.hpp"
 
 namespace	cl3
 {

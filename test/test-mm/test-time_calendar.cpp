@@ -37,8 +37,4 @@ namespace
 {
 	using namespace cl3::time;
 	using namespace cl3::time::calendar;
-
-	TEST(mmCalendar, Gregorian)
-	{
-	}
 }

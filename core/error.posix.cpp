@@ -27,7 +27,7 @@
 #include <string.h>
 #include <errno.h>
 #include "util.hpp"
-#include "error.hpp"
+#include "error-base.hpp"
 
 namespace	cl3
 {

@@ -21,6 +21,7 @@
 
 #include "system_compiler.hpp"
 #include "system_types.hpp"
+#include "system_task_synchronization.hpp"
 #include "io_collection.hpp"
 
 namespace	cl3
@@ -81,7 +82,7 @@ namespace	cl3
 					CL3PUBF	GETTER	const io::collection::IDynamicCollection<IThread*>&		Threads	() const;	//	list of threads that belong to this process. for the calling threads process all registered threads are listed (even dead ones), but for other processed only those the operating system knows about are listed (usually only those that are alive)
 			};
 
-			class	IThread
+			class	IThread : public synchronization::IInterlocked
 			{
 				public:
 					enum	EState
@@ -91,7 +92,9 @@ namespace	cl3
 						STATE_ALIVE_EXECUTING
 					};
 
-					CL3PUBF	static	GETTER	IThread&	Self	();	//	returns the IThread& for the calling thread
+					CL3PUBF	GETTER	static	IThread&	Self	() { CL3_NOT_IMPLEMENTED; }	//	returns the IThread& for the calling thread
+
+					CL3PUBF	GETTER	synchronization::IMutex&	Mutex	();	//	returns the mutex that protects this IThread-structure
 
 					CL3PUBF	GETTER	const char*	Name	() const;	//	returns the name of the thread
 					CL3PUBF	GETTER	TProcess&	Process	();	//	returns the process to which the thread belongs
@@ -101,7 +104,7 @@ namespace	cl3
 
 					CL3PUBF	GETTER	void*	StackStart	() const;	//	start address of the execution stack - might be less than end (stack grows down)
 					CL3PUBF	GETTER	void*	StackEnd	() const;	//	end address of the execution stack - might be bigger than start (stack grows up)
-					CL3PUBF	GETTER	void*	StackCurrent() const;	//	current address of the stack pointer (NOTE: highly volatile if the thread is not suspended for obvious reasons)
+					CL3PUBF	GETTER	void*	StackCurrent() const;	//	current address of the stack pointer (NOTE: obviously highly volatile if the thread is not suspended)
 					CL3PUBF	GETTER	size_t	StackSize	() const;	//	returns the size in bytes of the stacks size
 					CL3PUBF	GETTER	size_t	StackFree	() const;	//	returns the size in bytes of free (still unused / available) stack space (computed from Current() and End())
 					CL3PUBF	GETTER	size_t	StackUsed	() const;	//	returns the size in bytes of used stack space (computed from Current() and Start())

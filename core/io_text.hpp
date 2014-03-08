@@ -21,7 +21,7 @@
 
 #include "system_compiler.hpp"
 #include "system_types.hpp"
-#include "io_stream.hpp"
+#include "io_stream-base.hpp"
 
 namespace	cl3
 {
@@ -29,6 +29,11 @@ namespace	cl3
 
 	namespace	io
 	{
+		namespace	collection
+		{
+			template<class T>	struct	IStaticCollection;
+		}
+
 		namespace	text
 		{
 			namespace	string
@@ -52,6 +57,8 @@ namespace	cl3
 
 			struct	TUTF32
 			{
+				CL3PUBF const static TUTF32 TERMINATOR;	//	end-of-string marker (always code-value 0)
+
 				u32 code;
 
 				CL3PUBF	CLASS	TUTF32	(char chr);
@@ -59,8 +66,67 @@ namespace	cl3
 				inline	CLASS	TUTF32	(u32 code) throw() : code(code) {}
 			};
 
-			struct	ITextReader : public stream::IIn<TUTF32>
+			struct	TNumberFormat
 			{
+				enum	ESymbolPlacement
+				{
+					SYMBOL_PLACEMENT_BEFORE,
+					SYMBOL_PLACEMENT_AFTER
+				};
+
+				//	if a specific symbol is set to TUTF32::TERMINATOR, then it will not be displayed
+
+				collection::IStaticCollection<TUTF32>* digits;
+
+				TUTF32 positive_mark;	//	the charcater which indicates a positive value (usually not set)
+				TUTF32 negative_mark;	//	the charcater which indicates a negative value (usually '-')
+				TUTF32 decimal_mark;	//	character which separates the integer part from the fractional part (usually ',' in germany and '.' in USA)
+				TUTF32 grouping_mark;	//	character which seperates groups of digits (usually '.' in germany and ',' in USA)
+				TUTF32 before_decimal_padding;	//	character which gets used when padding is required left of the decimal mark (usually ' ')
+				TUTF32 after_decimal_padding;	//	character which gets used when padding is required right of the decimal mark (usually '0')
+				TUTF32 exponential_mark;	//	character which seperates the base from the exponent (e.g.: if set to 'e' => 2.76e76)
+
+				ESymbolPlacement positive_mark_placement;	//	specifies where to place the positive mark (usually SYMBOL_PLACEMENT_BEFORE)
+				ESymbolPlacement negative_mark_placement;	//	specifies where to place the negative mark (usually SYMBOL_PLACEMENT_BEFORE)
+
+				u16 grouping_length;	//	length of a group of digits (usually 3 for base 10/decimal formats)
+				u16 before_decimal_length_min;	//	minimum number of characters before the decimal mark
+				u16 before_decimal_length_max;	//	maximum number of characters before the decimal mark
+				u16 after_decimal_length_min;	//	minimum number of characters after the decimal mark
+				u16 after_decimal_length_max;	//	maximum number of characters after the decimal mark
+				u16 total_length_min;	//	minimum total length
+				u16 total_length_max;	//	maximum total length
+
+				//	some predefined commonly used formats
+				CL3PUBF const static TNumberFormat OCTAL;	//	standard octal format (base 8)
+				CL3PUBF const static TNumberFormat DECIMAL;	//	default values from your current operating system locale (base 10)
+				CL3PUBF const static TNumberFormat HEX;		//	standard hexadecimal format (base 16)
+				CL3PUBF const static TNumberFormat BASE64;	//	standard base64 format (base 64)
+
+				struct	TPackage
+				{
+					//	formats for "data classes"
+					//	cl3 will refer to these when printing or parsing values of the repective class
+					const TNumberFormat* addresses;	//	used when printing pointers, memory addresses or file offsets (defaults to HEX)
+					const TNumberFormat* integers;	//	used when printing integer numbers (defaults to DECIMAL)
+					const TNumberFormat* floats;	//	used when printing floating-point numbers (defaults to DECIMAL)
+				};
+
+				CL3PUBF const static TPackage default_formats;
+			};
+
+			struct	ITextReader : public stream::IIn<TUTF32>, public stream::IIn<wchar_t>, public stream::IIn<char>
+			{
+				using stream::IIn<TUTF32>::Read;
+				using stream::IIn<wchar_t>::Read;
+				using stream::IIn<char>::Read;
+
+				using stream::IIn<TUTF32>::WriteOut;
+				using stream::IIn<wchar_t>::WriteOut;
+				using stream::IIn<char>::WriteOut;
+
+				TNumberFormat::TPackage number_formats;
+
 				CL3PUBF	ITextReader&	operator>>	(TUTF32&);
 				CL3PUBF	ITextReader&	operator>>	(s8&);
 				CL3PUBF	ITextReader&	operator>>	(u8&);
@@ -76,8 +142,16 @@ namespace	cl3
 				CL3PUBF	ITextReader&	operator>>	(token::ITokenizer&);
 			};
 
-			struct	ITextWriter : public stream::IOut<TUTF32>
+			struct	ITextWriter : public stream::IOut<TUTF32>, public stream::IOut<wchar_t>, public stream::IOut<char>
 			{
+				using stream::IOut<TUTF32>::Write;
+				using stream::IOut<wchar_t>::Write;
+				using stream::IOut<char>::Write;
+
+				using stream::IOut<TUTF32>::ReadIn;
+				using stream::IOut<wchar_t>::ReadIn;
+				using stream::IOut<char>::ReadIn;
+
 				CL3PUBF	ITextWriter&	operator<<	(TUTF32);
 				CL3PUBF	ITextWriter&	operator<<	(s8);
 				CL3PUBF	ITextWriter&	operator<<	(u8);

@@ -24,7 +24,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <stdarg.h>
-#include "error.hpp"
+#include "error-base.hpp"
 #include "util.hpp"
 #include "system_types_typeinfo.hpp"
 
@@ -65,19 +65,16 @@ namespace	cl3
 			this->codeline  = codeline;
 		}
 
-		CLASS	TCoreArgumentException::TCoreArgumentException	(const system::types::typeinfo::TRTTI* argrtti, const char* argname, const char* argvalue) :
-				TException("function call argument or parameter is invalid (type: \"%s\", name: \"%s\", value: \"%s\")", argrtti != NULL ? argrtti->Name().Array() : "<?>", argname, argvalue),
-				argrtti(argrtti), argname(argname), argvalue(util::mkstrcpy(argvalue).Claim())
+		CLASS	TNotImplementedException::TNotImplementedException	() : TException("function or feature not implemented yet")
 		{
 		}
 
-		CLASS	TCoreArgumentException::TCoreArgumentException	(const TCoreArgumentException& ae) : TException(ae), argrtti(ae.argrtti), argname(ae.argname), argvalue(util::mkstrcpy(ae.argvalue).Claim())
+		CLASS	TNotImplementedException::TNotImplementedException	(const TNotImplementedException& nie) : TException(nie)
 		{
 		}
 
-		CLASS	TCoreArgumentException::~TCoreArgumentException	()
+		CLASS	TNotImplementedException::~TNotImplementedException	()
 		{
-			free(argvalue);
 		}
 	}
 }

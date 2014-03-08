@@ -21,7 +21,7 @@
 
 #include "system_compiler.hpp"
 #include "system_os.hpp"
-#include "io_stream.hpp"
+#include "io_stream-util.hpp"
 
 namespace	cl3
 {
@@ -40,14 +40,23 @@ namespace	cl3
 				#endif
 
 				//	generic buffered io-stream for interaction with operating systems io-structures (POSIX-fd, Windows HANDLE, etc.)
-				class	TFDStream : IIn<byte>, IOut<byte>
+				class	TFDStream : IIn<byte>, IOut<byte>, AWriteOut<byte>
 				{
 					protected:
-						TFD fd;
 						byte* p_buffer;
 						size_t sz_buffer;
+						TFD fd;
 
 					public:
+						CL3PUBF	size_t	Read	(byte* arr_items_read, size_t n_items_read_max, size_t n_items_read_min = (size_t)-1);
+						CL3PUBF	size_t	Left	() const;
+
+						CL3PUBF	size_t	Write	(const byte* arr_items_write, size_t n_items_write_max, size_t n_items_write_min = (size_t)-1);
+						CL3PUBF	size_t	Space	() const;
+
+						CL3PUBF	CLASS	TFDStream	(TFD fd);	//	TFDStream takes ownership of the file-descriptor fd
+						CL3PUBF	CLASS	TFDStream	(const TFDStream&);
+						CL3PUBF	CLASS	~TFDStream	();
 				};
 			}
 		}

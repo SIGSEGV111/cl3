@@ -20,7 +20,7 @@
 #define	_include_cl3_core_system_memory_hpp_
 
 #include "system_compiler.hpp"
-#include "error.hpp"
+#include "error-base.hpp"
 #include <malloc.h>
 
 namespace	cl3

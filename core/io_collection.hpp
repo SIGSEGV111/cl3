@@ -20,7 +20,7 @@
 #define	_include_cl3_core_io_collection_hpp_
 
 #include "io_collection_bitmask.hpp"
-#include "io_stream.hpp"
+#include "io_stream-base.hpp"
 #include "event.hpp"
 
 namespace	cl3

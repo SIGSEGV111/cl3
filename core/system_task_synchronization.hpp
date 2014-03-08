@@ -29,7 +29,7 @@ namespace	cl3
 	{
 		namespace	task
 		{
-			struct	IThread;
+			class	IThread;
 
 			namespace	synchronization
 			{
@@ -66,32 +66,34 @@ namespace	cl3
 				struct	IMutex
 				{
 					virtual	void	Acquire	() = 0;
-					virtual	bool	Acquire	(time::TTime timeout) = 0;
+					virtual	bool	Acquire	(time::TTime timeout) CL3_WARN_UNUSED_RESULT = 0;
 					virtual	void	Release	() = 0;
+					virtual	bool	Acquired() const = 0;	//	returns wheter or not, the calling thread has acquired this mutex
 
-					inline	bool	TryAcquire	() { return Acquire(time::TTime(0,0)); }
+					inline	bool	TryAcquire	() CL3_WARN_UNUSED_RESULT { return Acquire(time::TTime(0,0)); }
 				};
 
 				struct	ISignal
 				{
 					virtual	void	Raise	() = 0;
 					virtual	void	WaitFor	() = 0;
-					virtual	bool	WaitFor	(time::TTime timeout) = 0;
+					virtual	bool	WaitFor	(time::TTime timeout) CL3_WARN_UNUSED_RESULT = 0;
 				};
 
 				class	TMutex : public IMutex
 				{
 					private:
-						_::TMutexData* data;
+						_::TMutexData* const data;
 
 						CLASS	TMutex		(const TMutex&);
 						TMutex&	operator=	(const TMutex&);
 
 					public:
-						inline	bool	Enabled	() const { return data != NULL; }
+						GETTER	bool	Enabled	() const { return data != NULL; }
 						CL3PUBF	void	Acquire	();
-						CL3PUBF	bool	Acquire	(time::TTime timeout);
+						CL3PUBF	bool	Acquire	(time::TTime timeout) CL3_WARN_UNUSED_RESULT;
 						CL3PUBF	void	Release	();
+						CL3PUBF	bool	Acquired() const;
 
 						CL3PUBF	CLASS	TMutex	(bool enabled);
 						CL3PUBF	CLASS	~TMutex	();
@@ -99,7 +101,7 @@ namespace	cl3
 
 				struct	IInterlocked
 				{
-					virtual	IMutex&	Mutex	() = 0;
+					virtual	GETTER	IMutex&	Mutex	() = 0;
 				};
 
 				class	TDemandInterlocked : IInterlocked
@@ -111,7 +113,7 @@ namespace	cl3
 						CLASS	TDemandInterlocked	(bool enabled) : mutex(enabled) {}
 
 					public:
-						IMutex&	Mutex	() { return mutex; }
+						GETTER	IMutex&	Mutex	() { return mutex; }
 				};
 
 				class	TInterlockedRegion

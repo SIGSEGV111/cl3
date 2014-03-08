@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_error_hpp_
-#define	_include_cl3_core_error_hpp_
+#ifndef	_include_cl3_core_error_base_hpp_
+#define	_include_cl3_core_error_base_hpp_
 
 #include "system_os.hpp"
 #include "system_compiler.hpp"
@@ -50,19 +50,6 @@ namespace	cl3
 				CL3PUBF	void	Set	(const void* object, const char* codefile, const char* function, const char* expression, TException* inner, unsigned codeline);
 		};
 
-		class	CL3PUBT	TCoreArgumentException : public TException
-		{
-			protected:
-				const system::types::typeinfo::TRTTI* argrtti;	//	datatype of the argument expressed as Run-Time-Type-Info object (can be NULL)
-				const char* argname;	//	name of the argument that has an invalid value
-				char* argvalue;	//	value of the argument (as human-readable string)
-
-			public:
-				CL3PUBF	CLASS	TCoreArgumentException	(const system::types::typeinfo::TRTTI* argrtti, const char* argname, const char* argvalue);
-				CL3PUBF	CLASS	TCoreArgumentException	(const TCoreArgumentException&);
-				CL3PUBF	virtual	~TCoreArgumentException	();
-		};
-
 		class	CL3PUBT	TSyscallException : public TException
 		{
 			protected:
@@ -78,6 +65,23 @@ namespace	cl3
 				CL3PUBF	CLASS	TSyscallException	(const TSyscallException&);
 				CL3PUBF	virtual	~TSyscallException	();
 		};
+
+		class	CL3PUBT	TNotImplementedException : public TException
+		{
+			protected:
+
+			public:
+				CL3PUBF	CLASS	TNotImplementedException	();
+				CL3PUBF	CLASS	TNotImplementedException	(const TNotImplementedException&);
+				CL3PUBF	virtual	~TNotImplementedException	();
+		};
+
+		#define	CL3_NOT_IMPLEMENTED	do \
+			{ \
+				cl3::error::TNotImplementedException nie; \
+				nie.Set(NULL, __FILE__, __PRETTY_FUNCTION__, NULL, NULL, __LINE__); \
+				throw nie; \
+			} while(false)
 
 		#if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_LLVM)
 			//	general purpose error macro
