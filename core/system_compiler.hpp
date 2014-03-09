@@ -24,7 +24,7 @@
 
 #define	CL3_CXX_GCC		1	//	GNU G++
 #define	CL3_CXX_MSVC	2	//	Microsoft Visual C++
-#define	CL3_CXX_LLVM	3	//	LLVM CLANG
+#define	CL3_CXX_CLANG	3	//	LLVM CLANG
 
 #define	CL3_ENDIANITY_LITTLE	1
 #define	CL3_ENDIANITY_BIG		2
@@ -36,7 +36,7 @@
 	#endif
 
 	#ifdef __clang__
-		#define	CL3_CXX	CL3_CXX_LLVM
+		#define	CL3_CXX	CL3_CXX_CLANG
 	#else
 		#ifdef __GNUG__
 			#define	CL3_CXX CL3_CXX_GCC
@@ -44,7 +44,7 @@
 	#endif
 #endif
 
-#if ((CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_LLVM) && CL3_OS == CL3_OS_POSIX)
+#if ((CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_CLANG) && CL3_OS == CL3_OS_POSIX)
 	#include <alloca.h>
 	#include <stdint.h>
 #endif
@@ -73,7 +73,7 @@ namespace	cl3
 
 
 
-			#if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_LLVM)
+			#if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_CLANG)
 				#define	CL3_THREAD	__thread
 				#define	CL3_FCONST	__attribute__((const))
 				#define	CL3_FPURE	__attribute__((pure))
@@ -249,7 +249,7 @@ namespace	cl3
 				#error "unknown compiler"
 			#endif
 
-			#define	GETTER CL3_WARN_UNUSED_RESULT
+			#define	GETTER CL3_WARN_UNUSED_RESULT CL3_FPURE
 			#define	SETTER
 		}
 	}

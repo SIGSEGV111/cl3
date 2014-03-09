@@ -141,12 +141,6 @@ namespace	cl3
 				return *this;
 			}
 
-			ITextReader&	ITextReader::operator>>	(token::ITokenizer&)
-			{
-				CL3_NOT_IMPLEMENTED;
-				return *this;
-			}
-
 			//	*** ITextWriter ***
 
 			template<bool b_signed, class T>

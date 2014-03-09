@@ -36,10 +36,8 @@ namespace	cl3
 				using IIn<T>::Left;
 				using IIn<T>::Read;
 
-				size_t	WriteOut	(IOut<T>& os, size_t n_items_wo_max, size_t n_items_wo_min = (size_t)-1)
+				off64_t	WriteOut	(IOut<T>& os, off64_t n_items_wo_max, off64_t n_items_wo_min = (off64_t)-1)
 				{
-					//	TODO: add more error checks
-
 					/*
 						a) max -1, min -1: until source runs dry
 						b) max -1, min N: at least N, but more if source and sink can handle it
@@ -48,24 +46,26 @@ namespace	cl3
 					*/
 
 					//	will use at most 16KiB (unless T is bigger than 16KiB, then sizeof(T) bytes are used)
-					const size_t n_buffer_items = CL3_MIN(n_items_wo_max, CL3_MAX(16384UL / sizeof(T), 1));
+					const off64_t n_buffer_items = CL3_MIN(n_items_wo_max, (off64_t)CL3_MAX(16384UL / sizeof(T), 1));
 					T* buffer = reinterpret_cast<T*>(::alloca(sizeof(T) * n_buffer_items));
 
-					size_t n_already_transfered = 0;
-					size_t n_transfer_now;
+					off64_t n_already_transfered = 0;
+					off64_t n_transfer_now;
 
-					if(n_items_wo_min == (size_t)-1)
+					if(n_items_wo_min == (off64_t)-1)
 						n_items_wo_min = n_items_wo_max;
 
-					if(n_items_wo_min != (size_t)-1)
+					CL3_CLASS_ARGUMENT_ERROR(n_items_wo_max < n_items_wo_min, n_items_wo_max, "n_items_wo_max cannot be less than n_items_wo_min. (n_items_wo_min = "<<n_items_wo_min<<")");
+
+					if(n_items_wo_min != (off64_t)-1)
 					{
 						//	b & c (min N case)
 
 						while(n_already_transfered < n_items_wo_min)
 						{
 							n_transfer_now = CL3_MIN(n_buffer_items, n_items_wo_min - n_already_transfered);
-							Read(buffer, n_transfer_now);
-							os.Write(buffer, n_transfer_now);
+							CL3_CLASS_LOGIC_ERROR(Read(buffer, n_transfer_now) != n_transfer_now);
+							CL3_CLASS_LOGIC_ERROR(os.Write(buffer, n_transfer_now) != n_transfer_now);
 							n_already_transfered += n_transfer_now;
 						}
 					}
@@ -81,10 +81,10 @@ namespace	cl3
 
 					while(n_already_transfered < n_items_wo_max)
 					{
-						const size_t n_space = os.Space();
-						const size_t n_left = Left();
+						const off64_t n_space = os.Space();
+						const off64_t n_left = Left();
 
-						if(n_space == (size_t)-1 || n_left == (size_t)-1 || n_space == 0 || n_left == 0)
+						if(n_space == (off64_t)-1 || n_left == (off64_t)-1 || n_space == 0 || n_left == 0)
 							break;	//	sink and/or source can't, or don't know if they can, handle more data => take no risks and abort here
 
 						//	take the minimum amounts from all limitors

@@ -16,13 +16,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#define _LARGEFILE64_SOURCE
+#define _FILE_OFFSET_BITS 64
+
 #include "system_os.hpp"
 
 #if (CL3_OS == CL3_OS_POSIX)
 
 #include "io_stream_fd.hpp"
-#include "error-base.hpp"
+#include "error-ext.hpp"
 
+#include <sys/types.h>
 #include <unistd.h>
 #include <poll.h>
 #include <errno.h>
@@ -71,7 +75,7 @@ namespace	cl3
 								b_would_block = true;
 							if(status == 0)
 							{
-								CL3_CLASS_ERROR(n_already_read < n_items_read_min, TSourceDryException, n_items_read_min - n_already_read);
+								CL3_CLASS_ERROR(n_already_read < n_items_read_min, TSourceDryException, n_items_read_max, n_items_read_min, n_items_read_min - n_already_read);
 								break;
 							}
 							else
@@ -86,16 +90,40 @@ namespace	cl3
 					return n_already_read;
 				}
 
-				size_t	TFDStream::Left		() const
+				off64_t	TFDStream::Left		(size_t sz_unit) const
 				{
-					struct ::pollfd pfd = { fd, POLLIN, 0 };
-					CL3_CLASS_SYSERR(::poll(&pfd, 1, 0));
-					if((pfd.revents & POLLIN) != 0)
-						return 1;
-					else if((pfd.revents & POLLRDHUP) != 0)
-						return 0;
+					CL3_CLASS_ARGUMENT_ERROR(sz_unit != 1, sz_unit, "this class only works with 1-byte-sized units");
+
+					errno = 0;
+					const off64_t current_offset = lseek64(fd, 0, SEEK_CUR);
+					if(current_offset == (off64_t)-1)
+					{
+						if(errno == ESPIPE)
+						{
+							//	fd is not seekable
+							struct ::pollfd pfd = { fd, POLLIN, 0 };
+							CL3_CLASS_SYSERR(::poll(&pfd, 1, 0));
+							if((pfd.revents & POLLIN) != 0)
+								return 1;
+							else if((pfd.revents & POLLRDHUP) != 0)
+								return 0;
+							else
+								return (size_t)-1;
+						}
+						else
+							//	error during lseek64
+							CL3_CLASS_SYSERR(errno);
+						CL3_CLASS_LOGIC_ERROR(true);
+					}
 					else
-						return (size_t)-1;
+					{
+						//	fd is seekable
+						off64_t end_offset, return_offset;
+						CL3_CLASS_SYSERR(end_offset = lseek64(fd, 0, SEEK_END));
+						CL3_CLASS_SYSERR(return_offset = lseek64(fd, current_offset, SEEK_SET));
+						CL3_CLASS_LOGIC_ERROR(return_offset != current_offset || end_offset < current_offset);
+						return end_offset - current_offset;
+					}
 				}
 
 				size_t	TFDStream::Write	(const byte* arr_items_write, size_t n_items_write_max, size_t n_items_write_min)
@@ -132,7 +160,7 @@ namespace	cl3
 							else if(status == 0 || errno == ENOSPC)
 							{
 								//	no more can be written (disk full)
-								CL3_CLASS_ERROR(n_already_written < n_items_write_min, TSinkFloodedException, n_items_write_min - n_already_written);
+								CL3_CLASS_ERROR(n_already_written < n_items_write_min, TSinkFloodedException, n_items_write_max, n_items_write_min, n_items_write_min - n_already_written);
 								break;
 							}
 							else
@@ -147,8 +175,9 @@ namespace	cl3
 					return n_already_written;
 				}
 
-				size_t	TFDStream::Space	() const
+				off64_t	TFDStream::Space	(size_t sz_unit) const
 				{
+					CL3_CLASS_ARGUMENT_ERROR(sz_unit != 1, sz_unit, "this class only works with 1-byte-sized units");
 					struct ::pollfd pfd = { fd, POLLOUT, 0 };
 					CL3_CLASS_SYSERR(::poll(&pfd, 1, 0));
 					if((pfd.revents & POLLOUT) != 0)

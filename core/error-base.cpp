@@ -34,17 +34,20 @@ namespace	cl3
 	{
 		CLASS	TException::TException	(const char* format, ...) : message(NULL), object(NULL), codefile(NULL), function(NULL), expression(NULL), inner(NULL), codeline(0)
 		{
-			va_list list;
-			va_start(list, format);
-			int l = vsnprintf(NULL, 0, format, list) + 1;
-			va_end(list);
-			if(l <= 0) throw "TException: printf format error (ctor)";
+			if(format)
+			{
+				va_list list;
+				va_start(list, format);
+				int l = vsnprintf(NULL, 0, format, list) + 1;
+				va_end(list);
+				if(l <= 0) throw "TException: printf format error (ctor)";
 
-			va_start(list, format);
-			message = (char*)malloc(l);
-			if(message == NULL) { va_end(list); throw "TException: out of memory (ctor)"; }
-			vsnprintf(message, l, format, list);
-			va_end(list);
+				va_start(list, format);
+				message = (char*)malloc(l);
+				if(message == NULL) { va_end(list); throw "TException: out of memory (ctor)"; }
+				vsnprintf(message, l, format, list);
+				va_end(list);
+			}
 		}
 
 		CLASS	TException::TException	(const TException& e) : message(util::mkstrcpy(e.message).Claim()), object(e.object), codefile(e.codefile), function(e.function), expression(e.expression), inner(e.inner), codeline(e.codeline)
@@ -74,6 +77,18 @@ namespace	cl3
 		}
 
 		CLASS	TNotImplementedException::~TNotImplementedException	()
+		{
+		}
+
+		CLASS	TLogicException::TLogicException	() : TException("The program logic violated the expectations of the programmer")
+		{
+		}
+
+		CLASS	TLogicException::TLogicException	(const TLogicException& nie) : TException(nie)
+		{
+		}
+
+		CLASS	TLogicException::~TLogicException	()
 		{
 		}
 	}

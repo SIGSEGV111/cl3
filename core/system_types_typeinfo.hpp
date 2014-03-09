@@ -32,8 +32,18 @@ namespace	cl3
 		{
 			namespace	typeinfo
 			{
+				namespace	_
+				{
+					template<class T> static void generic_dtor(void* object) { reinterpret_cast<T*>(object)->~T(); }
+				}
+
+				//	constructors & destructor
 				typedef void (*FDestructor)(void*);
-				template<class T> static void __generic_dtor(void* object) { reinterpret_cast<T*>(object)->~T(); }
+				typedef void (*FStandardConstructor)(void*);
+				typedef void (*FCopyConstructor)(void*, const void*);
+
+				//	converts object value to human-readable string
+				typedef	system::memory::TUniquePtr<char[],false> (*FStringify)(const void*);
 
 				enum	ETypeClass
 				{
@@ -78,7 +88,12 @@ namespace	cl3
 					const static bool is_trivial_deleteable = false;
 					const static bool is_trivial_moveable = true;	//	NOTE: most classes are trivial moveable, this is why this is true by default
 					const static unsigned n_indirections = 0;
-					const static FDestructor dtor;
+
+					const static FDestructor Destructor;
+					const static FStandardConstructor StandardConstructor;
+					const static FCopyConstructor CopyConstructor;
+					const static FStringify Stringify;
+
 					const static TRTTI rtti;
 				};
 
@@ -96,7 +111,12 @@ namespace	cl3
 					const static bool is_trivial_deleteable = TCTTI<T>::is_trivial_deleteable;
 					const static bool is_trivial_moveable = TCTTI<T>::is_trivial_moveable;
 					const static unsigned n_indirections = TCTTI<T>::n_indirections;
-					const static FDestructor dtor;
+
+					const static FDestructor Destructor;
+					const static FStandardConstructor StandardConstructor;
+					const static FCopyConstructor CopyConstructor;
+					const static FStringify Stringify;
+
 					const static TRTTI rtti;
 				};
 
@@ -114,7 +134,12 @@ namespace	cl3
 					const static bool is_trivial_deleteable = true;
 					const static bool is_trivial_moveable = true;
 					const static unsigned n_indirections = TCTTI<T>::n_indirections + 1;
-					const static FDestructor dtor;
+
+					const static FDestructor Destructor;
+					const static FStandardConstructor StandardConstructor;
+					const static FCopyConstructor CopyConstructor;
+					const static FStringify Stringify;
+
 					const static TRTTI rtti;
 				};
 
@@ -132,18 +157,23 @@ namespace	cl3
 					const static bool is_trivial_deleteable = TCTTI<T>::is_trivial_deleteable;
 					const static bool is_trivial_moveable = TCTTI<T>::is_trivial_moveable;
 					const static unsigned n_indirections = TCTTI<T>::n_indirections + 1;
-					const static FDestructor dtor;
+
+					const static FDestructor Destructor;
+					const static FStandardConstructor StandardConstructor;
+					const static FCopyConstructor CopyConstructor;
+					const static FStringify Stringify;
+
 					const static TRTTI rtti;
 				};
 
-				template<class T> const FDestructor TCTTI<T>::dtor = &__generic_dtor<T>;
-				template<class T> const TRTTI TCTTI<T>::rtti = { typeclass, n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, sizeof(T), &typeid(T) };
-				template<class T> const FDestructor TCTTI<const T>::dtor = &__generic_dtor<T>;
-				template<class T> const TRTTI TCTTI<const T>::rtti = { typeclass, n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, sizeof(T), &typeid(T) };
-				template<class T> const FDestructor TCTTI<T*>::dtor = &__generic_dtor<T>;
-				template<class T> const TRTTI TCTTI<T*>::rtti = { typeclass, n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, sizeof(T), &typeid(T) };
-				template<class T> const FDestructor TCTTI<T&>::dtor = &__generic_dtor<T>;
-				template<class T> const TRTTI TCTTI<T&>::rtti = { typeclass, n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, sizeof(T), &typeid(T) };
+				template<class T> const FDestructor TCTTI<T>::Destructor = &_::generic_dtor<T>;
+				template<class T> const TRTTI TCTTI<T>::rtti = { typeclass, n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, Destructor, sizeof(T), &typeid(T) };
+				template<class T> const FDestructor TCTTI<const T>::Destructor = &_::generic_dtor<T>;
+				template<class T> const TRTTI TCTTI<const T>::rtti = { typeclass, n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, Destructor, sizeof(T), &typeid(T) };
+				template<class T> const FDestructor TCTTI<T*>::Destructor = &_::generic_dtor<T>;
+				template<class T> const TRTTI TCTTI<T*>::rtti = { typeclass, n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, Destructor, sizeof(T), &typeid(T) };
+				template<class T> const FDestructor TCTTI<T&>::Destructor = &_::generic_dtor<T>;
+				template<class T> const TRTTI TCTTI<T&>::rtti = { typeclass, n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, Destructor, sizeof(T), &typeid(T) };
 			}
 		}
 	}

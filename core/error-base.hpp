@@ -24,9 +24,6 @@
 
 namespace	cl3
 {
-	//	forward declaration for TRTTI
-	namespace system { namespace types { namespace typeinfo { struct TRTTI; } } }
-
 	namespace	error
 	{
 		class	CL3PUBT	TException
@@ -34,7 +31,7 @@ namespace	cl3
 			private:
 				TException& operator=(const TException&);	//	not available
 
-			protected:
+			public:
 				char* message;			//	exception-specific human-readable description message
 				const void* object;		//	this-pointer of object that raised the exception
 				const char* codefile;	//	sourcecode file (from __FILE__ macro)
@@ -43,7 +40,6 @@ namespace	cl3
 				TException* inner;	//	inner exception (can be NULL)
 				unsigned codeline;		//	sourcecode line number (from __LINE__ macro)
 
-			public:
 				CL3PUBF	CLASS	TException	(const char* format, ...);	//	printf-syle ctor
 				CL3PUBF	CLASS	TException	(const TException&);
 				CL3PUBF	virtual	~TException	();
@@ -52,7 +48,7 @@ namespace	cl3
 
 		class	CL3PUBT	TSyscallException : public TException
 		{
-			protected:
+			public:
 				#if (CL3_OS == CL3_OS_POSIX)
 					int err_no;	//	changed to err_no, because "errno" might be a macro and the preprocessor would do evil things if we would use the same name
 				#elif (CL3_OS == CL3_OS_WINDOWS)
@@ -68,13 +64,33 @@ namespace	cl3
 
 		class	CL3PUBT	TNotImplementedException : public TException
 		{
-			protected:
-
 			public:
 				CL3PUBF	CLASS	TNotImplementedException	();
 				CL3PUBF	CLASS	TNotImplementedException	(const TNotImplementedException&);
 				CL3PUBF	virtual	~TNotImplementedException	();
 		};
+
+		class	CL3PUBT	TLogicException : public TException
+		{
+			public:
+				CL3PUBF	CLASS	TLogicException	();
+				CL3PUBF	CLASS	TLogicException	(const TLogicException&);
+				CL3PUBF	virtual	~TLogicException();
+		};
+
+		#define	CL3_CLASS_LOGIC_ERROR(expression)	do \
+			{ \
+				cl3::error::TLogicException le; \
+				le.Set(this, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
+				throw le; \
+			} while(false)
+
+		#define	CL3_NONCLASS_LOGIC_ERROR(expression)	do \
+			{ \
+				cl3::error::TLogicException le; \
+				le.Set(NULL, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
+				throw le; \
+			} while(false)
 
 		#define	CL3_NOT_IMPLEMENTED	do \
 			{ \
@@ -83,7 +99,7 @@ namespace	cl3
 				throw nie; \
 			} while(false)
 
-		#if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_LLVM)
+		#if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_CLANG)
 			//	general purpose error macro
 			#define	CL3_NONCLASS_ERROR(expression, TExceptionClass, ...) do \
 			{ \

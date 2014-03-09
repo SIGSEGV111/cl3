@@ -49,10 +49,10 @@ namespace	cl3
 
 					public:
 						CL3PUBF	size_t	Read	(byte* arr_items_read, size_t n_items_read_max, size_t n_items_read_min = (size_t)-1);
-						CL3PUBF	size_t	Left	() const;
+						CL3PUBF	off64_t	Left	(size_t sz_unit = 1) const;
 
 						CL3PUBF	size_t	Write	(const byte* arr_items_write, size_t n_items_write_max, size_t n_items_write_min = (size_t)-1);
-						CL3PUBF	size_t	Space	() const;
+						CL3PUBF	off64_t	Space	(size_t sz_unit = 1) const;
 
 						CL3PUBF	CLASS	TFDStream	(TFD fd);	//	TFDStream takes ownership of the file-descriptor fd
 						CL3PUBF	CLASS	TFDStream	(const TFDStream&);

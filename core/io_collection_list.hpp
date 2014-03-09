@@ -33,6 +33,13 @@ namespace	cl3
 				//	index: a negative index starts at the end of the list (e.g. -1 would be the last item (Count()-1), whereas -2 would be the second last item, ...)
 				//	a list preserves the order of the items unless it was explicitly switched into "lose mode" with "allow_reorder" set to "true"
 
+				//	IIn & IOut follow strict FIFO semantics.
+				//	IIn will remove items from the head
+				//	IOut will append new items at the tail
+
+				template<class T> struct IList;
+				template<class T> class TList;
+
 				class	TIndexOutOfBoundsException : public error::TException
 				{
 					protected:
@@ -51,10 +58,10 @@ namespace	cl3
 				};
 
 				template<class T>
-				struct	IList : IDynamicCollection<T>
+				struct	IList : virtual IDynamicCollection<T>
 				{
-					virtual	IIterator<T>*		CreateIterator	() = 0;
-					virtual	IIterator<const T>*	CreateIterator	() const = 0;
+					using IDynamicCollection<T>::Count;
+					using IDynamicCollection<T>::Remove;
 
 					virtual	GETTER	T&			operator[]	(ssize_t index) = 0;	//	returns a reference to the item at index "index", the reference will remain valid until the next function call which changes the size of the list (Insert()/Remove()/Count(x))
 					virtual	GETTER	const T&	operator[]	(ssize_t index) const = 0;	//	as above
@@ -66,7 +73,52 @@ namespace	cl3
 					virtual	void				Insert		(ssize_t index, const T& item_insert) = 0;	//	inserts a new item at index "index" which will get copy-constructed from "item_insert"
 					virtual	void				Insert		(ssize_t index, const T* arr_items_insert, size_t n_items_insert) = 0;	//	inserts "n_items_insert" new item at index "index" which will get copy-constructed from the items in "arr_items_insert"
 					virtual	void				Insert		(ssize_t index, const IStaticCollection<T>& collection) = 0;	//	as above but draws the new items from another collection
+
 					virtual	void				Remove		(ssize_t index, size_t n_items_remove) = 0;	//	removes "n_items_remove" items from the list starting at index "index"
+				};
+
+				template<class T>
+				class	TList : public virtual IList<T>
+				{
+					public:
+						//	from IObservable
+						const event::TEvent<IStaticCollection<T>, TOnChangeData<T> >&	OnChange	() const GETTER;
+
+						//	from IStaticCollection
+						system::memory::TUniquePtr<IStaticIterator<T> >			CreateStaticIterator	() CL3_WARN_UNUSED_RESULT;
+						system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT;
+						size_t	Count		() const GETTER;
+						bool	CountMin	(size_t count_min) const GETTER;
+						bool	CountMax	(size_t count_max) const GETTER;
+
+						//	from IDynamicCollection
+						system::memory::TUniquePtr<IDynamicIterator<T> >		CreateDynamicIterator	() CL3_WARN_UNUSED_RESULT;
+						system::memory::TUniquePtr<IDynamicIterator<const T> >	CreateDynamicIterator	() const CL3_WARN_UNUSED_RESULT;
+						void	Add		(const T& item_insert);
+						void	Add		(const T* arr_items_add, size_t n_items_add);
+						void	Add		(const IStaticCollection<T>& collection);
+						void	Remove	(const T* item_remove);
+
+						//	from IOut
+						size_t			Write	(const T* arr_items_write, size_t n_items_write_max, size_t n_items_write_min = (size_t)-1);
+						off64_t			ReadIn	(io::stream::IIn<T>& is, off64_t n_items_ri_max, off64_t n_items_ri_min = (off64_t)-1);
+						off64_t	Space	(size_t sz_unit) const GETTER;
+
+						//	from IIn
+						size_t			Read	(T* arr_items_write, size_t n_items_write_max, size_t n_items_write_min = (size_t)-1);
+						off64_t			WriteOut(io::stream::IOut<T>& is, off64_t n_items_ri_max, off64_t n_items_ri_min = (off64_t)-1);
+						off64_t	Left	(size_t sz_unit) const GETTER;
+
+						//	from IList
+						GETTER	T&			operator[]	(ssize_t index);
+						GETTER	const T&	operator[]	(ssize_t index) const;
+						GETTER	T*			ItemPtr		(ssize_t index);
+						GETTER	const T*	ItemPtr		(ssize_t index) const;
+						SETTER	void		Count		(size_t new_count, const T& item_init = T());
+						void				Insert		(ssize_t index, const T& item_insert);
+						void				Insert		(ssize_t index, const T* arr_items_insert, size_t n_items_insert);
+						void				Insert		(ssize_t index, const IStaticCollection<T>& collection);
+						void				Remove		(ssize_t index, size_t n_items_remove);
 				};
 			}
 		}

@@ -21,7 +21,7 @@
 
 #include "system_compiler.hpp"
 
-#if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_LLVM)
+#if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_CLANG)
 	#include <stdint.h>
 
 	namespace	cl3
@@ -32,36 +32,21 @@
 			{
 				typedef	uint8_t				u8;
 				typedef	int8_t				s8;
-
 				typedef	uint16_t			u16;
 				typedef	int16_t				s16;
-
 				typedef	uint32_t			u32;
 				typedef	int32_t				s32;
-
 				typedef	uint64_t			u64;
 				typedef	int64_t				s64;
 
-					//typedef	signed __int128		s128;
-					//typedef	unsigned __int128	u128;
-
 				typedef	float				f32;
 				typedef	double				f64;
-					//typedef	__float128			f128;
-
-				typedef	uintptr_t			us;
-				typedef	intptr_t			ss;
-
-				typedef	signed int			sf;
-				typedef	unsigned int		uf;
 
 				typedef u8 byte;
 			};
 		};
 	};
-#endif
-
-#if (CL3_CXX == CL3_CXX_MSVC)
+#elif (CL3_CXX == CL3_CXX_MSVC)
 	namespace	cl3
 	{
 		namespace	system
@@ -88,19 +73,8 @@
 					typedef	signed __int64		s64;
 				#endif
 
-				#ifdef _WIN64
-					typedef s64			ss;
-					typedef u64			us;
-				#else
-					typedef s32			ss;
-					typedef u32			us;
-				#endif
-
 				typedef	float			f32;
 				typedef	double			f64;
-
-				typedef	signed int		sf;
-				typedef	unsigned int	uf;
 
 				typedef u8 byte;
 			};

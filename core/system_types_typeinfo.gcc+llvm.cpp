@@ -22,7 +22,7 @@
 
 #include "system_compiler.hpp"
 
-#if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_LLVM)
+#if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_CLANG)
 
 #include "system_types_typeinfo.hpp"
 #include "error-base.hpp"

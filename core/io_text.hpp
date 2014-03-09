@@ -41,11 +41,6 @@ namespace	cl3
 				struct	IString;
 			}
 
-			namespace	token
-			{
-				struct	ITokenizer;
-			};
-
 			namespace	encoding
 			{
 				class	TDecodeException;
@@ -115,14 +110,15 @@ namespace	cl3
 				CL3PUBF const static TPackage default_formats;
 			};
 
-			struct	ITextReader : public stream::IIn<TUTF32>, public stream::IIn<wchar_t>, public stream::IIn<char>
+			struct	ITextReader : public virtual stream::IIn<TUTF32>, public virtual stream::IIn<wchar_t>, public virtual stream::IIn<char>
 			{
 				using stream::IIn<TUTF32>::Read;
-				using stream::IIn<wchar_t>::Read;
-				using stream::IIn<char>::Read;
-
 				using stream::IIn<TUTF32>::WriteOut;
+
+				using stream::IIn<wchar_t>::Read;
 				using stream::IIn<wchar_t>::WriteOut;
+
+				using stream::IIn<char>::Read;
 				using stream::IIn<char>::WriteOut;
 
 				TNumberFormat::TPackage number_formats;
@@ -139,17 +135,17 @@ namespace	cl3
 				CL3PUBF	ITextReader&	operator>>	(f32&);
 				CL3PUBF	ITextReader&	operator>>	(f64&);
 				CL3PUBF	ITextReader&	operator>>	(string::IString&);
-				CL3PUBF	ITextReader&	operator>>	(token::ITokenizer&);
 			};
 
-			struct	ITextWriter : public stream::IOut<TUTF32>, public stream::IOut<wchar_t>, public stream::IOut<char>
+			struct	ITextWriter : public virtual stream::IOut<TUTF32>, public virtual stream::IOut<wchar_t>, public virtual stream::IOut<char>
 			{
 				using stream::IOut<TUTF32>::Write;
-				using stream::IOut<wchar_t>::Write;
-				using stream::IOut<char>::Write;
-
 				using stream::IOut<TUTF32>::ReadIn;
+
+				using stream::IOut<wchar_t>::Write;
 				using stream::IOut<wchar_t>::ReadIn;
+
+				using stream::IOut<char>::Write;
 				using stream::IOut<char>::ReadIn;
 
 				CL3PUBF	ITextWriter&	operator<<	(TUTF32);
@@ -168,7 +164,7 @@ namespace	cl3
 				CL3PUBF	ITextWriter&	operator<<	(const wchar_t*);
 			};
 
-			struct	ITextStream : ITextReader, ITextWriter
+			struct	ITextStream : virtual ITextReader, virtual ITextWriter
 			{
 				using ITextReader::operator>>;
 				using ITextWriter::operator<<;

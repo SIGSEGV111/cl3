@@ -20,11 +20,49 @@
 #define	_include_cl3_core_error_ext_hpp_
 
 #include "error-base.hpp"
+#include "io_text_string.hpp"
+#include "system_types_typeinfo.hpp"
 
 namespace	cl3
 {
 	namespace	error
 	{
+		class	TArgumentException : public TException
+		{
+			public:
+				io::text::string::TUString msgbuf;
+				template<class T>
+				CL3PUBF	CLASS	TArgumentException	(const char* name, const T& value) : TException("function-call argument \"%s\" has invalid value \"%s\"", name, system::types::typeinfo::TCTTI<T>::Stringify ? system::types::typeinfo::TCTTI<T>::Stringify(&value).Array() : "<unknown value>") {}
+
+				CL3PUBF	CLASS	TArgumentException	(const TArgumentException&) : TException(NULL) { CL3_NOT_IMPLEMENTED; }
+				CL3PUBF	CLASS	~TArgumentException	() { CL3_NOT_IMPLEMENTED; }
+		};
+
+		#define	CL3_CLASS_ARGUMENT_ERROR(expression, argument, message) \
+			do \
+			{ \
+				if(expression) \
+				{ \
+					cl3::error::TArgumentException ae(#argument, argument); \
+					ae.Set(this, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
+					ae.msgbuf<<message; \
+					throw ae; \
+				} \
+			} \
+			while(false)
+
+		#define	CL3_NONCLASS_ARGUMENT_ERROR(expression, argument, message) \
+			do \
+			{ \
+				if(expression) \
+				{ \
+					cl3::error::TArgumentException ae(#argument, argument); \
+					ae.Set(NULL, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
+					ae.msgbuf<<message; \
+					throw ae; \
+				} \
+			} \
+			while(false)
 	}
 }
 
