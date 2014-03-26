@@ -86,24 +86,24 @@ namespace
 
 	/*************************************************/
 
-	TEST(TypeInfo, StandardConstructor_NA)
-	{
-		volatile FStandardConstructor ctor = TCTTI<TTestType_NA>::ctor;
-		EXPECT_TRUE(ctor == NULL);
-	}
-
-	TEST(TypeInfo, Destructor_NA)
-	{
-		volatile FDestructor dtor = TCTTI<TTestType_NA>::dtor;
-		EXPECT_TRUE(dtor == NULL);
-	}
-
-	TEST(TypeInfo, CopyConstructor_NA)
-	{
-		volatile FCopyConstructor copyctor = TCTTI<TTestType_NA>::copyctor;
-		EXPECT_TRUE(copyctor == NULL);
-
-	}
+// 	TEST(TypeInfo, StandardConstructor_NA)
+// 	{
+// 		volatile FStandardConstructor ctor = TCTTI<TTestType_NA>::ctor;
+// 		EXPECT_TRUE(ctor == NULL);
+// 	}
+//
+// 	TEST(TypeInfo, Destructor_NA)
+// 	{
+// 		volatile FDestructor dtor = TCTTI<TTestType_NA>::dtor;
+// 		EXPECT_TRUE(dtor == NULL);
+// 	}
+//
+// 	TEST(TypeInfo, CopyConstructor_NA)
+// 	{
+// 		volatile FCopyConstructor copyctor = TCTTI<TTestType_NA>::copyctor;
+// 		EXPECT_TRUE(copyctor == NULL);
+//
+// 	}
 
 	/*************************************************/
 }

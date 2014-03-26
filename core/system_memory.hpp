@@ -86,8 +86,8 @@ namespace	cl3
 					CLASS	~TUniquePtr	() { Release(); }
 			};
 
-			template<EUnqiuePtrType type, class T>
-			GETTER static TUniquePtr<T, type> MakeUniquePtr(T* object) { TUniquePtr<T, type> uptr; uptr.Object(object); return uptr; }
+			template<class T> GETTER static TUniquePtr<T, UPTR_OBJECT> MakeUniquePtr(T* object) { TUniquePtr<T, UPTR_OBJECT> uptr; uptr.Object(object); return uptr; }
+			template<EUnqiuePtrType type, class T> GETTER static TUniquePtr<T, type> MakeUniquePtr(T* object) { TUniquePtr<T, type> uptr; uptr.Object(object); return uptr; }
 
 			class	CL3PUBT	TBadAllocException : public error::TException
 			{
@@ -105,13 +105,6 @@ namespace	cl3
 				virtual	void*	Alloc	(size_t sz_bytes) = 0;
 				virtual	void	Free	(void* p_mem) = 0;
 				virtual	void*	Realloc	(void* p_mem, size_t sz_bytes_new) = 0;
-			};
-
-			template<size_t sz_item>
-			struct	CL3PUBT	IItemAllocator
-			{
-				virtual	void*	Alloc	() = 0;
-				virtual	void	Free	(void* item) = 0;
 			};
 
 			struct	CL3PUBT	TDefaultAllocator : IDynamicAllocator

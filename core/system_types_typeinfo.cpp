@@ -38,6 +38,7 @@ namespace	cl3
 			{
 				using namespace system::memory;
 				using namespace io::text::string;
+				using namespace io::text;
 
 				//	from wikipedia: https://en.wikipedia.org/wiki/Jenkins_hash_function
 				static u32 JenkinsHash(const byte *key, size_t len)
@@ -100,7 +101,7 @@ namespace	cl3
 					{NULL,NULL}
 				};
 
-				static	const char*	FindReplace	(const char* token, size_t token_length)
+				/*static	const char*	FindReplace	(const char* token, size_t token_length)
 				{
 					for(size_t i = 0; arr_replace[i].wrong != NULL; i++)
 					{
@@ -111,16 +112,18 @@ namespace	cl3
 						}
 					}
 					return NULL;
-				}
+				}*/
 
-				TUniquePtr<char,UPTR_MALLOC> UnifyTypename(const char* oldname)
+				TUStringUPtr UnifyTypename(const TUString& oldname)
 				{
-					util::TCoreList<char> newname;
+					CL3_NOT_IMPLEMENTED;
 
-					const char* token_start = oldname;
+					/*TUStringUPtr newname = MakeUniquePtr(new TUString());
+
+					const TUTF32* token_start = oldname.ItemPtr(0);
 					for(size_t i = 0; ; ++i)
 					{
-						switch(oldname[i])
+						switch(oldname[i].code)
 						{
 							//	end of token markers:
 							case ' ':
@@ -138,14 +141,8 @@ namespace	cl3
 							case ']':
 							case '\0':
 							{
-								const size_t token_length = i - (token_start - oldname);
+								const size_t token_length = i - (token_start - oldname.ItemPtr(0));
 								size_t offset = 0;
-
-								/*if( token_length > 0 && *token_end == ']' )
-								{
-									offset = token_length;
-								}
-								else */
 
 								if( token_length >= 5 && memcmp("class",  token_start, 5) == 0 )
 								{
@@ -173,9 +170,9 @@ namespace	cl3
 									const char* const replace = FindReplace(token_start + offset, token_length - offset);
 
 									if(replace)
-										newname.Push(replace, strlen(replace));
+										newname.Object()->Append(replace, strlen(replace));
 									else
-										newname.Push(token_start + offset, token_length - offset);
+										newname.Object()->Append(token_start + offset, token_length - offset);
 								}
 
 								switch(oldname[i])
@@ -187,7 +184,7 @@ namespace	cl3
 									case '\t':
 										break;
 									default:
-										newname.Push(oldname[i]);
+										newname.Object()->Append(oldname[i]);
 								}
 
 								token_start = oldname + i + 1;
@@ -197,8 +194,7 @@ namespace	cl3
 						if(oldname[i] == '\0') break;
 					}
 
-					TUniquePtr<char,UPTR_MALLOC> _tmp(MakeUniquePtr<UPTR_MALLOC>(newname.Claim()));
-					return _tmp;
+					return newname;*/
 				}
 			}
 		}

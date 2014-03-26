@@ -60,6 +60,16 @@ namespace	cl3
 						off64_t	Left	(size_t sz_unit) const;
 						off64_t	Space	(size_t sz_unit) const;
 
+						using collection::list::TList<TUTF32>::Append;
+						void			Append		(const char item_append);
+						void			Append		(const char* arr_items_append, size_t n_items_append);
+						void			Append		(const collection::IStaticCollection<char>& collection);
+						void			Append		(const wchar_t item_append);
+						void			Append		(const wchar_t* arr_items_append, size_t n_items_append);
+						void			Append		(const collection::IStaticCollection<wchar_t>& collection);
+
+						size_t			Replace		(const TUString& find, const TUString& replace, size_t n_times = (size_t)-1);	//	returns the number of times of which <find> was replaced with <replace>
+
 						CL3PUBF	CLASS	TUString	();
 						CL3PUBF	CLASS	TUString	(const char*     str, size_t maxlen = (size_t)-1);
 						CL3PUBF	CLASS	TUString	(const wchar_t* wstr, size_t maxlen = (size_t)-1);

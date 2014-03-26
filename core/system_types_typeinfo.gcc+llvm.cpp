@@ -26,6 +26,7 @@
 
 #include "system_types_typeinfo.hpp"
 #include "error-base.hpp"
+#include "io_text_string.hpp"
 
 #include <cxxabi.h>
 
@@ -40,14 +41,13 @@ namespace	cl3
 				using namespace system::memory;
 				using namespace io::text::string;
 
-				TUStringUPtr UnifyTypename(const char* name);
+				TUStringUPtr UnifyTypename(const TUString& name);
 
 				TUStringUPtr TRTTI::Name() const
 				{
-					TUStringUPtr name;
-					CL3_CLASS_ERROR((name = MakeUniquePtr(new TUString(abi::__cxa_demangle(sys_type_info->name(), NULL, NULL, NULL)))).Object()->Count() == 0, error::TException, "name decoding failed");
-					TUniquePtr<char,UPTR_MALLOC> ret(UnifyTypename(name.Object()));
-					return ret;
+					TUString name;
+					CL3_CLASS_ERROR((name = abi::__cxa_demangle(sys_type_info->name(), NULL, NULL, NULL)).Count() == 0, error::TException, "name decoding failed");
+					return UnifyTypename(name);
 				}
 			}
 		}

@@ -75,6 +75,10 @@ namespace	cl3
 					virtual	void				Insert		(ssize_t index, const IStaticCollection<T>& collection) = 0;	//	as above but draws the new items from another collection
 
 					virtual	void				Remove		(ssize_t index, size_t n_items_remove) = 0;	//	removes "n_items_remove" items from the list starting at index "index"
+
+					virtual	void				Append		(const T& item_append) = 0;
+					virtual	void				Append		(const T* arr_items_append, size_t n_items_append) = 0;
+					virtual	void				Append		(const IStaticCollection<T>& collection) = 0;
 				};
 
 				template<class T>
@@ -97,7 +101,8 @@ namespace	cl3
 						//	from IDynamicCollection
 						system::memory::TUniquePtr<IDynamicIterator<T> >		CreateDynamicIterator	() CL3_WARN_UNUSED_RESULT;
 						system::memory::TUniquePtr<IDynamicIterator<const T> >	CreateDynamicIterator	() const CL3_WARN_UNUSED_RESULT;
-						void	Add		(const T& item_insert);
+
+						void	Add		(const T& item_add);
 						void	Add		(const T* arr_items_add, size_t n_items_add);
 						void	Add		(const IStaticCollection<T>& collection);
 						void	Remove	(const T* item_remove);
@@ -122,6 +127,11 @@ namespace	cl3
 						void				Insert		(ssize_t index, const T* arr_items_insert, size_t n_items_insert);
 						void				Insert		(ssize_t index, const IStaticCollection<T>& collection);
 						void				Remove		(ssize_t index, size_t n_items_remove);
+
+						void				Append		(const T& item_append);
+						void				Append		(const T* arr_items_append, size_t n_items_append);
+						void				Append		(const IStaticCollection<T>& collection);
+						void				Append		(const TList& list);
 				};
 
 				/**************************************************************/
@@ -187,19 +197,19 @@ namespace	cl3
 				template<class T>
 				void	TList<T>::Add		(const T& item_insert)
 				{
-					CL3_NOT_IMPLEMENTED;
+					Append(item_insert);
 				}
 
 				template<class T>
 				void	TList<T>::Add		(const T* arr_items_add, size_t n_items_add)
 				{
-					CL3_NOT_IMPLEMENTED;
+					Append(arr_items_add, n_items_add);
 				}
 
 				template<class T>
 				void	TList<T>::Add		(const IStaticCollection<T>& collection)
 				{
-					CL3_NOT_IMPLEMENTED;
+					Append(collection);
 				}
 
 				template<class T>
@@ -297,6 +307,30 @@ namespace	cl3
 
 				template<class T>
 				void		TList<T>::Remove	(ssize_t index, size_t n_items_remove)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				void		TList<T>::Append	(const T& item_append)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				void		TList<T>::Append	(const T* arr_items_append, size_t n_items_append)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				void		TList<T>::Append	(const IStaticCollection<T>& collection)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				void		TList<T>::Append	(const TList& list)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
