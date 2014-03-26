@@ -25,23 +25,12 @@ namespace	cl3
 {
 	namespace	context
 	{
-		template<class T> class TParameterStack;
-		template<> class TParameterStack<void>;
-
-		template<>
-		class	TParameterStack<void>
-		{
-			protected:
-				static CL3_THREAD void* current_value;
-
-			public:
-				CL3PUBF	GETTER	void*	Current	();
-				CL3PUBF	SETTER	void	Current	(void* new_value);
-		};
-
 		template<class T>
-		class	TParameterStack : private TParameterStack<void>
+		class	TParameterStack
 		{
+			private:
+				T* current_value;
+
 			public:
 				typedef T TValue;
 				T*		Current	() { return reinterpret_cast<T*>(current_value); }
@@ -61,7 +50,7 @@ namespace	cl3
 				CLASS	~TParameterHolder	() { stack.Current(old_value); }
 		};
 
-		#define	CONTEXT_PARAMETER(stack, new_value) cl3::context::TParameterHolder<stack::TValue> CL3_PASTE(__context_parameter_, __COUNTER__)(stack, new_value)
+		#define	CONTEXT_PARAMETER(stack, new_value) cl3::context::TParameterHolder<decltype(stack)::TValue> CL3_PASTE(__context_parameter_, __COUNTER__)(stack, new_value)
 	}
 }
 

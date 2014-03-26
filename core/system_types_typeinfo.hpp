@@ -24,6 +24,106 @@
 #include "system_compiler.hpp"
 #include "system_memory.hpp"
 
+
+
+
+
+
+/*
+#include <iostream>
+#include <vector>
+
+template<typename T>
+class is_default_constructible
+{
+	private:
+		typedef struct { char arr[sizeof(T)+0]; } yes;
+		typedef struct { char arr[sizeof(T)+1]; } no;
+
+		template<typename U>
+		static decltype(new U(), yes()) test(int);
+
+		template<typename>
+		static no test(...);
+
+	public:
+		static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+};
+
+template<typename T>
+class is_copy_constructible
+{
+	private:
+		typedef struct { char arr[sizeof(T)+0]; } yes;
+		typedef struct { char arr[sizeof(T)+1]; } no;
+
+		template<typename U>
+		static decltype(new U(*reinterpret_cast<const U*>(NULL)), yes()) test(int);
+
+		template<typename>
+		static no test(...);
+
+	public:
+		static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+};
+
+template<typename T>
+class is_destructible
+{
+	private:
+		typedef struct { char arr[sizeof(T)+0]; } yes;
+		typedef struct { char arr[sizeof(T)+1]; } no;
+
+		template<typename U>
+		static decltype((delete reinterpret_cast<U*>(NULL)), yes()) test(int);
+
+		template<typename>
+		static no test(...);
+
+	public:
+		static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+};
+
+struct foo
+{
+	private:
+// 	public:
+		foo() {}
+	private:
+// 	public:
+		foo(int) {}
+	private:
+// 	public:
+		foo(const foo&) {}
+	private:
+// 	public:
+		~foo() {}
+};
+
+int main()
+{
+	std::cout << is_default_constructible<foo>::value << '\n'		// 0
+			  << is_default_constructible<std::vector<int> >::value << '\n';  // 1
+
+	std::cout << is_copy_constructible<foo>::value << '\n'		// 0
+			  << is_copy_constructible<std::vector<int> >::value << '\n';  // 1
+
+	std::cout << is_destructible<foo>::value << '\n'		// 0
+			  << is_destructible<std::vector<int> >::value << '\n';  // 1
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
 namespace	cl3
 {
 	namespace	io
