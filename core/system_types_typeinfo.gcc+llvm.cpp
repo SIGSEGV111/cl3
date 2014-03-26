@@ -38,14 +38,15 @@ namespace	cl3
 			namespace	typeinfo
 			{
 				using namespace system::memory;
+				using namespace io::text::string;
 
-				TUniquePtr<char[],false> UnifyTypename(const char* name);
+				TUStringUPtr UnifyTypename(const char* name);
 
-				TUniquePtr<char[],false> TRTTI::Name() const
+				TUStringUPtr TRTTI::Name() const
 				{
-					TUniquePtr<char[],false> name;
-					CL3_CLASS_ERROR((name = abi::__cxa_demangle(sys_type_info->name(), NULL, NULL, NULL)).Array() == NULL, error::TException, "name decoding failed");
-					TUniquePtr<char[],false> ret(UnifyTypename(name.Array()).Claim());
+					TUStringUPtr name;
+					CL3_CLASS_ERROR((name = MakeUniquePtr(new TUString(abi::__cxa_demangle(sys_type_info->name(), NULL, NULL, NULL)))).Object()->Count() == 0, error::TException, "name decoding failed");
+					TUniquePtr<char,UPTR_MALLOC> ret(UnifyTypename(name.Object()));
 					return ret;
 				}
 			}

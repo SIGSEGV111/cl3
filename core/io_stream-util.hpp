@@ -31,7 +31,7 @@ namespace	cl3
 		namespace	stream
 		{
 			template<class T>
-			struct	AWriteOut : IIn<T>
+			struct	AWriteOut : virtual IIn<T>
 			{
 				using IIn<T>::Left;
 				using IIn<T>::Read;

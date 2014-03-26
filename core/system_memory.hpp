@@ -29,83 +29,65 @@ namespace	cl3
 	{
 		namespace	memory
 		{
-			template<class T, bool use_delete = true>
+			enum	EUnqiuePtrType
+			{
+				UPTR_OBJECT,
+				UPTR_ARRAY,
+				UPTR_MALLOC
+			};
+
+			template<class T, EUnqiuePtrType type = UPTR_OBJECT>
 			class	TUniquePtr
 			{
 				private:
-					CLASS		TUniquePtr	(const TUniquePtr&);
-					TUniquePtr&	operator=	(const TUniquePtr&);
+					CLASS		TUniquePtr	(T* object) throw() : object(object) {}
 				protected:
-					T* object;
-				public:
-					TUniquePtr&	operator=	(TUniquePtr& other)
+					mutable T* object;
+
+					void	Release	()
 					{
-						if(use_delete) delete object; else ::free(object);
+						switch(type)
+						{
+							case UPTR_OBJECT:
+								delete object;
+								break;
+							case UPTR_ARRAY:
+								delete[] object;
+								break;
+							case UPTR_MALLOC:
+								::free(object);
+								break;
+						};
+					}
+
+				public:
+					TUniquePtr&	operator=	(const TUniquePtr& other)
+					{
+						Release();
 						this->object = other.object;
 						other.object = NULL;
 						return *this;
 					}
 
-					TUniquePtr&	operator=	(T* new_object)
+					SETTER	void	Object		(T* new_object)
 					{
-						if(use_delete) delete[] object; else ::free(object);
+						Release();
 						object = new_object;
-						return *this;
 					}
 
-					GETTER	T&	operator*	() { return *object; }
-					GETTER	T*	operator->	() { return object; }
-					GETTER	T*	Object		() { return object; }
+					GETTER	T*		Object		() { return object; }
+					GETTER	T*		Claim		() { T* tmp = object; object = NULL; return tmp; }
+					void			Reset		() { object = NULL; }	//	does *NOT* release any memory - just removes control of the object from this class
 
-					GETTER	T*	Claim		() { T* tmp = object; object = NULL; return tmp; }
-					void		Reset		() { object = NULL; }	//	does *NOT* release any memory - just removes control of the object from this class
-
-					GETTER	const T&	operator*	() const { return *object; }
-					GETTER	const T*	operator->	() const { return object; }
 					GETTER	const T*	Object		() const { return object; }
 
-					CLASS	TUniquePtr	(T* object = NULL) throw() : object(object) {}
-					CLASS	TUniquePtr	(TUniquePtr& other) throw() : object(other.object) { other.object = NULL; }
-					CLASS	~TUniquePtr	() { if(use_delete) delete object; else ::free(object); }
+					CLASS	TUniquePtr	() throw() : object(NULL) {}
+					CLASS	TUniquePtr	(const TUniquePtr& other) throw() : object(other.object) { other.object = NULL; }
+					CLASS	~TUniquePtr	() { Release(); }
 			};
 
-			template<class T, bool use_delete>
-			class	TUniquePtr<T[], use_delete>
-			{
-				private:
-					CLASS		TUniquePtr	(const TUniquePtr&);
-					TUniquePtr&	operator=	(const TUniquePtr&);
-				protected:
-					T* array;
-				public:
-					TUniquePtr&	operator=	(TUniquePtr& other)
-					{
-						if(use_delete) delete[] array; else ::free(array);
-						this->array = other.array;
-						other.array = NULL;
-						return *this;
-					}
-
-					TUniquePtr&	operator=	(T* new_array)
-					{
-						if(use_delete) delete[] array; else ::free(array);
-						array = new_array;
-						return *this;
-					}
-
-					GETTER	T&	operator[]	(size_t index) { return array[index]; }
-					GETTER	T*	Array		() { return array; }
-
-					GETTER	T*	Claim		() { T* tmp = array; array = NULL; return tmp; }
-					void		Reset		() { array = NULL; }	//	does *NOT* release any memory - just removes control of the object from this class
-
-					GETTER	const T&	operator[]	(size_t index) const { return array[index]; }
-					GETTER	const T*	Array		() const { return array; }
-
-					CLASS	TUniquePtr	(T* array = NULL) throw() : array(array) {}
-					CLASS	TUniquePtr	(TUniquePtr& other) throw() : array(other.array) { other.array = NULL; }
-					CLASS	~TUniquePtr	() { if(use_delete) delete[] array; else ::free(array); }
-			};
+			template<EUnqiuePtrType type, class T>
+			GETTER static TUniquePtr<T, type> MakeUniquePtr(T* object) { TUniquePtr<T, type> uptr; uptr.Object(object); return uptr; }
 
 			class	CL3PUBT	TBadAllocException : public error::TException
 			{

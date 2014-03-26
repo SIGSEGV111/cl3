@@ -39,7 +39,7 @@ namespace	cl3
 		TTime	TTime::Now			(EClock clock)
 		{
 			timespec ts;
-			clockid_t id;
+			clockid_t id = -1;
 			rusage ru;
 
 			switch(clock)

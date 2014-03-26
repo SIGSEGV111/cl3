@@ -23,6 +23,7 @@
 #include "system_types.hpp"
 #include "system_types_typeinfo.hpp"
 #include "util.hpp"
+#include "io_text_string.hpp"
 #include <string.h>
 
 namespace	cl3
@@ -36,9 +37,10 @@ namespace	cl3
 			namespace	typeinfo
 			{
 				using namespace system::memory;
+				using namespace io::text::string;
 
 				//	from wikipedia: https://en.wikipedia.org/wiki/Jenkins_hash_function
-				static u32 JenkinsHash(char *key, size_t len)
+				static u32 JenkinsHash(const byte *key, size_t len)
 				{
 					u32 hash = 0;
 					for(size_t i = 0; i < len; ++i)
@@ -55,8 +57,8 @@ namespace	cl3
 
 				u32 TRTTI::Hash() const
 				{
-					TUniquePtr<char[],false> name(Name().Claim());
-					return JenkinsHash(name.Array(), strlen(name.Array()));
+					TUStringUPtr name(Name());
+					return JenkinsHash(reinterpret_cast<const u8*>(name.Object()->ItemPtr(0)), name.Object()->Count() * 4);
 				}
 
 
@@ -111,7 +113,7 @@ namespace	cl3
 					return NULL;
 				}
 
-				TUniquePtr<char[],false> UnifyTypename(const char* oldname)
+				TUniquePtr<char,UPTR_MALLOC> UnifyTypename(const char* oldname)
 				{
 					util::TCoreList<char> newname;
 
@@ -195,7 +197,7 @@ namespace	cl3
 						if(oldname[i] == '\0') break;
 					}
 
-					TUniquePtr<char[],false> _tmp(newname.Claim());
+					TUniquePtr<char,UPTR_MALLOC> _tmp(MakeUniquePtr<UPTR_MALLOC>(newname.Claim()));
 					return _tmp;
 				}
 			}

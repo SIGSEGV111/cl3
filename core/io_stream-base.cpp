@@ -38,7 +38,7 @@ namespace	cl3
 			{
 			}
 
-			CLASS	TSourceDryException::TSourceDryException	(size_t n_items_read_max, size_t n_items_read_min, size_t n_items_read) : n_items_read_max(n_items_read_max), n_items_read_min(n_items_read_min), n_items_read(n_items_read)
+			CLASS	TSourceDryException::TSourceDryException	(off64_t n_items_read_max, off64_t n_items_read_min, off64_t n_items_read) : n_items_read_max(n_items_read_max), n_items_read_min(n_items_read_min), n_items_read(n_items_read)
 			{
 			}
 
@@ -50,7 +50,7 @@ namespace	cl3
 			{
 			}
 
-			CLASS	TSinkFloodedException::TSinkFloodedException	(size_t n_items_write_max, size_t n_items_write_min, size_t n_items_written) : n_items_write_max(n_items_write_max), n_items_write_min(n_items_write_min), n_items_written(n_items_written)
+			CLASS	TSinkFloodedException::TSinkFloodedException	(off64_t n_items_write_max, off64_t n_items_write_min, off64_t n_items_written) : n_items_write_max(n_items_write_max), n_items_write_min(n_items_write_min), n_items_written(n_items_written)
 			{
 			}
 

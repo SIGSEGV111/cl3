@@ -77,7 +77,7 @@ namespace	cl3
 			{
 				public:
 					CL3PUBF	GETTER	const char*	Name	() const;	//	name of the process
-					CL3PUBF	void				Name	(const char* new_name);
+					CL3PUBF	SETTER	void		Name	(const char* new_name);
 					CL3PUBF	GETTER	const io::collection::IDynamicCollection<const char*>&	CommandlineArguments	() const;	//	commandline arguments (like argv[] in main())
 					CL3PUBF	GETTER	const io::collection::IDynamicCollection<IThread*>&		Threads	() const;	//	list of threads that belong to this process. for the calling threads process all registered threads are listed (even dead ones), but for other processed only those the operating system knows about are listed (usually only those that are alive)
 			};
@@ -115,7 +115,7 @@ namespace	cl3
 					CL3PUBF	void	Resume		();	//	resumes the execution of a suspended thread, throws if the thread is not suspended or not alive at all
 
 				protected:
-					CL3PUBF	void	Name		(const char* new_name);
+					CL3PUBF	SETTER	void	Name	(const char* new_name);
 					virtual	void	ThreadMain	() = 0;
 			};
 		}

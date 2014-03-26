@@ -27,6 +27,14 @@ namespace	cl3
 {
 	namespace	io
 	{
+		namespace	collection
+		{
+			namespace	list
+			{
+				template class CL3PUBF TList<io::text::TUTF32>;
+			}
+		}
+
 		namespace	text
 		{
 			namespace	string
@@ -35,17 +43,18 @@ namespace	cl3
 				class	TUString;
 				class	TCString;
 
-				struct	IString : virtual ITextStream, virtual collection::IDynamicCollection<TUTF32>
+				struct	IString : virtual ITextStream
 				{
 					virtual	CLASS	~IString	() {}
 				};
 
-				class	TUString :	public virtual IString,
-									public virtual collection::list::TList<TUTF32>,
-									public virtual encoding::ACharDecoder,
-									public virtual encoding::ACharEncoder,
-									public virtual encoding::AWCharDecoder,
-									public virtual encoding::AWCharEncoder
+				class	CL3PUBF	TUString :
+								public virtual IString,
+								public virtual collection::list::TList<TUTF32>,
+								public virtual encoding::ACharDecoder,
+								public virtual encoding::ACharEncoder,
+								public virtual encoding::AWCharDecoder,
+								public virtual encoding::AWCharEncoder
 				{
 					public:
 						off64_t	Left	(size_t sz_unit) const;
@@ -58,8 +67,6 @@ namespace	cl3
 						CL3PUBF	CLASS	TUString	(const TUString&);
 						CL3PUBF	CLASS	TUString	(const IString&);
 						CL3PUBF	CLASS	~TUString	();
-
-						CL3PUBF	GETTER	system::task::synchronization::IMutex&	Mutex	();
 				};
 			}
 		}

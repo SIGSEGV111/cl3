@@ -78,9 +78,12 @@ namespace	cl3
 				};
 
 				template<class T>
-				class	TList : public virtual IList<T>
+				class	CL3PUBT	TList : public virtual IList<T>
 				{
 					public:
+						//	from IInterlocked
+						system::task::synchronization::IMutex&	Mutex	() GETTER;
+
 						//	from IObservable
 						const event::TEvent<IStaticCollection<T>, TOnChangeData<T> >&	OnChange	() const GETTER;
 
@@ -120,6 +123,183 @@ namespace	cl3
 						void				Insert		(ssize_t index, const IStaticCollection<T>& collection);
 						void				Remove		(ssize_t index, size_t n_items_remove);
 				};
+
+				/**************************************************************/
+
+				//	from IInterlocked
+				template<class T>
+				system::task::synchronization::IMutex&	TList<T>::Mutex	()
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				//	from IObservable
+				template<class T>
+				const event::TEvent<IStaticCollection<T>, TOnChangeData<T> >&	TList<T>::OnChange	() const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				//	from IStaticCollection
+				template<class T>
+				system::memory::TUniquePtr<IStaticIterator<T> >			TList<T>::CreateStaticIterator	()
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				system::memory::TUniquePtr<IStaticIterator<const T> >	TList<T>::CreateStaticIterator	() const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				size_t	TList<T>::Count		() const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				bool	TList<T>::CountMin	(size_t count_min) const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				bool	TList<T>::CountMax	(size_t count_max) const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				//	from IDynamicCollection
+				template<class T>
+				system::memory::TUniquePtr<IDynamicIterator<T> > TList<T>::CreateDynamicIterator()
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				system::memory::TUniquePtr<IDynamicIterator<const T> > TList<T>::CreateDynamicIterator() const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				void	TList<T>::Add		(const T& item_insert)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				void	TList<T>::Add		(const T* arr_items_add, size_t n_items_add)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				void	TList<T>::Add		(const IStaticCollection<T>& collection)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				void	TList<T>::Remove	(const T* item_remove)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				//	from IOut
+				template<class T>
+				size_t	TList<T>::Write		(const T* arr_items_write, size_t n_items_write_max, size_t n_items_write_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				off64_t	TList<T>::ReadIn	(io::stream::IIn<T>& is, off64_t n_items_ri_max, off64_t n_items_ri_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				off64_t	TList<T>::Space		(size_t sz_unit) const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				//	from IIn
+				template<class T>
+				size_t	TList<T>::Read		(T* arr_items_write, size_t n_items_write_max, size_t n_items_write_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				off64_t	TList<T>::WriteOut	(io::stream::IOut<T>& is, off64_t n_items_ri_max, off64_t n_items_ri_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				off64_t	TList<T>::Left		(size_t sz_unit) const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				//	from IList
+				template<class T>
+				T&			TList<T>::operator[]	(ssize_t index)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				const T&	TList<T>::operator[]	(ssize_t index) const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				T*			TList<T>::ItemPtr		(ssize_t index)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				const T*	TList<T>::ItemPtr		(ssize_t index) const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				void		TList<T>::Count		(size_t new_count, const T& item_init)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				void		TList<T>::Insert	(ssize_t index, const T& item_insert)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				void		TList<T>::Insert	(ssize_t index, const T* arr_items_insert, size_t n_items_insert)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				void		TList<T>::Insert	(ssize_t index, const IStaticCollection<T>& collection)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				void		TList<T>::Remove	(ssize_t index, size_t n_items_remove)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
 			}
 		}
 	}

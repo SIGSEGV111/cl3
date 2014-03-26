@@ -32,7 +32,7 @@ namespace	cl3
 			public:
 				io::text::string::TUString msgbuf;
 				template<class T>
-				CL3PUBF	CLASS	TArgumentException	(const char* name, const T& value) : TException("function-call argument \"%s\" has invalid value \"%s\"", name, system::types::typeinfo::TCTTI<T>::Stringify ? system::types::typeinfo::TCTTI<T>::Stringify(&value).Array() : "<unknown value>") {}
+				CL3PUBF	CLASS	TArgumentException	(const char* name, const T& value) : TException("function-call argument \"%s\" has invalid value \"%s\"", name, system::types::typeinfo::TCTTI<T>::stringify(&value).Object()) {}
 
 				CL3PUBF	CLASS	TArgumentException	(const TArgumentException&) : TException(NULL) { CL3_NOT_IMPLEMENTED; }
 				CL3PUBF	CLASS	~TArgumentException	() { CL3_NOT_IMPLEMENTED; }

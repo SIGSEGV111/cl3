@@ -40,7 +40,7 @@ namespace	cl3
 				#endif
 
 				//	generic buffered io-stream for interaction with operating systems io-structures (POSIX-fd, Windows HANDLE, etc.)
-				class	TFDStream : IIn<byte>, IOut<byte>, AWriteOut<byte>
+				class	TFDStream : virtual IIn<byte>, virtual IOut<byte>, virtual AWriteOut<byte>
 				{
 					protected:
 						byte* p_buffer;

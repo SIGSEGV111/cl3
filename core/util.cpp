@@ -33,7 +33,7 @@ namespace	cl3
 	{
 		using namespace system::memory;
 
-		TUniquePtr<char[],false> mprintf(const char* format, ...)
+		TUniquePtr<char,UPTR_MALLOC> mprintf(const char* format, ...)
 		{
 			va_list list;
 			va_start(list, format);
@@ -42,10 +42,10 @@ namespace	cl3
 
 			CL3_NONCLASS_ERROR(sz_need < 0, error::TException, "::vsnprintf() failed (format-string: \"%s\")", format);
 
-			TUniquePtr<char[],false> buffer((char*)system::memory::safe_malloc(sz_need + 1));	// one byte extra for '\0'
+			TUniquePtr<char,UPTR_MALLOC> buffer(MakeUniquePtr<UPTR_MALLOC>((char*)system::memory::safe_malloc(sz_need + 1)));	// one byte extra for '\0'
 
 			va_start(list, format);
-			/*const int sz_used =*/ vsnprintf(buffer.Array(), sz_need + 1, format, list);
+			/*const int sz_used =*/ vsnprintf(buffer.Object(), sz_need + 1, format, list);
 			va_end(list);
 
 			//CL3_IFDBG(CL3_CLASS_ERROR(sz_used != sz_need || sz_used < 0, error::TException, "your ::vsnprintf() implementation is broken, *OR* the memory that was referenced by the format string changed, which is an indicator for unguarded multi-threaded access to the same memory in your application - the output of the mprintf() function will be of limited use."));
@@ -53,11 +53,11 @@ namespace	cl3
 			return buffer;
 		}
 
-		TUniquePtr<char[],false> mkstrcpy(const char* str)
+		TUniquePtr<char,UPTR_MALLOC> mkstrcpy(const char* str)
 		{
 			size_t l = ::strlen(str) + 1;
-			TUniquePtr<char[],false> cpy((char*)system::memory::safe_malloc(l));
-			::memcpy(cpy.Array(), str, l);
+			TUniquePtr<char,UPTR_MALLOC> cpy(MakeUniquePtr<UPTR_MALLOC>((char*)system::memory::safe_malloc(l)));
+			::memcpy(cpy.Object(), str, l);
 			return cpy;
 		}
 	}

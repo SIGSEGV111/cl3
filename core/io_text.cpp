@@ -41,7 +41,7 @@ namespace	cl3
 
 			CLASS	TUTF32::TUTF32	(char chr)
 			{
-				if(chr < 128)
+				if((unsigned char)chr < 128)
 					code = chr;
 				else
 					CL3_NOT_IMPLEMENTED;
