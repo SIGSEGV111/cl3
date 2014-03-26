@@ -43,12 +43,14 @@ namespace	cl3
 				class	TUString;
 				class	TCString;
 
+				typedef	system::memory::TUniquePtr<TUString>	TUStringUPtr;
+
 				struct	IString : virtual ITextStream
 				{
 					virtual	CLASS	~IString	() {}
 				};
 
-				class	CL3PUBF	TUString :
+				class	CL3PUBT	TUString :
 								public virtual IString,
 								public virtual collection::list::TList<TUTF32>,
 								public virtual encoding::ACharDecoder,
@@ -78,6 +80,21 @@ namespace	cl3
 						CL3PUBF	CLASS	TUString	(const IString&);
 						CL3PUBF	CLASS	~TUString	();
 				};
+
+				class	CL3PUBT	TCString
+				{
+					protected:
+						byte* arr_bytes;
+						size_t n_bytes;
+
+					public:
+						byte*			Bytes		() const { return arr_bytes; }
+						size_t			Count		() const { return n_bytes; }
+
+						CL3PUBF	CLASS	TCString	(const TUString&, const encoding::ICodec*);
+				};
+
+				CL3PUBF	TUStringUPtr	Stringify	(FPrint print, const void* object);
 			}
 		}
 	}

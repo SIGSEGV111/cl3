@@ -24,117 +24,35 @@
 #include "system_compiler.hpp"
 #include "system_memory.hpp"
 
-
-
-
-
-
-/*
-#include <iostream>
-#include <vector>
-
-template<typename T>
-class is_default_constructible
-{
-	private:
-		typedef struct { char arr[sizeof(T)+0]; } yes;
-		typedef struct { char arr[sizeof(T)+1]; } no;
-
-		template<typename U>
-		static decltype(new U(), yes()) test(int);
-
-		template<typename>
-		static no test(...);
-
-	public:
-		static const bool value = sizeof(test<T>(0)) == sizeof(yes);
-};
-
-template<typename T>
-class is_copy_constructible
-{
-	private:
-		typedef struct { char arr[sizeof(T)+0]; } yes;
-		typedef struct { char arr[sizeof(T)+1]; } no;
-
-		template<typename U>
-		static decltype(new U(*reinterpret_cast<const U*>(NULL)), yes()) test(int);
-
-		template<typename>
-		static no test(...);
-
-	public:
-		static const bool value = sizeof(test<T>(0)) == sizeof(yes);
-};
-
-template<typename T>
-class is_destructible
-{
-	private:
-		typedef struct { char arr[sizeof(T)+0]; } yes;
-		typedef struct { char arr[sizeof(T)+1]; } no;
-
-		template<typename U>
-		static decltype((delete reinterpret_cast<U*>(NULL)), yes()) test(int);
-
-		template<typename>
-		static no test(...);
-
-	public:
-		static const bool value = sizeof(test<T>(0)) == sizeof(yes);
-};
-
-struct foo
-{
-	private:
-// 	public:
-		foo() {}
-	private:
-// 	public:
-		foo(int) {}
-	private:
-// 	public:
-		foo(const foo&) {}
-	private:
-// 	public:
-		~foo() {}
-};
-
-int main()
-{
-	std::cout << is_default_constructible<foo>::value << '\n'		// 0
-			  << is_default_constructible<std::vector<int> >::value << '\n';  // 1
-
-	std::cout << is_copy_constructible<foo>::value << '\n'		// 0
-			  << is_copy_constructible<std::vector<int> >::value << '\n';  // 1
-
-	std::cout << is_destructible<foo>::value << '\n'		// 0
-			  << is_destructible<std::vector<int> >::value << '\n';  // 1
-}
-*/
-
-
-
-
-
-
-
-
-
-
-
-
 namespace	cl3
 {
 	namespace	io
 	{
 		namespace	text
 		{
+			struct	ITextWriter;
+			struct	ITextReader;
+
+			//	converts object value to human-readable string
+			typedef	void (*FPrint)(ITextWriter&, const void*);
+
 			namespace	string
 			{
 				class	TUString;
 				typedef	system::memory::TUniquePtr<TUString>	TUStringUPtr;
+
+				CL3PUBF	TUStringUPtr	Stringify	(FPrint print, const void* object);
+
+				template<class T>
+				TUStringUPtr			Stringify	(const T& object);
 			}
+		}
+
+		namespace	serialization
+		{
+			struct	ISerializer;
+			struct	IDeserializer;
+			struct	ISerializable;
 		}
 	}
 
@@ -149,13 +67,12 @@ namespace	cl3
 				typedef void (*FStandardConstructor)(void*);
 				typedef void (*FCopyConstructor)(void*, const void*);
 
-				//	converts object value to human-readable string
-				typedef	io::text::string::TUStringUPtr (*FStringify)(const void*);
+				//	serializes/deserializes an object to/from a stream
+				typedef void (*FSerialize)(io::serialization::ISerializer&, const void*);
+				typedef void (*FDeserialize)(io::serialization::IDeserializer&, void*);
 
 				namespace	_
 				{
-					CL3PUBF io::text::string::TUStringUPtr generic_stringify(const void* object, size_t sz_object, io::text::string::TUStringUPtr type_name, bool is_reference, unsigned n_indirections);
-
 					template<class T> static void generic_dtor(void* object) { reinterpret_cast<T*>(object)->~T(); }
 					template<class T> static void generic_ctor(void* object) { new (object) T(); }
 					template<class T> static void generic_copyctor(void* object, const void* ref) { new (object) T(*reinterpret_cast<const T*>(ref)); }
@@ -169,7 +86,7 @@ namespace	cl3
 						static FDestructor dtor;
 						static FStandardConstructor ctor;
 						static FCopyConstructor copyctor;
-						static FStringify stringify;
+						static io::text::FPrint print;
 					};
 
 					template<class T>
@@ -178,7 +95,7 @@ namespace	cl3
 						static FDestructor dtor;
 						static FStandardConstructor ctor;
 						static FCopyConstructor copyctor;
-						static FStringify stringify;
+						static io::text::FPrint print;
 					};
 
 					template<class T> FDestructor TImpl<T, false>::dtor = NULL;
@@ -190,37 +107,66 @@ namespace	cl3
 					template<class T> FCopyConstructor TImpl<T, false>::copyctor = NULL;
 					template<class T> FCopyConstructor TImpl<T, true >::copyctor = &generic_copyctor<T>;
 
-					template<class T> FStringify TImpl<T, false>::stringify = NULL;
-					template<class T> FStringify TImpl<T, true >::stringify = NULL;
+					template<class T> io::text::FPrint TImpl<T, false>::print = NULL;
+					template<class T> io::text::FPrint TImpl<T, true >::print = NULL;
 
-					struct Yes { char value[1]; };
-					struct No  { char value[sizeof(Yes)+1]; };
+					struct yes { char value[1]; };
+					struct no  { char value[sizeof(yes)+1]; };
 
-					template<class T>
-					struct	TDetectStandardConstructor
+					template<typename T>
+					class is_default_constructible
 					{
-						template<class U> static Yes	test(char*[sizeof(new U())]) { return Yes(); }
-						template<class U> static No		test(...) { return No(); }
+						private:
+							template<typename U>
+							static decltype(new U(), yes()) test(int);
 
-						static const bool has_feature = sizeof(test<T>(0)) == sizeof(Yes);
+							template<typename>
+							static no test(...);
+
+						public:
+							static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
 
-					template<class T>
-					struct	TDetectCopyConstructor
+					template<typename T>
+					class is_copy_constructible
 					{
-						template<class U> static Yes	test(char*[sizeof(new U(*reinterpret_cast<const U*>(NULL)))]) { return Yes(); }
-						template<class U> static No		test(...) { return No(); }
+						private:
+							template<typename U>
+							static decltype(new U(*reinterpret_cast<const U*>(NULL)), yes()) test(int);
 
-						static const bool has_feature = sizeof(test<T>(0)) == sizeof(Yes);
+							template<typename>
+							static no test(...);
+
+						public:
+							static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
 
-					template<class T>
-					struct	TDetectDestructor
+					template<typename T>
+					class is_destructible
 					{
-						template<class U> static Yes	test(int) { delete reinterpret_cast<U*>(NULL); return Yes(); }
-						template<class U> static No		test(...) { return No(); }
+						private:
+							template<typename U>
+							static decltype((delete reinterpret_cast<U*>(NULL)), yes()) test(int);
 
-						static const bool has_feature = sizeof(test<T>(0)) == sizeof(Yes);
+							template<typename>
+							static no test(...);
+
+						public:
+							static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+					};
+
+					template<typename T>
+					class is_serializable
+					{
+						private:
+							template<typename U>
+							static decltype((reinterpret_cast<const U*>(NULL)->Serialize(*reinterpret_cast<io::serialization::ISerializer*>(NULL))), yes()) test(int);
+
+							template<typename>
+							static no test(...);
+
+						public:
+							static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
 				}
 
@@ -241,7 +187,7 @@ namespace	cl3
 					FDestructor dtor;	//	pointer to destructor function (if available, NULL otherwise)
 					FStandardConstructor ctor;	//	pointer to standard constructor (if available, NULL otherwise)
 					FCopyConstructor copyctor;	//	pointer to copy constructor (if available, NULL otherwise)
-					FStringify stringify;	//	pointer to stringify function (always available - but might be less useful if not specialized)
+					io::text::FPrint print;	//	pointer to print function (always available - but might be less useful if not specialized)
 
 					size_t sz_bytes;	//	size of the datatype in bytes
 					const std::type_info* sys_type_info;	//	pointer to the type-info structure provided by C++ typeid()
@@ -267,7 +213,7 @@ namespace	cl3
 					const static FDestructor dtor;
 					const static FStandardConstructor ctor;
 					const static FCopyConstructor copyctor;
-					const static FStringify stringify;
+					const static io::text::FPrint print;
 
 					const static TRTTI rtti;
 				};
@@ -289,7 +235,7 @@ namespace	cl3
 					const static FDestructor dtor;
 					const static FStandardConstructor ctor;
 					const static FCopyConstructor copyctor;
-					const static FStringify stringify;
+					const static io::text::FPrint print;
 
 					const static TRTTI rtti;
 				};
@@ -311,7 +257,7 @@ namespace	cl3
 					const static FDestructor dtor;
 					const static FStandardConstructor ctor;
 					const static FCopyConstructor copyctor;
-					const static FStringify stringify;
+					const static io::text::FPrint print;
 
 					const static TRTTI rtti;
 				};
@@ -333,34 +279,49 @@ namespace	cl3
 					const static FDestructor dtor;
 					const static FStandardConstructor ctor;
 					const static FCopyConstructor copyctor;
-					const static FStringify stringify;
+					const static io::text::FPrint print;
 
 					const static TRTTI rtti;
 				};
 
-				template<class T> const FDestructor				TCTTI<T>::dtor		= _::TImpl<T, _::TDetectDestructor<T>::has_feature>::dtor;
-				template<class T> const FStandardConstructor	TCTTI<T>::ctor		= _::TImpl<T, _::TDetectStandardConstructor<T>::has_feature>::ctor;
-				template<class T> const FCopyConstructor		TCTTI<T>::copyctor	= _::TImpl<T, _::TDetectCopyConstructor<T>::has_feature>::copyctor;
-				template<class T> const FStringify				TCTTI<T>::stringify	= NULL;
-				template<class T> const TRTTI					TCTTI<T>::rtti		= { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, stringify, sizeof(T), &typeid(T) };
+				template<class T> const FDestructor				TCTTI<T>::dtor		= _::TImpl<T, _::is_destructible<T>::value>::dtor;
+				template<class T> const FStandardConstructor	TCTTI<T>::ctor		= _::TImpl<T, _::is_default_constructible<T>::value>::ctor;
+				template<class T> const FCopyConstructor		TCTTI<T>::copyctor	= _::TImpl<T, _::is_copy_constructible<T>::value>::copyctor;
+				template<class T> const io::text::FPrint		TCTTI<T>::print	= NULL;
+				template<class T> const TRTTI					TCTTI<T>::rtti		= { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, sizeof(T), &typeid(T) };
 
-				template<class T> const FDestructor				TCTTI<const T>::dtor		= _::TImpl<T, _::TDetectDestructor<T>::has_feature>::dtor;
-				template<class T> const FStandardConstructor	TCTTI<const T>::ctor		= _::TImpl<T, _::TDetectStandardConstructor<T>::has_feature>::ctor;
-				template<class T> const FCopyConstructor		TCTTI<const T>::copyctor	= _::TImpl<T, _::TDetectCopyConstructor<T>::has_feature>::copyctor;
-				template<class T> const FStringify				TCTTI<const T>::stringify	= NULL;
-				template<class T> const TRTTI					TCTTI<const T>::rtti		= { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, stringify, sizeof(T), &typeid(T) };
+				template<class T> const FDestructor				TCTTI<const T>::dtor		= _::TImpl<T, _::is_destructible<T>::value>::dtor;
+				template<class T> const FStandardConstructor	TCTTI<const T>::ctor		= _::TImpl<T, _::is_default_constructible<T>::value>::ctor;
+				template<class T> const FCopyConstructor		TCTTI<const T>::copyctor	= _::TImpl<T, _::is_copy_constructible<T>::value>::copyctor;
+				template<class T> const io::text::FPrint		TCTTI<const T>::print	= NULL;
+				template<class T> const TRTTI					TCTTI<const T>::rtti		= { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, sizeof(T), &typeid(T) };
 
 				template<class T> const FDestructor				TCTTI<T*>::dtor			= _::TImpl<T*, true>::dtor;
 				template<class T> const FStandardConstructor	TCTTI<T*>::ctor			= _::TImpl<T*, true>::ctor;
 				template<class T> const FCopyConstructor		TCTTI<T*>::copyctor		= _::TImpl<T*, true>::copyctor;
-				template<class T> const FStringify				TCTTI<T*>::stringify	= NULL;
-				template<class T> const TRTTI					TCTTI<T*>::rtti			= { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, stringify, sizeof(T), &typeid(T) };
+				template<class T> const io::text::FPrint		TCTTI<T*>::print	= NULL;
+				template<class T> const TRTTI					TCTTI<T*>::rtti			= { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, sizeof(T), &typeid(T) };
 
 				template<class T> const FDestructor				TCTTI<T&>::dtor			= NULL;
 				template<class T> const FStandardConstructor	TCTTI<T&>::ctor			= NULL;
 				template<class T> const FCopyConstructor		TCTTI<T&>::copyctor		= NULL;
-				template<class T> const FStringify				TCTTI<T&>::stringify	= NULL;
-				template<class T> const TRTTI TCTTI<T&>::rtti = { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, stringify, sizeof(T), &typeid(T) };
+				template<class T> const io::text::FPrint		TCTTI<T&>::print	= NULL;
+				template<class T> const TRTTI TCTTI<T&>::rtti = { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, sizeof(T), &typeid(T) };
+			}
+		}
+	}
+
+	namespace	io
+	{
+		namespace	text
+		{
+			namespace	string
+			{
+				template<class T>
+				TUStringUPtr	Stringify	(const T& object)
+				{
+					return Stringify(system::types::typeinfo::TCTTI<T>::print, &object);
+				}
 			}
 		}
 	}

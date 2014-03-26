@@ -169,6 +169,9 @@ namespace	cl3
 				using ITextReader::operator>>;
 				using ITextWriter::operator<<;
 			};
+
+			//	converts object value to human-readable string
+			typedef	void (*FPrint)(ITextWriter&, const void*);
 		}
 	}
 }

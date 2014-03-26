@@ -29,6 +29,9 @@ namespace	cl3
 		{
 			namespace	encoding
 			{
+				CL3PUBF extern const ICodec* const CODEC_CXX_CHAR;
+				CL3PUBF extern const ICodec* const CODEC_CXX_WCHAR;
+
 				class	ACharDecoder : public virtual stream::IOut<TUTF32>, public virtual stream::IOut<char>
 				{
 					public:

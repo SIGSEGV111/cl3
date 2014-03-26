@@ -78,6 +78,26 @@ namespace	cl3
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
+
+				CLASS	TCString::TCString	(const TUString&, const encoding::ICodec*)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				TUStringUPtr	Stringify	(FPrint print, const void* object)
+				{
+					TUStringUPtr ret;
+					if(print)
+					{
+						ret = system::memory::MakeUniquePtr(new TUString());
+						print(ret.Object(), object);
+					}
+					else
+					{
+						ret = system::memory::MakeUniquePtr(new TUString(L"<unprintable>"));
+					}
+					return ret;
+				}
 			}
 		}
 	}

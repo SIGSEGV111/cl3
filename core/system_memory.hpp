@@ -75,7 +75,7 @@ namespace	cl3
 						object = new_object;
 					}
 
-					GETTER	T*		Object		() { return object; }
+					GETTER	T&		Object		() { return *object; }
 					GETTER	T*		Claim		() { T* tmp = object; object = NULL; return tmp; }
 					void			Reset		() { object = NULL; }	//	does *NOT* release any memory - just removes control of the object from this class
 

@@ -26,6 +26,9 @@ namespace	cl3
 		{
 			namespace	encoding
 			{
+				const ICodec* const CODEC_CXX_CHAR = NULL;
+				const ICodec* const CODEC_CXX_WCHAR = NULL;
+
 				size_t	ACharDecoder::Write		(const char* arr_items_write, size_t n_items_write_max, size_t n_items_write_min)
 				{
 					CL3_NOT_IMPLEMENTED;

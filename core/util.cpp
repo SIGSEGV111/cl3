@@ -45,7 +45,7 @@ namespace	cl3
 			TUniquePtr<char,UPTR_MALLOC> buffer(MakeUniquePtr<UPTR_MALLOC>((char*)system::memory::safe_malloc(sz_need + 1)));	// one byte extra for '\0'
 
 			va_start(list, format);
-			/*const int sz_used =*/ vsnprintf(buffer.Object(), sz_need + 1, format, list);
+			/*const int sz_used =*/ vsnprintf(&buffer.Object(), sz_need + 1, format, list);
 			va_end(list);
 
 			//CL3_IFDBG(CL3_CLASS_ERROR(sz_used != sz_need || sz_used < 0, error::TException, "your ::vsnprintf() implementation is broken, *OR* the memory that was referenced by the format string changed, which is an indicator for unguarded multi-threaded access to the same memory in your application - the output of the mprintf() function will be of limited use."));
@@ -57,7 +57,7 @@ namespace	cl3
 		{
 			size_t l = ::strlen(str) + 1;
 			TUniquePtr<char,UPTR_MALLOC> cpy(MakeUniquePtr<UPTR_MALLOC>((char*)system::memory::safe_malloc(l)));
-			::memcpy(cpy.Object(), str, l);
+			::memcpy(&cpy.Object(), str, l);
 			return cpy;
 		}
 	}

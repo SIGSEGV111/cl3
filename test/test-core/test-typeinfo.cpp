@@ -28,20 +28,53 @@ namespace
 	using namespace cl3::system::types;
 	using namespace cl3::system::types::typeinfo;
 
-	struct	TTestType_POD
+	struct	TT_POD
 	{
 		int a,b,c;
 	};
 
-	struct	TTestType_NA
+	struct	TT_Nothing
 	{
 		private:
-			TTestType_NA(const TTestType_NA& other) : a(other.a), b(other.a), c(other.a) {}
+			TT_Nothing(const TT_Nothing& other);
+			TT_Nothing();
+			~TT_Nothing();
+	};
 
+	struct	TT_public_stdctor
+	{
 		public:
-			TTestType_NA(int) : a(-1), b(-2), c(-3) {}
-			int a,b,c;
-			~TTestType_NA() {}
+			TT_public_stdctor() {}
+		private:
+			TT_public_stdctor(const TT_public_stdctor&);
+			~TT_public_stdctor();
+	};
+
+	struct	TT_public_copyctor
+	{
+		public:
+			TT_public_copyctor(const TT_public_copyctor&) {}
+		private:
+			TT_public_copyctor();
+			~TT_public_copyctor();
+	};
+
+	struct	TT_public_dtor
+	{
+		public:
+			~TT_public_dtor() {}
+		private:
+			TT_public_dtor();
+			TT_public_dtor(const TT_public_dtor&);
+	};
+
+	struct	TT_public_nonstdctor
+	{
+		public:
+			TT_public_nonstdctor(int) {}
+		private:
+			TT_public_nonstdctor(const TT_public_stdctor&);
+			~TT_public_nonstdctor();
 	};
 
 	/*************************************************/
@@ -66,44 +99,66 @@ namespace
 
 	/*************************************************/
 
-	TEST(TypeInfo, StandardConstructor_POD)
+	TEST(TypeInfo, StandardConstructor)
 	{
-		volatile FStandardConstructor ctor = TCTTI<TTestType_POD>::ctor;
-		EXPECT_TRUE(ctor != NULL);
+		volatile FStandardConstructor v;
+
+		v = TCTTI<TT_POD>::ctor;
+		EXPECT_TRUE(v != NULL);
+
+		v = TCTTI<TT_Nothing>::ctor;
+		EXPECT_TRUE(v == NULL);
+
+		v = TCTTI<TT_public_stdctor>::ctor;
+		EXPECT_TRUE(v != NULL);
+
+		v = TCTTI<TT_public_copyctor>::ctor;
+		EXPECT_TRUE(v == NULL);
+
+		v = TCTTI<TT_public_dtor>::ctor;
+		EXPECT_TRUE(v == NULL);
+
+		v = TCTTI<TT_public_nonstdctor>::ctor;
+		EXPECT_TRUE(v == NULL);
 	}
 
-	TEST(TypeInfo, Destructor_POD)
+	TEST(TypeInfo, Destructor)
 	{
-		volatile FDestructor dtor = TCTTI<TTestType_POD>::dtor;
-		EXPECT_TRUE(dtor != NULL);
+		volatile FDestructor v;
+
+		v = TCTTI<TT_POD>::dtor;
+		EXPECT_TRUE(v != NULL);
+
+		v = TCTTI<TT_Nothing>::dtor;
+		EXPECT_TRUE(v == NULL);
+
+		v = TCTTI<TT_public_stdctor>::dtor;
+		EXPECT_TRUE(v == NULL);
+
+		v = TCTTI<TT_public_copyctor>::dtor;
+		EXPECT_TRUE(v == NULL);
+
+		v = TCTTI<TT_public_dtor>::dtor;
+		EXPECT_TRUE(v != NULL);
 	}
 
-	TEST(TypeInfo, CopyConstructor_POD)
+	TEST(TypeInfo, CopyConstructor)
 	{
-		volatile FCopyConstructor copyctor = TCTTI<TTestType_POD>::copyctor;
-		EXPECT_TRUE(copyctor != NULL);
+		volatile FCopyConstructor v;
+
+		v = TCTTI<TT_POD>::copyctor;
+		EXPECT_TRUE(v != NULL);
+
+		v = TCTTI<TT_Nothing>::copyctor;
+		EXPECT_TRUE(v == NULL);
+
+		v = TCTTI<TT_public_stdctor>::copyctor;
+		EXPECT_TRUE(v == NULL);
+
+		v = TCTTI<TT_public_copyctor>::copyctor;
+		EXPECT_TRUE(v != NULL);
+
+		v = TCTTI<TT_public_dtor>::copyctor;
+		EXPECT_TRUE(v == NULL);
 	}
-
-	/*************************************************/
-
-// 	TEST(TypeInfo, StandardConstructor_NA)
-// 	{
-// 		volatile FStandardConstructor ctor = TCTTI<TTestType_NA>::ctor;
-// 		EXPECT_TRUE(ctor == NULL);
-// 	}
-//
-// 	TEST(TypeInfo, Destructor_NA)
-// 	{
-// 		volatile FDestructor dtor = TCTTI<TTestType_NA>::dtor;
-// 		EXPECT_TRUE(dtor == NULL);
-// 	}
-//
-// 	TEST(TypeInfo, CopyConstructor_NA)
-// 	{
-// 		volatile FCopyConstructor copyctor = TCTTI<TTestType_NA>::copyctor;
-// 		EXPECT_TRUE(copyctor == NULL);
-//
-// 	}
-
-	/*************************************************/
 }
