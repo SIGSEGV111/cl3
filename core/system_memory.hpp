@@ -21,7 +21,7 @@
 
 #include "system_compiler.hpp"
 #include "error-base.hpp"
-#include <malloc.h>
+#include "context.hpp"
 
 namespace	cl3
 {
@@ -29,6 +29,10 @@ namespace	cl3
 	{
 		namespace	memory
 		{
+			CL3PUBF	void	cxx_free	(void*);
+			CL3PUBF	void*	cxx_malloc	(size_t);
+			CL3PUBF	void*	cxx_realloc	(void*, size_t);
+
 			enum	EUnqiuePtrType
 			{
 				UPTR_OBJECT,
@@ -55,7 +59,7 @@ namespace	cl3
 								delete[] object;
 								break;
 							case UPTR_MALLOC:
-								::free(object);
+								cxx_free(object);
 								break;
 						};
 					}
@@ -107,16 +111,7 @@ namespace	cl3
 				virtual	void*	Realloc	(void* p_mem, size_t sz_bytes_new) = 0;
 			};
 
-			struct	CL3PUBT	TDefaultAllocator : IDynamicAllocator
-			{
-				CL3PUBF static TDefaultAllocator instance;
-				CL3PUBF	void*	Alloc	(size_t sz_bytes);
-				CL3PUBF	void	Free	(void* p_mem);
-				CL3PUBF	void*	Realloc	(void* p_mem, size_t sz_bytes_new);
-			};
-
-			CL3PUBF	void* safe_malloc	(size_t);
-			CL3PUBF	void* safe_realloc	(void*, size_t);
+			CL3_PARAMETER_STACK_DECL(IDynamicAllocator*, allocator);
 		}
 	}
 }

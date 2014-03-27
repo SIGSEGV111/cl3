@@ -37,24 +37,12 @@ namespace	cl3
 			CLASS	TBadAllocException::TBadAllocException	(const TBadAllocException& bae) : TException(bae), sz_bytes(bae.sz_bytes) {}
 			CLASS	TBadAllocException::~TBadAllocException	() {}
 
-			TDefaultAllocator TDefaultAllocator::instance;
-
-			void*	TDefaultAllocator::Alloc	(size_t sz_bytes)
+			void	cxx_free	(void* ptr)
 			{
-				return safe_malloc(sz_bytes);
+				::free(ptr);
 			}
 
-			void	TDefaultAllocator::Free		(void* p_mem)
-			{
-				::free(p_mem);
-			}
-
-			void*	TDefaultAllocator::Realloc	(void* p_mem, size_t sz_bytes_new)
-			{
-				return safe_realloc(p_mem, sz_bytes_new);
-			}
-
-			void* safe_malloc(size_t sz_bytes)
+			void*	cxx_malloc	(size_t sz_bytes)
 			{
 				//	malloc() will not be called when sz_bytes == 0, so p must be initilized to NULL
 				void* p = NULL;
@@ -62,13 +50,54 @@ namespace	cl3
 				return p;
 			}
 
-			void* safe_realloc(void* old, size_t sz_bytes)
+			void*	cxx_realloc	(void* old, size_t sz_bytes)
 			{
 				//	realloc() will not be called when sz_bytes == 0, so p must be initilized to NULL
 				void* p = NULL;
 				CL3_NONCLASS_ERROR(sz_bytes != 0 && (p = ::realloc(old, sz_bytes)) == NULL, TBadAllocException, sz_bytes);
 				return p;
 			}
+
+			struct	TDefaultAllocator : IDynamicAllocator
+			{
+				void*	Alloc	(size_t sz_bytes)
+				{
+					IDynamicAllocator** p = reinterpret_cast<IDynamicAllocator**>(cxx_malloc(sizeof(IDynamicAllocator*) + sz_bytes));
+					*p = this;
+					return p+1;
+				}
+
+				void	Free	(void* p_mem)
+				{
+					IDynamicAllocator** p = reinterpret_cast<IDynamicAllocator**>(p_mem);
+					p--;
+					if(*p == this)
+						cxx_free(p);
+					else
+						(*p)->Free(p_mem);
+				}
+
+				void*	Realloc	(void* p_mem, size_t sz_bytes_new)
+				{
+					if(p_mem)
+					{
+						IDynamicAllocator** p = reinterpret_cast<IDynamicAllocator**>(p_mem);
+						p--;
+						if(*p == this)
+						{
+							p = reinterpret_cast<IDynamicAllocator**>(cxx_realloc(p, sizeof(IDynamicAllocator*) + sz_bytes_new));
+							return p+1;
+						}
+						else
+							return (*p)->Realloc(p_mem, sz_bytes_new);
+					}
+					else
+						return Alloc(sz_bytes_new);
+				}
+			};
+
+			static TDefaultAllocator default_allocator;
+			CL3_PARAMETER_STACK_IMPL(IDynamicAllocator*, allocator, &default_allocator);
 		}
 	}
 }

@@ -22,13 +22,11 @@
 
 #include "system_compiler.hpp"
 #include "system_memory.hpp"
-#include "system_context.hpp"
 
 using namespace cl3::system::memory;
-using namespace cl3::system::context;
 
-void* operator new(size_t sz)	{ return OptionStack<IDynamicAllocator>().Current()->Alloc(sz); }
-void* operator new[](size_t sz)	{ return OptionStack<IDynamicAllocator>().Current()->Alloc(sz); }
+void* operator new(size_t sz)	{ return CL3_PARAMETER_STACK_VALUE(allocator)->Alloc(sz); }
+void* operator new[](size_t sz)	{ return CL3_PARAMETER_STACK_VALUE(allocator)->Alloc(sz); }
 
-void operator delete(void* ptr) throw()		{ return OptionStack<IDynamicAllocator>().Current()->Free(ptr); }
-void operator delete[](void* ptr) throw()	{ return OptionStack<IDynamicAllocator>().Current()->Free(ptr); }
+void operator delete(void* ptr) throw()		{ return CL3_PARAMETER_STACK_VALUE(allocator)->Free(ptr); }
+void operator delete[](void* ptr) throw()	{ return CL3_PARAMETER_STACK_VALUE(allocator)->Free(ptr); }

@@ -19,38 +19,49 @@
 #ifndef	_include_cl3_core_context_hpp_
 #define	_include_cl3_core_context_hpp_
 
+#include "system_os.hpp"
 #include "system_compiler.hpp"
 
 namespace	cl3
 {
 	namespace	context
 	{
-		template<class T>
-		class	TParameterStack
-		{
-			private:
-				T* current_value;
+		#if (CL3_OS == CL3_OS_POSIX)
+			template<class T>
+			struct	THolder
+			{
+				T& current_value;
+				T old_value;
+				inline THolder(T& current_value, T new_value) : current_value(current_value), old_value(current_value) { current_value = new_value; }
+				inline ~THolder() { current_value = old_value; }
+			};
 
-			public:
-				typedef T TValue;
-				T*		Current	() { return reinterpret_cast<T*>(current_value); }
-				void	Current	(T* new_value) { current_value = reinterpret_cast<void*>(new_value); }
-		};
+			#define	CL3_PARAMETER_STACK_DECL(type, name)	CL3PUBF extern CL3_THREAD type name##__stack_variable
+			#define	CL3_PARAMETER_STACK_IMPL(type, name, value)	CL3_THREAD type name##__stack_variable = (value);
+			#define	CL3_PARAMETER_STACK_PUSH(name, value)	cl3::context::THolder<decltype(name##__stack_variable)> CL3_PASTE(__stack_holder_, __COUNTER__)(name##__stack_variable, value)
+			#define	CL3_PARAMETER_STACK_VALUE(name)			(static_cast<const decltype(name##__stack_variable)>(name##__stack_variable))
+		#else
+			template<class T, T (*get)(), void (*set)(T), T new_value>
+			struct	THolder
+			{
+				T old_value;
+				inline THolder() : old_value(get()) { set(new_value); }
+				inline ~THolder() { set(old_value); }
+			};
 
-		template<class T, TParameterStack<T>& stack>
-		class	TParameterHolder
-		{
-			private:
-				T* old_value;
+			#define	CL3_PARAMETER_STACK_DECL(type, name)	\
+				typedef type name##__typedef; \
+				CL3PUBF void name##__stack_setter(type); \
+				CL3PUBF type name##__stack_getter()
 
-				CLASS	TParameterHolder	(const TParameterHolder&);
+			#define	CL3_PARAMETER_STACK_IMPL(type, name, value)	\
+				static CL3_THREAD type __stack_variable_#name = (value); \
+				void name##__stack_setter(type value) { __stack_variable_#name = value; } \
+				type name##__stack_getter() { return __stack_variable_#name }
 
-			public:
-				CLASS	TParameterHolder	(T* new_value) throw() : old_value(stack.Current()) { stack.Current(new_value); }
-				CLASS	~TParameterHolder	() { stack.Current(old_value); }
-		};
-
-		#define	CONTEXT_PARAMETER(stack, new_value) cl3::context::TParameterHolder<decltype(stack)::TValue> CL3_PASTE(__context_parameter_, __COUNTER__)(stack, new_value)
+			#define	CL3_PARAMETER_STACK_PUSH(name, value)	cl3::context::THolder<name##__typedef, name##__stack_getter, name##__stack_setter, value> CL3_PASTE(__stack_holder_, __COUNTER__)
+			#define	CL3_PARAMETER_STACK_VALUE(name)			(name##__stack_getter())
+		#endif
 	}
 }
 

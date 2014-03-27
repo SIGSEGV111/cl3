@@ -21,7 +21,7 @@ clean:
 
 exe: $(OBJS)
 	$(MAKE) libcl3-core.so -C ../../core
-	$(CXX) -L../lib -lstdc++ -lrt -pthread $(CXX_OPT) $(OBJS) -lcl3-core -lgtest ../lib/libgtest_main.a -o $@
+	$(CXX) -L../lib $(CXX_OPT) $(OBJS) -lcl3-core -lstdc++ -lrt -pthread -lgtest ../lib/libgtest_main.a -o $@
 
 run: exe
 	LD_LIBRARY_PATH=$(CURDIR)/../lib ./exe

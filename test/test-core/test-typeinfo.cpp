@@ -16,22 +16,27 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <cl3/core/io_text.hpp>
 #include <cl3/core/system_types.hpp>
 #include <cl3/core/system_types_typeinfo.hpp>
 #include <gtest/gtest.h>
 
 using namespace ::testing;
-using namespace std;
 
 namespace
 {
 	using namespace cl3::system::types;
 	using namespace cl3::system::types::typeinfo;
 
+	struct	TTestException {};
+
 	struct	TT_POD
 	{
 		int a,b,c;
 	};
+
+	//	make the TT_POD printable
+	cl3::io::text::ITextWriter& operator<<(cl3::io::text::ITextWriter&, const TT_POD&) { throw TTestException(); }
 
 	struct	TT_Nothing
 	{
@@ -79,29 +84,12 @@ namespace
 
 	/*************************************************/
 
-	TEST(TypeInfo, StandardConstructor_int)
-	{
-		volatile FStandardConstructor ctor = TCTTI<int>::ctor;
-		EXPECT_TRUE(ctor != NULL);
-	}
-
-	TEST(TypeInfo, Destructor_int)
-	{
-		volatile FDestructor dtor = TCTTI<int>::dtor;
-		EXPECT_TRUE(dtor != NULL);
-	}
-
-	TEST(TypeInfo, CopyConstructor_int)
-	{
-		volatile FCopyConstructor copyctor = TCTTI<int>::copyctor;
-		EXPECT_TRUE(copyctor != NULL);
-	}
-
-	/*************************************************/
-
 	TEST(TypeInfo, StandardConstructor)
 	{
 		volatile FStandardConstructor v;
+
+		v = TCTTI<int>::ctor;
+		EXPECT_TRUE(v != NULL);
 
 		v = TCTTI<TT_POD>::ctor;
 		EXPECT_TRUE(v != NULL);
@@ -126,6 +114,9 @@ namespace
 	{
 		volatile FDestructor v;
 
+		v = TCTTI<int>::dtor;
+		EXPECT_TRUE(v != NULL);
+
 		v = TCTTI<TT_POD>::dtor;
 		EXPECT_TRUE(v != NULL);
 
@@ -146,6 +137,9 @@ namespace
 	{
 		volatile FCopyConstructor v;
 
+		v = TCTTI<int>::copyctor;
+		EXPECT_TRUE(v != NULL);
+
 		v = TCTTI<TT_POD>::copyctor;
 		EXPECT_TRUE(v != NULL);
 
@@ -160,5 +154,32 @@ namespace
 
 		v = TCTTI<TT_public_dtor>::copyctor;
 		EXPECT_TRUE(v == NULL);
+	}
+
+	/*************************************************/
+
+	TEST(TypeInfo, Print)
+	{
+		volatile cl3::io::text::FPrint v;
+
+		v = TCTTI<int>::print;
+		EXPECT_TRUE(v != NULL);
+
+		v = TCTTI<TT_POD>::print;
+		EXPECT_TRUE(v != NULL);
+
+		v = TCTTI<TT_Nothing>::print;
+		EXPECT_TRUE(v == NULL);
+
+		v = TCTTI<TT_public_stdctor>::print;
+		EXPECT_TRUE(v == NULL);
+
+		v = TCTTI<TT_public_copyctor>::print;
+		EXPECT_TRUE(v == NULL);
+
+		v = TCTTI<TT_public_dtor>::print;
+		EXPECT_TRUE(v == NULL);
+
+		EXPECT_THROW(TCTTI<TT_POD>::print(*reinterpret_cast<cl3::io::text::ITextWriter*>(NULL), NULL), TTestException);
 	}
 }

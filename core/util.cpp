@@ -33,30 +33,30 @@ namespace	cl3
 	{
 		using namespace system::memory;
 
-		TUniquePtr<char,UPTR_MALLOC> mprintf(const char* format, ...)
-		{
-			va_list list;
-			va_start(list, format);
-			int sz_need = vsnprintf(NULL, 0, format, list);
-			va_end(list);
-
-			CL3_NONCLASS_ERROR(sz_need < 0, error::TException, "::vsnprintf() failed (format-string: \"%s\")", format);
-
-			TUniquePtr<char,UPTR_MALLOC> buffer(MakeUniquePtr<UPTR_MALLOC>((char*)system::memory::safe_malloc(sz_need + 1)));	// one byte extra for '\0'
-
-			va_start(list, format);
-			/*const int sz_used =*/ vsnprintf(&buffer.Object(), sz_need + 1, format, list);
-			va_end(list);
-
-			//CL3_IFDBG(CL3_CLASS_ERROR(sz_used != sz_need || sz_used < 0, error::TException, "your ::vsnprintf() implementation is broken, *OR* the memory that was referenced by the format string changed, which is an indicator for unguarded multi-threaded access to the same memory in your application - the output of the mprintf() function will be of limited use."));
-
-			return buffer;
-		}
+// 		TUniquePtr<char,UPTR_MALLOC> mprintf(const char* format, ...)
+// 		{
+// 			va_list list;
+// 			va_start(list, format);
+// 			int sz_need = vsnprintf(NULL, 0, format, list);
+// 			va_end(list);
+//
+// 			CL3_NONCLASS_ERROR(sz_need < 0, error::TException, "::vsnprintf() failed (format-string: \"%s\")", format);
+//
+// 			TUniquePtr<char,UPTR_MALLOC> buffer(MakeUniquePtr<UPTR_MALLOC>((char*)system::memory::safe_malloc(sz_need + 1)));	// one byte extra for '\0'
+//
+// 			va_start(list, format);
+// 			/*const int sz_used =*/ vsnprintf(&buffer.Object(), sz_need + 1, format, list);
+// 			va_end(list);
+//
+// 			//CL3_IFDBG(CL3_CLASS_ERROR(sz_used != sz_need || sz_used < 0, error::TException, "your ::vsnprintf() implementation is broken, *OR* the memory that was referenced by the format string changed, which is an indicator for unguarded multi-threaded access to the same memory in your application - the output of the mprintf() function will be of limited use."));
+//
+// 			return buffer;
+// 		}
 
 		TUniquePtr<char,UPTR_MALLOC> mkstrcpy(const char* str)
 		{
 			size_t l = ::strlen(str) + 1;
-			TUniquePtr<char,UPTR_MALLOC> cpy(MakeUniquePtr<UPTR_MALLOC>((char*)system::memory::safe_malloc(l)));
+			TUniquePtr<char,UPTR_MALLOC> cpy(MakeUniquePtr<UPTR_MALLOC>((char*)CL3_PARAMETER_STACK_VALUE(allocator)->Alloc(l)));
 			::memcpy(&cpy.Object(), str, l);
 			return cpy;
 		}
