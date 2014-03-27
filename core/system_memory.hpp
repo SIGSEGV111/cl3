@@ -23,16 +23,14 @@
 #include "error-base.hpp"
 #include "context.hpp"
 
+extern "C" extern void free(void*) throw();
+
 namespace	cl3
 {
 	namespace	system
 	{
 		namespace	memory
 		{
-			CL3PUBF	void	cxx_free	(void*);
-			CL3PUBF	void*	cxx_malloc	(size_t);
-			CL3PUBF	void*	cxx_realloc	(void*, size_t);
-
 			enum	EUnqiuePtrType
 			{
 				UPTR_OBJECT,
@@ -59,7 +57,7 @@ namespace	cl3
 								delete[] object;
 								break;
 							case UPTR_MALLOC:
-								cxx_free(object);
+								::free(object);
 								break;
 						};
 					}
@@ -117,10 +115,10 @@ namespace	cl3
 
 			struct	CL3PUBT	IDynamicAllocator
 			{
-				virtual	void*	Alloc	(size_t sz_bytes) = 0;
+				virtual	void*	Alloc	(size_t sz_bytes) CL3_WARN_UNUSED_RESULT = 0;
 				virtual	void	Free	(void* p_mem) = 0;
-				virtual	void*	Realloc	(void* p_mem, size_t sz_bytes_new) = 0;
-				virtual	size_t	SizeOf	(void* p_mem) = 0;
+				virtual	void*	Realloc	(void* p_mem, size_t sz_bytes_new) CL3_WARN_UNUSED_RESULT = 0;
+				virtual	size_t	SizeOf	(void* p_mem) const GETTER = 0;
 			};
 
 			class	CL3PUBT	TRestrictAllocator : public IDynamicAllocator
@@ -134,16 +132,21 @@ namespace	cl3
 					size_t sz_current;
 
 				public:
-					CL3PUBF	void*	Alloc	(size_t sz_bytes);
+					CL3PUBF	void*	Alloc	(size_t sz_bytes) CL3_WARN_UNUSED_RESULT;
 					CL3PUBF	void	Free	(void* p_mem);
-					CL3PUBF	void*	Realloc	(void* p_mem, size_t sz_bytes_new);
-					CL3PUBF	size_t	SizeOf	(void* p_mem);
+					CL3PUBF	void*	Realloc	(void* p_mem, size_t sz_bytes_new) CL3_WARN_UNUSED_RESULT;
+					CL3PUBF	size_t	SizeOf	(void* p_mem) const GETTER;
 
 					CL3PUBF	CLASS	TRestrictAllocator	(IDynamicAllocator* allocator, size_t sz_limit);
 					CL3PUBF	CLASS	~TRestrictAllocator	();
 			};
 
 			CL3_PARAMETER_STACK_DECL(IDynamicAllocator*, allocator);
+
+			CL3PUBF	void	Free	(void*);
+			CL3PUBF	void*	Alloc	(size_t);
+			CL3PUBF	void*	Realloc	(void*, size_t);
+			CL3PUBF	size_t	SizeOf	(void*);
 		}
 	}
 }

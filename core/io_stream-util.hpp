@@ -50,7 +50,7 @@ namespace	cl3
 					T* buffer = reinterpret_cast<T*>(::alloca(sizeof(T) * n_buffer_items));
 
 					off64_t n_already_transfered = 0;
-					off64_t n_transfer_now;
+					size_t n_transfer_now;
 
 					if(n_items_wo_min == (off64_t)-1)
 						n_items_wo_min = n_items_wo_max;

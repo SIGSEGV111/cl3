@@ -51,7 +51,7 @@ namespace	cl3
 					if(n_prealloc < count)
 					{
 						const size_t n_prealloc_new = count + (n_items + count) / 8 + 128U / sizeof(T);
-						arr_items = (T*)CL3_PARAMETER_STACK_VALUE(system::memory::allocator)->Realloc(arr_items, sizeof(T) * (n_items + n_prealloc_new));
+						arr_items = (T*)Realloc(arr_items, sizeof(T) * (n_items + n_prealloc_new));
 						n_prealloc = n_prealloc_new;
 					}
 					n_prealloc -= count;
@@ -66,7 +66,7 @@ namespace	cl3
 					if(n_prealloc > n_threshold)
 					{
 						const size_t n_prealloc_new = n_items / 16 + 64U / sizeof(T);
-						arr_items = (T*)CL3_PARAMETER_STACK_VALUE(system::memory::allocator)->Realloc(arr_items, sizeof(T) * (n_items + n_prealloc_new));
+						arr_items = (T*)Realloc(arr_items, sizeof(T) * (n_items + n_prealloc_new));
 						n_prealloc = n_prealloc_new;
 					}
 				}
@@ -146,7 +146,7 @@ namespace	cl3
 
 				CLASS	TCoreList	(const TCoreList& other)
 				{
-					arr_items = CL3_PARAMETER_STACK_VALUE(system::memory::allocator)->Alloc(sizeof(T) * other.n_items);
+					arr_items = Alloc(sizeof(T) * other.n_items);
 					n_items = other.n_items;
 					n_prealloc = 0;
 				}

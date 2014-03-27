@@ -20,7 +20,7 @@
 #define	_include_cl3_core_system_def_hpp_
 
 #ifndef	NULL
-	#define	NULL	(0U)
+	#define	NULL	(nullptr)
 #endif
 
 #define	CLASS

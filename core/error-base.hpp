@@ -80,16 +80,22 @@ namespace	cl3
 
 		#define	CL3_CLASS_LOGIC_ERROR(expression)	do \
 			{ \
-				cl3::error::TLogicException le; \
-				le.Set(this, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
-				throw le; \
+				if(expression) \
+				{ \
+					cl3::error::TLogicException le; \
+					le.Set(this, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
+					throw le; \
+				} \
 			} while(false)
 
 		#define	CL3_NONCLASS_LOGIC_ERROR(expression)	do \
 			{ \
-				cl3::error::TLogicException le; \
-				le.Set(NULL, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
-				throw le; \
+				if(expression) \
+				{ \
+					cl3::error::TLogicException le; \
+					le.Set(NULL, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
+					throw le; \
+				} \
 			} while(false)
 
 		#define	CL3_NOT_IMPLEMENTED	do \

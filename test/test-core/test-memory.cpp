@@ -20,6 +20,7 @@
 #include <cl3/core/system_types.hpp>
 #include <cl3/core/system_memory.hpp>
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 using namespace ::testing;
 
@@ -28,38 +29,49 @@ namespace
 	using namespace cl3::system::types;
 	using namespace cl3::system::memory;
 
-	struct	TTestException {};
-
-	struct	TTestAllocator : IDynamicAllocator
+	struct	TMockAllocator : IDynamicAllocator
 	{
-		void*	Alloc	(size_t sz)		{ IDynamicAllocator** p = (IDynamicAllocator**)::malloc(sz + sizeof(IDynamicAllocator*)); *p = this; return p+1; }
-		void*	Realloc	(void*, size_t)	{ throw TTestException(); }
-		void	Free	(void*)			{ throw TTestException(); }
-		size_t	SizeOf	(void*)			{ throw TTestException(); }
+		MOCK_METHOD1(Alloc, void*(size_t));
+		MOCK_METHOD2(Realloc, void*(void*, size_t));
+		MOCK_METHOD1(Free, void(void*));
+		MOCK_CONST_METHOD1(SizeOf, size_t(void*));
 	};
-
-	static TTestAllocator test_allocator;
 
 	TEST(MemoryAllocator, Alloc_Realloc_Free)
 	{
-		byte* bytes = (byte*)CL3_PARAMETER_STACK_VALUE(allocator)->Alloc(128);
+		byte* bytes = (byte*)Alloc(128);
 		memset(bytes, 1, 128);
-		CL3_PARAMETER_STACK_VALUE(allocator)->Realloc(bytes, 256);
+		bytes = (byte*)Realloc(bytes, 256);
 		memset(bytes, 2, 256);
-		CL3_PARAMETER_STACK_VALUE(allocator)->Free(bytes);
+		Free(bytes);
 	}
 
 	/*TEST(MemoryAllocator, Alloc_Realloc_Free_w_allocator_switch)
 	{
+		IDynamicAllocator* real_allocator = CL3_PARAMETER_STACK_VALUE(allocator);
+		TMockAllocator mock_allocator;
 		byte* bytes = NULL;
 
+		EXPECT_CALL(mock_allocator, Alloc(_))
+				.Times(1)
+				.WillRepeatedly(Invoke(real_allocator, &IDynamicAllocator::Alloc));
+
+		EXPECT_CALL(mock_allocator, Realloc(_,_))
+				.Times(1)
+				.WillRepeatedly(Invoke(real_allocator, &IDynamicAllocator::Realloc));
+
+		EXPECT_CALL(mock_allocator, Free(_))
+				.Times(1)
+				.WillRepeatedly(Invoke(real_allocator, &IDynamicAllocator::Free));
+
 		{
-			CL3_PARAMETER_STACK_PUSH(allocator, &test_allocator);
-			bytes = (byte*)CL3_PARAMETER_STACK_VALUE(allocator)->Alloc(128);
+			//CL3_PARAMETER_STACK_PUSH(allocator, &mock_allocator);
+			//bytes = (byte*)CL3_PARAMETER_STACK_VALUE(allocator)->Alloc(128);
+			bytes = (byte*)mock_allocator.Alloc(128);
 		}
 
-		EXPECT_THROW(CL3_PARAMETER_STACK_VALUE(allocator)->Realloc(bytes, 256), TTestException);
-		EXPECT_THROW(CL3_PARAMETER_STACK_VALUE(allocator)->Free(bytes), TTestException);
+		bytes = (byte*)CL3_PARAMETER_STACK_VALUE(allocator)->Realloc(bytes, 256);
+		CL3_PARAMETER_STACK_VALUE(allocator)->Free(bytes);;
 	}*/
 
 	/*TEST(MemoryAllocator, New_Delete)
@@ -73,7 +85,7 @@ namespace
 		delete x;
 	}*/
 
-	/*TEST(MemoryAllocator, TRestrictAllocator)
+	TEST(MemoryAllocator, TRestrictAllocator)
 	{
 		TRestrictAllocator ra(CL3_PARAMETER_STACK_VALUE(allocator), 0x10000);
 		CL3_PARAMETER_STACK_PUSH(allocator, &ra);
@@ -88,16 +100,10 @@ namespace
 
 		byte* array = NULL;
 
-		try
-		{
-			array = new byte[0x10000];
-		}
-		catch(...)
-		{
-		}
+		EXPECT_THROW(array = new byte[0x10000], TBadAllocException);
 
 		delete x;
 		delete y;
 		delete z;
-	}*/
+	}
 }

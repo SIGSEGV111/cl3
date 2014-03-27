@@ -25,8 +25,16 @@
 
 using namespace cl3::system::memory;
 
-void* operator new(size_t sz)	{ return CL3_PARAMETER_STACK_VALUE(allocator)->Alloc(sz); }
-void* operator new[](size_t sz)	{ return CL3_PARAMETER_STACK_VALUE(allocator)->Alloc(sz); }
+namespace	std
+{
+	const nothrow_t nothrow = {};
+}
 
-void operator delete(void* ptr) throw()		{ return CL3_PARAMETER_STACK_VALUE(allocator)->Free(ptr); }
-void operator delete[](void* ptr) throw()	{ return CL3_PARAMETER_STACK_VALUE(allocator)->Free(ptr); }
+void* operator new(size_t sz) { return Alloc(sz); }
+void* operator new[](size_t sz) { return Alloc(sz); }
+void operator delete(void* p_mem) throw() { Free(p_mem); }
+void operator delete[](void* p_mem) throw() { Free(p_mem); }
+void* operator new(size_t sz, const std::nothrow_t&) throw() { try { return Alloc(sz); } catch(...) { return NULL; } }
+void* operator new[](size_t sz, const std::nothrow_t&) throw() { try { return Alloc(sz); } catch(...) { return NULL; } }
+void operator delete(void* p_mem, const std::nothrow_t&) throw() { Free(p_mem); }
+void operator delete[](void* p_mem, const std::nothrow_t&) throw() { Free(p_mem); }

@@ -44,7 +44,6 @@ namespace	cl3
 				if(l <= 0) throw "TException: printf format error (ctor)";
 
 				va_start(list, format);
-//				message = (char*)CL3_PARAMETER_STACK_VALUE(allocator)->Alloc(l);
 				message = (char*)malloc(l);
  				if(message == NULL) { va_end(list); throw "TException: out of memory (ctor)"; }
 				vsnprintf(message, l, format, list);
@@ -57,7 +56,6 @@ namespace	cl3
 
 		CLASS	TException::~TException	()
 		{
-// 			CL3_PARAMETER_STACK_VALUE(allocator)->Free(message);
 			free(message);
 		}
 

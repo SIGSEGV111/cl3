@@ -38,7 +38,7 @@ namespace	cl3
 
 				void		TBitmask::Count		(size_t new_count)
 				{
-					arr_bits = reinterpret_cast<byte*>(CL3_PARAMETER_STACK_VALUE(allocator)->Realloc(arr_bits, new_count / 8U + (((new_count % 8U) != 0U) ? 1U : 0U)));
+					arr_bits = reinterpret_cast<byte*>(Realloc(arr_bits, new_count / 8U + (((new_count % 8U) != 0U) ? 1U : 0U)));
 					n_bits = new_count;
 				}
 
@@ -74,7 +74,7 @@ namespace	cl3
 
 				CLASS		TBitmask::TBitmask	(const TBitmask& other)
 				{
-					arr_bits = reinterpret_cast<byte*>(CL3_PARAMETER_STACK_VALUE(allocator)->Alloc(other.n_bits / 8U + (((other.n_bits % 8U) != 0U) ? 1U : 0U)));
+					arr_bits = reinterpret_cast<byte*>(Alloc(other.n_bits / 8U + (((other.n_bits % 8U) != 0U) ? 1U : 0U)));
 					n_bits = other.n_bits;
 				}
 

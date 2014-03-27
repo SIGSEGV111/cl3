@@ -86,6 +86,7 @@ namespace	cl3
 				#define CL3_PACK( ... ) __VA_ARGS__ __attribute__((__packed__))
 				#define	CL3_WARN_UNUSED_RESULT	__attribute__((warn_unused_result))
 				#define CL3_UNREACHABLE	__builtin_unreachable()
+				#define	CL3_LIKELY(expr)	__builtin_expect((expr), true)
 
 				template<class T> inline static T AtomicAdd(T& var, T add) { return __sync_fetch_and_add(&var,add); }
 				template<class T> inline static T AtomicSub(T& var, T sub) { return __sync_fetch_and_sub(&var,sub); }
@@ -130,6 +131,8 @@ namespace	cl3
 
 				#define CL3_PACK( ... ) __pragma( pack(push, 1) ); __VA_ARGS__; __pragma( pack(pop) )
 				#define	CL3_WARN_UNUSED_RESULT	__checkReturn
+				#define	CL3_UNREACHABLE		__assume(0)
+				#define	CL3_LIKELY(expr)	(expr)
 
 				template<class T> inline static T AtomicAdd (T& var, T add) { if(sizeof(T) == 4) return (T)InterlockedExchangeAdd((unsigned int*)var, (unsigned int) add); else if(sizeof(T) == 8) return (T)InterlockedExchangeAdd64((LONG64*)var, (LONG64) add); }
 				template<class T> inline static T AtomicSub (T& var, T sub) { if(sizeof(T) == 4) return (T)InterlockedExchangeAdd((unsigned int*)var, (unsigned int)-sub); else if(sizeof(T) == 8) return (T)InterlockedExchangeAdd64((LONG64*)var, (LONG64)-sub); }
@@ -258,6 +261,12 @@ namespace	cl3
 //	for compatibility with libstdc++
 #ifndef _NEW
 #define _NEW
+	namespace	std
+	{
+		struct nothrow_t {};
+		extern CL3PUBF const nothrow_t nothrow;
+	}
+
 	CL3PUBF	void* operator new(size_t);
 	CL3PUBF	void* operator new[](size_t);
 
@@ -269,6 +278,11 @@ namespace	cl3
 
 	inline void operator delete(void*, void*) throw() {}
 	inline void operator delete[](void*, void*) throw() {}
+
+	CL3PUBF	void* operator new(size_t, const std::nothrow_t&) throw();
+	CL3PUBF	void* operator new[](size_t, const std::nothrow_t&) throw();
+	CL3PUBF	void operator delete(void*, const std::nothrow_t&) throw();
+	CL3PUBF	void operator delete[](void*, const std::nothrow_t&) throw();
 #endif
 
 #endif

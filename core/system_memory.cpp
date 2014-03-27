@@ -41,9 +41,11 @@ namespace	cl3
 			CLASS	TBadAllocException::TBadAllocException	(const TBadAllocException& bae) : TException(bae), sz_bytes(bae.sz_bytes) {}
 			CLASS	TBadAllocException::~TBadAllocException	() {}
 
-			void	cxx_free	(void* ptr)
+			/*******************************************************/
+
+			void	cxx_free	(void* p_mem)
 			{
-				::free(ptr);
+				::free(p_mem);
 			}
 
 			void*	cxx_malloc	(size_t sz_bytes)
@@ -54,52 +56,40 @@ namespace	cl3
 				return p;
 			}
 
-			void*	cxx_realloc	(void* old, size_t sz_bytes)
+			void*	cxx_realloc	(void* p_mem, size_t sz_bytes)
 			{
 				//	realloc() will not be called when sz_bytes == 0, so p must be initilized to NULL
 				void* p = NULL;
-				CL3_NONCLASS_ERROR(sz_bytes != 0 && (p = ::realloc(old, sz_bytes)) == NULL, TBadAllocException, sz_bytes);
+				CL3_NONCLASS_ERROR(sz_bytes != 0 && (p = ::realloc(p_mem, sz_bytes)) == NULL, TBadAllocException, sz_bytes);
 				return p;
 			}
+
+			size_t	cxx_sizeof	(void* p_mem)
+			{
+				//	FIXME: this is linux specific
+				return ::malloc_usable_size(p_mem);
+			}
+
+			/*******************************************************/
 
 			struct	TDefaultAllocator : IDynamicAllocator
 			{
 				void*	Alloc	(size_t sz_bytes)
 				{
-					IDynamicAllocator** p = reinterpret_cast<IDynamicAllocator**>(cxx_malloc(sizeof(IDynamicAllocator*) + sz_bytes));
-					*p = this;
-					return p+1;
+					return cxx_malloc(sz_bytes);
 				}
 
 				void	Free	(void* p_mem)
 				{
-					IDynamicAllocator** p = reinterpret_cast<IDynamicAllocator**>(p_mem);
-					p--;
-					if(*p == this)
-						cxx_free(p);
-					else
-						(*p)->Free(p_mem);
+					cxx_free(p_mem);
 				}
 
 				void*	Realloc	(void* p_mem, size_t sz_bytes_new)
 				{
-					if(p_mem)
-					{
-						IDynamicAllocator** p = reinterpret_cast<IDynamicAllocator**>(p_mem);
-						p--;
-						if(*p == this)
-						{
-							p = reinterpret_cast<IDynamicAllocator**>(cxx_realloc(p, sizeof(IDynamicAllocator*) + sz_bytes_new));
-							return p+1;
-						}
-						else
-							return (*p)->Realloc(p_mem, sz_bytes_new);
-					}
-					else
-						return Alloc(sz_bytes_new);
+					return cxx_realloc(p_mem, sz_bytes_new);
 				}
 
-				size_t	SizeOf	(void* p_mem)
+				size_t	SizeOf	(void* p_mem) const
 				{
 					if(p_mem)
 						return ::malloc_usable_size(p_mem);
@@ -108,36 +98,36 @@ namespace	cl3
 				}
 			};
 
-			static TDefaultAllocator default_allocator;
-			CL3_PARAMETER_STACK_IMPL(IDynamicAllocator*, allocator, &default_allocator);
-
+			/*******************************************************/
 
 			void*	TRestrictAllocator::Alloc	(size_t sz_bytes)
 			{
 				CL3_CLASS_ERROR(sz_current + sz_bytes > sz_limit, TBadAllocException, sz_bytes);
-				void* p = allocator->Alloc(sz_bytes);
-				sz_current += sz_bytes;
-				return p;
+				void* p_mem = allocator->Alloc(sz_bytes);
+				const size_t sz_mb = allocator->SizeOf(p_mem);
+				sz_current += sz_mb;
+				return p_mem;
 			}
 
 			void	TRestrictAllocator::Free	(void* p_mem)
 			{
-				const size_t sz_free = allocator->SizeOf(p_mem);
-				CL3_CLASS_LOGIC_ERROR(sz_free > sz_current);
+				const size_t sz_mb = allocator->SizeOf(p_mem);
+				CL3_CLASS_LOGIC_ERROR(sz_mb > sz_current);
 				allocator->Free(p_mem);
-				sz_current -= sz_free;
+				sz_current -= sz_mb;
 			}
 
 			void*	TRestrictAllocator::Realloc	(void* p_mem, size_t sz_bytes_new)
 			{
-				const size_t sz_free = allocator->SizeOf(p_mem);
-				CL3_CLASS_LOGIC_ERROR(sz_free > sz_current);
-				allocator->Realloc(p_mem, sz_bytes_new);
-				sz_current -= sz_free;
+				const size_t sz_mb = allocator->SizeOf(p_mem);
+				CL3_CLASS_LOGIC_ERROR(sz_mb > sz_current);
+				p_mem = allocator->Realloc(p_mem, sz_bytes_new);
+				sz_current -= sz_mb;
 				sz_current += sz_bytes_new;
+				return p_mem;
 			}
 
-			size_t	TRestrictAllocator::SizeOf	(void* p_mem)
+			size_t	TRestrictAllocator::SizeOf	(void* p_mem) const
 			{
 				return allocator->SizeOf(p_mem);
 			}
@@ -150,6 +140,90 @@ namespace	cl3
 			CLASS	TRestrictAllocator::~TRestrictAllocator	()
 			{
 				CL3_CLASS_ERROR(sz_current != 0, TDirtyAllocatorException, sz_current);
+			}
+
+
+			/*******************************************************/
+
+			CL3_PARAMETER_STACK_IMPL(IDynamicAllocator*, allocator, NULL);
+
+			static TDefaultAllocator default_allocator;
+			CL3_PARAMETER_STACK_PUSH(allocator, &default_allocator);
+
+			/*******************************************************/
+
+			void	Free	(void* p_mem)
+			{
+				if(p_mem)
+				{
+					IDynamicAllocator** const p_base = reinterpret_cast<IDynamicAllocator**>(p_mem)-1;
+					IDynamicAllocator* const owner = *p_base;
+
+					if(owner)
+						owner->Free(p_base);
+					else
+						cxx_free(p_base);
+				}
+			}
+
+			void*	Alloc	(size_t sz_bytes)
+			{
+				if(sz_bytes)
+				{
+					IDynamicAllocator* const owner = CL3_PARAMETER_STACK_VALUE(allocator);
+					IDynamicAllocator** p_base;
+
+					if(owner)
+						p_base = reinterpret_cast<IDynamicAllocator**>(owner->Alloc(sizeof(IDynamicAllocator*) + sz_bytes));
+					else
+						p_base = reinterpret_cast<IDynamicAllocator**>(cxx_malloc(sizeof(IDynamicAllocator*) + sz_bytes));
+
+					*p_base = owner;
+					return p_base+1;
+				}
+				else
+					return NULL;
+			}
+
+			void*	Realloc	(void* p_mem, size_t sz_bytes_new)
+			{
+				if(p_mem)
+				{
+					IDynamicAllocator** p_base = reinterpret_cast<IDynamicAllocator**>(p_mem)-1;
+					IDynamicAllocator* const owner = *p_base;
+
+					if(sz_bytes_new)
+					{
+						if(owner)
+							p_base = reinterpret_cast<IDynamicAllocator**>(owner->Realloc(p_base, sizeof(IDynamicAllocator*) + sz_bytes_new));
+						else
+							p_base = reinterpret_cast<IDynamicAllocator**>(cxx_realloc(p_base, sizeof(IDynamicAllocator*) + sz_bytes_new));
+
+						return p_base+1;
+					}
+					else
+					{
+						owner->Free(p_base);
+						return NULL;
+					}
+				}
+				else
+					return Alloc(sz_bytes_new);
+			}
+
+			size_t	SizeOf	(void* p_mem)
+			{
+				if(p_mem)
+				{
+					IDynamicAllocator** p_base = reinterpret_cast<IDynamicAllocator**>(p_mem)-1;
+					IDynamicAllocator* const owner = *p_base;
+					if(owner)
+						return owner->SizeOf(p_base) - sizeof(IDynamicAllocator*);
+					else
+						return cxx_sizeof(p_base);
+				}
+				else
+					return 0;
 			}
 		}
 	}
