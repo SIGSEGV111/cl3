@@ -21,17 +21,18 @@
 #endif
 
 #include <stdio.h>
-#include <string.h>
-#include <malloc.h>
 #include <stdarg.h>
 #include "error-base.hpp"
 #include "util.hpp"
 #include "system_types_typeinfo.hpp"
+#include "system_memory.hpp"
 
 namespace	cl3
 {
 	namespace	error
 	{
+		using namespace system::memory;
+
 		CLASS	TException::TException	(const char* format, ...) : message(NULL), object(NULL), codefile(NULL), function(NULL), expression(NULL), inner(NULL), codeline(0)
 		{
 			if(format)
@@ -43,8 +44,9 @@ namespace	cl3
 				if(l <= 0) throw "TException: printf format error (ctor)";
 
 				va_start(list, format);
+//				message = (char*)CL3_PARAMETER_STACK_VALUE(allocator)->Alloc(l);
 				message = (char*)malloc(l);
-				if(message == NULL) { va_end(list); throw "TException: out of memory (ctor)"; }
+ 				if(message == NULL) { va_end(list); throw "TException: out of memory (ctor)"; }
 				vsnprintf(message, l, format, list);
 				va_end(list);
 			}
@@ -55,6 +57,7 @@ namespace	cl3
 
 		CLASS	TException::~TException	()
 		{
+// 			CL3_PARAMETER_STACK_VALUE(allocator)->Free(message);
 			free(message);
 		}
 

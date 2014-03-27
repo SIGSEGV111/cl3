@@ -104,11 +104,43 @@ namespace	cl3
 					CL3PUBF	virtual	~TBadAllocException	();
 			};
 
+			class	CL3PUBT	TDirtyAllocatorException : public error::TException
+			{
+				protected:
+					size_t sz_bytes;
+
+				public:
+					CL3PUBF	CLASS	TDirtyAllocatorException	(size_t sz_bytes);
+					CL3PUBF	CLASS	TDirtyAllocatorException	(const TDirtyAllocatorException&);
+					CL3PUBF	virtual	~TDirtyAllocatorException	();
+			};
+
 			struct	CL3PUBT	IDynamicAllocator
 			{
 				virtual	void*	Alloc	(size_t sz_bytes) = 0;
 				virtual	void	Free	(void* p_mem) = 0;
 				virtual	void*	Realloc	(void* p_mem, size_t sz_bytes_new) = 0;
+				virtual	size_t	SizeOf	(void* p_mem) = 0;
+			};
+
+			class	CL3PUBT	TRestrictAllocator : public IDynamicAllocator
+			{
+				private:
+					CLASS	TRestrictAllocator	(const TRestrictAllocator&);
+
+				protected:
+					IDynamicAllocator* allocator;
+					size_t sz_limit;
+					size_t sz_current;
+
+				public:
+					CL3PUBF	void*	Alloc	(size_t sz_bytes);
+					CL3PUBF	void	Free	(void* p_mem);
+					CL3PUBF	void*	Realloc	(void* p_mem, size_t sz_bytes_new);
+					CL3PUBF	size_t	SizeOf	(void* p_mem);
+
+					CL3PUBF	CLASS	TRestrictAllocator	(IDynamicAllocator* allocator, size_t sz_limit);
+					CL3PUBF	CLASS	~TRestrictAllocator	();
 			};
 
 			CL3_PARAMETER_STACK_DECL(IDynamicAllocator*, allocator);

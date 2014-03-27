@@ -56,7 +56,8 @@ namespace	cl3
 		TUniquePtr<char,UPTR_MALLOC> mkstrcpy(const char* str)
 		{
 			size_t l = ::strlen(str) + 1;
-			TUniquePtr<char,UPTR_MALLOC> cpy(MakeUniquePtr<UPTR_MALLOC>((char*)CL3_PARAMETER_STACK_VALUE(allocator)->Alloc(l)));
+			//TUniquePtr<char,UPTR_MALLOC> cpy(MakeUniquePtr<UPTR_MALLOC>((char*)CL3_PARAMETER_STACK_VALUE(allocator)->Alloc(l)));
+			TUniquePtr<char,UPTR_MALLOC> cpy(MakeUniquePtr<UPTR_MALLOC>((char*)malloc(l)));
 			::memcpy(&cpy.Object(), str, l);
 			return cpy;
 		}
