@@ -1,8 +1,16 @@
-.PHONY: test-core test-mm
+.PHONY: test-core test-mm prereqs
 
-all:
+all: prereqs
 	$(MAKE) run -C test-core
 	$(MAKE) run -C test-mm
+
+prereqs: gtest/lib/.libs/libgtest_main.a gmock/lib/.libs/libgmock_main.a
+
+gtest/lib/.libs/libgtest_main.a:
+	cd gtest && ./configure && make
+
+gmock/lib/.libs/libgmock_main.a:
+	cd gmock && ./configure --with-gtest=../gtest && make
 
 test-core:
 	$(MAKE) run -C test-core

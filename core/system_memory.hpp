@@ -23,7 +23,7 @@
 #include "error-base.hpp"
 #include "context.hpp"
 
-extern "C" extern void free(void*) throw();
+extern "C" void free(void*) throw();
 
 namespace	cl3
 {
