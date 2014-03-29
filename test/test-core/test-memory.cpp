@@ -29,12 +29,14 @@ namespace
 	using namespace cl3::system::types;
 	using namespace cl3::system::memory;
 
-	struct	TMockAllocator : IDynamicAllocator
+	struct	TTestException {};
+
+	struct	TFailAllocator : IDynamicAllocator
 	{
-		MOCK_METHOD1(Alloc, void*(size_t));
-		MOCK_METHOD2(Realloc, void*(void*, size_t));
-		MOCK_METHOD1(Free, void(void*));
-		MOCK_CONST_METHOD1(SizeOf, size_t(void*));
+		void*	Alloc	(usys_t) CL3_WARN_UNUSED_RESULT { throw TTestException(); }
+		void	Free	(void*) { throw TTestException(); }
+		void*	Realloc	(void*, usys_t) CL3_WARN_UNUSED_RESULT  { throw TTestException(); }
+		usys_t	SizeOf	(void*) const GETTER  { throw TTestException(); }
 	};
 
 	TEST(MemoryAllocator, Alloc_Realloc_Free)
@@ -46,44 +48,27 @@ namespace
 		Free(bytes);
 	}
 
-	/*TEST(MemoryAllocator, Alloc_Realloc_Free_w_allocator_switch)
+	TEST(MemoryAllocator, Alloc_Realloc_Free_w_allocator_switch)
 	{
-		IDynamicAllocator* real_allocator = CL3_PARAMETER_STACK_VALUE(allocator);
-		TMockAllocator mock_allocator;
+		TFailAllocator fail_allocator;
 		byte_t* bytes = NULL;
 
-		EXPECT_CALL(mock_allocator, Alloc(_))
-				.Times(1)
-				.WillRepeatedly(Invoke(real_allocator, &IDynamicAllocator::Alloc));
+		bytes = (byte_t*)Alloc(128);
 
-		EXPECT_CALL(mock_allocator, Realloc(_,_))
-				.Times(1)
-				.WillRepeatedly(Invoke(real_allocator, &IDynamicAllocator::Realloc));
+		CL3_PARAMETER_STACK_PUSH(allocator, &fail_allocator);
+		bytes = (byte_t*)Realloc(bytes, 256);
+		Free(bytes);
+	}
 
-		EXPECT_CALL(mock_allocator, Free(_))
-				.Times(1)
-				.WillRepeatedly(Invoke(real_allocator, &IDynamicAllocator::Free));
-
-		{
-			//CL3_PARAMETER_STACK_PUSH(allocator, &mock_allocator);
-			//bytes = (byte_t*)CL3_PARAMETER_STACK_VALUE(allocator)->Alloc(128);
-			bytes = (byte_t*)mock_allocator.Alloc(128);
-		}
-
-		bytes = (byte_t*)CL3_PARAMETER_STACK_VALUE(allocator)->Realloc(bytes, 256);
-		CL3_PARAMETER_STACK_VALUE(allocator)->Free(bytes);;
-	}*/
-
-	/*TEST(MemoryAllocator, New_Delete)
+	TEST(MemoryAllocator, New_Delete)
 	{
 		//	fails if the libcl3-core is linked after libstdc++ (then the wrong operator new() implemention is used)
 		int* x = new int(17);
 		EXPECT_TRUE(*x == 17);
-		IDynamicAllocator** p = reinterpret_cast<IDynamicAllocator**>(x);
-		p--;
+		IDynamicAllocator** p = reinterpret_cast<IDynamicAllocator**>(x)-1;
 		EXPECT_TRUE(*p == CL3_PARAMETER_STACK_VALUE(allocator));
 		delete x;
-	}*/
+	}
 
 	TEST(MemoryAllocator, TRestrictAllocator)
 	{
