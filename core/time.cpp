@@ -30,13 +30,13 @@ namespace cl3
 		{
 			if(asec <= -1000000000000000000LL)
 			{
-				const s64 f = asec / 1000000000000000000LL;
+				const s64_t f = asec / 1000000000000000000LL;
 				sec -= f;
 				asec += f * 1000000000000000000LL;
 			}
 			else if(asec >= 1000000000000000000LL)
 			{
-				const s64 f = asec / 1000000000000000000LL;
+				const s64_t f = asec / 1000000000000000000LL;
 				sec += f;
 				asec -= f * 1000000000000000000LL;
 			}
@@ -129,12 +129,12 @@ namespace cl3
 			return sec != op.sec || asec != op.asec;
 		}
 
-		s64		TTime::ConvertToI	(EUnit cunit) const
+		s64_t		TTime::ConvertToI	(EUnit cunit) const
 		{
 			if(cunit < 0)
 			{
-				s64 mul = 1LL;
-				s64 div = 1000000000000000000LL;
+				s64_t mul = 1LL;
+				s64_t div = 1000000000000000000LL;
 
 				for(int i = 0; i > cunit; i--)
 				{
@@ -167,12 +167,12 @@ namespace cl3
 				return ((double)sec + (double)asec / 1000000000000000000.0) / (double)cunit;
 		}
 
-		TTime	TTime::ConvertFrom	(EUnit cunit, s64 value)
+		TTime	TTime::ConvertFrom	(EUnit cunit, s64_t value)
 		{
 			if(cunit < 0)
 			{
-				s64 div = 1LL;
-				s64 mul = 1000000000000000000LL;
+				s64_t div = 1LL;
+				s64_t mul = 1000000000000000000LL;
 
 				for(int i = 0; i > cunit; i--)
 				{
@@ -180,7 +180,7 @@ namespace cl3
 					mul /= 1000LL;
 				}
 
-				s64 sec = value / div;
+				s64_t sec = value / div;
 				value -= sec * div;
 
 				return TTime(sec, value * mul);
@@ -202,23 +202,23 @@ namespace cl3
 					mul *= 1000.0;
 				}
 
-				s64 sec = (s64)(value / div);
+				s64_t sec = (s64_t)(value / div);
 				value -= sec * div;
 
-				return TTime(sec, (s64)(value / mul));
+				return TTime(sec, (s64_t)(value / mul));
 			}
 			else
 			{
 				value *= (double)cunit;
 
-				s64 sec = (s64)value;
+				s64_t sec = (s64_t)value;
 				value -= sec;
 
-				return TTime(sec, (s64)(value * 1000000000000000000.0));
+				return TTime(sec, (s64_t)(value * 1000000000000000000.0));
 			}
 		}
 
-		s64		TTime::UnixTimeI		() const
+		s64_t		TTime::UnixTimeI		() const
 		{
 			return sec;
 		}
@@ -230,15 +230,15 @@ namespace cl3
 
 		TTime	TTime::UnixTime		(double unixtime)
 		{
-			s64 sec = (s64)unixtime;
+			s64_t sec = (s64_t)unixtime;
 			unixtime -= sec;
 			unixtime *= 1000000000000000000.0;
-			s64 asec = (s64)unixtime;
+			s64_t asec = (s64_t)unixtime;
 
 			return TTime(sec, asec);
 		}
 
-		TTime	TTime::UnixTime		(s64 unixtime)
+		TTime	TTime::UnixTime		(s64_t unixtime)
 		{
 			return TTime(unixtime, 0);
 		}
@@ -257,12 +257,12 @@ namespace cl3
 
 		CLASS	TTime::TTime		(double Seconds)
 		{
-			sec = (s64)Seconds;
+			sec = (s64_t)Seconds;
 			Seconds -= sec;
-			asec = (s64)(Seconds * 1000000000000000000.0);
+			asec = (s64_t)(Seconds * 1000000000000000000.0);
 		}
 
-		CLASS	TTime::TTime		(s64 Seconds, s64 Attoseconds) : sec(Seconds), asec(Attoseconds)
+		CLASS	TTime::TTime		(s64_t Seconds, s64_t Attoseconds) : sec(Seconds), asec(Attoseconds)
 		{
 			Normalize();
 		}

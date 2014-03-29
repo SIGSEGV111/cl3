@@ -34,22 +34,22 @@ namespace	cl3
 			{
 				struct	IBitmask
 				{
-					virtual	GETTER	size_t	Count	() const = 0;
-					virtual	GETTER	bool	Bit		(size_t index) = 0;
-					virtual	SETTER	void	Bit		(size_t index, bool value) = 0;
+					virtual	GETTER	usys_t	Count	() const = 0;
+					virtual	GETTER	bool	Bit		(usys_t index) = 0;
+					virtual	SETTER	void	Bit		(usys_t index, bool value) = 0;
 				};
 
 				class	TBitmask : IBitmask
 				{
 					protected:
-						byte* arr_bits;
-						size_t n_bits;
+						byte_t* arr_bits;
+						usys_t n_bits;
 
 					public:
-						CL3PUBF	GETTER	size_t	Count	() const;
-						CL3PUBF	SETTER	void	Count	(size_t new_count);
-						CL3PUBF	GETTER	bool	Bit		(size_t index);
-						CL3PUBF	SETTER	void	Bit		(size_t index, bool value);
+						CL3PUBF	GETTER	usys_t	Count	() const;
+						CL3PUBF	SETTER	void	Count	(usys_t new_count);
+						CL3PUBF	GETTER	bool	Bit		(usys_t index);
+						CL3PUBF	SETTER	void	Bit		(usys_t index, bool value);
 
 						CL3PUBF	TBitmask&	operator=	(const TBitmask&);
 

@@ -54,11 +54,11 @@ namespace	cl3
 			{
 				CL3PUBF const static TUTF32 TERMINATOR;	//	end-of-string marker (always code-value 0)
 
-				u32 code;
+				u32_t code;
 
 				CL3PUBF	CLASS	TUTF32	(char chr);
 				CL3PUBF	CLASS	TUTF32	(wchar_t wchr);
-				inline	CLASS	TUTF32	(u32 code) throw() : code(code) {}
+				inline	CLASS	TUTF32	(u32_t code) throw() : code(code) {}
 			};
 
 			struct	TNumberFormat
@@ -84,13 +84,13 @@ namespace	cl3
 				ESymbolPlacement positive_mark_placement;	//	specifies where to place the positive mark (usually SYMBOL_PLACEMENT_BEFORE)
 				ESymbolPlacement negative_mark_placement;	//	specifies where to place the negative mark (usually SYMBOL_PLACEMENT_BEFORE)
 
-				u16 grouping_length;	//	length of a group of digits (usually 3 for base 10/decimal formats)
-				u16 before_decimal_length_min;	//	minimum number of characters before the decimal mark
-				u16 before_decimal_length_max;	//	maximum number of characters before the decimal mark
-				u16 after_decimal_length_min;	//	minimum number of characters after the decimal mark
-				u16 after_decimal_length_max;	//	maximum number of characters after the decimal mark
-				u16 total_length_min;	//	minimum total length
-				u16 total_length_max;	//	maximum total length
+				u16_t grouping_length;	//	length of a group of digits (usually 3 for base 10/decimal formats)
+				u16_t before_decimal_length_min;	//	minimum number of characters before the decimal mark
+				u16_t before_decimal_length_max;	//	maximum number of characters before the decimal mark
+				u16_t after_decimal_length_min;	//	minimum number of characters after the decimal mark
+				u16_t after_decimal_length_max;	//	maximum number of characters after the decimal mark
+				u16_t total_length_min;	//	minimum total length
+				u16_t total_length_max;	//	maximum total length
 
 				//	some predefined commonly used formats
 				CL3PUBF const static TNumberFormat OCTAL;	//	standard octal format (base 8)
@@ -124,16 +124,16 @@ namespace	cl3
 				TNumberFormat::TPackage number_formats;
 
 				CL3PUBF	ITextReader&	operator>>	(TUTF32&);
-				CL3PUBF	ITextReader&	operator>>	(s8&);
-				CL3PUBF	ITextReader&	operator>>	(u8&);
-				CL3PUBF	ITextReader&	operator>>	(s16&);
-				CL3PUBF	ITextReader&	operator>>	(u16&);
-				CL3PUBF	ITextReader&	operator>>	(s32&);
-				CL3PUBF	ITextReader&	operator>>	(u32&);
-				CL3PUBF	ITextReader&	operator>>	(s64&);
-				CL3PUBF	ITextReader&	operator>>	(u64&);
-				CL3PUBF	ITextReader&	operator>>	(f32&);
-				CL3PUBF	ITextReader&	operator>>	(f64&);
+				CL3PUBF	ITextReader&	operator>>	(s8_t&);
+				CL3PUBF	ITextReader&	operator>>	(u8_t&);
+				CL3PUBF	ITextReader&	operator>>	(s16_t&);
+				CL3PUBF	ITextReader&	operator>>	(u16_t&);
+				CL3PUBF	ITextReader&	operator>>	(s32_t&);
+				CL3PUBF	ITextReader&	operator>>	(u32_t&);
+				CL3PUBF	ITextReader&	operator>>	(s64_t&);
+				CL3PUBF	ITextReader&	operator>>	(u64_t&);
+				CL3PUBF	ITextReader&	operator>>	(f32_t&);
+				CL3PUBF	ITextReader&	operator>>	(f64_t&);
 				CL3PUBF	ITextReader&	operator>>	(string::IString&);
 			};
 
@@ -149,16 +149,16 @@ namespace	cl3
 				using stream::IOut<char>::ReadIn;
 
 				CL3PUBF	ITextWriter&	operator<<	(TUTF32);
-				CL3PUBF	ITextWriter&	operator<<	(s8);
-				CL3PUBF	ITextWriter&	operator<<	(u8);
-				CL3PUBF	ITextWriter&	operator<<	(s16);
-				CL3PUBF	ITextWriter&	operator<<	(u16);
-				CL3PUBF	ITextWriter&	operator<<	(s32);
-				CL3PUBF	ITextWriter&	operator<<	(u32);
-				CL3PUBF	ITextWriter&	operator<<	(s64);
-				CL3PUBF	ITextWriter&	operator<<	(u64);
-				CL3PUBF	ITextWriter&	operator<<	(f32);
-				CL3PUBF	ITextWriter&	operator<<	(f64);
+				CL3PUBF	ITextWriter&	operator<<	(s8_t);
+				CL3PUBF	ITextWriter&	operator<<	(u8_t);
+				CL3PUBF	ITextWriter&	operator<<	(s16_t);
+				CL3PUBF	ITextWriter&	operator<<	(u16_t);
+				CL3PUBF	ITextWriter&	operator<<	(s32_t);
+				CL3PUBF	ITextWriter&	operator<<	(u32_t);
+				CL3PUBF	ITextWriter&	operator<<	(s64_t);
+				CL3PUBF	ITextWriter&	operator<<	(u64_t);
+				CL3PUBF	ITextWriter&	operator<<	(f32_t);
+				CL3PUBF	ITextWriter&	operator<<	(f64_t);
 				CL3PUBF	ITextWriter&	operator<<	(const string::IString&);
 				CL3PUBF	ITextWriter&	operator<<	(const char*);
 				CL3PUBF	ITextWriter&	operator<<	(const wchar_t*);

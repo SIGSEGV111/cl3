@@ -39,9 +39,9 @@ namespace
 
 	TEST(MemoryAllocator, Alloc_Realloc_Free)
 	{
-		byte* bytes = (byte*)Alloc(128);
+		byte_t* bytes = (byte_t*)Alloc(128);
 		memset(bytes, 1, 128);
-		bytes = (byte*)Realloc(bytes, 256);
+		bytes = (byte_t*)Realloc(bytes, 256);
 		memset(bytes, 2, 256);
 		Free(bytes);
 	}
@@ -50,7 +50,7 @@ namespace
 	{
 		IDynamicAllocator* real_allocator = CL3_PARAMETER_STACK_VALUE(allocator);
 		TMockAllocator mock_allocator;
-		byte* bytes = NULL;
+		byte_t* bytes = NULL;
 
 		EXPECT_CALL(mock_allocator, Alloc(_))
 				.Times(1)
@@ -66,11 +66,11 @@ namespace
 
 		{
 			//CL3_PARAMETER_STACK_PUSH(allocator, &mock_allocator);
-			//bytes = (byte*)CL3_PARAMETER_STACK_VALUE(allocator)->Alloc(128);
-			bytes = (byte*)mock_allocator.Alloc(128);
+			//bytes = (byte_t*)CL3_PARAMETER_STACK_VALUE(allocator)->Alloc(128);
+			bytes = (byte_t*)mock_allocator.Alloc(128);
 		}
 
-		bytes = (byte*)CL3_PARAMETER_STACK_VALUE(allocator)->Realloc(bytes, 256);
+		bytes = (byte_t*)CL3_PARAMETER_STACK_VALUE(allocator)->Realloc(bytes, 256);
 		CL3_PARAMETER_STACK_VALUE(allocator)->Free(bytes);;
 	}*/
 
@@ -98,9 +98,9 @@ namespace
 		EXPECT_TRUE(*y == 2);
 		EXPECT_TRUE(*z == 3);
 
-		byte* array = NULL;
+		byte_t* array = NULL;
 
-		EXPECT_THROW(array = new byte[0x10000], TBadAllocException);
+		EXPECT_THROW(array = new byte_t[0x10000], TBadAllocException);
 
 		delete x;
 		delete y;

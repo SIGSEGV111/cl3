@@ -29,42 +29,42 @@ namespace	cl3
 				const ICodec* const CODEC_CXX_CHAR = NULL;
 				const ICodec* const CODEC_CXX_WCHAR = NULL;
 
-				size_t	ACharDecoder::Write		(const char* arr_items_write, size_t n_items_write_max, size_t n_items_write_min)
+				usys_t	ACharDecoder::Write		(const char* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				off64_t	ACharDecoder::ReadIn	(io::stream::IIn<char>& is, off64_t n_items_ri_max, off64_t n_items_ri_min)
+				uoff_t	ACharDecoder::ReadIn	(io::stream::IIn<char>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				size_t	AWCharDecoder::Write	(const wchar_t* arr_items_write, size_t n_items_write_max, size_t n_items_write_min)
+				usys_t	AWCharDecoder::Write	(const wchar_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				off64_t	AWCharDecoder::ReadIn	(io::stream::IIn<wchar_t>& is, off64_t n_items_ri_max, off64_t n_items_ri_min)
+				uoff_t	AWCharDecoder::ReadIn	(io::stream::IIn<wchar_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				size_t	ACharEncoder::Read		(char* arr_items_read, size_t n_items_read_max, size_t n_items_read_min)
+				usys_t	ACharEncoder::Read		(char* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				off64_t	ACharEncoder::WriteOut	(io::stream::IOut<char>& os, off64_t n_items_wo_max, off64_t n_items_wo_min)
+				uoff_t	ACharEncoder::WriteOut	(io::stream::IOut<char>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				size_t	AWCharEncoder::Read		(wchar_t* arr_items_read, size_t n_items_read_max, size_t n_items_read_min)
+				usys_t	AWCharEncoder::Read		(wchar_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				off64_t	AWCharEncoder::WriteOut	(io::stream::IOut<wchar_t>& os, off64_t n_items_wo_max, off64_t n_items_wo_min)
+				uoff_t	AWCharEncoder::WriteOut	(io::stream::IOut<wchar_t>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

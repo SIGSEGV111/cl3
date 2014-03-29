@@ -44,7 +44,7 @@ namespace	cl3
 				if(l <= 0) throw "TException: printf format error (ctor)";
 
 				va_start(list, format);
-				message = (char*)malloc(l);
+				message = (char*)Alloc(l);
  				if(message == NULL) { va_end(list); throw "TException: out of memory (ctor)"; }
 				vsnprintf(message, l, format, list);
 				va_end(list);
@@ -56,7 +56,7 @@ namespace	cl3
 
 		CLASS	TException::~TException	()
 		{
-			free(message);
+			Free(message);
 		}
 
 		void	TException::Set	(const void* object, const char* codefile, const char* function, const char* expression, TException* inner, unsigned codeline)

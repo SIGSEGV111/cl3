@@ -30,19 +30,32 @@
 		{
 			namespace	types
 			{
-				typedef	uint8_t				u8;
-				typedef	int8_t				s8;
-				typedef	uint16_t			u16;
-				typedef	int16_t				s16;
-				typedef	uint32_t			u32;
-				typedef	int32_t				s32;
-				typedef	uint64_t			u64;
-				typedef	int64_t				s64;
+				typedef	uint8_t		u8_t;
+				typedef	int8_t		s8_t;
+				typedef	uint16_t	u16_t;
+				typedef	int16_t		s16_t;
+				typedef	uint32_t	u32_t;
+				typedef	int32_t		s32_t;
+				typedef	uint64_t	u64_t;
+				typedef	int64_t		s64_t;
 
-				typedef	float				f32;
-				typedef	double				f64;
+				typedef	float		f32_t;
+				typedef	double		f64_t;
 
-				typedef u8 byte;
+				typedef u8_t		byte_t;
+
+				#if (__SIZEOF_SIZE_T__ == 4)
+					typedef	u32_t	usys_t;
+					typedef	s32_t	ssys_t;
+				#elif (__SIZEOF_SIZE_T__ == 8)
+					typedef	u64_t	usys_t;
+					typedef	s64_t	ssys_t;
+				#else
+					#error "unknown wordsize"
+				#endif
+
+				typedef s64_t	soff_t;
+				typedef u64_t	uoff_t;
 			};
 		};
 	};
@@ -54,29 +67,40 @@
 			namespace	types
 			{
 				#if (_MSC_VER < 1300)
-					typedef	unsigned char		u8;
-					typedef	signed char			s8;
-					typedef	unsigned short		u16;
-					typedef	signed short		s16;
-					typedef	unsigned int		u32;
-					typedef	signed int			s32;
-					typedef	unsigned long long	u64;
-					typedef	signed long long	s64;
+					typedef	unsigned char		u8_t;
+					typedef	signed char			s8_t;
+					typedef	unsigned short		u16_t;
+					typedef	signed short		s16_t;
+					typedef	unsigned int		u32_t;
+					typedef	signed int			s32_t;
+					typedef	unsigned long long	u64_t;
+					typedef	signed long long	s64_t;
 				#else
-					typedef	unsigned __int8		u8;
-					typedef	signed __int8		s8;
-					typedef	unsigned __int16	u16;
-					typedef	signed __int16		s16;
-					typedef	unsigned __int32	u32;
-					typedef	signed __int32		s32;
-					typedef	unsigned __int64	u64;
-					typedef	signed __int64		s64;
+					typedef	unsigned __int8		u8_t;
+					typedef	signed __int8		s8_t;
+					typedef	unsigned __int16	u16_t;
+					typedef	signed __int16		s16_t;
+					typedef	unsigned __int32	u32_t;
+					typedef	signed __int32		s32_t;
+					typedef	unsigned __int64	u64_t;
+					typedef	signed __int64		s64_t;
 				#endif
 
-				typedef	float			f32;
-				typedef	double			f64;
+				typedef	float	f32_t;
+				typedef	double	f64_t;
 
-				typedef u8 byte;
+				typedef u8_t byte_t;
+
+				#ifdef _WIN64
+					typedef s64	ssys_t;
+					typedef u64	usys_t;
+				#else
+					typedef s32	ssys_t;
+					typedef u32	usys_t;
+				#endif
+
+				typedef s64_t	soff_t;
+				typedef u64_t	uoff_t;
 			};
 		};
 	};

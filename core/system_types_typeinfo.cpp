@@ -41,10 +41,10 @@ namespace	cl3
 				using namespace io::text;
 
 				//	from wikipedia: https://en.wikipedia.org/wiki/Jenkins_hash_function
-				static u32 JenkinsHash(const byte *key, size_t len)
+				static u32_t JenkinsHash(const byte_t *key, usys_t len)
 				{
-					u32 hash = 0;
-					for(size_t i = 0; i < len; ++i)
+					u32_t hash = 0;
+					for(usys_t i = 0; i < len; ++i)
 					{
 						hash += key[i];
 						hash += (hash << 10);
@@ -56,10 +56,10 @@ namespace	cl3
 					return hash;
 				}
 
-				u32 TRTTI::Hash() const
+				u32_t TRTTI::Hash() const
 				{
 					TUStringUPtr name(Name());
-					return JenkinsHash(reinterpret_cast<const u8*>(name.Object().ItemPtr(0)), name.Object().Count() * 4);
+					return JenkinsHash(reinterpret_cast<const u8_t*>(name.Object().ItemPtr(0)), name.Object().Count() * 4);
 				}
 
 
@@ -75,17 +75,17 @@ namespace	cl3
 				static const TReplace arr_replace[] =
 				{
 					{"char", "s8"},
-					{"unsigned char", "u8"},
+					{"unsigned char", "u8_t"},
 					{"signed char", "s8"},
 
 					{"short", "s16"},
 					{"unsigned short", "u16"},
 
 					{"int", "s32"},
-					{"unsigned int", "u32"},
+					{"unsigned int", "u32_t"},
 
 					{"long", sizeof(long) == 4 ? "s32" : sizeof(long) == 8 ? "s64" : NULL },
-					{"unsigned long", sizeof(long) == 4 ? "u32" : sizeof(long) == 8 ? "u64" : NULL },
+					{"unsigned long", sizeof(long) == 4 ? "u32_t" : sizeof(long) == 8 ? "u64" : NULL },
 
 					{"__int64", "s64"},
 					{"unsigned __int64", "u64"},
@@ -96,14 +96,14 @@ namespace	cl3
 					{"float", sizeof(float) == 4 ? "f32" : sizeof(float) == 8 ? "f64" : NULL },
 					{"double", sizeof(double) == 4 ? "f32" : sizeof(double) == 8 ? "f64" : NULL },
 
-					{"wchar_t", sizeof(wchar_t) == 1 ? "u8" : sizeof(wchar_t) == 2 ? "u16" : sizeof(wchar_t) == 4 ? "u32" : NULL },
+					{"wchar_t", sizeof(wchar_t) == 1 ? "u8_t" : sizeof(wchar_t) == 2 ? "u16" : sizeof(wchar_t) == 4 ? "u32_t" : NULL },
 
 					{NULL,NULL}
 				};
 
-				/*static	const char*	FindReplace	(const char* token, size_t token_length)
+				/*static	const char*	FindReplace	(const char* token, usys_t token_length)
 				{
-					for(size_t i = 0; arr_replace[i].wrong != NULL; i++)
+					for(usys_t i = 0; arr_replace[i].wrong != NULL; i++)
 					{
 						if(strlen(arr_replace[i].wrong) == token_length)
 						{
@@ -121,7 +121,7 @@ namespace	cl3
 					/*TUStringUPtr newname = MakeUniquePtr(new TUString());
 
 					const TUTF32* token_start = oldname.ItemPtr(0);
-					for(size_t i = 0; ; ++i)
+					for(usys_t i = 0; ; ++i)
 					{
 						switch(oldname[i].code)
 						{
@@ -141,8 +141,8 @@ namespace	cl3
 							case ']':
 							case '\0':
 							{
-								const size_t token_length = i - (token_start - oldname.ItemPtr(0));
-								size_t offset = 0;
+								const usys_t token_length = i - (token_start - oldname.ItemPtr(0));
+								usys_t offset = 0;
 
 								if( token_length >= 5 && memcmp("class",  token_start, 5) == 0 )
 								{

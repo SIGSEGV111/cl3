@@ -43,7 +43,7 @@ namespace	cl3
 			#if (CL3_OS == CL3_OS_POSIX)
 				typedef int TPID;
 			#elif (CL3_OS == CL3_OS_WINDOWS)
-				typedef u32 TPID;
+				typedef u32_t TPID;
 			#else
 				#error "define TPID for this OS"
 			#endif
@@ -70,7 +70,7 @@ namespace	cl3
 			class	THost
 			{
 				public:
-					CL3PUBF	size_t	EnumProcesses	(io::collection::IDynamicCollection<TProcessInfo>&) const;	//	enumerates all processes on this host and adds them to the list; returns the number of processes added
+					CL3PUBF	usys_t	EnumProcesses	(io::collection::IDynamicCollection<TProcessInfo>&) const;	//	enumerates all processes on this host and adds them to the list; returns the number of processes added
 			};
 
 			class	TProcess : public TProcessInfo
@@ -105,11 +105,11 @@ namespace	cl3
 					CL3PUBF	GETTER	void*	StackStart	() const;	//	start address of the execution stack - might be less than end (stack grows down)
 					CL3PUBF	GETTER	void*	StackEnd	() const;	//	end address of the execution stack - might be bigger than start (stack grows up)
 					CL3PUBF	GETTER	void*	StackCurrent() const;	//	current address of the stack pointer (NOTE: obviously highly volatile if the thread is not suspended)
-					CL3PUBF	GETTER	size_t	StackSize	() const;	//	returns the size in bytes of the stacks size
-					CL3PUBF	GETTER	size_t	StackFree	() const;	//	returns the size in bytes of free (still unused / available) stack space (computed from Current() and End())
-					CL3PUBF	GETTER	size_t	StackUsed	() const;	//	returns the size in bytes of used stack space (computed from Current() and Start())
+					CL3PUBF	GETTER	usys_t	StackSize	() const;	//	returns the size in byte_ts of the stacks size
+					CL3PUBF	GETTER	usys_t	StackFree	() const;	//	returns the size in byte_ts of free (still unused / available) stack space (computed from Current() and End())
+					CL3PUBF	GETTER	usys_t	StackUsed	() const;	//	returns the size in byte_ts of used stack space (computed from Current() and Start())
 
-					CL3PUBF	void	Start		(size_t sz_stack = -1UL);	//	starts the thread if it is not alive yet, throws if it is already alive
+					CL3PUBF	void	Start		(usys_t sz_stack = -1UL);	//	starts the thread if it is not alive yet, throws if it is already alive
 					CL3PUBF	void	Shutdown	();	//	sets the "request shutdown" flag, throws if the thread is not alive
 					CL3PUBF	void	Suspend		();	//	suspends the execution of the thread, throws if the thread is already suspended or not alive at all
 					CL3PUBF	void	Resume		();	//	resumes the execution of a suspended thread, throws if the thread is not suspended or not alive at all

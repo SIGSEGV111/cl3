@@ -38,8 +38,8 @@ namespace	cl3
 						using stream::IOut<TUTF32>::Write;
 						using stream::IOut<TUTF32>::ReadIn;
 
-						CL3PUBF	size_t	Write	(const char* arr_items_write, size_t n_items_write_max, size_t n_items_write_min = (size_t)-1);
-						CL3PUBF	off64_t	ReadIn	(io::stream::IIn<char>& is, off64_t n_items_ri_max, off64_t n_items_ri_min = (off64_t)-1);
+						CL3PUBF	usys_t	Write	(const char* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
+						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<char>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
 				};
 
 				class	AWCharDecoder : public virtual stream::IOut<TUTF32>, public virtual stream::IOut<wchar_t>
@@ -48,8 +48,8 @@ namespace	cl3
 						using stream::IOut<TUTF32>::Write;
 						using stream::IOut<TUTF32>::ReadIn;
 
-						CL3PUBF	size_t	Write	(const wchar_t* arr_items_write, size_t n_items_write_max, size_t n_items_write_min = (size_t)-1);
-						CL3PUBF	off64_t	ReadIn	(io::stream::IIn<wchar_t>& is, off64_t n_items_ri_max, off64_t n_items_ri_min = (off64_t)-1);
+						CL3PUBF	usys_t	Write	(const wchar_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
+						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<wchar_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
 				};
 
 				class	ACharEncoder : public virtual stream::IIn<TUTF32>, public virtual stream::IIn<char>
@@ -58,8 +58,8 @@ namespace	cl3
 						using stream::IIn<TUTF32>::Read;
 						using stream::IIn<TUTF32>::WriteOut;
 
-						CL3PUBF	size_t	Read	(char* arr_items_read, size_t n_items_read_max, size_t n_items_read_min = (size_t)-1);
-						CL3PUBF	off64_t	WriteOut(io::stream::IOut<char>& os, off64_t n_items_wo_max, off64_t n_items_wo_min = (off64_t)-1);
+						CL3PUBF	usys_t	Read	(char* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min = (usys_t)-1);
+						CL3PUBF	uoff_t	WriteOut(io::stream::IOut<char>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min = (uoff_t)-1);
 				};
 
 				class	AWCharEncoder : public virtual stream::IIn<TUTF32>, public virtual stream::IIn<wchar_t>
@@ -68,8 +68,8 @@ namespace	cl3
 						using stream::IIn<TUTF32>::Read;
 						using stream::IIn<TUTF32>::WriteOut;
 
-						CL3PUBF	size_t	Read	(wchar_t* arr_items_read, size_t n_items_read_max, size_t n_items_read_min = (size_t)-1);
-						CL3PUBF	off64_t	WriteOut(io::stream::IOut<wchar_t>& os, off64_t n_items_wo_max, off64_t n_items_wo_min = (off64_t)-1);
+						CL3PUBF	usys_t	Read	(wchar_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min = (usys_t)-1);
+						CL3PUBF	uoff_t	WriteOut(io::stream::IOut<wchar_t>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min = (uoff_t)-1);
 				};
 			}
 		}

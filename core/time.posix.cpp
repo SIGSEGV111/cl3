@@ -66,23 +66,23 @@ namespace	cl3
 
 				case TIME_CLOCK_PROCESS_USER:
 					CL3_NONCLASS_SYSERR(getrusage(RUSAGE_SELF, &ru));
-					return TTime(ru.ru_utime.tv_sec, (s64)ru.ru_utime.tv_usec * (s64)1000000000000);
+					return TTime(ru.ru_utime.tv_sec, (s64_t)ru.ru_utime.tv_usec * (s64_t)1000000000000);
 
 				case TIME_CLOCK_PROCESS_SYS:
 					CL3_NONCLASS_SYSERR(getrusage(RUSAGE_SELF, &ru));
-					return TTime(ru.ru_stime.tv_sec, (s64)ru.ru_stime.tv_usec * (s64)1000000000000);
+					return TTime(ru.ru_stime.tv_sec, (s64_t)ru.ru_stime.tv_usec * (s64_t)1000000000000);
 
 				case TIME_CLOCK_THREAD_USER:
 					CL3_NONCLASS_SYSERR(getrusage(RUSAGE_THREAD, &ru));
-					return TTime(ru.ru_utime.tv_sec, (s64)ru.ru_utime.tv_usec * (s64)1000000000000);
+					return TTime(ru.ru_utime.tv_sec, (s64_t)ru.ru_utime.tv_usec * (s64_t)1000000000000);
 
 				case TIME_CLOCK_THREAD_SYS:
 					CL3_NONCLASS_SYSERR(getrusage(RUSAGE_THREAD, &ru));
-					return TTime(ru.ru_stime.tv_sec, (s64)ru.ru_stime.tv_usec * (s64)1000000000000);
+					return TTime(ru.ru_stime.tv_sec, (s64_t)ru.ru_stime.tv_usec * (s64_t)1000000000000);
 			}
 
 			CL3_NONCLASS_SYSERR(clock_gettime(id, &ts));
-			return TTime((s64)ts.tv_sec, (s64)ts.tv_nsec * (s64)1000000000);
+			return TTime((s64_t)ts.tv_sec, (s64_t)ts.tv_nsec * (s64_t)1000000000);
 		}
 
 		/*TTime	TTime::LocalTime	() const

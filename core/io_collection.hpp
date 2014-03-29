@@ -44,14 +44,14 @@ namespace	cl3
 			{
 				virtual	bool	Match	(const T& item_match) const = 0;	//	compares "item_match" against the ciriteria and returns true if the item matches, false otherwise
 				virtual	void	Match	(const T* arr_items_match, bitmask::TBitmask& bm_result) const = 0;	//	compares all items within the array against the criteria and sets the coresponding bits in the bitmask to 1 if the item matches or to 0 if it does not match, the size of the array is taken from the bitmask
-				virtual	size_t	Match	(const T* arr_items_match, size_t n_items_match, list::TList<size_t>& ls_result, size_t offset = 0) const = 0;	//	adds the indices of the matching items to "ls_result" after adding "offset" to the index, the function retuns the number of items added/matched
+				virtual	usys_t	Match	(const T* arr_items_match, usys_t n_items_match, list::TList<usys_t>& ls_result, usys_t offset = 0) const = 0;	//	adds the indices of the matching items to "ls_result" after adding "offset" to the index, the function retuns the number of items added/matched
 			};
 
 			/*template<class T>
 			struct	IComparator : IMatcher<T>
 			{
 				virtual	int		Compare	(const T& item_compare) const = 0;	//	returns 0 if item_compare matches the reference, returns a value < 0 if the item is less then the reference, returns a value > 0 if the item is bigger than the reference
-				virtual	void	Compare	(const T* arr_items_compare, s8* arr_result, size_t n_items_compare) const = 0;	//	returns 0 if item_compare matches the reference, returns a value < 0 if the item is less then the reference, returns a value > 0 if the item is bigger than the reference
+				virtual	void	Compare	(const T* arr_items_compare, s8* arr_result, usys_t n_items_compare) const = 0;	//	returns 0 if item_compare matches the reference, returns a value < 0 if the item is less then the reference, returns a value > 0 if the item is bigger than the reference
 
 				virtual	bool	operator>	(const T& item_compare) const { return Compare(item_compare) >  0; }
 				virtual	bool	operator<	(const T& item_compare) const { return Compare(item_compare) <  0; }
@@ -63,15 +63,15 @@ namespace	cl3
 
 				virtual	void	Match	(const T* arr_items_match, bitmask::TBitmask& bm_result) const
 				{
-					const size_t n = bm_result.Count();
-					for(size_t i = 0; i < n; ++i)
+					const usys_t n = bm_result.Count();
+					for(usys_t i = 0; i < n; ++i)
 						bm_result.Bit(i, Match(arr_items_match[i]));
 				}
 
-				virtual	size_t	Match	(const T* arr_items_match, size_t n_items_match, list::TList<size_t>& ls_result, size_t offset = 0) const
+				virtual	usys_t	Match	(const T* arr_items_match, usys_t n_items_match, list::TList<usys_t>& ls_result, usys_t offset = 0) const
 				{
-					size_t n = 0;
-					for(size_t i = 0; i < n; i++)
+					usys_t n = 0;
+					for(usys_t i = 0; i < n; i++)
 						if(Match(arr_items_match[i]))
 						{
 							ls_result.Add(i + offset);
@@ -126,7 +126,7 @@ namespace	cl3
 			struct	IDynamicIterator : IStaticIterator<T>
 			{
 				virtual	void	Insert	(const T& item_insert) = 0;	//	inserts an item before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to it
-				virtual	void	Insert	(const T* arr_items_insert, size_t n_items_insert) = 0;	//	inserts items before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to the first of the inserted items (does nothing if the array is empty)
+				virtual	void	Insert	(const T* arr_items_insert, usys_t n_items_insert) = 0;	//	inserts items before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to the first of the inserted items (does nothing if the array is empty)
 				virtual	void	Remove	() = 0;	//	removes the current item and moves to the first item after the removed (if the collection supports ordering, or at a implementation choosen position otherwise - avoiding head/tail until the last item gets removed)
 			};
 
@@ -136,9 +136,9 @@ namespace	cl3
 				virtual	system::memory::TUniquePtr<IStaticIterator<T> >			CreateStaticIterator	() CL3_WARN_UNUSED_RESULT = 0;
 				virtual	system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT = 0;
 
-				virtual	GETTER	size_t	Count		() const = 0;
-				virtual	GETTER	bool	CountMin	(size_t count_min) const { return Count() >= count_min; }
-				virtual	GETTER	bool	CountMax	(size_t count_max) const { return Count() <= count_max; }
+				virtual	GETTER	usys_t	Count		() const = 0;
+				virtual	GETTER	bool	CountMin	(usys_t count_min) const { return Count() >= count_min; }
+				virtual	GETTER	bool	CountMax	(usys_t count_max) const { return Count() <= count_max; }
 			};
 
 			template<class T>
@@ -150,7 +150,7 @@ namespace	cl3
 				virtual	system::memory::TUniquePtr<IDynamicIterator<const T> >	CreateDynamicIterator	() const CL3_WARN_UNUSED_RESULT = 0;
 
 				virtual	void	Add		(const T& item_add) = 0;	//	inserts a single item into the collection, it is left to the implementation to determine where the new item is positioned
-				virtual	void	Add		(const T* arr_items_add, size_t n_items_add) = 0;	//	like above but for multiple items at once
+				virtual	void	Add		(const T* arr_items_add, usys_t n_items_add) = 0;	//	like above but for multiple items at once
 				virtual	void	Add		(const IStaticCollection<T>& collection) = 0;	//	inserts another collection into this collection, it is left to the implementation to determine where the new items are positioned
 				virtual	void	Remove	(const T* item_remove) = 0;	//	removes the specified item from the collection, the pointer is free to point to any valid item - the item needs not to be a member of the collection, if however so, then exactly the specified item is removed, if not, one item which compares equal to the specified item is removed - if multiple items compare equal to the specified item, the implementation is free to choose one among them
 			};
@@ -187,8 +187,8 @@ namespace	cl3
 							bool	MoveNext	();
 							bool	MovePrev	();
 
-							size_t	Read	(TT* arr_items_read, size_t n_items_read_max, size_t n_items_read_min = (size_t)-1);
-							size_t	WriteOut(stream::IOut<TT>& os, size_t n_items_wo_max, size_t n_items_wo_min = (size_t)-1);
+							usys_t	Read	(TT* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min = (usys_t)-1);
+							usys_t	WriteOut(stream::IOut<TT>& os, usys_t n_items_wo_max, usys_t n_items_wo_min = (usys_t)-1);
 					};
 
 					template<class TT>
@@ -196,8 +196,8 @@ namespace	cl3
 					{
 						public:
 							TT&		Item	();
-							size_t	Write	(const TT* arr_items_write, size_t n_items_write_max, size_t n_items_write_min = (size_t)-1);
-							size_t	ReadIn	(stream::IIn<TT>& is, size_t n_items_ri_max, size_t n_items_ri_min = (size_t)-1);
+							usys_t	Write	(const TT* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
+							usys_t	ReadIn	(stream::IIn<TT>& is, usys_t n_items_ri_max, usys_t n_items_ri_min = (usys_t)-1);
 					};
 
 					CLASS	TSelection	(IStaticCollection<T>* collection, IMatcher<T>* matcher) : collection(collection), matcher(matcher) {}
@@ -205,9 +205,9 @@ namespace	cl3
 					TIterator<T>*		CreateIterator	() { return new TIterator<T>(this); }
 					TIterator<const T>*	CreateIterator	() const { return new TIterator<const T>(this); }
 
-					size_t	Count		() const;
-					bool	CountMin	(size_t count_min) const;
-					bool	CountMax	(size_t count_max) const;
+					usys_t	Count		() const;
+					bool	CountMin	(usys_t count_min) const;
+					bool	CountMax	(usys_t count_max) const;
 			};*/
 		}
 	}

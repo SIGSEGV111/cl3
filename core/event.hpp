@@ -21,14 +21,15 @@
 
 #include "error-base.hpp"
 #include "system_memory.hpp"
-#include "util.hpp"
 #include "system_types_typeinfo.hpp"
 #include "system_compiler.hpp"
+#include "io_collection_basiclist.hpp"
 
 namespace	cl3
 {
 	namespace	event
 	{
+		using namespace system::types;
 		template<class TSender, class TData> class TEvent;
 
 		struct	CL3PUBT	IGenericObservable
@@ -98,8 +99,8 @@ namespace	cl3
 					CLASS	TStaticFuncReceiver	(FReceiver func, const TReceiverData& rdata) : rdata(rdata), func(func) {}
 				};
 
-				util::TCoreList<IReceiver*> receivers;
-				TEvent<IGenericObservable,void*>* on_change;
+				mutable io::collection::basiclist::TBasicList<IReceiver*> receivers;
+				mutable TEvent<IGenericObservable,void*>* on_change;
 
 				void	RaiseChanged	(EAction action, IReceiver* receiver) const
 				{
@@ -116,26 +117,26 @@ namespace	cl3
 
 				CLASS	~TEvent	()
 				{
-					const size_t n = receivers.Count();
-					for(size_t i = 0; i < n; ++i)
+					const usys_t n = receivers.Count();
+					for(usys_t i = 0; i < n; ++i)
 						if(dynamic_cast<__ICleanup*>(receivers[i]))	//	I clean up! :-)
 							delete receivers[i];
 					delete on_change;
 				}
 
 				//	NOTE: receiver which get registered during the execution of an Raise() will *NOT* get called for the current invocation
-				size_t	Raise		(TSender& sender, TData data)
+				usys_t	Raise		(TSender& sender, TData data)
 				{
-					const size_t n = receivers.Count();
-					for(size_t i = 0; i < n; ++i)
+					const usys_t n = receivers.Count();
+					for(usys_t i = 0; i < n; ++i)
 						receivers[i]->OnRaise(*this, sender, data);
 					return n;	//	return the number of receivers which received the event
 				}
 
-				size_t	Raise		(TSender* sender, TData data)
+				usys_t	Raise		(TSender* sender, TData data)
 				{
-					const size_t n = receivers.Count();
-					for(size_t i = 0; i < n; ++i)
+					const usys_t n = receivers.Count();
+					for(usys_t i = 0; i < n; ++i)
 						receivers[i]->OnRaise(*this, *sender, data);
 					return n;	//	return the number of receivers which received the event
 				}
@@ -147,7 +148,7 @@ namespace	cl3
 				void	Register	(IReceiver* receiver) const
 				{
 					RaiseChanged(ACTION_REGISTER, receiver);
-					const_cast<TEvent*>(this)->receivers.Push(receiver);
+					receivers.Push(receiver);
 				}
 
 				template<class TReceiver>
@@ -155,7 +156,7 @@ namespace	cl3
 				{
 					system::memory::TUniquePtr<IReceiver> proxy(new TMemberFuncReceiver<TReceiver>(receiver, func));
 					RaiseChanged(ACTION_REGISTER, proxy.Object());
-					const_cast<TEvent*>(this)->receivers.Push(proxy.Object());
+					receivers.Push(proxy.Object());
 					proxy.Reset();	//	reset after proxy has been successfully added to the list
 				}
 
@@ -164,7 +165,7 @@ namespace	cl3
 				{
 					system::memory::TUniquePtr<IReceiver> proxy(new TStaticFuncReceiver<TReceiverData>(func, rdata));
 					RaiseChanged(ACTION_REGISTER, proxy.Object());
-					const_cast<TEvent*>(this)->receivers.Push(proxy.Object());
+					receivers.Push(proxy.Object());
 					proxy.Reset();	//	reset after proxy has been successfully added to the list
 				}
 
@@ -176,12 +177,12 @@ namespace	cl3
 					//	and thus we need to scan less memory, and also if the receiver was registered multiple times, we remove
 					//	the last registry first, this makes the order a bit more stable, and requires less memory moving
 					//	however, this is an assumption for the "average" program...
-					const size_t n = receivers.Count();
-					for(size_t i = n; i > 0; --i)
+					const usys_t n = receivers.Count();
+					for(usys_t i = n; i > 0; --i)
 						if(receivers[i-1] == receiver)
 						{
 							RaiseChanged(ACTION_UNREGISTER, receivers[i]);
-							const_cast<TEvent*>(this)->receivers.Remove(i-1,1);
+							receivers.Remove(i-1,1);
 							return;	//	only remove one registry (the receiver might be registered multiple times)
 						}
 					//	fail if the receiver was not registered
@@ -191,14 +192,14 @@ namespace	cl3
 				template<class TReceiver>
 				void	Unregister	(TReceiver* receiver, void (TReceiver::*func)(TEvent&,TSender&,TData)) const
 				{
-					const size_t n = receivers.Count();
-					for(size_t i = n; i > 0; --i)
+					const usys_t n = receivers.Count();
+					for(usys_t i = n; i > 0; --i)
 					{
 						TMemberFuncReceiver<TReceiver>* proxy = dynamic_cast<TMemberFuncReceiver<TReceiver>*>(receivers[i-1]);
 						if(proxy != NULL && proxy->receiver == receiver && proxy->func == func)
 						{
 							RaiseChanged(ACTION_UNREGISTER, proxy);
-							const_cast<TEvent*>(this)->receivers.Remove(i-1,1);
+							receivers.Remove(i-1,1);
 							delete proxy;	//	clean up what we created in the first place
 							return;
 						}
@@ -209,14 +210,14 @@ namespace	cl3
 				template<class TReceiverData>
 				void	Unregister	(void (*func)(TEvent&,TSender&,TData,TReceiverData& rdata)) const
 				{
-					const size_t n = receivers.Count();
-					for(size_t i = n; i > 0; --i)
+					const usys_t n = receivers.Count();
+					for(usys_t i = n; i > 0; --i)
 					{
 						TStaticFuncReceiver<TReceiverData>* proxy = dynamic_cast<TStaticFuncReceiver<TReceiverData>*>(receivers[i-1]);
 						if(proxy != NULL && proxy->func == func)
 						{
 							RaiseChanged(ACTION_UNREGISTER, proxy);
-							const_cast<TEvent*>(this)->receivers.Remove(i-1,1);
+							receivers.Remove(i-1,1);
 							delete proxy;	//	clean up what we created in the first place
 							return;
 						}
@@ -227,14 +228,14 @@ namespace	cl3
 				template<class TReceiverData>
 				void	Unregister	(void (*func)(TEvent&,TSender&,TData,TReceiverData& rdata), const TReceiverData& rdata) const
 				{
-					const size_t n = receivers.Count();
-					for(size_t i = n; i > 0; --i)
+					const usys_t n = receivers.Count();
+					for(usys_t i = n; i > 0; --i)
 					{
 						TStaticFuncReceiver<TReceiverData>* proxy = dynamic_cast<TStaticFuncReceiver<TReceiverData>*>(receivers[i-1]);
 						if(proxy != NULL && proxy->func == func && proxy->rdata == rdata)
 						{
 							RaiseChanged(ACTION_UNREGISTER, proxy);
-							const_cast<TEvent*>(this)->receivers.Remove(i-1,1);
+							receivers.Remove(i-1,1);
 							delete proxy;	//	clean up what we created in the first place
 							return;
 						}
@@ -245,7 +246,7 @@ namespace	cl3
 				const TEvent<IGenericObservable,void*>&	OnChange	() const
 				{
 					if(on_change == NULL)
-						const_cast<TEvent*>(this)->on_change = new TEvent<IGenericObservable,void*>();
+						on_change = new TEvent<IGenericObservable,void*>();
 					return *on_change;
 				}
 		};

@@ -20,6 +20,7 @@
 #define	_include_cl3_core_system_memory_hpp_
 
 #include "system_compiler.hpp"
+#include "system_types.hpp"
 #include "error-base.hpp"
 #include "context.hpp"
 
@@ -31,6 +32,8 @@ namespace	cl3
 	{
 		namespace	memory
 		{
+			using namespace types;
+
 			enum	EUnqiuePtrType
 			{
 				UPTR_OBJECT,
@@ -94,10 +97,10 @@ namespace	cl3
 			class	CL3PUBT	TBadAllocException : public error::TException
 			{
 				protected:
-					size_t sz_bytes;
+					usys_t sz_byte_ts;
 
 				public:
-					CL3PUBF	CLASS	TBadAllocException	(size_t sz_bytes);
+					CL3PUBF	CLASS	TBadAllocException	(usys_t sz_byte_ts);
 					CL3PUBF	CLASS	TBadAllocException	(const TBadAllocException&);
 					CL3PUBF	virtual	~TBadAllocException	();
 			};
@@ -105,20 +108,20 @@ namespace	cl3
 			class	CL3PUBT	TDirtyAllocatorException : public error::TException
 			{
 				protected:
-					size_t sz_bytes;
+					usys_t sz_byte_ts;
 
 				public:
-					CL3PUBF	CLASS	TDirtyAllocatorException	(size_t sz_bytes);
+					CL3PUBF	CLASS	TDirtyAllocatorException	(usys_t sz_byte_ts);
 					CL3PUBF	CLASS	TDirtyAllocatorException	(const TDirtyAllocatorException&);
 					CL3PUBF	virtual	~TDirtyAllocatorException	();
 			};
 
 			struct	CL3PUBT	IDynamicAllocator
 			{
-				virtual	void*	Alloc	(size_t sz_bytes) CL3_WARN_UNUSED_RESULT = 0;
+				virtual	void*	Alloc	(usys_t sz_byte_ts) CL3_WARN_UNUSED_RESULT = 0;
 				virtual	void	Free	(void* p_mem) = 0;
-				virtual	void*	Realloc	(void* p_mem, size_t sz_bytes_new) CL3_WARN_UNUSED_RESULT = 0;
-				virtual	size_t	SizeOf	(void* p_mem) const GETTER = 0;
+				virtual	void*	Realloc	(void* p_mem, usys_t sz_byte_ts_new) CL3_WARN_UNUSED_RESULT = 0;
+				virtual	usys_t	SizeOf	(void* p_mem) const GETTER = 0;
 			};
 
 			class	CL3PUBT	TRestrictAllocator : public IDynamicAllocator
@@ -128,25 +131,25 @@ namespace	cl3
 
 				protected:
 					IDynamicAllocator* allocator;
-					size_t sz_limit;
-					size_t sz_current;
+					usys_t sz_limit;
+					usys_t sz_current;
 
 				public:
-					CL3PUBF	void*	Alloc	(size_t sz_bytes) CL3_WARN_UNUSED_RESULT;
+					CL3PUBF	void*	Alloc	(usys_t sz_byte_ts) CL3_WARN_UNUSED_RESULT;
 					CL3PUBF	void	Free	(void* p_mem);
-					CL3PUBF	void*	Realloc	(void* p_mem, size_t sz_bytes_new) CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	size_t	SizeOf	(void* p_mem) const GETTER;
+					CL3PUBF	void*	Realloc	(void* p_mem, usys_t sz_byte_ts_new) CL3_WARN_UNUSED_RESULT;
+					CL3PUBF	usys_t	SizeOf	(void* p_mem) const GETTER;
 
-					CL3PUBF	CLASS	TRestrictAllocator	(IDynamicAllocator* allocator, size_t sz_limit);
+					CL3PUBF	CLASS	TRestrictAllocator	(IDynamicAllocator* allocator, usys_t sz_limit);
 					CL3PUBF	CLASS	~TRestrictAllocator	();
 			};
 
 			CL3_PARAMETER_STACK_DECL(IDynamicAllocator*, allocator);
 
 			CL3PUBF	void	Free	(void*);
-			CL3PUBF	void*	Alloc	(size_t);
-			CL3PUBF	void*	Realloc	(void*, size_t);
-			CL3PUBF	size_t	SizeOf	(void*);
+			CL3PUBF	void*	Alloc	(usys_t);
+			CL3PUBF	void*	Realloc	(void*, usys_t);
+			CL3PUBF	usys_t	SizeOf	(void*);
 		}
 	}
 }

@@ -77,12 +77,12 @@ namespace	cl3
 				void	Normalize	();
 
 			protected:
-				s64	sec;	//	seconds since 1970-01-01 00:00 +0000 (UTC)
-				s64	asec;	//	atto-seconds (10^-18) of current second
+				s64_t	sec;	//	seconds since 1970-01-01 00:00 +0000 (UTC)
+				s64_t	asec;	//	atto-seconds (10^-18) of current second
 
 			public:
-				inline	s64	Seconds		() const { return sec; }
-				inline	s64	Attoseconds	() const { return asec; }
+				inline	s64_t	Seconds		() const { return sec; }
+				inline	s64_t	Attoseconds	() const { return asec; }
 
 				CL3PUBF	TTime&	operator+=	(const TTime op);
 				CL3PUBF	TTime&	operator-=	(const TTime op);
@@ -96,26 +96,26 @@ namespace	cl3
 				CL3PUBF	bool	operator==	(const TTime op) const;
 				CL3PUBF	bool	operator!=	(const TTime op) const;
 
-				CL3PUBF	s64				ConvertToI	(EUnit unit) const;
+				CL3PUBF	s64_t				ConvertToI	(EUnit unit) const;
 				CL3PUBF	double			ConvertToF	(EUnit unit) const;
-				CL3PUBF	static TTime	ConvertFrom	(EUnit unit, s64 value);
+				CL3PUBF	static TTime	ConvertFrom	(EUnit unit, s64_t value);
 				CL3PUBF	static TTime	ConvertFrom	(EUnit unit, double value);
 
 				CL3PUBF	static	TTime	Now			(EClock clock = TIME_CLOCK_REALTIME);
-				CL3PUBF	s64				UnixTimeI	() const;
+				CL3PUBF	s64_t				UnixTimeI	() const;
 				CL3PUBF	double			UnixTimeF	() const;
 				CL3PUBF	static	TTime	UnixTime	(double unixtime);
-				CL3PUBF	static	TTime	UnixTime	(s64 unixtime);
+				CL3PUBF	static	TTime	UnixTime	(s64_t unixtime);
 				CL3PUBF	operator timespec			() const;
 				CL3PUBF	operator timeval			() const;
 
 				inline	CLASS	TTime	() : sec(0), asec(0) {}
 				CL3PUBF	CLASS	TTime	(double Seconds);
-				CL3PUBF	CLASS	TTime	(s64 seconds, s64 attoseconds);
-				inline	CLASS	TTime	(s32 seconds) : sec(seconds), asec(0) {}
-				inline	CLASS	TTime	(s64 seconds) : sec(seconds), asec(0) {}
-				inline	CLASS	TTime	(struct timespec ts) : sec((s64)ts.tv_sec), asec((s64)ts.tv_nsec * (s64)1000000000LL) {}
-				inline	CLASS	TTime	(struct timeval tv) : sec((s64)tv.tv_sec), asec((s64)tv.tv_usec * (s64)1000000000000LL) {}
+				CL3PUBF	CLASS	TTime	(s64_t seconds, s64_t attoseconds);
+				inline	CLASS	TTime	(s32_t seconds) : sec(seconds), asec(0) {}
+				inline	CLASS	TTime	(s64_t seconds) : sec(seconds), asec(0) {}
+				inline	CLASS	TTime	(struct timespec ts) : sec((s64_t)ts.tv_sec), asec((s64_t)ts.tv_nsec * (s64_t)1000000000LL) {}
+				inline	CLASS	TTime	(struct timeval tv) : sec((s64_t)tv.tv_sec), asec((s64_t)tv.tv_usec * (s64_t)1000000000000LL) {}
 		};
 	}
 }

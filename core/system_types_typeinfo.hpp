@@ -257,11 +257,11 @@ namespace	cl3
 					FDeserialize deserialize_instance;	//	overwrites an existing instance with deserialized data
 					FDeserialize deserialize_ctor;	//	constructs a new instance from a stream by deserialization
 
-					size_t sz_bytes;	//	size of the datatype in bytes
+					usys_t sz_byte_ts;	//	size of the datatype in byte_ts
 					const std::type_info* sys_type_info;	//	pointer to the type-info structure provided by C++ typeid()
 
 					CL3PUBF	GETTER	io::text::string::TUStringUPtr Name() const;	//	platform independet human-readable type-name
-					CL3PUBF	GETTER	u32 Hash() const;	//	32bit hashcode based on type-name
+					CL3PUBF	GETTER	u32_t Hash() const;	//	32bit hashcode based on type-name
 				};
 
 				template<class T>

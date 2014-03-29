@@ -64,12 +64,12 @@ namespace
 		TEST(Time, InitFrom_sint64)
 		{
 			{
-				const TTime t1 = TTime::UnixTime((s64)8589934592LL);
+				const TTime t1 = TTime::UnixTime((s64_t)8589934592LL);
 				const TTime t2(8589934592LL,0);
 				EXPECT_TRUE(t1 == t2);
 			}
 			{
-				const TTime t1 = TTime::UnixTime((s64)-8589934592LL);
+				const TTime t1 = TTime::UnixTime((s64_t)-8589934592LL);
 				const TTime t2(-8589934592LL,0);
 				EXPECT_TRUE(t1 == t2);
 			}
@@ -139,14 +139,14 @@ namespace
 		{
 			{
 				const TTime t1(8589934592LL, 654743500000000LL);
-				const s64 ux_out = t1.UnixTimeI();
-				const s64 ux_exp = 8589934592LL;
+				const s64_t ux_out = t1.UnixTimeI();
+				const s64_t ux_exp = 8589934592LL;
 				EXPECT_TRUE(ux_out == ux_exp);
 			}
 			{
 				const TTime t1(-8589934592LL, -654743500000000LL);
-				const s64 ux_out = t1.UnixTimeI();
-				const s64 ux_exp = -8589934592LL;
+				const s64_t ux_out = t1.UnixTimeI();
+				const s64_t ux_exp = -8589934592LL;
 				EXPECT_TRUE(ux_out == ux_exp);
 			}
 		}
@@ -155,14 +155,14 @@ namespace
 		{
 			{
 				const TTime t1(1024LL, 976562500000000LL);
-				const f64 ux_out = t1.UnixTimeF();
-				const f64 ux_exp = 1024.0009765625;
+				const f64_t ux_out = t1.UnixTimeF();
+				const f64_t ux_exp = 1024.0009765625;
 				EXPECT_TRUE(ux_out == ux_exp);
 			}
 			{
 				const TTime t1(-1024LL, -976562500000000LL);
-				const f64 ux_out = t1.UnixTimeF();
-				const f64 ux_exp = -1024.0009765625;
+				const f64_t ux_out = t1.UnixTimeF();
+				const f64_t ux_exp = -1024.0009765625;
 				EXPECT_TRUE(ux_out == ux_exp);
 			}
 		}
@@ -203,13 +203,13 @@ namespace
 		{
 			{
 				const TTime t1(8589934592LL,0);
-				const s64 tt = t1.UnixTimeI();;
+				const s64_t tt = t1.UnixTimeI();;
 				const TTime t2 = tt;
 				EXPECT_TRUE(t1 == t2);
 			}
 			{
 				const TTime t1(-8589934592LL,0);
-				const s64 tt = t1.UnixTimeI();;
+				const s64_t tt = t1.UnixTimeI();;
 				const TTime t2 = tt;
 				EXPECT_TRUE(t1 == t2);
 			}

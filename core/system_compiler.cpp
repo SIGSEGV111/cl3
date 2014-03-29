@@ -30,11 +30,11 @@ namespace	std
 	const nothrow_t nothrow = {};
 }
 
-void* operator new(size_t sz) { return Alloc(sz); }
-void* operator new[](size_t sz) { return Alloc(sz); }
+void* operator new(usys_t sz) { return Alloc(sz); }
+void* operator new[](usys_t sz) { return Alloc(sz); }
 void operator delete(void* p_mem) throw() { Free(p_mem); }
 void operator delete[](void* p_mem) throw() { Free(p_mem); }
-void* operator new(size_t sz, const std::nothrow_t&) throw() { try { return Alloc(sz); } catch(...) { return NULL; } }
-void* operator new[](size_t sz, const std::nothrow_t&) throw() { try { return Alloc(sz); } catch(...) { return NULL; } }
+void* operator new(usys_t sz, const std::nothrow_t&) throw() { try { return Alloc(sz); } catch(...) { return NULL; } }
+void* operator new[](usys_t sz, const std::nothrow_t&) throw() { try { return Alloc(sz); } catch(...) { return NULL; } }
 void operator delete(void* p_mem, const std::nothrow_t&) throw() { Free(p_mem); }
 void operator delete[](void* p_mem, const std::nothrow_t&) throw() { Free(p_mem); }

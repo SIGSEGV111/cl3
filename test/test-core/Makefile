@@ -24,4 +24,4 @@ exe: $(OBJS)
 	$(CXX) -L../lib $(CXX_OPT) $(OBJS) -lcl3-core -lstdc++ -lrt -pthread -lgtest -lgmock ../lib/libgtest_main.a ../lib/libgmock_main.a -o $@
 
 run: exe
-	LD_LIBRARY_PATH=$(CURDIR)/../lib ./exe
+	LD_LIBRARY_PATH=$(CURDIR)/../lib valgrind -q ./exe

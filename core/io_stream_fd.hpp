@@ -40,19 +40,19 @@ namespace	cl3
 				#endif
 
 				//	generic buffered io-stream for interaction with operating systems io-structures (POSIX-fd, Windows HANDLE, etc.)
-				class	TFDStream : virtual IIn<byte>, virtual IOut<byte>, virtual AWriteOut<byte>
+				class	TFDStream : virtual IIn<byte_t>, virtual IOut<byte_t>, virtual AWriteOut<byte_t>
 				{
 					protected:
-						byte* p_buffer;
-						size_t sz_buffer;
+						byte_t* p_buffer;
+						usys_t sz_buffer;
 						TFD fd;
 
 					public:
-						CL3PUBF	size_t	Read	(byte* arr_items_read, size_t n_items_read_max, size_t n_items_read_min = (size_t)-1);
-						CL3PUBF	off64_t	Left	(size_t sz_unit = 1) const;
+						CL3PUBF	usys_t	Read	(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min = (usys_t)-1);
+						CL3PUBF	uoff_t	Left	(usys_t sz_unit = 1) const;
 
-						CL3PUBF	size_t	Write	(const byte* arr_items_write, size_t n_items_write_max, size_t n_items_write_min = (size_t)-1);
-						CL3PUBF	off64_t	Space	(size_t sz_unit = 1) const;
+						CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
+						CL3PUBF	uoff_t	Space	(usys_t sz_unit = 1) const;
 
 						CL3PUBF	CLASS	TFDStream	(TFD fd);	//	TFDStream takes ownership of the file-descriptor fd
 						CL3PUBF	CLASS	TFDStream	(const TFDStream&);

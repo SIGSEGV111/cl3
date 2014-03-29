@@ -79,9 +79,9 @@ namespace	cl3
 					//	584400 days from 0001-01-01 to 1601-01-01
 					//	   -11 days (thanks to Gregor XIII)
 					//	*86400 seconds per day
-					//const s64 add = offset_year1;
+					//const s64_t add = offset_year1;
 
-					s64 sec = li.QuadPart / 10000000LL;
+					s64_t sec = li.QuadPart / 10000000LL;
 					li.QuadPart -= sec * 10000000LL;
 
 					return TTime(sec - offset_unixtime, li.QuadPart * 100000000000LL);
@@ -114,7 +114,7 @@ namespace	cl3
 
 					total_time.QuadPart = kernel_time.QuadPart + user_time.QuadPart;
 
-					s64 sec = total_time.QuadPart / 10000000LL;
+					s64_t sec = total_time.QuadPart / 10000000LL;
 					total_time.QuadPart -= sec * 10000000LL;
 
 
@@ -128,7 +128,7 @@ namespace	cl3
 					user_time.LowPart = results[3].dwLowDateTime;
 					user_time.HighPart = results[3].dwHighDateTime;
 
-					s64 sec = user_time.QuadPart / 10000000LL;
+					s64_t sec = user_time.QuadPart / 10000000LL;
 					user_time.QuadPart -= sec * 10000000LL;
 
 					return TTime(sec, user_time.QuadPart * 100000000000LL);
@@ -141,7 +141,7 @@ namespace	cl3
 					kernel_time.LowPart = results[2].dwLowDateTime;
 					kernel_time.HighPart = results[2].dwHighDateTime;
 
-					s64 sec = kernel_time.QuadPart / 10000000LL;
+					s64_t sec = kernel_time.QuadPart / 10000000LL;
 					kernel_time.QuadPart -= sec * 10000000LL;
 
 					return TTime(sec, kernel_time.QuadPart * 100000000000LL);
@@ -162,7 +162,7 @@ namespace	cl3
 
 					total_time.QuadPart = kernel_time.QuadPart + user_time.QuadPart;
 
-					s64 sec = total_time.QuadPart / 10000000LL;
+					s64_t sec = total_time.QuadPart / 10000000LL;
 					total_time.QuadPart -= sec * 10000000LL;
 
 
@@ -176,7 +176,7 @@ namespace	cl3
 					user_time.LowPart = results[3].dwLowDateTime;
 					user_time.HighPart = results[3].dwHighDateTime;
 
-					s64 sec = user_time.QuadPart / 10000000LL;
+					s64_t sec = user_time.QuadPart / 10000000LL;
 					user_time.QuadPart -= sec * 10000000LL;
 
 					return TTime(sec, user_time.QuadPart * 100000000000LL);
@@ -189,7 +189,7 @@ namespace	cl3
 					kernel_time.LowPart = results[2].dwLowDateTime;
 					kernel_time.HighPart = results[2].dwHighDateTime;
 
-					s64 sec = kernel_time.QuadPart / 10000000LL;
+					s64_t sec = kernel_time.QuadPart / 10000000LL;
 					kernel_time.QuadPart -= sec * 10000000LL;
 
 					return TTime(sec, kernel_time.QuadPart * 100000000000LL);

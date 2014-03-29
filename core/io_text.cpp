@@ -37,7 +37,7 @@ namespace	cl3
 
 			//	*** TUTF32 ***
 
-			const TUTF32 TUTF32::TERMINATOR((u32)0);
+			const TUTF32 TUTF32::TERMINATOR((u32_t)0);
 
 			CLASS	TUTF32::TUTF32	(char chr)
 			{
@@ -75,61 +75,61 @@ namespace	cl3
 				return *this;
 			}
 
-			ITextReader&	ITextReader::operator>>	(s8& v)
+			ITextReader&	ITextReader::operator>>	(s8_t& v)
 			{
 				ParseInteger<true>(*this, v);
 				return *this;
 			}
 
-			ITextReader&	ITextReader::operator>>	(u8& v)
+			ITextReader&	ITextReader::operator>>	(u8_t& v)
 			{
 				ParseInteger<false>(*this, v);
 				return *this;
 			}
 
-			ITextReader&	ITextReader::operator>>	(s16& v)
+			ITextReader&	ITextReader::operator>>	(s16_t& v)
 			{
 				ParseInteger<true>(*this, v);
 				return *this;
 			}
 
-			ITextReader&	ITextReader::operator>>	(u16& v)
+			ITextReader&	ITextReader::operator>>	(u16_t& v)
 			{
 				ParseInteger<false>(*this, v);
 				return *this;
 			}
 
-			ITextReader&	ITextReader::operator>>	(s32& v)
+			ITextReader&	ITextReader::operator>>	(s32_t& v)
 			{
 				ParseInteger<true>(*this, v);
 				return *this;
 			}
 
-			ITextReader&	ITextReader::operator>>	(u32& v)
+			ITextReader&	ITextReader::operator>>	(u32_t& v)
 			{
 				ParseInteger<false>(*this, v);
 				return *this;
 			}
 
-			ITextReader&	ITextReader::operator>>	(s64& v)
+			ITextReader&	ITextReader::operator>>	(s64_t& v)
 			{
 				ParseInteger<true>(*this, v);
 				return *this;
 			}
 
-			ITextReader&	ITextReader::operator>>	(u64& v)
+			ITextReader&	ITextReader::operator>>	(u64_t& v)
 			{
 				ParseInteger<false>(*this, v);
 				return *this;
 			}
 
-			ITextReader&	ITextReader::operator>>	(f32& v)
+			ITextReader&	ITextReader::operator>>	(f32_t& v)
 			{
 				ParseFloat(*this, v);
 				return *this;
 			}
 
-			ITextReader&	ITextReader::operator>>	(f64& v)
+			ITextReader&	ITextReader::operator>>	(f64_t& v)
 			{
 				ParseFloat(*this, v);
 				return *this;
@@ -166,61 +166,61 @@ namespace	cl3
 				return *this;
 			}
 
-			ITextWriter&	ITextWriter::operator<<	(s8 v)
+			ITextWriter&	ITextWriter::operator<<	(s8_t v)
 			{
 				PrintInteger<true>(*this, v);
 				return *this;
 			}
 
-			ITextWriter&	ITextWriter::operator<<	(u8 v)
+			ITextWriter&	ITextWriter::operator<<	(u8_t v)
 			{
 				PrintInteger<true>(*this, v);
 				return *this;
 			}
 
-			ITextWriter&	ITextWriter::operator<<	(s16 v)
+			ITextWriter&	ITextWriter::operator<<	(s16_t v)
 			{
 				PrintInteger<true>(*this, v);
 				return *this;
 			}
 
-			ITextWriter&	ITextWriter::operator<<	(u16 v)
+			ITextWriter&	ITextWriter::operator<<	(u16_t v)
 			{
 				PrintInteger<true>(*this, v);
 				return *this;
 			}
 
-			ITextWriter&	ITextWriter::operator<<	(s32 v)
+			ITextWriter&	ITextWriter::operator<<	(s32_t v)
 			{
 				PrintInteger<true>(*this, v);
 				return *this;
 			}
 
-			ITextWriter&	ITextWriter::operator<<	(u32 v)
+			ITextWriter&	ITextWriter::operator<<	(u32_t v)
 			{
 				PrintInteger<true>(*this, v);
 				return *this;
 			}
 
-			ITextWriter&	ITextWriter::operator<<	(s64 v)
+			ITextWriter&	ITextWriter::operator<<	(s64_t v)
 			{
 				PrintInteger<true>(*this, v);
 				return *this;
 			}
 
-			ITextWriter&	ITextWriter::operator<<	(u64 v)
+			ITextWriter&	ITextWriter::operator<<	(u64_t v)
 			{
 				PrintInteger<true>(*this, v);
 				return *this;
 			}
 
-			ITextWriter&	ITextWriter::operator<<	(f32 v)
+			ITextWriter&	ITextWriter::operator<<	(f32_t v)
 			{
 				PrintFloat(*this, v);
 				return *this;
 			}
 
-			ITextWriter&	ITextWriter::operator<<	(f64 v)
+			ITextWriter&	ITextWriter::operator<<	(f64_t v)
 			{
 				PrintFloat(*this, v);
 				return *this;

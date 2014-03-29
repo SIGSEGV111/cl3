@@ -34,12 +34,12 @@ namespace	cl3
 		{
 			namespace	string
 			{
-				off64_t	TUString::Left	(size_t sz_unit) const
+				uoff_t	TUString::Left	(usys_t sz_unit) const
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				off64_t	TUString::Space	(size_t sz_unit) const
+				uoff_t	TUString::Space	(usys_t sz_unit) const
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -49,17 +49,17 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TUString::TUString	(const char*     str, size_t maxlen)
+				CLASS	TUString::TUString	(const char*     str, usys_t maxlen)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TUString::TUString	(const wchar_t* wstr, size_t maxlen)
+				CLASS	TUString::TUString	(const wchar_t* wstr, usys_t maxlen)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TUString::TUString	(const TUTF32*  ustr, size_t maxlen)
+				CLASS	TUString::TUString	(const TUTF32*  ustr, usys_t maxlen)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

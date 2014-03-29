@@ -42,10 +42,10 @@ namespace	cl3
 			{
 				using namespace error;
 
-				size_t	TFDStream::Read		(byte* arr_items_read, size_t n_items_read_max, size_t n_items_read_min)
+				usys_t	TFDStream::Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
 				{
 					bool b_would_block = false;
-					size_t n_already_read = 0;
+					usys_t n_already_read = 0;
 					errno = 0;	//	reset error indicator
 
 					do
@@ -59,8 +59,8 @@ namespace	cl3
 							CL3_CLASS_ERROR(pfd.revents != POLLIN, TException, "unknown events were returned by ::poll()");
 						}
 
-						const size_t n_read_now = n_items_read_max - n_already_read;	//	calculate how much to read at most in this loop iteration
-						const ssize_t status = ::read(fd, arr_items_read + n_already_read, n_read_now);	//	do the actual read-syscall to the kernel
+						const usys_t n_read_now = n_items_read_max - n_already_read;	//	calculate how much to read at most in this loop iteration
+						const ssys_t status = ::read(fd, arr_items_read + n_already_read, n_read_now);	//	do the actual read-syscall to the kernel
 
 						if(status > 0 && errno == 0)
 						{
@@ -90,13 +90,13 @@ namespace	cl3
 					return n_already_read;
 				}
 
-				off64_t	TFDStream::Left		(size_t sz_unit) const
+				uoff_t	TFDStream::Left		(usys_t sz_unit) const
 				{
-					CL3_CLASS_ARGUMENT_ERROR(sz_unit != 1, sz_unit, "this class only works with 1-byte-sized units");
+					CL3_CLASS_ARGUMENT_ERROR(sz_unit != 1, sz_unit, "this class only works with 1-byte_t-sized units");
 
 					errno = 0;
-					const off64_t current_offset = lseek64(fd, 0, SEEK_CUR);
-					if(current_offset == (off64_t)-1)
+					const uoff_t current_offset = lseek64(fd, 0, SEEK_CUR);
+					if(current_offset == (uoff_t)-1)
 					{
 						if(errno == ESPIPE)
 						{
@@ -108,7 +108,7 @@ namespace	cl3
 							else if((pfd.revents & POLLRDHUP) != 0)
 								return 0;
 							else
-								return (size_t)-1;
+								return (usys_t)-1;
 						}
 						else
 							//	error during lseek64
@@ -118,7 +118,7 @@ namespace	cl3
 					else
 					{
 						//	fd is seekable
-						off64_t end_offset, return_offset;
+						uoff_t end_offset, return_offset;
 						CL3_CLASS_SYSERR(end_offset = lseek64(fd, 0, SEEK_END));
 						CL3_CLASS_SYSERR(return_offset = lseek64(fd, current_offset, SEEK_SET));
 						CL3_CLASS_LOGIC_ERROR(return_offset != current_offset || end_offset < current_offset);
@@ -126,10 +126,10 @@ namespace	cl3
 					}
 				}
 
-				size_t	TFDStream::Write	(const byte* arr_items_write, size_t n_items_write_max, size_t n_items_write_min)
+				usys_t	TFDStream::Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
 					bool b_would_block = false;
-					size_t n_already_written = 0;
+					usys_t n_already_written = 0;
 					errno = 0;	//	reset error indicator
 
 					do
@@ -143,8 +143,8 @@ namespace	cl3
 							CL3_CLASS_ERROR(pfd.revents != POLLOUT, TException, "unknown events were returned by ::poll()");
 						}
 
-						const size_t n_write_now = n_items_write_max - n_already_written;	//	calculate how much to write at most in this loop iteration
-						const ssize_t status = ::write(fd, arr_items_write + n_already_written, n_write_now);	//	do the actual write-syscall to the kernel
+						const usys_t n_write_now = n_items_write_max - n_already_written;	//	calculate how much to write at most in this loop iteration
+						const ssys_t status = ::write(fd, arr_items_write + n_already_written, n_write_now);	//	do the actual write-syscall to the kernel
 
 						if(status > 0 && errno == 0)
 						{
@@ -175,9 +175,9 @@ namespace	cl3
 					return n_already_written;
 				}
 
-				off64_t	TFDStream::Space	(size_t sz_unit) const
+				uoff_t	TFDStream::Space	(usys_t sz_unit) const
 				{
-					CL3_CLASS_ARGUMENT_ERROR(sz_unit != 1, sz_unit, "this class only works with 1-byte-sized units");
+					CL3_CLASS_ARGUMENT_ERROR(sz_unit != 1, sz_unit, "this class only works with 1-byte_t-sized units");
 					struct ::pollfd pfd = { fd, POLLOUT, 0 };
 					CL3_CLASS_SYSERR(::poll(&pfd, 1, 0));
 					if((pfd.revents & POLLOUT) != 0)
@@ -185,7 +185,7 @@ namespace	cl3
 					else if((pfd.revents & POLLHUP) != 0)
 						return 0;
 					else
-						return (size_t)-1;
+						return (usys_t)-1;
 				}
 
 				CLASS	TFDStream::TFDStream	(TFD fd) : p_buffer(NULL), sz_buffer(0), fd(fd)

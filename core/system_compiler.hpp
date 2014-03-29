@@ -270,8 +270,8 @@ namespace	cl3
 	CL3PUBF	void* operator new(size_t);
 	CL3PUBF	void* operator new[](size_t);
 
-	CL3PUBF	void operator delete(void* ptr) throw();
-	CL3PUBF	void operator delete[](void* ptr) throw();
+	CL3PUBF	void operator delete(void*) throw();
+	CL3PUBF	void operator delete[](void*) throw();
 
 	inline void* operator new(size_t, void* ptr) { return ptr; }
 	inline void* operator new[](size_t, void* ptr) { return ptr; }
