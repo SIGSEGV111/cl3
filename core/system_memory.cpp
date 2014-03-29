@@ -33,7 +33,7 @@ namespace	cl3
 		{
 			using namespace error;
 
-			CLASS	TDirtyAllocatorException::TDirtyAllocatorException	(size_t sz_bytes) : TException("destroying allocator in which still some memory is allocated (size: %zd bytes)", sz_bytes), sz_bytes(sz_bytes) {}
+			CLASS	TDirtyAllocatorException::TDirtyAllocatorException	(size_t sz_bytes) : TException("destroying non-empty allocator (allocated size: %zd bytes)", sz_bytes), sz_bytes(sz_bytes) {}
 			CLASS	TDirtyAllocatorException::TDirtyAllocatorException	(const TDirtyAllocatorException& dae) : TException(dae), sz_bytes(dae.sz_bytes) {}
 			CLASS	TDirtyAllocatorException::~TDirtyAllocatorException	() {}
 

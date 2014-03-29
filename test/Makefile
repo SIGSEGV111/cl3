@@ -9,7 +9,7 @@ prereqs: gtest/lib/.libs/libgtest_main.a gmock/lib/.libs/libgmock_main.a
 gtest/lib/.libs/libgtest_main.a:
 	cd gtest && ./configure && make
 
-gmock/lib/.libs/libgmock_main.a:
+gmock/lib/.libs/libgmock_main.a: gtest/lib/.libs/libgtest_main.a
 	cd gmock && ./configure --with-gtest=../gtest && make
 
 test-core:
