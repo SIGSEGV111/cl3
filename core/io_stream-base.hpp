@@ -75,7 +75,7 @@ namespace	cl3
 			};
 
 			template<class T>
-			struct	IIn : virtual IStream<T>, virtual system::task::synchronization::IInterlocked
+			struct	IIn : virtual IStream<T>
 			{
 				virtual	usys_t	Read	(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min = (usys_t)-1) = 0;	//	reads at least "n_items_read_min" and at most "n_items_read_max" items from the stream into "arr_items_read", returns the amount of items actually read
 				virtual	uoff_t	WriteOut(IOut<T>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min = (uoff_t)-1) = 0;
@@ -83,7 +83,7 @@ namespace	cl3
 			};
 
 			template<class T>
-			struct	IOut : virtual IStream<T>, virtual system::task::synchronization::IInterlocked
+			struct	IOut : virtual IStream<T>
 			{
 				virtual	usys_t	Write	(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1) = 0;
 				virtual	uoff_t	ReadIn	(IIn<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1) = 0;

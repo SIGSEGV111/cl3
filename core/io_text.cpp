@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <wchar.h>
+#include <string.h>
 
 namespace	cl3
 {

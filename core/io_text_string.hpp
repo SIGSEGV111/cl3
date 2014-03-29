@@ -84,12 +84,12 @@ namespace	cl3
 				class	CL3PUBT	TCString
 				{
 					protected:
-						byte_t* arr_byte_ts;
-						usys_t n_byte_ts;
+						byte_t* arr_bytes;
+						usys_t n_bytes;
 
 					public:
-						byte_t*			Bytes		() const { return arr_byte_ts; }
-						usys_t			Count		() const { return n_byte_ts; }
+						byte_t*			Bytes		() const { return arr_bytes; }
+						usys_t			Count		() const { return n_bytes; }
 
 						CL3PUBF	CLASS	TCString	(const TUString&, const encoding::ICodec*);
 				};

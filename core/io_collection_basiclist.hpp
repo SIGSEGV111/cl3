@@ -21,7 +21,8 @@
 
 #include "system_memory.hpp"
 #include "system_types.hpp"
-#include <string.h>
+
+extern "C" void* memmove(void* dest, const void* src, size_t n) throw();
 
 namespace	cl3
 {

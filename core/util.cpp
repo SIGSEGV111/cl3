@@ -25,6 +25,7 @@
 #include <string.h>
 #include "util.hpp"
 #include "system_memory.hpp"
+#include "system_types_typeinfo.hpp"
 #include "error-base.hpp"
 
 namespace	cl3
@@ -53,10 +54,14 @@ namespace	cl3
 // 			return buffer;
 // 		}
 
-		TUniquePtr<char,UPTR_MALLOC> mkstrcpy(const char* str)
+		TUniquePtr<char,UPTR_MALLOC> mkstrcpy(const char* str, system::memory::IDynamicAllocator* local_allocator)
 		{
+			if(local_allocator == NULL)
+				local_allocator = CL3_PARAMETER_STACK_VALUE(allocator);
+			CL3_PARAMETER_STACK_PUSH(allocator, local_allocator);
+
 			usys_t l = ::strlen(str) + 1;
-			TUniquePtr<char,UPTR_MALLOC> cpy(MakeUniquePtr<UPTR_MALLOC>((char*)Alloc(l)));
+			TUniquePtr<char,UPTR_MALLOC> cpy(MakeUniquePtr<UPTR_MALLOC>(Alloc<char>(l)));
 			::memcpy(&cpy.Object(), str, l);
 			return cpy;
 		}

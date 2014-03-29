@@ -36,6 +36,7 @@ namespace	cl3
 				namespace	_
 				{
 					struct	TMutexData;
+					struct	TRWMutexData;
 
 					enum	EMutexEvent
 					{
@@ -63,14 +64,19 @@ namespace	cl3
 					};
 				}
 
+				enum	EAccess
+				{
+					MUTEX_ACCESS_READ,
+					MUTEX_ACCESS_WRITE
+				};
+
 				struct	IMutex
 				{
-					virtual	void	Acquire	() = 0;
-					virtual	bool	Acquire	(time::TTime timeout) CL3_WARN_UNUSED_RESULT = 0;
-					virtual	void	Release	() = 0;
-					virtual	bool	Acquired() const = 0;	//	returns wheter or not, the calling thread has acquired this mutex
-
-					inline	bool	TryAcquire	() CL3_WARN_UNUSED_RESULT { return Acquire(time::TTime(0,0)); }
+					virtual	void	Acquire		(EAccess) = 0;
+					virtual	bool	Acquire		(time::TTime timeout, EAccess) CL3_WARN_UNUSED_RESULT = 0;
+					virtual	void	Release		(EAccess) = 0;
+					virtual	bool	HasAcquired	(EAccess) const GETTER = 0;	//	returns wheter or not, the calling thread has acquired this mutex
+					inline	bool	TryAcquire	(EAccess access) CL3_WARN_UNUSED_RESULT { return Acquire(time::TTime(0,0), access); }
 				};
 
 				struct	ISignal
@@ -85,47 +91,67 @@ namespace	cl3
 					private:
 						_::TMutexData* const data;
 
-						CLASS	TMutex		(const TMutex&);
-						TMutex&	operator=	(const TMutex&);
+						CLASS TMutex(const TMutex&);
+						TMutex& operator=(const TMutex&);
 
 					public:
-						GETTER	bool	Enabled	() const { return data != NULL; }
-						CL3PUBF	void	Acquire	();
-						CL3PUBF	bool	Acquire	(time::TTime timeout) CL3_WARN_UNUSED_RESULT;
-						CL3PUBF	void	Release	();
-						CL3PUBF	bool	Acquired() const;
+						CL3PUBF	void	Acquire		(EAccess access = MUTEX_ACCESS_WRITE);
+						CL3PUBF	bool	Acquire		(time::TTime timeout, EAccess access = MUTEX_ACCESS_WRITE) CL3_WARN_UNUSED_RESULT;
+						CL3PUBF	void	Release		(EAccess access = MUTEX_ACCESS_WRITE);
+						CL3PUBF	bool	HasAcquired	(EAccess access = MUTEX_ACCESS_WRITE) const GETTER;
 
-						CL3PUBF	CLASS	TMutex	(bool enabled);
+						CL3PUBF	CLASS	TMutex	();
 						CL3PUBF	CLASS	~TMutex	();
 				};
 
-				struct	IInterlocked
-				{
-					virtual	GETTER	IMutex&	Mutex	() = 0;
-				};
-
-				class	TDemandInterlocked : IInterlocked
+				class	TRWMutex : public IMutex
 				{
 					private:
-						TMutex mutex;
+						_::TRWMutexData* const data;
 
-					protected:
-						CLASS	TDemandInterlocked	(bool enabled) : mutex(enabled) {}
+						CLASS TRWMutex(const TRWMutex&);
+						TRWMutex& operator=(const TRWMutex&);
 
 					public:
-						GETTER	IMutex&	Mutex	() { return mutex; }
+						CL3PUBF	void	Acquire		(EAccess access);
+						CL3PUBF	bool	Acquire		(time::TTime timeout, EAccess access) CL3_WARN_UNUSED_RESULT;
+						CL3PUBF	void	Release		(EAccess access);
+						CL3PUBF	bool	HasAcquired	(EAccess access) const GETTER;
+
+						CL3PUBF	CLASS	TRWMutex	();
+						CL3PUBF	CLASS	~TRWMutex	();
+				};
+
+				/*struct	IInterlocked
+				{
+					virtual	GETTER	IMutex&	Mutex	() = 0;
+				};*/
+
+				template<class T>
+				class	TInterlocked : public TRWMutex
+				{
+					protected:
+						T object;
+
+					public:
+						inline	const T&	R	() const GETTER	{ CL3_CLASS_LOGIC_ERROR(!HasAcquired(MUTEX_ACCESS_READ)); return object; }
+						inline	T&			W	() GETTER		{ CL3_CLASS_LOGIC_ERROR(!HasAcquired(MUTEX_ACCESS_WRITE)); return object; }
+
+						CLASS	TInterlocked	() : object() {}
+						CLASS	TInterlocked	(const T& object) : object(object) {}
 				};
 
 				class	TInterlockedRegion
 				{
 					private:
+						EAccess access;
 						IMutex* mutex;
 
 						CLASS	TInterlockedRegion	(const TInterlockedRegion&);
 
 					public:
-						CLASS	TInterlockedRegion	(IMutex* mutex) : mutex(mutex)	{ mutex->Acquire(); }
-						CLASS	~TInterlockedRegion	()								{ mutex->Release(); }
+						CLASS	TInterlockedRegion	(IMutex* mutex, EAccess access) : access(access), mutex(mutex) { mutex->Acquire(access); }
+						CLASS	~TInterlockedRegion	() { mutex->Release(access); }
 				};
 
 				#define	CL3_CLASS_INTERLOCKED_REGION_BEGIN	{ cl3::system::task::synchronization::TInterlockedRegion __interlocked_region(&this->Mutex());

@@ -257,7 +257,7 @@ namespace	cl3
 					FDeserialize deserialize_instance;	//	overwrites an existing instance with deserialized data
 					FDeserialize deserialize_ctor;	//	constructs a new instance from a stream by deserialization
 
-					usys_t sz_byte_ts;	//	size of the datatype in byte_ts
+					usys_t sz_bytes;	//	size of the datatype in byte_ts
 					const std::type_info* sys_type_info;	//	pointer to the type-info structure provided by C++ typeid()
 
 					CL3PUBF	GETTER	io::text::string::TUStringUPtr Name() const;	//	platform independet human-readable type-name
@@ -364,37 +364,37 @@ namespace	cl3
 					const static TRTTI rtti;
 				};
 
-				template<class T> const FDestructor				TCTTI<T>::dtor		= _::TImpl<T, _::is_destructible<T>::value>::dtor;
-				template<class T> const FStandardConstructor	TCTTI<T>::ctor		= _::TImpl<T, _::is_default_constructible<T>::value>::ctor;
-				template<class T> const FCopyConstructor		TCTTI<T>::copyctor	= _::TImpl<T, _::is_copy_constructible<T>::value>::copyctor;
-				template<class T> const io::text::FPrint		TCTTI<T>::print		= _::TImpl<T, _::is_printable<T>::value>::print;
+				template<class T> const FDestructor				TCTTI<T>::dtor					= _::TImpl<T, _::is_destructible<T>::value>::dtor;
+				template<class T> const FStandardConstructor	TCTTI<T>::ctor					= _::TImpl<T, _::is_default_constructible<T>::value>::ctor;
+				template<class T> const FCopyConstructor		TCTTI<T>::copyctor				= _::TImpl<T, _::is_copy_constructible<T>::value>::copyctor;
+				template<class T> const io::text::FPrint		TCTTI<T>::print					= _::TImpl<T, _::is_printable<T>::value>::print;
 				template<class T> const FSerialize				TCTTI<T>::serialize				= _::TImpl<T, _::is_serializable<T>::value>::serialize;
 				template<class T> const FDeserialize			TCTTI<T>::deserialize_instance	= _::TImpl<T, _::is_deserializable_instance<T>::value>::deserinst;
 				template<class T> const FDeserialize			TCTTI<T>::deserialize_ctor		= _::TImpl<T, _::is_deserializable_ctor<T>::value>::deserctor;
 				template<class T> const TRTTI					TCTTI<T>::rtti		= { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, serialize, deserialize_instance, deserialize_ctor, sizeof(T), &typeid(T) };
 
-				template<class T> const FDestructor				TCTTI<const T>::dtor		= _::TImpl<T, _::is_destructible<T>::value>::dtor;
-				template<class T> const FStandardConstructor	TCTTI<const T>::ctor		= _::TImpl<T, _::is_default_constructible<T>::value>::ctor;
-				template<class T> const FCopyConstructor		TCTTI<const T>::copyctor	= _::TImpl<T, _::is_copy_constructible<T>::value>::copyctor;
-				template<class T> const io::text::FPrint		TCTTI<const T>::print		= _::TImpl<T, _::is_printable<T>::value>::print;
+				template<class T> const FDestructor				TCTTI<const T>::dtor					= _::TImpl<T, _::is_destructible<T>::value>::dtor;
+				template<class T> const FStandardConstructor	TCTTI<const T>::ctor					= _::TImpl<T, _::is_default_constructible<T>::value>::ctor;
+				template<class T> const FCopyConstructor		TCTTI<const T>::copyctor				= _::TImpl<T, _::is_copy_constructible<T>::value>::copyctor;
+				template<class T> const io::text::FPrint		TCTTI<const T>::print					= _::TImpl<T, _::is_printable<T>::value>::print;
 				template<class T> const FSerialize				TCTTI<const T>::serialize				= _::TImpl<T, _::is_serializable<T>::value>::serialize;
 				template<class T> const FDeserialize			TCTTI<const T>::deserialize_instance	= NULL;
 				template<class T> const FDeserialize			TCTTI<const T>::deserialize_ctor		= _::TImpl<T, _::is_deserializable_ctor<T>::value>::deserctor;
 				template<class T> const TRTTI					TCTTI<const T>::rtti		= { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, serialize, deserialize_instance, deserialize_ctor, sizeof(T), &typeid(T) };
 
-				template<class T> const FDestructor				TCTTI<T*>::dtor			= NULL;
-				template<class T> const FStandardConstructor	TCTTI<T*>::ctor			= NULL;
-				template<class T> const FCopyConstructor		TCTTI<T*>::copyctor		= NULL;
-				template<class T> const io::text::FPrint		TCTTI<T*>::print		= _::TImpl<T*, _::is_printable<T*>::value>::print;
+				template<class T> const FDestructor				TCTTI<T*>::dtor					= NULL;
+				template<class T> const FStandardConstructor	TCTTI<T*>::ctor					= NULL;
+				template<class T> const FCopyConstructor		TCTTI<T*>::copyctor				= NULL;
+				template<class T> const io::text::FPrint		TCTTI<T*>::print				= _::TImpl<T*, _::is_printable<T*>::value>::print;
 				template<class T> const FSerialize				TCTTI<T*>::serialize			= NULL;
 				template<class T> const FDeserialize			TCTTI<T*>::deserialize_instance	= NULL;
 				template<class T> const FDeserialize			TCTTI<T*>::deserialize_ctor		= NULL;
 				template<class T> const TRTTI					TCTTI<T*>::rtti			= { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, serialize, deserialize_instance, deserialize_ctor, sizeof(T), &typeid(T) };
 
-				template<class T> const FDestructor				TCTTI<T&>::dtor			= NULL;
-				template<class T> const FStandardConstructor	TCTTI<T&>::ctor			= NULL;
-				template<class T> const FCopyConstructor		TCTTI<T&>::copyctor		= NULL;
-				template<class T> const io::text::FPrint		TCTTI<T&>::print		= _::TImpl<T&, _::is_printable<T&>::value>::print;
+				template<class T> const FDestructor				TCTTI<T&>::dtor					= NULL;
+				template<class T> const FStandardConstructor	TCTTI<T&>::ctor					= NULL;
+				template<class T> const FCopyConstructor		TCTTI<T&>::copyctor				= NULL;
+				template<class T> const io::text::FPrint		TCTTI<T&>::print				= _::TImpl<T&, _::is_printable<T&>::value>::print;
 				template<class T> const FSerialize				TCTTI<T&>::serialize			= NULL;
 				template<class T> const FDeserialize			TCTTI<T&>::deserialize_instance	= NULL;
 				template<class T> const FDeserialize			TCTTI<T&>::deserialize_ctor		= NULL;
@@ -415,6 +415,15 @@ namespace	cl3
 					return Stringify(system::types::typeinfo::TCTTI<T>::print, &object);
 				}
 			}
+		}
+	}
+
+	namespace	system
+	{
+		namespace	memory
+		{
+			template<class T>	T*	Alloc	(usys_t n_items)				{ return reinterpret_cast<T*>(Alloc(n_items, &typeinfo::TCTTI<T>::rtti)); }
+			template<class T>	T*	Realloc	(T* p_mem, usys_t n_items_new)	{ return reinterpret_cast<T*>(Realloc(p_mem, n_items_new, &typeinfo::TCTTI<T>::rtti)); }
 		}
 	}
 }

@@ -33,12 +33,12 @@ namespace	cl3
 		{
 			using namespace error;
 
-			CLASS	TDirtyAllocatorException::TDirtyAllocatorException	(usys_t sz_byte_ts) : TException("destroying non-empty allocator (allocated size: %zd byte_ts)", sz_byte_ts), sz_byte_ts(sz_byte_ts) {}
-			CLASS	TDirtyAllocatorException::TDirtyAllocatorException	(const TDirtyAllocatorException& dae) : TException(dae), sz_byte_ts(dae.sz_byte_ts) {}
+			CLASS	TDirtyAllocatorException::TDirtyAllocatorException	(usys_t sz_bytes) : TException("destroying non-empty allocator (allocated size: %zd byte_ts)", sz_bytes), sz_bytes(sz_bytes) {}
+			CLASS	TDirtyAllocatorException::TDirtyAllocatorException	(const TDirtyAllocatorException& dae) : TException(dae), sz_bytes(dae.sz_bytes) {}
 			CLASS	TDirtyAllocatorException::~TDirtyAllocatorException	() {}
 
-			CLASS	TBadAllocException::TBadAllocException	(usys_t sz_byte_ts) : TException("memory allocation failed (size: %zd byte_ts)", sz_byte_ts), sz_byte_ts(sz_byte_ts) {}
-			CLASS	TBadAllocException::TBadAllocException	(const TBadAllocException& bae) : TException(bae), sz_byte_ts(bae.sz_byte_ts) {}
+			CLASS	TBadAllocException::TBadAllocException	(usys_t sz_bytes) : TException("memory allocation failed (size: %zd byte_ts)", sz_bytes), sz_bytes(sz_bytes) {}
+			CLASS	TBadAllocException::TBadAllocException	(const TBadAllocException& bae) : TException(bae), sz_bytes(bae.sz_bytes) {}
 			CLASS	TBadAllocException::~TBadAllocException	() {}
 
 			/*******************************************************/
@@ -48,19 +48,19 @@ namespace	cl3
 				::free(p_mem);
 			}
 
-			void*	cxx_malloc	(usys_t sz_byte_ts)
+			void*	cxx_malloc	(usys_t sz_bytes)
 			{
-				//	malloc() will not be called when sz_byte_ts == 0, so p must be initilized to NULL
+				//	malloc() will not be called when sz_bytes == 0, so p must be initilized to NULL
 				void* p = NULL;
-				CL3_NONCLASS_ERROR(sz_byte_ts != 0 && (p = ::malloc(sz_byte_ts)) == NULL, TBadAllocException, sz_byte_ts);
+				CL3_NONCLASS_ERROR(sz_bytes != 0 && (p = ::malloc(sz_bytes)) == NULL, TBadAllocException, sz_bytes);
 				return p;
 			}
 
-			void*	cxx_realloc	(void* p_mem, usys_t sz_byte_ts)
+			void*	cxx_realloc	(void* p_mem, usys_t sz_bytes)
 			{
-				//	realloc() will not be called when sz_byte_ts == 0, so p must be initilized to NULL
+				//	realloc() will not be called when sz_bytes == 0, so p must be initilized to NULL
 				void* p = NULL;
-				CL3_NONCLASS_ERROR(sz_byte_ts != 0 && (p = ::realloc(p_mem, sz_byte_ts)) == NULL, TBadAllocException, sz_byte_ts);
+				CL3_NONCLASS_ERROR(sz_bytes != 0 && (p = ::realloc(p_mem, sz_bytes)) == NULL, TBadAllocException, sz_bytes);
 				return p;
 			}
 
@@ -74,9 +74,9 @@ namespace	cl3
 
 			struct	TDefaultAllocator : IDynamicAllocator
 			{
-				void*	Alloc	(usys_t sz_byte_ts)
+				void*	Alloc	(usys_t sz_bytes)
 				{
-					return cxx_malloc(sz_byte_ts);
+					return cxx_malloc(sz_bytes);
 				}
 
 				void	Free	(void* p_mem)
@@ -84,9 +84,9 @@ namespace	cl3
 					cxx_free(p_mem);
 				}
 
-				void*	Realloc	(void* p_mem, usys_t sz_byte_ts_new)
+				void*	Realloc	(void* p_mem, usys_t sz_bytes_new)
 				{
-					return cxx_realloc(p_mem, sz_byte_ts_new);
+					return cxx_realloc(p_mem, sz_bytes_new);
 				}
 
 				usys_t	SizeOf	(void* p_mem) const
@@ -100,10 +100,10 @@ namespace	cl3
 
 			/*******************************************************/
 
-			void*	TRestrictAllocator::Alloc	(usys_t sz_byte_ts)
+			void*	TRestrictAllocator::Alloc	(usys_t sz_bytes)
 			{
-				CL3_CLASS_ERROR(sz_current + sz_byte_ts > sz_limit, TBadAllocException, sz_byte_ts);
-				void* p_mem = allocator->Alloc(sz_byte_ts);
+				CL3_CLASS_ERROR(sz_current + sz_bytes > sz_limit, TBadAllocException, sz_bytes);
+				void* p_mem = allocator->Alloc(sz_bytes);
 				const usys_t sz_mb = allocator->SizeOf(p_mem);
 				sz_current += sz_mb;
 				return p_mem;
@@ -117,19 +117,29 @@ namespace	cl3
 				sz_current -= sz_mb;
 			}
 
-			void*	TRestrictAllocator::Realloc	(void* p_mem, usys_t sz_byte_ts_new)
+			void*	TRestrictAllocator::Realloc	(void* p_mem, usys_t sz_bytes_new)
 			{
 				const usys_t sz_mb = allocator->SizeOf(p_mem);
 				CL3_CLASS_LOGIC_ERROR(sz_mb > sz_current);
-				p_mem = allocator->Realloc(p_mem, sz_byte_ts_new);
+				p_mem = allocator->Realloc(p_mem, sz_bytes_new);
 				sz_current -= sz_mb;
-				sz_current += sz_byte_ts_new;
+				sz_current += sz_bytes_new;
 				return p_mem;
 			}
 
 			usys_t	TRestrictAllocator::SizeOf	(void* p_mem) const
 			{
 				return allocator->SizeOf(p_mem);
+			}
+
+			usys_t	TRestrictAllocator::BytesAllocated	() const
+			{
+				return sz_current;
+			}
+
+			usys_t	TRestrictAllocator::BytesLimit		() const
+			{
+				return sz_limit;
 			}
 
 			CLASS	TRestrictAllocator::TRestrictAllocator	(IDynamicAllocator* allocator, usys_t sz_limit) : allocator(allocator), sz_limit(sz_limit), sz_current(0)
@@ -139,7 +149,8 @@ namespace	cl3
 
 			CLASS	TRestrictAllocator::~TRestrictAllocator	()
 			{
-				CL3_CLASS_ERROR(sz_current != 0, TDirtyAllocatorException, sz_current);
+				//CL3_CLASS_ERROR(BytesAllocated() != 0, TDirtyAllocatorException, sz_current);
+				//	FIXME: print diagnostic
 			}
 
 
@@ -149,6 +160,7 @@ namespace	cl3
 
 			static TDefaultAllocator default_allocator;
 			CL3_PARAMETER_STACK_PUSH(allocator, &default_allocator);
+			IDynamicAllocator* exception_allocator = &default_allocator;	//	FIXME: assign a dedicated allocator which keeps a reserve
 
 			/*******************************************************/
 
@@ -166,17 +178,19 @@ namespace	cl3
 				}
 			}
 
-			void*	Alloc	(usys_t sz_byte_ts)
+			void*	Alloc	(usys_t n_items, const typeinfo::TRTTI* rtti)
 			{
-				if(sz_byte_ts)
+				const usys_t sz_bytes = rtti == NULL ? n_items : n_items * rtti->sz_bytes;
+
+				if(sz_bytes)
 				{
 					IDynamicAllocator* const owner = CL3_PARAMETER_STACK_VALUE(allocator);
 					IDynamicAllocator** p_base;
 
 					if(owner)
-						p_base = reinterpret_cast<IDynamicAllocator**>(owner->Alloc(sizeof(IDynamicAllocator*) + sz_byte_ts));
+						p_base = reinterpret_cast<IDynamicAllocator**>(owner->Alloc(sizeof(IDynamicAllocator*) + sz_bytes));
 					else
-						p_base = reinterpret_cast<IDynamicAllocator**>(cxx_malloc(sizeof(IDynamicAllocator*) + sz_byte_ts));
+						p_base = reinterpret_cast<IDynamicAllocator**>(cxx_malloc(sizeof(IDynamicAllocator*) + sz_bytes));
 
 					*p_base = owner;
 					return p_base+1;
@@ -185,19 +199,21 @@ namespace	cl3
 					return NULL;
 			}
 
-			void*	Realloc	(void* p_mem, usys_t sz_byte_ts_new)
+			void*	Realloc	(void* p_mem, usys_t n_items_new, const typeinfo::TRTTI* rtti)
 			{
+				const usys_t sz_bytes_new = rtti == NULL ? n_items_new : n_items_new * rtti->sz_bytes;
+
 				if(p_mem)
 				{
 					IDynamicAllocator** p_base = reinterpret_cast<IDynamicAllocator**>(p_mem)-1;
 					IDynamicAllocator* const owner = *p_base;
 
-					if(sz_byte_ts_new)
+					if(sz_bytes_new)
 					{
 						if(owner)
-							p_base = reinterpret_cast<IDynamicAllocator**>(owner->Realloc(p_base, sizeof(IDynamicAllocator*) + sz_byte_ts_new));
+							p_base = reinterpret_cast<IDynamicAllocator**>(owner->Realloc(p_base, sizeof(IDynamicAllocator*) + sz_bytes_new));
 						else
-							p_base = reinterpret_cast<IDynamicAllocator**>(cxx_realloc(p_base, sizeof(IDynamicAllocator*) + sz_byte_ts_new));
+							p_base = reinterpret_cast<IDynamicAllocator**>(cxx_realloc(p_base, sizeof(IDynamicAllocator*) + sz_bytes_new));
 
 						return p_base+1;
 					}
@@ -208,7 +224,7 @@ namespace	cl3
 					}
 				}
 				else
-					return Alloc(sz_byte_ts_new);
+					return Alloc(sz_bytes_new, rtti);
 			}
 
 			usys_t	SizeOf	(void* p_mem)

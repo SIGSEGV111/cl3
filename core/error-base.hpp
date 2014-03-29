@@ -37,7 +37,7 @@ namespace	cl3
 				const char* codefile;	//	sourcecode file (from __FILE__ macro)
 				const char* function;	//	function name in which the exception occurecd (from __FUNCDNAME__ or __PRETTY_FUNCTION__ macro)
 				const char* expression;	//	the expression that triggered the exception (from ERROR(expression, excepclass, args))
-				TException* inner;	//	inner exception (can be NULL)
+				TException* inner;		//	inner exception (can be NULL)
 				unsigned codeline;		//	sourcecode line number (from __LINE__ macro)
 
 				CL3PUBF	CLASS	TException	(const char* format, ...);	//	printf-syle ctor
@@ -152,7 +152,7 @@ namespace	cl3
 				throw exception; \
 			} while(false)
 
-		//	just throw without check for an expression to be true
+			//	just throw without check for an expression to be true
 			#define CL3_CLASS_FAIL(TExceptionClass, ...) do \
 			{ \
 				TExceptionClass exception(__VA_ARGS__); \

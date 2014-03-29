@@ -35,6 +35,7 @@ namespace	cl3
 
 		CLASS	TException::TException	(const char* format, ...) : message(NULL), object(NULL), codefile(NULL), function(NULL), expression(NULL), inner(NULL), codeline(0)
 		{
+			CL3_PARAMETER_STACK_PUSH(allocator, exception_allocator);
 			if(format)
 			{
 				va_list list;
@@ -44,14 +45,14 @@ namespace	cl3
 				if(l <= 0) throw "TException: printf format error (ctor)";
 
 				va_start(list, format);
-				message = (char*)Alloc(l);
+				message = Alloc<char>(l);
  				if(message == NULL) { va_end(list); throw "TException: out of memory (ctor)"; }
 				vsnprintf(message, l, format, list);
 				va_end(list);
 			}
 		}
 
-		CLASS	TException::TException	(const TException& e) : message(util::mkstrcpy(e.message).Claim()), object(e.object), codefile(e.codefile), function(e.function), expression(e.expression), inner(e.inner), codeline(e.codeline)
+		CLASS	TException::TException	(const TException& e) : message(util::mkstrcpy(e.message, exception_allocator).Claim()), object(e.object), codefile(e.codefile), function(e.function), expression(e.expression), inner(e.inner), codeline(e.codeline)
 		{}
 
 		CLASS	TException::~TException	()

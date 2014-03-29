@@ -82,7 +82,7 @@ namespace	cl3
 					CL3PUBF	GETTER	const io::collection::IDynamicCollection<IThread*>&		Threads	() const;	//	list of threads that belong to this process. for the calling threads process all registered threads are listed (even dead ones), but for other processed only those the operating system knows about are listed (usually only those that are alive)
 			};
 
-			class	IThread : public synchronization::IInterlocked
+			class	IThread
 			{
 				public:
 					enum	EState
@@ -92,22 +92,20 @@ namespace	cl3
 						STATE_ALIVE_EXECUTING
 					};
 
-					CL3PUBF	GETTER	static	IThread&	Self	() { CL3_NOT_IMPLEMENTED; }	//	returns the IThread& for the calling thread
+					CL3PUBF	static	IThread&	Self	() GETTER { CL3_NOT_IMPLEMENTED; }	//	returns the IThread& for the calling thread
 
-					CL3PUBF	GETTER	synchronization::IMutex&	Mutex	();	//	returns the mutex that protects this IThread-structure
+					CL3PUBF	const char*	Name	() const GETTER;	//	returns the name of the thread
+					CL3PUBF	TProcess&	Process	() GETTER;	//	returns the process to which the thread belongs
+					CL3PUBF	EState		State	() const GETTER;	//	returns the threads current state
+					CL3PUBF	THost&		Host	() const GETTER;	//	returns the host machine this thread is executed on (possibly volatile in cluster systems)
+					CL3PUBF	io::collection::IDynamicCollection<TCPU*>&	Affinity() GETTER;	//	returns the threads CPU affinity list
 
-					CL3PUBF	GETTER	const char*	Name	() const;	//	returns the name of the thread
-					CL3PUBF	GETTER	TProcess&	Process	();	//	returns the process to which the thread belongs
-					CL3PUBF	GETTER	EState		State	() const;	//	returns the threads current state
-					CL3PUBF	GETTER	THost&		Host	() const;	//	returns the host machine this thread is executed on (possibly volatile in cluster systems)
-					CL3PUBF	GETTER	io::collection::IDynamicCollection<TCPU*>&	Affinity();	//	returns the threads CPU affinity list
-
-					CL3PUBF	GETTER	void*	StackStart	() const;	//	start address of the execution stack - might be less than end (stack grows down)
-					CL3PUBF	GETTER	void*	StackEnd	() const;	//	end address of the execution stack - might be bigger than start (stack grows up)
-					CL3PUBF	GETTER	void*	StackCurrent() const;	//	current address of the stack pointer (NOTE: obviously highly volatile if the thread is not suspended)
-					CL3PUBF	GETTER	usys_t	StackSize	() const;	//	returns the size in byte_ts of the stacks size
-					CL3PUBF	GETTER	usys_t	StackFree	() const;	//	returns the size in byte_ts of free (still unused / available) stack space (computed from Current() and End())
-					CL3PUBF	GETTER	usys_t	StackUsed	() const;	//	returns the size in byte_ts of used stack space (computed from Current() and Start())
+					CL3PUBF	void*	StackStart	() const GETTER;	//	start address of the execution stack - might be less than end (stack grows down)
+					CL3PUBF	void*	StackEnd	() const GETTER;	//	end address of the execution stack - might be bigger than start (stack grows up)
+					CL3PUBF	void*	StackCurrent() const GETTER;	//	current address of the stack pointer (NOTE: obviously highly volatile if the thread is not suspended)
+					CL3PUBF	usys_t	StackSize	() const GETTER;	//	returns the size in byte_ts of the stacks size
+					CL3PUBF	usys_t	StackFree	() const GETTER;	//	returns the size in byte_ts of free (still unused / available) stack space (computed from Current() and End())
+					CL3PUBF	usys_t	StackUsed	() const GETTER;	//	returns the size in byte_ts of used stack space (computed from Current() and Start())
 
 					CL3PUBF	void	Start		(usys_t sz_stack = -1UL);	//	starts the thread if it is not alive yet, throws if it is already alive
 					CL3PUBF	void	Shutdown	();	//	sets the "request shutdown" flag, throws if the thread is not alive
@@ -115,7 +113,7 @@ namespace	cl3
 					CL3PUBF	void	Resume		();	//	resumes the execution of a suspended thread, throws if the thread is not suspended or not alive at all
 
 				protected:
-					CL3PUBF	SETTER	void	Name	(const char* new_name);
+					CL3PUBF	void	Name		(const char* new_name) SETTER;
 					virtual	void	ThreadMain	() = 0;
 			};
 		}

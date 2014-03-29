@@ -27,7 +27,7 @@ namespace	cl3
 	namespace	util
 	{
 // 		CL3PUBF	system::memory::TUniquePtr<char,system::memory::UPTR_MALLOC> mprintf(const char* format, ...);
-		CL3PUBF	system::memory::TUniquePtr<char,system::memory::UPTR_MALLOC> mkstrcpy(const char* str);
+		CL3PUBF	system::memory::TUniquePtr<char,system::memory::UPTR_MALLOC> mkstrcpy(const char* str, system::memory::IDynamicAllocator* allocator = NULL);
 	}
 }
 

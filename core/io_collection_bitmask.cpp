@@ -17,8 +17,8 @@
 */
 
 #include "system_memory.hpp"
+#include "system_types_typeinfo.hpp"
 #include "io_collection_bitmask.hpp"
-#include <malloc.h>
 #include <string.h>
 
 namespace	cl3
@@ -30,6 +30,7 @@ namespace	cl3
 			namespace	bitmask
 			{
 				using namespace system::memory;
+				using namespace system::types;
 
 				usys_t		TBitmask::Count		() const
 				{
@@ -38,27 +39,27 @@ namespace	cl3
 
 				void		TBitmask::Count		(usys_t new_count)
 				{
-					arr_bits = reinterpret_cast<byte_t*>(Realloc(arr_bits, new_count / 8U + (((new_count % 8U) != 0U) ? 1U : 0U)));
+					arr_bits = Realloc<byte_t>(arr_bits, new_count / 8U + (((new_count % 8U) != 0U) ? 1U : 0U));
 					n_bits = new_count;
 				}
 
 				void		TBitmask::Bit		(usys_t index, bool value)
 				{
-					const usys_t index_byte_t = index / 8U;
-					const u8_t mask = 1U << (index % 8U);
+					const usys_t index_byte = index / 8U;
+					const byte_t mask = 1U << (index % 8U);
 
 					if(value)
-						arr_bits[index_byte_t] |= mask;
+						arr_bits[index_byte] |= mask;
 					else
-						arr_bits[index_byte_t] &= !mask;
+						arr_bits[index_byte] &= ~mask;
 				}
 
 				bool		TBitmask::Bit		(usys_t index)
 				{
-					const usys_t index_byte_t = index / 8U;
-					const u8_t mask = 1U << (index % 8U);
+					const usys_t index_byte = index / 8U;
+					const byte_t mask = 1U << (index % 8U);
 
-					return (arr_bits[index_byte_t] &= mask) != 0U;
+					return (arr_bits[index_byte] & mask) != 0U;
 				}
 
 				TBitmask&	TBitmask::operator=	(const TBitmask& rhs)
@@ -74,13 +75,13 @@ namespace	cl3
 
 				CLASS		TBitmask::TBitmask	(const TBitmask& other)
 				{
-					arr_bits = reinterpret_cast<byte_t*>(Alloc(other.n_bits / 8U + (((other.n_bits % 8U) != 0U) ? 1U : 0U)));
+					arr_bits = reinterpret_cast<byte_t*>(Alloc<byte_t>(other.n_bits / 8U + (((other.n_bits % 8U) != 0U) ? 1U : 0U)));
 					n_bits = other.n_bits;
 				}
 
 				CLASS		TBitmask::~TBitmask	()
 				{
-					free(arr_bits);
+					Free(arr_bits);
 				}
 			}
 		}

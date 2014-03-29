@@ -21,7 +21,6 @@
 
 #include "io_collection_bitmask.hpp"
 #include "io_stream-base.hpp"
-#include "system_memory.hpp"
 #include "event.hpp"
 
 namespace	cl3

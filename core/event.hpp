@@ -20,8 +20,6 @@
 #define	_include_cl3_core_event_hpp_
 
 #include "error-base.hpp"
-#include "system_memory.hpp"
-#include "system_types_typeinfo.hpp"
 #include "system_compiler.hpp"
 #include "io_collection_basiclist.hpp"
 

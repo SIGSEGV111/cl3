@@ -30,6 +30,14 @@ namespace	cl3
 {
 	namespace	system
 	{
+		namespace	types
+		{
+			namespace	typeinfo
+			{
+				struct	TRTTI;
+			}
+		}
+
 		namespace	memory
 		{
 			using namespace types;
@@ -97,10 +105,10 @@ namespace	cl3
 			class	CL3PUBT	TBadAllocException : public error::TException
 			{
 				protected:
-					usys_t sz_byte_ts;
+					usys_t sz_bytes;
 
 				public:
-					CL3PUBF	CLASS	TBadAllocException	(usys_t sz_byte_ts);
+					CL3PUBF	CLASS	TBadAllocException	(usys_t sz_bytes);
 					CL3PUBF	CLASS	TBadAllocException	(const TBadAllocException&);
 					CL3PUBF	virtual	~TBadAllocException	();
 			};
@@ -108,17 +116,17 @@ namespace	cl3
 			class	CL3PUBT	TDirtyAllocatorException : public error::TException
 			{
 				protected:
-					usys_t sz_byte_ts;
+					usys_t sz_bytes;
 
 				public:
-					CL3PUBF	CLASS	TDirtyAllocatorException	(usys_t sz_byte_ts);
+					CL3PUBF	CLASS	TDirtyAllocatorException	(usys_t sz_bytes);
 					CL3PUBF	CLASS	TDirtyAllocatorException	(const TDirtyAllocatorException&);
 					CL3PUBF	virtual	~TDirtyAllocatorException	();
 			};
 
 			struct	CL3PUBT	IDynamicAllocator
 			{
-				virtual	void*	Alloc	(usys_t sz_byte_ts) CL3_WARN_UNUSED_RESULT = 0;
+				virtual	void*	Alloc	(usys_t sz_bytes) CL3_WARN_UNUSED_RESULT = 0;
 				virtual	void	Free	(void* p_mem) = 0;
 				virtual	void*	Realloc	(void* p_mem, usys_t sz_byte_ts_new) CL3_WARN_UNUSED_RESULT = 0;
 				virtual	usys_t	SizeOf	(void* p_mem) const GETTER = 0;
@@ -135,21 +143,26 @@ namespace	cl3
 					usys_t sz_current;
 
 				public:
-					CL3PUBF	void*	Alloc	(usys_t sz_byte_ts) CL3_WARN_UNUSED_RESULT;
+					CL3PUBF	void*	Alloc	(usys_t sz_bytes) CL3_WARN_UNUSED_RESULT;
 					CL3PUBF	void	Free	(void* p_mem);
 					CL3PUBF	void*	Realloc	(void* p_mem, usys_t sz_byte_ts_new) CL3_WARN_UNUSED_RESULT;
 					CL3PUBF	usys_t	SizeOf	(void* p_mem) const GETTER;
+					CL3PUBF	usys_t	BytesAllocated	() const GETTER;
+					CL3PUBF	usys_t	BytesLimit		() const GETTER;
 
 					CL3PUBF	CLASS	TRestrictAllocator	(IDynamicAllocator* allocator, usys_t sz_limit);
 					CL3PUBF	CLASS	~TRestrictAllocator	();
 			};
 
 			CL3_PARAMETER_STACK_DECL(IDynamicAllocator*, allocator);
+			CL3PUBF extern IDynamicAllocator* exception_allocator;
 
 			CL3PUBF	void	Free	(void*);
-			CL3PUBF	void*	Alloc	(usys_t);
-			CL3PUBF	void*	Realloc	(void*, usys_t);
+			CL3PUBF	void*	Alloc	(usys_t, const typeinfo::TRTTI*);
+			CL3PUBF	void*	Realloc	(void*, usys_t, const typeinfo::TRTTI*);
 			CL3PUBF	usys_t	SizeOf	(void*);
+
+			//template<class T>	T*	Alloc	(usys_t n_items);	//	defined in system_types_typeinfo.hpp
 		}
 	}
 }

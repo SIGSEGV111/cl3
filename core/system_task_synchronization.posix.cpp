@@ -46,94 +46,74 @@ namespace	cl3
 					};
 				}
 
-				void	TMutex::Acquire	()
+				void	TMutex::Acquire		(EAccess)
 				{
-					if(data)
-					{
-						IThread* const self = &task::IThread::Self();
-						if(data->owner == self)
-							data->n_times++;
-						else
-							CL3_CLASS_PTHREAD_ERROR(pthread_mutex_lock(&data->mutex));
-					}
+					IThread* const self = &task::IThread::Self();
+					if(data->owner == self)
+						data->n_times++;
+					else
+						CL3_CLASS_PTHREAD_ERROR(pthread_mutex_lock(&data->mutex));
 				}
 
-				bool	TMutex::Acquire	(time::TTime timeout)
+				bool	TMutex::Acquire		(time::TTime timeout, EAccess)
 				{
-					if(data)
+					IThread* const self = &task::IThread::Self();
+					if(data->owner == self)
 					{
-						IThread* const self = &task::IThread::Self();
-						if(data->owner == self)
-						{
-							data->n_times++;
-							return true;
-						}
-						else
-						{
-							const struct ::timespec ts = timeout;
-							const int status = pthread_mutex_timedlock(&data->mutex, &ts);
-							switch(status)
-							{
-								case 0:
-									data->owner = self;
-									data->n_times = 1;
-									return true;
-								case ETIMEDOUT:
-									return false;
-								default:
-									CL3_CLASS_PTHREAD_ERROR(status);
-							}
-							CL3_UNREACHABLE;
-						}
+						data->n_times++;
+						return true;
 					}
 					else
-						return true;
-				}
-
-				void	TMutex::Release	()
-				{
-					if(data)
 					{
-						CL3_CLASS_ERROR(data->owner != &task::IThread::Self(), TException, "mutex is not owned by the calling thread");
-						if(--data->n_times == 0)
+						const struct ::timespec ts = timeout;
+						const int status = pthread_mutex_timedlock(&data->mutex, &ts);
+						switch(status)
 						{
-							data->owner = NULL;
-							CL3_CLASS_PTHREAD_ERROR(pthread_mutex_unlock(&data->mutex));
+							case 0:
+								data->owner = self;
+								data->n_times = 1;
+								return true;
+							case ETIMEDOUT:
+								return false;
+							default:
+								CL3_CLASS_PTHREAD_ERROR(status);
 						}
+						CL3_UNREACHABLE;
 					}
 				}
 
-				bool	TMutex::Acquired() const
+				void	TMutex::Release		(EAccess)
 				{
-					if(data)
-						return data->owner == &task::IThread::Self();
-					else
-						return true;
-				}
-
-				CLASS	TMutex::TMutex	(bool enabled) : data(enabled ? new _::TMutexData() : NULL)
-				{
-					if(enabled)
+					CL3_CLASS_ERROR(data->owner != &task::IThread::Self(), TException, "mutex is not owned by the calling thread");
+					if(--data->n_times == 0)
 					{
 						data->owner = NULL;
-						data->n_times = 0;
-						pthread_mutexattr_t attr;
-						CL3_CLASS_PTHREAD_ERROR(pthread_mutexattr_init(&attr));
-						CL3_CLASS_PTHREAD_ERROR(pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK));
-						CL3_CLASS_PTHREAD_ERROR(pthread_mutexattr_setrobust(&attr, PTHREAD_MUTEX_ROBUST));
-						CL3_CLASS_PTHREAD_ERROR(pthread_mutex_init(&data->mutex, &attr));
-						CL3_CLASS_PTHREAD_ERROR(pthread_mutexattr_destroy(&attr));
+						CL3_CLASS_PTHREAD_ERROR(pthread_mutex_unlock(&data->mutex));
 					}
+				}
+
+				bool	TMutex::HasAcquired	(EAccess) const
+				{
+					return data->owner == &task::IThread::Self();
+				}
+
+				CLASS	TMutex::TMutex	() : data(new _::TMutexData())
+				{
+					data->owner = NULL;
+					data->n_times = 0;
+					pthread_mutexattr_t attr;
+					CL3_CLASS_PTHREAD_ERROR(pthread_mutexattr_init(&attr));
+					CL3_CLASS_PTHREAD_ERROR(pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK));
+					CL3_CLASS_PTHREAD_ERROR(pthread_mutexattr_setrobust(&attr, PTHREAD_MUTEX_ROBUST));
+					CL3_CLASS_PTHREAD_ERROR(pthread_mutex_init(&data->mutex, &attr));
+					CL3_CLASS_PTHREAD_ERROR(pthread_mutexattr_destroy(&attr));
 				}
 
 				CLASS	TMutex::~TMutex	()
 				{
-					if(data)
-					{
-						CL3_CLASS_ERROR(data->owner != &task::IThread::Self() || data->n_times != 1, TException, "mutex can only be destroyed by a thread which has currently acquired the mutex exactly once");
-						CL3_CLASS_PTHREAD_ERROR(pthread_mutex_unlock(&data->mutex));
-						CL3_CLASS_PTHREAD_ERROR(pthread_mutex_destroy(&data->mutex));
-					}
+					CL3_CLASS_ERROR(data->owner != &task::IThread::Self() || data->n_times != 1, TException, "mutex can only be destroyed by a thread which has currently acquired the mutex exactly once");
+					CL3_CLASS_PTHREAD_ERROR(pthread_mutex_unlock(&data->mutex));
+					CL3_CLASS_PTHREAD_ERROR(pthread_mutex_destroy(&data->mutex));
 				}
 			}
 		}

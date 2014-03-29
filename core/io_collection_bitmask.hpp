@@ -34,9 +34,9 @@ namespace	cl3
 			{
 				struct	IBitmask
 				{
-					virtual	GETTER	usys_t	Count	() const = 0;
-					virtual	GETTER	bool	Bit		(usys_t index) = 0;
-					virtual	SETTER	void	Bit		(usys_t index, bool value) = 0;
+					virtual	usys_t	Count	() const GETTER = 0;
+					virtual	bool	Bit		(usys_t index) GETTER = 0;
+					virtual	void	Bit		(usys_t index, bool value) SETTER = 0;
 				};
 
 				class	TBitmask : IBitmask
@@ -46,10 +46,10 @@ namespace	cl3
 						usys_t n_bits;
 
 					public:
-						CL3PUBF	GETTER	usys_t	Count	() const;
-						CL3PUBF	SETTER	void	Count	(usys_t new_count);
-						CL3PUBF	GETTER	bool	Bit		(usys_t index);
-						CL3PUBF	SETTER	void	Bit		(usys_t index, bool value);
+						CL3PUBF	usys_t	Count	() const GETTER;
+						CL3PUBF	void	Count	(usys_t new_count) SETTER;
+						CL3PUBF	bool	Bit		(usys_t index) GETTER;
+						CL3PUBF	void	Bit		(usys_t index, bool value) SETTER;
 
 						CL3PUBF	TBitmask&	operator=	(const TBitmask&);
 

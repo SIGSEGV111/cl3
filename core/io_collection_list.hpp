@@ -42,19 +42,18 @@ namespace	cl3
 
 				class	TIndexOutOfBoundsException : public error::TException
 				{
-					protected:
+					public:
 						ssys_t index;
 						usys_t count;
 
-					public:
 						CL3PUBF	CLASS	TIndexOutOfBoundsException	(ssys_t index, usys_t count);
 				};
 
 				template<class T>
 				struct	IIterator : IDynamicIterator<T>
 				{
-					virtual	GETTER	usys_t	Index	() const = 0;	//	returns the index on which the iterator is currently positioned (might change on Insert()/Remove/Count(x), as the iterator is repositioned to stay on the same item)
-					virtual	SETTER	void	Index	(usys_t new_index) = 0;	//	positiones the iterator on the item with the specified index
+					virtual	usys_t	Index	() const GETTER = 0;	//	returns the index on which the iterator is currently positioned (might change on Insert()/Remove/Count(x), as the iterator is repositioned to stay on the same item)
+					virtual	void	Index	(usys_t new_index) SETTER = 0;	//	positiones the iterator on the item with the specified index
 				};
 
 				template<class T>
@@ -63,22 +62,22 @@ namespace	cl3
 					using IDynamicCollection<T>::Count;
 					using IDynamicCollection<T>::Remove;
 
-					virtual	GETTER	T&			operator[]	(ssys_t index) = 0;	//	returns a reference to the item at index "index", the reference will remain valid until the next function call which changes the size of the list (Insert()/Remove()/Count(x))
-					virtual	GETTER	const T&	operator[]	(ssys_t index) const = 0;	//	as above
-					virtual	GETTER	T*			ItemPtr		(ssys_t index) = 0;	//	returns a pointer to the item at index "index", the pointer will remain valid until the next function call which changes the size of the list (Insert()/Remove()/Count(x))
-					virtual	GETTER	const T*	ItemPtr		(ssys_t index) const = 0;	//	as above
+					virtual	T&			operator[]	(ssys_t index) GETTER = 0;	//	returns a reference to the item at index "index", the reference will remain valid until the next function call which changes the size of the list (Insert()/Remove()/Count(x))
+					virtual	const T&	operator[]	(ssys_t index) const GETTER = 0;	//	as above
+					virtual	T*			ItemPtr		(ssys_t index) GETTER = 0;	//	returns a pointer to the item at index "index", the pointer will remain valid until the next function call which changes the size of the list (Insert()/Remove()/Count(x))
+					virtual	const T*	ItemPtr		(ssys_t index) const GETTER = 0;	//	as above
 
-					virtual	SETTER	void		Count		(usys_t new_count, const T& item_init = T()) = 0;	//	reallocates the list to the specified size, removing items at the end when shrinking and appending new items when enlarging (new items get initialized by copy-constructor from "item_init")
+					virtual	void	Count		(usys_t new_count, const T& item_init = T()) SETTER = 0;	//	reallocates the list to the specified size, removing items at the end when shrinking and appending new items when enlarging (new items get initialized by copy-constructor from "item_init")
 
-					virtual	void				Insert		(ssys_t index, const T& item_insert) = 0;	//	inserts a new item at index "index" which will get copy-constructed from "item_insert"
-					virtual	void				Insert		(ssys_t index, const T* arr_items_insert, usys_t n_items_insert) = 0;	//	inserts "n_items_insert" new item at index "index" which will get copy-constructed from the items in "arr_items_insert"
-					virtual	void				Insert		(ssys_t index, const IStaticCollection<T>& collection) = 0;	//	as above but draws the new items from another collection
+					virtual	void	Insert		(ssys_t index, const T& item_insert) = 0;	//	inserts a new item at index "index" which will get copy-constructed from "item_insert"
+					virtual	void	Insert		(ssys_t index, const T* arr_items_insert, usys_t n_items_insert) = 0;	//	inserts "n_items_insert" new item at index "index" which will get copy-constructed from the items in "arr_items_insert"
+					virtual	void	Insert		(ssys_t index, const IStaticCollection<T>& collection) = 0;	//	as above but draws the new items from another collection
 
-					virtual	void				Remove		(ssys_t index, usys_t n_items_remove) = 0;	//	removes "n_items_remove" items from the list starting at index "index"
+					virtual	void	Remove		(ssys_t index, usys_t n_items_remove) = 0;	//	removes "n_items_remove" items from the list starting at index "index"
 
-					virtual	void				Append		(const T& item_append) = 0;
-					virtual	void				Append		(const T* arr_items_append, usys_t n_items_append) = 0;
-					virtual	void				Append		(const IStaticCollection<T>& collection) = 0;
+					virtual	void	Append		(const T& item_append) = 0;
+					virtual	void	Append		(const T* arr_items_append, usys_t n_items_append) = 0;
+					virtual	void	Append		(const IStaticCollection<T>& collection) = 0;
 				};
 
 				template<class T>
@@ -118,20 +117,20 @@ namespace	cl3
 						uoff_t	Left	(usys_t sz_unit) const GETTER;
 
 						//	from IList
-						GETTER	T&			operator[]	(ssys_t index);
-						GETTER	const T&	operator[]	(ssys_t index) const;
-						GETTER	T*			ItemPtr		(ssys_t index);
-						GETTER	const T*	ItemPtr		(ssys_t index) const;
-						SETTER	void		Count		(usys_t new_count, const T& item_init = T());
-						void				Insert		(ssys_t index, const T& item_insert);
-						void				Insert		(ssys_t index, const T* arr_items_insert, usys_t n_items_insert);
-						void				Insert		(ssys_t index, const IStaticCollection<T>& collection);
-						void				Remove		(ssys_t index, usys_t n_items_remove);
+						T&			operator[]	(ssys_t index) GETTER;
+						const T&	operator[]	(ssys_t index) const GETTER;
+						T*			ItemPtr		(ssys_t index) GETTER;
+						const T*	ItemPtr		(ssys_t index) const GETTER;
+						void		Count		(usys_t new_count, const T& item_init = T()) SETTER;
+						void		Insert		(ssys_t index, const T& item_insert);
+						void		Insert		(ssys_t index, const T* arr_items_insert, usys_t n_items_insert);
+						void		Insert		(ssys_t index, const IStaticCollection<T>& collection);
+						void		Remove		(ssys_t index, usys_t n_items_remove);
 
-						void				Append		(const T& item_append);
-						void				Append		(const T* arr_items_append, usys_t n_items_append);
-						void				Append		(const IStaticCollection<T>& collection);
-						void				Append		(const TList& list);
+						void		Append		(const T& item_append);
+						void		Append		(const T* arr_items_append, usys_t n_items_append);
+						void		Append		(const IStaticCollection<T>& collection);
+						void		Append		(const TList& list);
 				};
 
 				/**************************************************************/
@@ -183,13 +182,13 @@ namespace	cl3
 
 				//	from IDynamicCollection
 				template<class T>
-				system::memory::TUniquePtr<IDynamicIterator<T> > TList<T>::CreateDynamicIterator()
+				system::memory::TUniquePtr<IDynamicIterator<T> >		TList<T>::CreateDynamicIterator()
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
 				template<class T>
-				system::memory::TUniquePtr<IDynamicIterator<const T> > TList<T>::CreateDynamicIterator() const
+				system::memory::TUniquePtr<IDynamicIterator<const T> >	TList<T>::CreateDynamicIterator() const
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
