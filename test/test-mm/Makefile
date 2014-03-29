@@ -2,26 +2,26 @@
 
 GTEST_DIR=$(CURDIR)/../gtest
 CXX=$(shell which clang)
-CXX_OPT=-fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -Winvalid-pch -I.tmp -I../include
-OBJS=$(shell ls -1 *.cpp | sed 's/\(.*\)\.cpp/\.tmp\/\1\.o/' -)
+CXX_OPT=-fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -Winvalid-pch -I../include
+OBJS=$(shell ls -1 *.cpp | sed 's/\.cpp/\.o/' -)
 
 all: run
 
 clean:
-	rm -vf exe .tmp/*
+	rm -vf exe *.o *.dhh *.dcc *.hpp.gch
 
 # pull in dependencies
 -include $(OBJS:.o=.dcc)
 
-.tmp/%.dcc: %.cpp
-	$(CXX) $(CXX_OPT) -MM $< | sed 's/\(.*\):/\.tmp\/\1:/' - > $@
+%.dcc: %.cpp
+	$(CXX) $(CXX_OPT) -MM $< > $@
 
-.tmp/%.o: %.cpp $(PCHS)
+%.o: %.cpp
 	$(CXX) $(CXX_OPT) -c $< -o $@
 
 exe: $(OBJS)
 	$(MAKE) libcl3-mm.so -C ../../mm
-	$(CXX) -L../lib -lstdc++ -lrt -pthread $(CXX_OPT) $(OBJS) -lcl3-core -lcl3-mm -lgtest ../lib/libgtest_main.a -o $@
+	$(CXX) -L../lib $(CXX_OPT) $(OBJS) -lcl3-core -lcl3-mm -lstdc++ -lrt -pthread -lgtest ../lib/libgtest_main.a -o $@
 
 run: exe
 	LD_LIBRARY_PATH=$(CURDIR)/../lib valgrind -q ./exe

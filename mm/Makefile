@@ -1,16 +1,16 @@
 .PHONY: all clean pch test
 
 CXX=$(shell which clang)
-CXX_OPT_INT=-fPIC -std=c++11 -g -O3 -Wall -Wextra -Werror -Winvalid-pch -I.tmp -Iinclude -DINSIDE_CL3
-CXX_OPT_EXT=-fPIC -std=c++11 -g -O3 -Wall -Wextra -Werror -Winvalid-pch -I.tmp -Iinclude
-OBJS=$(shell ls -1 *.cpp | sed 's/\(.*\)\.cpp/\.tmp\/\1\.o/' -)
+CXX_OPT_INT=-fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -Winvalid-pch -Iinclude -DINSIDE_CL3
+CXX_OPT_EXT=-fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -Winvalid-pch -Iinclude
+OBJS=$(shell ls -1 *.cpp | sed 's/\.cpp/\.o/' -)
 PCHS=$(shell ls -1 *.hpp | sed 's/\.hpp/\.hpp\.gch/' -)
-DHHS=$(shell ls -1 *.hpp | sed 's/\(.*\)\.hpp/\.tmp\/\1\.dhh/' -)
+DHHS=$(shell ls -1 *.hpp | sed 's/\.hpp/\.dhh/' -)
 
 all: libcl3-mm.so libcl3-mm.a $(PCHS)
 
 clean:
-	rm -vf libcl3-mm.so .tmp/* *.hpp.gch
+	rm -vf *.so *.a *.o *.dhh *.dcc *.hpp.gch
 
 pch: $(PCHS)
 
@@ -18,13 +18,13 @@ pch: $(PCHS)
 -include $(OBJS:.o=.dcc)
 -include $(DHHS)
 
-.tmp/%.dcc: %.cpp
-	$(CXX) $(CXX_OPT_INT) -MM $< | sed 's/\(.*\):/\.tmp\/\1:/' - > $@
+%.dcc: %.cpp
+	$(CXX) $(CXX_OPT_INT) -MM $< > $@
 
-.tmp/%.o: %.cpp .tmp/%.dcc
+%.o: %.cpp %.dcc
 	$(CXX) $(CXX_OPT_INT) -c $< -o $@
 
-.tmp/%.dhh: %.hpp
+%.dhh: %.hpp
 	$(CXX) $(CXX_OPT_INT) -MM $< | sed 's/\.o:/\.hpp\.gch:/' - >  $@
 
 %.hpp.gch: %.hpp
@@ -36,6 +36,3 @@ libcl3-mm.so: $(OBJS)
 
 libcl3-mm.a: $(OBJS)
 	ar rcs $@ $(OBJS)
-
-test: libcl3-mm.so
-	$(MAKE) test-mm -C ../test

@@ -1,16 +1,16 @@
 .PHONY: all clean pch
 
 CXX=$(shell which clang)
-CXX_OPT_INT=-fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -Winvalid-pch -I.tmp -DINSIDE_CL3 -Wno-unused-parameter
-CXX_OPT_EXT=-fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -Winvalid-pch -I.tmp -Wno-unused-parameter
-OBJS=$(shell ls -1 *.cpp | sed 's/\(.*\)\.cpp/\.tmp\/\1\.o/' -)
+CXX_OPT_INT=-fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -Winvalid-pch -DINSIDE_CL3 -Wno-unused-parameter
+CXX_OPT_EXT=-fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -Winvalid-pch -Wno-unused-parameter
+OBJS=$(shell ls -1 *.cpp | sed 's/\.cpp/\.o/' -)
 PCHS=$(shell ls -1 *.hpp | sed 's/\.hpp/\.hpp\.gch/' -)
-DHHS=$(shell ls -1 *.hpp | sed 's/\(.*\)\.hpp/\.tmp\/\1\.dhh/' -)
+DHHS=$(shell ls -1 *.hpp | sed 's/\.hpp/\.dhh/' -)
 
 all: libcl3-core.so libcl3-core.a $(PCHS)
 
 clean:
-	rm -vf libcl3-core.so .tmp/* *.hpp.gch
+	rm -vf *.so *.a *.o *.dhh *.dcc *.hpp.gch
 
 pch: $(PCHS)
 
@@ -18,20 +18,19 @@ pch: $(PCHS)
 -include $(OBJS:.o=.dcc)
 -include $(DHHS)
 
-.tmp/%.dcc: %.cpp
-	$(CXX) $(CXX_OPT_INT) -MM $< | sed 's/\(.*\):/\.tmp\/\1:/' - > $@
+%.dcc: %.cpp
+	$(CXX) $(CXX_OPT_INT) -MM $< > $@
 
-.tmp/%.o: %.cpp .tmp/%.dcc
+%.o: %.cpp %.dcc
 	$(CXX) $(CXX_OPT_INT) -c $< -o $@
 
-.tmp/%.dhh: %.hpp
+%.dhh: %.hpp
 	$(CXX) $(CXX_OPT_INT) -MM $< | sed 's/\.o:/\.hpp\.gch:/' - >  $@
 
 %.hpp.gch: %.hpp
 	$(CXX) $(CXX_OPT_EXT) $< -o $@
 
 libcl3-core.so: $(OBJS)
-	rm -f libcl3-core.so
 	$(CXX) -lstdc++ -lrt -shared $(CXX_OPT_INT) $(OBJS) -o $@
 
 libcl3-core.a: $(OBJS)

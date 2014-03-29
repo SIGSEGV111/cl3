@@ -1,6 +1,9 @@
 gmock-1.7.0*
 gtest-1.7.0*
 *.hpp.gch
+*.dcc
+*.dhh
 *.so
 *.a
+*.o
 exe
