@@ -21,7 +21,7 @@
 
 #include "system_compiler.hpp"
 #include "system_types.hpp"
-#include "io_stream-base.hpp"
+#include "io_stream.hpp"
 
 namespace	cl3
 {
@@ -55,6 +55,8 @@ namespace	cl3
 				CL3PUBF const static TUTF32 TERMINATOR;	//	end-of-string marker (always code-value 0)
 
 				u32_t code;
+
+				inline bool operator==(TUTF32 rhs) const { return code == rhs.code; }
 
 				CL3PUBF	CLASS	TUTF32	(char chr);
 				CL3PUBF	CLASS	TUTF32	(wchar_t wchr);

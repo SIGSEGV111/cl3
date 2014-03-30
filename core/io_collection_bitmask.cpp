@@ -32,6 +32,177 @@ namespace	cl3
 				using namespace system::memory;
 				using namespace system::types;
 
+				void		TIterator::CheckIndex	() const
+				{
+					if(index >= bm->Count())
+						index = (usys_t)-2;
+				}
+
+				const IStaticCollection<TBoolProxy>&	TIterator::Collection	() const
+				{
+					return *bm;
+				}
+
+				bool		TIterator::FindNext	(const IMatcher<TBoolProxy>& matcher)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				bool		TIterator::FindPrev	(const IMatcher<TBoolProxy>& matcher)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				bool		TIterator::IsValid	() const
+				{
+					CheckIndex();
+					return index != (usys_t)-1 && index != (usys_t)-2;
+				}
+
+				const TBoolProxy&	TIterator::Item		() const
+				{
+					CL3_CLASS_ERROR(!IsValid(), TIndexOutOfBoundsException, index, bm->Count());
+					return *this;
+				}
+
+				void		TIterator::MoveHead	()
+				{
+					index = (usys_t)-1;
+				}
+
+				void		TIterator::MoveTail	()
+				{
+					index = (usys_t)-2;
+				}
+
+				bool		TIterator::MoveFirst()
+				{
+					CheckIndex();
+					if(bm->Count() > 0)
+					{
+						index = 0;
+						return true;
+					}
+					else
+						return false;
+				}
+
+				bool		TIterator::MoveLast	()
+				{
+					CheckIndex();
+					if(bm->Count() > 0)
+					{
+						index = bm->Count()-1;
+						return true;
+					}
+					else
+						return false;
+				}
+
+				bool		TIterator::MoveNext	()
+				{
+					CheckIndex();
+					if(index < bm->Count()-1)
+					{
+						index++;
+						return true;
+					}
+					else
+						return false;
+				}
+
+				bool		TIterator::MovePrev	()
+				{
+					CheckIndex();
+					if(index > 0)
+					{
+						index--;
+						return true;
+					}
+					else
+						return false;
+				}
+
+				TBoolProxy&	TIterator::Item		()
+				{
+					CL3_CLASS_ERROR(!IsValid(), TIndexOutOfBoundsException, index, bm->Count());
+					return *this;
+				}
+
+				usys_t		TIterator::Write	(const TBoolProxy* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				uoff_t		TIterator::ReadIn	(io::stream::IIn<TBoolProxy>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				usys_t		TIterator::Read		(TBoolProxy* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				uoff_t		TIterator::WriteOut	(io::stream::IOut<TBoolProxy>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				usys_t		TIterator::Write	(const bool* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				uoff_t		TIterator::ReadIn	(io::stream::IIn<bool>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				usys_t		TIterator::Read		(bool* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				uoff_t		TIterator::WriteOut	(io::stream::IOut<bool>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				usys_t		TIterator::Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				uoff_t		TIterator::ReadIn	(io::stream::IIn<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				usys_t		TIterator::Read		(byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				uoff_t		TIterator::WriteOut	(io::stream::IOut<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				usys_t		TIterator::Index	() const
+				{
+					CheckIndex();
+					return index;
+				}
+
+				void		TIterator::Index	(usys_t new_index)
+				{
+					CL3_CLASS_ERROR(new_index >= bm->Count(), TIndexOutOfBoundsException, new_index, bm->Count());
+					index = new_index;
+				}
+
+				/******************************************************************/
+
 				usys_t		TBitmask::Count		() const
 				{
 					return n_bits;
@@ -45,6 +216,7 @@ namespace	cl3
 
 				void		TBitmask::Bit		(usys_t index, bool value)
 				{
+					CL3_CLASS_ERROR(index < 0 || index >= n_bits, TIndexOutOfBoundsException, index, n_bits);
 					const usys_t index_byte = index / 8U;
 					const byte_t mask = 1U << (index % 8U);
 
@@ -56,6 +228,7 @@ namespace	cl3
 
 				bool		TBitmask::Bit		(usys_t index)
 				{
+					CL3_CLASS_ERROR(index < 0 || index >= n_bits, TIndexOutOfBoundsException, index, n_bits);
 					const usys_t index_byte = index / 8U;
 					const byte_t mask = 1U << (index % 8U);
 

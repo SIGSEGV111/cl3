@@ -24,11 +24,8 @@ namespace	cl3
 	{
 		namespace	collection
 		{
-			namespace	list
+			CLASS	TIndexOutOfBoundsException::TIndexOutOfBoundsException	(ssys_t index, usys_t count) : TException("index out of bounds (index = %zd, count = %zu)", index, count), index(index), count(count)
 			{
-				CLASS	TIndexOutOfBoundsException::TIndexOutOfBoundsException	(ssys_t index, usys_t count) : TException("index out of bounds (index = %zd, count = %zu)", index, count), index(index), count(count)
-				{
-				}
 			}
 		}
 	}

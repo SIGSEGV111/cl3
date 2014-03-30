@@ -159,6 +159,17 @@ namespace	cl3
 
 				#define	CL3_NONCLASS_INTERLOCKED_REGION_BEGIN(mutex)	{ cl3::system::task::synchronization::TInterlockedRegion __interlocked_region(&(mutex));
 				#define	CL3_NONCLASS_INTERLOCKED_REGION_END				}
+
+
+				class	TRecurseGuard
+				{
+					protected:
+						bool* var;
+
+					public:
+						CLASS	TRecurseGuard	(bool* var) : var(var) { CL3_CLASS_LOGIC_ERROR(*var); *var = true; }
+						CLASS	~TRecurseGuard	() { *var = false; }
+				};
 			}
 		}
 	}

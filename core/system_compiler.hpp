@@ -213,31 +213,6 @@ namespace	cl3
 				#undef SendMessage
 			#endif
 
-
-
-
-
-
-
-
-
-			struct	TRecurseGuard
-			{
-				bool& var;
-
-				inline	CLASS	TRecurseGuard	(bool& var) : var(var)
-				{
-					var = true;
-				}
-
-				inline	CLASS	~TRecurseGuard	()
-				{
-					var = false;
-				}
-			};
-
-			#define	RECURSEGUARD	static CL3_THREAD bool __recurse_guard_var = false; if(__recurse_guard_var) return;	TRecurseGuard __recurse_guard(__recurse_guard_var)
-
 			#ifdef	INSIDE_CL3
 				#define	CL3PUBF CL3_CXX_EXPORT_FUNC
 				#define	CL3PUBT CL3_CXX_EXPORT_TYPE

@@ -90,40 +90,9 @@ namespace	cl3
 					return n_already_read;
 				}
 
-				uoff_t	TFDStream::Left		(usys_t sz_unit) const
+				uoff_t	TFDStream::WriteOut(IOut<byte_t>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min)
 				{
-					CL3_CLASS_ARGUMENT_ERROR(sz_unit != 1, sz_unit, "this class only works with 1-byte_t-sized units");
-
-					errno = 0;
-					const uoff_t current_offset = lseek64(fd, 0, SEEK_CUR);
-					if(current_offset == (uoff_t)-1)
-					{
-						if(errno == ESPIPE)
-						{
-							//	fd is not seekable
-							struct ::pollfd pfd = { fd, POLLIN, 0 };
-							CL3_CLASS_SYSERR(::poll(&pfd, 1, 0));
-							if((pfd.revents & POLLIN) != 0)
-								return 1;
-							else if((pfd.revents & POLLRDHUP) != 0)
-								return 0;
-							else
-								return (usys_t)-1;
-						}
-						else
-							//	error during lseek64
-							CL3_CLASS_SYSERR(errno);
-						CL3_CLASS_LOGIC_ERROR(true);
-					}
-					else
-					{
-						//	fd is seekable
-						uoff_t end_offset, return_offset;
-						CL3_CLASS_SYSERR(end_offset = lseek64(fd, 0, SEEK_END));
-						CL3_CLASS_SYSERR(return_offset = lseek64(fd, current_offset, SEEK_SET));
-						CL3_CLASS_LOGIC_ERROR(return_offset != current_offset || end_offset < current_offset);
-						return end_offset - current_offset;
-					}
+					CL3_NOT_IMPLEMENTED;
 				}
 
 				usys_t	TFDStream::Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
@@ -175,17 +144,9 @@ namespace	cl3
 					return n_already_written;
 				}
 
-				uoff_t	TFDStream::Space	(usys_t sz_unit) const
+				uoff_t	TFDStream::ReadIn	(IIn<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
 				{
-					CL3_CLASS_ARGUMENT_ERROR(sz_unit != 1, sz_unit, "this class only works with 1-byte_t-sized units");
-					struct ::pollfd pfd = { fd, POLLOUT, 0 };
-					CL3_CLASS_SYSERR(::poll(&pfd, 1, 0));
-					if((pfd.revents & POLLOUT) != 0)
-						return 1;
-					else if((pfd.revents & POLLHUP) != 0)
-						return 0;
-					else
-						return (usys_t)-1;
+					CL3_NOT_IMPLEMENTED;
 				}
 
 				CLASS	TFDStream::TFDStream	(TFD fd) : p_buffer(NULL), sz_buffer(0), fd(fd)

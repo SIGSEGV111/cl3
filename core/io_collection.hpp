@@ -19,8 +19,7 @@
 #ifndef	_include_cl3_core_io_collection_hpp_
 #define	_include_cl3_core_io_collection_hpp_
 
-#include "io_collection_bitmask.hpp"
-#include "io_stream-base.hpp"
+#include "io_stream.hpp"
 #include "event.hpp"
 
 namespace	cl3
@@ -29,6 +28,11 @@ namespace	cl3
 	{
 		namespace	collection
 		{
+			namespace	bitmask
+			{
+				class	TBitmask;
+			}
+
 			namespace	list
 			{
 				template<class T>
@@ -37,6 +41,15 @@ namespace	cl3
 				template<class T>
 				class	TList;
 			}
+
+			class	TIndexOutOfBoundsException : public error::TException
+			{
+				public:
+					ssys_t index;
+					usys_t count;
+
+					CL3PUBF	CLASS	TIndexOutOfBoundsException	(ssys_t index, usys_t count);
+			};
 
 			template<class T>
 			struct	IMatcher
@@ -112,6 +125,7 @@ namespace	cl3
 				virtual	bool	MoveLast	() = 0;	//	move to the last item (returns false if there is no last item / the collection is empty)
 				virtual	bool	MoveNext	() = 0;	//	move to the next item (returns false if there is no next item and places the iterator on tail)
 				virtual	bool	MovePrev	() = 0;	//	move to the previous item (returns false if there is no previous item and places the iterator on head)
+				virtual	CLASS	~IStaticIterator	() {}
 			};
 
 			template<class T>
@@ -119,14 +133,21 @@ namespace	cl3
 			{
 				using IStaticIterator<const T>::Item;
 				virtual	GETTER	T&	Item	() = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
+				virtual	CLASS	~IStaticIterator	() {}
 			};
 
 			template<class T>
-			struct	IDynamicIterator : IStaticIterator<T>
+			struct	IDynamicIterator<const T> : IStaticIterator<T>
 			{
 				virtual	void	Insert	(const T& item_insert) = 0;	//	inserts an item before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to it
 				virtual	void	Insert	(const T* arr_items_insert, usys_t n_items_insert) = 0;	//	inserts items before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to the first of the inserted items (does nothing if the array is empty)
 				virtual	void	Remove	() = 0;	//	removes the current item and moves to the first item after the removed (if the collection supports ordering, or at a implementation choosen position otherwise - avoiding head/tail until the last item gets removed)
+				virtual	CLASS	~IDynamicIterator	() {}
+			};
+
+			template<class T>
+			struct	IDynamicIterator : IDynamicIterator<const T>
+			{
 			};
 
 			template<class T>
@@ -135,9 +156,9 @@ namespace	cl3
 				virtual	system::memory::TUniquePtr<IStaticIterator<T> >			CreateStaticIterator	() CL3_WARN_UNUSED_RESULT = 0;
 				virtual	system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT = 0;
 
-				virtual	GETTER	usys_t	Count		() const = 0;
-				virtual	GETTER	bool	CountMin	(usys_t count_min) const { return Count() >= count_min; }
-				virtual	GETTER	bool	CountMax	(usys_t count_max) const { return Count() <= count_max; }
+				virtual	usys_t	Count		() const GETTER = 0;
+				virtual	bool	CountMin	(usys_t count_min) const GETTER { return Count() >= count_min; }
+				virtual	bool	CountMax	(usys_t count_max) const GETTER { return Count() <= count_max; }
 			};
 
 			template<class T>
@@ -151,7 +172,7 @@ namespace	cl3
 				virtual	void	Add		(const T& item_add) = 0;	//	inserts a single item into the collection, it is left to the implementation to determine where the new item is positioned
 				virtual	void	Add		(const T* arr_items_add, usys_t n_items_add) = 0;	//	like above but for multiple items at once
 				virtual	void	Add		(const IStaticCollection<T>& collection) = 0;	//	inserts another collection into this collection, it is left to the implementation to determine where the new items are positioned
-				virtual	void	Remove	(const T* item_remove) = 0;	//	removes the specified item from the collection, the pointer is free to point to any valid item - the item needs not to be a member of the collection, if however so, then exactly the specified item is removed, if not, one item which compares equal to the specified item is removed - if multiple items compare equal to the specified item, the implementation is free to choose one among them
+				virtual	bool	Remove	(const T* item_remove) = 0;	//	removes the specified item from the collection, the pointer is free to point to any valid item - the item needs not to be a member of the collection, if however so, then exactly the specified item is removed, if not, one item which compares equal to the specified item is removed - if multiple items compare equal to the specified item, the implementation is free to choose one among them, if no matching item is found false is returned
 			};
 
 			/*template<class T>
