@@ -22,6 +22,7 @@
 #include "io_collection.hpp"
 #include "error-base.hpp"
 #include "system_memory.hpp"
+#include "util.hpp"
 #include "system_types_typeinfo.hpp"
 
 namespace	cl3
@@ -61,7 +62,9 @@ namespace	cl3
 					using IDynamicCollection<T>::Count;
 					using IDynamicCollection<T>::Remove;
 
-					virtual	IList&	operator=	(const IList& rhs) = 0;
+					inline	IList&	operator+=	(const IStaticCollection<T>& rhs) { Append(rhs); return *this; }
+					virtual	IList&	operator=	(const IStaticCollection<T>& rhs) = 0;
+					virtual	IList&	operator=	(IStaticCollection<T>&& rhs) = 0;
 
 					virtual	T&			operator[]	(ssys_t index) GETTER = 0;	//	returns a reference to the item at index "index", the reference will remain valid until the next function call which changes the size of the list (Insert()/Remove()/Count(x))
 					virtual	const T&	operator[]	(ssys_t index) const GETTER = 0;	//	as above
@@ -140,6 +143,9 @@ namespace	cl3
 						const event::TEvent<IStaticCollection<T>, TOnChangeData<T> > on_change;
 						bool guard_resize;
 
+						usys_t	AbsIndex	(ssys_t rel_index);
+						void	Prealloc	(usys_t n_items_prealloc_min);
+
 					public:
 						//	from IObservable
 						const event::TEvent<IStaticCollection<T>, TOnChangeData<T> >&	OnChange	() const GETTER;
@@ -155,6 +161,7 @@ namespace	cl3
 						system::memory::TUniquePtr<IDynamicIterator<T> >		CreateDynamicIterator	() CL3_WARN_UNUSED_RESULT;
 						system::memory::TUniquePtr<IDynamicIterator<const T> >	CreateDynamicIterator	() const CL3_WARN_UNUSED_RESULT;
 
+						void	Clear	();
 						void	Add		(const T& item_add);
 						void	Add		(const T* arr_items_add, usys_t n_items_add);
 						void	Add		(const IStaticCollection<T>& collection);
@@ -169,8 +176,8 @@ namespace	cl3
 						uoff_t	WriteOut(io::stream::IOut<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
 
 						//	from IList
-						TList<T>&	operator=	(const IList<T>& rhs);
-						TList<T>&	operator=	(const TList<T>& rhs);
+						TList<T>&	operator=	(const IStaticCollection<T>& rhs);
+						TList<T>&	operator=	(IStaticCollection<T>&& rhs);
 						T&			operator[]	(ssys_t index) GETTER;
 						const T&	operator[]	(ssys_t index) const GETTER;
 						T*			ItemPtr		(ssys_t index) GETTER;
@@ -190,7 +197,13 @@ namespace	cl3
 
 						usys_t		Find		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) const CL3_WARN_UNUSED_RESULT;
 
+						//	from TList
+						TList<T>&	operator=	(const TList<T>& rhs);
+						TList<T>&	operator=	(TList<T>&& rhs);
+
 						CLASS		TList		();
+						CLASS		TList		(T* arr_items, usys_t n_items, bool claim);
+						CLASS		TList		(const T* arr_items, usys_t n_items);
 						CLASS		TList		(const IStaticCollection<T>&);
 						CLASS		TList		(const TList&);
 						CLASS		~TList		();
@@ -339,6 +352,28 @@ namespace	cl3
 
 				/**************************************************************/
 
+				template<class T>
+				usys_t	TList<T>::AbsIndex	(ssys_t rel_index)
+				{
+					if(rel_index < 0)
+						return n_items_current - rel_index;
+					else
+						return rel_index;
+				}
+
+				template<class T>
+				void	TList<T>::Prealloc	(usys_t n_items_prealloc_min)
+				{
+					const usys_t n_items_prealloc_ideal = (n_items_current >> 8) + (32 / sizeof(T));
+
+					if((n_items_prealloc < n_items_prealloc_min) || (n_items_prealloc - n_items_prealloc_min > 2 * n_items_prealloc_ideal))
+					{
+						//	FIXME: check if memory can be enlarged, if not alloc new memory and correctly move items to the new location
+						arr_items = system::memory::Realloc<T>(arr_items, n_items_current + n_items_prealloc_ideal + n_items_prealloc_min);
+						n_items_prealloc = n_items_prealloc_ideal;
+					}
+				}
+
 				//	from IObservable
 				template<class T>
 				const event::TEvent<IStaticCollection<T>, TOnChangeData<T> >&
@@ -394,6 +429,18 @@ namespace	cl3
 				}
 
 				template<class T>
+				void	TList<T>::Clear		()
+				{
+					for(usys_t i = 0; i < n_items_current; i++)
+						arr_items[i].~T();
+					n_items_prealloc += n_items_current;
+					n_items_current = 0;
+					system::memory::Free(arr_items);
+					arr_items = NULL;
+					n_items_prealloc = 0;
+				}
+
+				template<class T>
 				void	TList<T>::Add		(const T& item_insert)
 				{
 					Append(item_insert);
@@ -432,7 +479,8 @@ namespace	cl3
 				template<class T>
 				usys_t	TList<T>::Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
-					CL3_NOT_IMPLEMENTED;
+					Append(arr_items_write, n_items_write_max);
+					return n_items_write_max;
 				}
 
 				template<class T>
@@ -443,9 +491,17 @@ namespace	cl3
 
 				//	from IIn
 				template<class T>
-				usys_t	TList<T>::Read		(T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t	TList<T>::Read		(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
 				{
-					CL3_NOT_IMPLEMENTED;
+					if(n_items_read_min >= n_items_read_max) n_items_read_min = n_items_read_max;
+					CL3_CLASS_ERROR(n_items_read_min > n_items_current, stream::TSourceDryException, n_items_read_max, n_items_read_min, 0, n_items_current);
+					const usys_t n_items_read = CL3_MIN(n_items_read_max, n_items_current);
+
+					for(usys_t i = 0; i < n_items_read; i++)
+						arr_items_read[i] = util::move(arr_items[i]);
+
+					Remove(0, n_items_read);
+					return n_items_read;
 				}
 
 				template<class T>
@@ -456,15 +512,31 @@ namespace	cl3
 
 				//	from IList
 				template<class T>
-				TList<T>&	TList<T>::operator=		(const IList<T>& rhs)
+				TList<T>&	TList<T>::operator=		(const IStaticCollection<T>& rhs)
 				{
-					CL3_NOT_IMPLEMENTED;
+					const TList<T>* list = dynamic_cast<const TList<T>*>(&rhs);
+					if(list)
+						(*this) = (*list);
+					else
+					{
+						Clear();
+						Append(rhs);
+					}
+					return *this;
 				}
 
 				template<class T>
-				TList<T>&	TList<T>::operator=		(const TList<T>& rhs)
+				TList<T>&	TList<T>::operator=		(IStaticCollection<T>&& rhs)
 				{
-					CL3_NOT_IMPLEMENTED;
+					TList<T>* list = dynamic_cast<TList<T>*>(&rhs);
+					if(list)
+						(*this) = util::move(*list);
+					else
+					{
+						Clear();
+						Append(rhs);
+					}
+					return *this;
 				}
 
 				template<class T>
@@ -506,29 +578,22 @@ namespace	cl3
 				template<class T>
 				void		TList<T>::Shrink	(usys_t n_items_shrink)
 				{
-					system::task::synchronization::TRecurseGuard recurse_guard(&guard_resize);
-
 					for(usys_t i = 0; i < n_items_shrink; i++)
 						arr_items[n_items_current - i].~T();
 
 					n_items_current  -= n_items_shrink;
 					n_items_prealloc += n_items_shrink;
 
-					const usys_t n_items_prealloc_ideal = (n_items_current >> 8) + (32 / sizeof(T));
-
-					if(n_items_prealloc > 2 * n_items_prealloc_ideal)
-					{
-						arr_items = system::memory::Realloc<T>(arr_items, n_items_current + n_items_prealloc_ideal);
-						n_items_prealloc = n_items_prealloc_ideal;
-					}
+					Prealloc(0);
 				}
 
 				template<class T>
 				void		TList<T>::Grow		(usys_t n_items_grow, const T& item_init)
 				{
-					system::task::synchronization::TRecurseGuard recurse_guard(&guard_resize);
+					Prealloc(n_items_grow);
 
-					CL3_NOT_IMPLEMENTED;
+					for(usys_t i = 0; i < n_items_grow; i++)
+						new (arr_items + i) T(item_init);
 				}
 
 				template<class T>
@@ -559,33 +624,48 @@ namespace	cl3
 				}
 
 				template<class T>
-				void		TList<T>::Remove	(ssys_t index, usys_t n_items_remove)
+				void		TList<T>::Remove	(ssys_t rel_index, usys_t n_items_remove)
 				{
-					CL3_NOT_IMPLEMENTED;
+					const usys_t index = AbsIndex(rel_index);
+					const usys_t n_items_after = n_items_current - index - n_items_remove;
+
+					for(usys_t i = 0; i < n_items_after; i++)
+						arr_items[index + i] = util::move(arr_items[index + i + n_items_remove]);
+
+					Shrink(n_items_remove);
 				}
 
 				template<class T>
 				void		TList<T>::Append	(const T& item_append)
 				{
-					CL3_NOT_IMPLEMENTED;
+					Append(&item_append, 1);
 				}
 
 				template<class T>
 				void		TList<T>::Append	(const T* arr_items_append, usys_t n_items_append)
 				{
-					CL3_NOT_IMPLEMENTED;
+					Prealloc(n_items_append);
+
+					for(usys_t i = 0; i < n_items_append; i++)
+						new (arr_items + i) T(arr_items_append[i]);
+
+					n_items_current  += n_items_append;
+					n_items_prealloc -= n_items_append;
 				}
 
 				template<class T>
 				void		TList<T>::Append	(const IStaticCollection<T>& collection)
 				{
-					CL3_NOT_IMPLEMENTED;
+					system::memory::TUniquePtr<IStaticIterator<const T> > it = collection.CreateStaticIterator();
+					it.Object().MoveHead();
+					while(it.Object().MoveNext())
+						Append(it.Object().Item());
 				}
 
 				template<class T>
 				void		TList<T>::Append	(const TList& list)
 				{
-					CL3_NOT_IMPLEMENTED;
+					Append(list.arr_items, list.n_items_current);
 				}
 
 				template<class T>
@@ -607,24 +687,72 @@ namespace	cl3
 					}
 				}
 
+				//	from TList<T>
 				template<class T>
-				CLASS		TList<T>::TList		() : guard_resize(false)
+				TList<T>&	TList<T>::operator=	(const TList<T>& rhs)
+				{
+					Clear();
+					Append(rhs);
+					return *this;
+				}
+
+				template<class T>
+				TList<T>&	TList<T>::operator=	(TList<T>&& rhs)
+				{
+					Clear();
+					arr_items = rhs.arr_items;
+					n_items_current = rhs.n_items_current;
+					n_items_prealloc = rhs.n_items_prealloc;
+					rhs.arr_items = NULL;
+					rhs.n_items_current = 0;
+					rhs.n_items_prealloc = 0;
+					return *this;
+				}
+
+				template<class T>
+				CLASS		TList<T>::TList		() : arr_items(NULL), n_items_current(0), n_items_prealloc(0), on_change(), guard_resize(false)
 				{
 				}
 
 				template<class T>
-				CLASS		TList<T>::TList		(const IStaticCollection<T>& collection)
+				CLASS		TList<T>::TList		(T* arr_items, usys_t n_items, bool claim) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), on_change(), guard_resize(false)
 				{
+					if(claim)
+					{
+						this->arr_items = arr_items;
+						this->n_items_current = n_items;
+					}
+					else
+					{
+						Prealloc(n_items);
+						Append(arr_items, n_items);
+					}
 				}
 
 				template<class T>
-				CLASS		TList<T>::TList		(const TList& list)
+				CLASS		TList<T>::TList		(const T* arr_items, usys_t n_items) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), on_change(), guard_resize(false)
 				{
+					Prealloc(n_items);
+					Append(arr_items, n_items);
+				}
+
+				template<class T>
+				CLASS		TList<T>::TList		(const IStaticCollection<T>& collection) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), on_change(), guard_resize(false)
+				{
+					Append(collection);
+				}
+
+				template<class T>
+				CLASS		TList<T>::TList		(const TList& list) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), on_change(), guard_resize(false)
+				{
+					Prealloc(list.n_items_current);
+					Append(list.arr_items, list.n_items_current);
 				}
 
 				template<class T>
 				CLASS		TList<T>::~TList	()
 				{
+					Clear();
 				}
 			}
 		}

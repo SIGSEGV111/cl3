@@ -75,7 +75,7 @@ namespace	cl3
 								b_would_block = true;
 							if(status == 0)
 							{
-								CL3_CLASS_ERROR(n_already_read < n_items_read_min, TSourceDryException, n_items_read_max, n_items_read_min, n_items_read_min - n_already_read);
+								CL3_CLASS_ERROR(n_already_read < n_items_read_min, TSourceDryException, n_items_read_max, n_items_read_min, n_items_read_min - n_already_read, 0);
 								break;
 							}
 							else
@@ -129,7 +129,7 @@ namespace	cl3
 							else if(status == 0 || errno == ENOSPC)
 							{
 								//	no more can be written (disk full)
-								CL3_CLASS_ERROR(n_already_written < n_items_write_min, TSinkFloodedException, n_items_write_max, n_items_write_min, n_items_write_min - n_already_written);
+								CL3_CLASS_ERROR(n_already_written < n_items_write_min, TSinkFloodedException, n_items_write_max, n_items_write_min, n_items_write_min - n_already_written, 0);
 								break;
 							}
 							else

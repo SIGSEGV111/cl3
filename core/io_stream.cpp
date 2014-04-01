@@ -38,7 +38,11 @@ namespace	cl3
 			{
 			}
 
-			CLASS	TSourceDryException::TSourceDryException	(uoff_t n_items_read_max, uoff_t n_items_read_min, uoff_t n_items_read) : n_items_read_max(n_items_read_max), n_items_read_min(n_items_read_min), n_items_read(n_items_read)
+			CLASS	TSourceDryException::TSourceDryException	(uoff_t n_items_requested_read_max, uoff_t n_items_requested_read_min, uoff_t n_items_actually_read, uoff_t n_items_still_available) :
+					n_items_requested_read_max(n_items_requested_read_max),
+					n_items_requested_read_min(n_items_requested_read_min),
+					n_items_actually_read(n_items_actually_read),
+					n_items_still_available(n_items_still_available)
 			{
 			}
 
@@ -50,7 +54,11 @@ namespace	cl3
 			{
 			}
 
-			CLASS	TSinkFloodedException::TSinkFloodedException	(uoff_t n_items_write_max, uoff_t n_items_write_min, uoff_t n_items_written) : n_items_write_max(n_items_write_max), n_items_write_min(n_items_write_min), n_items_written(n_items_written)
+			CLASS	TSinkFloodedException::TSinkFloodedException	(uoff_t n_items_requested_write_max, uoff_t n_items_requested_write_min, uoff_t n_items_actually_written, uoff_t n_items_still_space) :
+					n_items_requested_write_max(n_items_requested_write_max),
+					n_items_requested_write_min(n_items_requested_write_min),
+					n_items_actually_written(n_items_actually_written),
+					n_items_still_space(n_items_still_space)
 			{
 			}
 

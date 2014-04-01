@@ -18,6 +18,7 @@
 
 #include <cl3/core/io_collection.hpp>
 #include <cl3/core/io_collection_bitmask.hpp>
+#include <cl3/core/io_collection_list.hpp>
 #include <gtest/gtest.h>
 
 using namespace ::testing;
@@ -88,4 +89,9 @@ namespace
 		EXPECT_TRUE(!bm.Bit(510));
 		EXPECT_TRUE(bm.Bit(511));
 	}
+}
+
+namespace
+{
+	using namespace cl3::io::collection::list;
 }

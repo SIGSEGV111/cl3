@@ -48,11 +48,12 @@ namespace	cl3
 			class	TSourceDryException : public TIOException
 			{
 				public:
-					uoff_t n_items_read_max;	//	maximum number of items to read
-					uoff_t n_items_read_min;	//	minimum number of items to read
-					uoff_t n_items_read;		//	number of items actually read
+					uoff_t n_items_requested_read_max;
+					uoff_t n_items_requested_read_min;
+					uoff_t n_items_actually_read;
+					uoff_t n_items_still_available;
 
-					CL3PUBF	CLASS	TSourceDryException	(uoff_t n_items_read_max, uoff_t n_items_read_min, uoff_t n_items_read);
+					CL3PUBF	CLASS	TSourceDryException	(uoff_t n_items_requested_read_max, uoff_t n_items_requested_read_min, uoff_t n_items_actually_read, uoff_t n_items_still_available);
 					CL3PUBF	CLASS	TSourceDryException	(const TSourceDryException&);
 					CL3PUBF	CLASS	~TSourceDryException();
 			};
@@ -60,11 +61,12 @@ namespace	cl3
 			class	TSinkFloodedException : public TIOException
 			{
 				public:
-					uoff_t n_items_write_max;	//	maximum number of items to write
-					uoff_t n_items_write_min;	//	minimum number of items to write
-					uoff_t n_items_written;		//	number of items actually written
+					uoff_t n_items_requested_write_max;
+					uoff_t n_items_requested_write_min;
+					uoff_t n_items_actually_written;
+					uoff_t n_items_still_space;
 
-					CL3PUBF	CLASS	TSinkFloodedException	(uoff_t n_items_write_max, uoff_t n_items_write_min, uoff_t n_items_written);
+					CL3PUBF	CLASS	TSinkFloodedException	(uoff_t n_items_requested_write_max, uoff_t n_items_requested_write_min, uoff_t n_items_actually_written, uoff_t n_items_still_space);
 					CL3PUBF	CLASS	TSinkFloodedException	(const TSinkFloodedException&);
 					CL3PUBF	CLASS	~TSinkFloodedException	();
 			};
