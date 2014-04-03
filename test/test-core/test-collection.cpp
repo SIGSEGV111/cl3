@@ -91,7 +91,65 @@ namespace
 	}
 }
 
-namespace
+/*namespace
 {
 	using namespace cl3::io::collection::list;
-}
+
+	TEST(List, Add_Remove)
+	{
+		TList<int> list;
+
+		list.Add(0);
+		list.Add(1);
+		list.Add(2);
+		list.Add(3);
+		list.Add(4);
+		list.Add(5);
+		list.Add(6);
+		list.Add(7);
+		list.Add(8);
+		list.Add(9);
+
+		EXPECT_TRUE(list.Count() == 10);
+
+		EXPECT_TRUE(list[0] == 0);
+		EXPECT_TRUE(list[1] == 1);
+		EXPECT_TRUE(list[2] == 2);
+		EXPECT_TRUE(list[3] == 3);
+		EXPECT_TRUE(list[4] == 4);
+		EXPECT_TRUE(list[5] == 5);
+		EXPECT_TRUE(list[6] == 6);
+		EXPECT_TRUE(list[7] == 7);
+		EXPECT_TRUE(list[8] == 8);
+		EXPECT_TRUE(list[9] == 9);
+
+		list.Remove(5,3);	//	removes 5,6,7
+
+		EXPECT_TRUE(list.Count() == 7);
+
+		EXPECT_TRUE(list[0] == 0);
+		EXPECT_TRUE(list[1] == 1);
+		EXPECT_TRUE(list[2] == 2);
+		EXPECT_TRUE(list[3] == 3);
+		EXPECT_TRUE(list[4] == 4);
+		EXPECT_TRUE(list[5] == 8);
+		EXPECT_TRUE(list[6] == 9);
+
+		list.Remove(0,1);	//	removes 0
+
+		EXPECT_TRUE(list[0] == 1);
+		EXPECT_TRUE(list[1] == 2);
+		EXPECT_TRUE(list[2] == 3);
+		EXPECT_TRUE(list[3] == 4);
+		EXPECT_TRUE(list[4] == 8);
+		EXPECT_TRUE(list[5] == 9);
+
+		list.Remove(5,1);	//	removes 9
+
+		EXPECT_TRUE(list[0] == 1);
+		EXPECT_TRUE(list[1] == 2);
+		EXPECT_TRUE(list[2] == 3);
+		EXPECT_TRUE(list[3] == 4);
+		EXPECT_TRUE(list[4] == 8);
+	}
+}*/

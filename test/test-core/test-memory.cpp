@@ -98,6 +98,7 @@ namespace
 		//	this should work (-256 because of alignment and padding which might be required)
 		array = new byte_t[sz_limit-sizeof(int)*3-256];
 
+		delete array;
 		delete x;
 		delete y;
 		delete z;
@@ -111,7 +112,7 @@ namespace
 
 		TRestrictAllocator ra(CL3_PARAMETER_STACK_VALUE(allocator), sz_limit);
 		EXPECT_TRUE(ra.BytesLimit() == sz_limit);
-		EXPECT_TRUE(sz_alloc_before = ra.BytesAllocated() == 0);
+		EXPECT_TRUE((sz_alloc_before = ra.BytesAllocated()) == 0);
 		CL3_PARAMETER_STACK_PUSH(allocator, &ra);
 
 		int* x = new int(1);

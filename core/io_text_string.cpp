@@ -22,13 +22,7 @@ namespace	cl3
 {
 	namespace	io
 	{
-		namespace	collection
-		{
-			namespace	list
-			{
-// 				template class CL3PUBF TList<io::text::TUTF32>;
-			}
-		}
+		using namespace collection::list;
 
 		namespace	text
 		{
@@ -64,7 +58,7 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TUString::TUString	(const TUString&)
+				CLASS	TUString::TUString	(const TUString& other) : TList<TUTF32>(other)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

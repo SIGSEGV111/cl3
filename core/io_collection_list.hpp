@@ -685,6 +685,7 @@ namespace	cl3
 									return i;
 							return (usys_t)-1;
 					}
+					CL3_UNREACHABLE;
 				}
 
 				//	from TList<T>

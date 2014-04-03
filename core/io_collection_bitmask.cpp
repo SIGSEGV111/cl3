@@ -216,7 +216,7 @@ namespace	cl3
 
 				void		TBitmask::Bit		(usys_t index, bool value)
 				{
-					CL3_CLASS_ERROR(index < 0 || index >= n_bits, TIndexOutOfBoundsException, index, n_bits);
+					CL3_CLASS_ERROR(index >= n_bits, TIndexOutOfBoundsException, index, n_bits);
 					const usys_t index_byte = index / 8U;
 					const byte_t mask = 1U << (index % 8U);
 
@@ -228,7 +228,7 @@ namespace	cl3
 
 				bool		TBitmask::Bit		(usys_t index)
 				{
-					CL3_CLASS_ERROR(index < 0 || index >= n_bits, TIndexOutOfBoundsException, index, n_bits);
+					CL3_CLASS_ERROR(index >= n_bits, TIndexOutOfBoundsException, index, n_bits);
 					const usys_t index_byte = index / 8U;
 					const byte_t mask = 1U << (index % 8U);
 

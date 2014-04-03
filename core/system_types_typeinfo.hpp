@@ -265,7 +265,7 @@ namespace	cl3
 				};
 
 				template<class T>
-				struct	TCTTI
+				struct	CL3PUBT	TCTTI
 				{
 					const static bool is_constant = false;
 					const static bool is_signed = false;
@@ -290,7 +290,7 @@ namespace	cl3
 				};
 
 				template<class T>
-				struct	TCTTI<const T>
+				struct	CL3PUBT	TCTTI<const T>
 				{
 					const static bool is_constant = true;
 					const static bool is_signed = TCTTI<T>::is_signed;
@@ -315,7 +315,7 @@ namespace	cl3
 				};
 
 				template<class T>
-				struct	TCTTI<T*>
+				struct	CL3PUBT	TCTTI<T*>
 				{
 					const static bool is_constant = TCTTI<T>::is_constant;
 					const static bool is_signed = TCTTI<T>::is_signed;
@@ -340,7 +340,7 @@ namespace	cl3
 				};
 
 				template<class T>
-				struct	TCTTI<T&>
+				struct	CL3PUBT	TCTTI<T&>
 				{
 					const static bool is_constant = TCTTI<T>::is_constant;
 					const static bool is_signed = TCTTI<T>::is_signed;
