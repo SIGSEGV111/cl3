@@ -1,6 +1,6 @@
 .PHONY: all clean pch
 
-CXX=$(shell which g++)
+CXX=$(shell which clang)
 CXX_OPT_INT=-fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -DINSIDE_CL3 -Wno-unused-parameter
 CXX_OPT_EXT=-fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -Wno-unused-parameter
 OBJS=$(shell ls -1 *.cpp | sed 's/\.cpp/\.o/' -)
