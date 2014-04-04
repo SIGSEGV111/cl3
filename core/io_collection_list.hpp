@@ -647,7 +647,7 @@ namespace	cl3
 					Prealloc(n_items_append);
 
 					for(usys_t i = 0; i < n_items_append; i++)
-						new (arr_items + i) T(arr_items_append[i]);
+						new (arr_items + n_items_current + i) T(arr_items_append[i]);
 
 					n_items_current  += n_items_append;
 					n_items_prealloc -= n_items_append;

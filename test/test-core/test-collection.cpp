@@ -91,7 +91,7 @@ namespace
 	}
 }
 
-/*namespace
+namespace
 {
 	using namespace cl3::io::collection::list;
 
@@ -137,6 +137,8 @@ namespace
 
 		list.Remove(0,1);	//	removes 0
 
+		EXPECT_TRUE(list.Count() == 6);
+
 		EXPECT_TRUE(list[0] == 1);
 		EXPECT_TRUE(list[1] == 2);
 		EXPECT_TRUE(list[2] == 3);
@@ -146,10 +148,41 @@ namespace
 
 		list.Remove(5,1);	//	removes 9
 
+		EXPECT_TRUE(list.Count() == 5);
+
 		EXPECT_TRUE(list[0] == 1);
 		EXPECT_TRUE(list[1] == 2);
 		EXPECT_TRUE(list[2] == 3);
 		EXPECT_TRUE(list[3] == 4);
 		EXPECT_TRUE(list[4] == 8);
+
+		list.Add(10);
+		list.Add(11);
+
+		EXPECT_TRUE(list.Count() == 7);
+
+		EXPECT_TRUE(list[0] == 1);
+		EXPECT_TRUE(list[1] == 2);
+		EXPECT_TRUE(list[2] == 3);
+		EXPECT_TRUE(list[3] == 4);
+		EXPECT_TRUE(list[4] == 8);
+		EXPECT_TRUE(list[5] == 10);
+		EXPECT_TRUE(list[6] == 11);
+
+		const int arr_ints[] = { 20, 21, 22 };
+		list.Add(arr_ints, sizeof(arr_ints) / sizeof(int));
+
+		EXPECT_TRUE(list.Count() == 10);
+
+		EXPECT_TRUE(list[0] == 1);
+		EXPECT_TRUE(list[1] == 2);
+		EXPECT_TRUE(list[2] == 3);
+		EXPECT_TRUE(list[3] == 4);
+		EXPECT_TRUE(list[4] == 8);
+		EXPECT_TRUE(list[5] == 10);
+		EXPECT_TRUE(list[6] == 11);
+		EXPECT_TRUE(list[7] == 20);
+		EXPECT_TRUE(list[8] == 21);
+		EXPECT_TRUE(list[9] == 22);
 	}
-}*/
+}
