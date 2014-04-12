@@ -596,7 +596,7 @@ namespace	cl3
 				template<class T>
 				void		TList<T>::Shrink	(usys_t n_items_shrink)
 				{
-					for(usys_t i = 0; i < n_items_shrink; i++)
+					for(usys_t i = 1; i <= n_items_shrink; i++)
 						arr_items[n_items_current - i].~T();
 
 					n_items_current  -= n_items_shrink;
@@ -611,7 +611,10 @@ namespace	cl3
 					Prealloc(n_items_grow);
 
 					for(usys_t i = 0; i < n_items_grow; i++)
-						new (arr_items + i) T(item_init);
+						new (arr_items + n_items_current + i) T(item_init);
+
+					n_items_current  += n_items_grow;
+					n_items_prealloc -= n_items_grow;
 				}
 
 				template<class T>

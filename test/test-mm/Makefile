@@ -24,4 +24,4 @@ exe: $(OBJS)
 	$(CXX) -L../lib $(CXX_OPT) -rdynamic $(OBJS) -lcl3-core -lcl3-mm -lstdc++ -lrt -pthread -lgtest ../lib/libgtest_main.a -o $@
 
 run: exe
-	LD_LIBRARY_PATH=$(CURDIR)/../lib valgrind -q --leak-check=summary --show-reachable=yes --track-origins=yes ./exe
+	LD_LIBRARY_PATH=$(CURDIR)/../lib valgrind -q --leak-check=full --show-reachable=yes --track-origins=yes ./exe

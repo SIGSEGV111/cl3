@@ -94,6 +94,95 @@ namespace
 namespace
 {
 	using namespace cl3::io::collection::list;
+	using namespace cl3::system::types;
+
+	TEST(List, Construct)
+	{
+		const int arr_ints[] = { 0, 1, 2, 3, 4, 5, 6 };
+		const usys_t n_ints = sizeof(arr_ints) / sizeof(int);	//	must be 7
+		EXPECT_TRUE(n_ints == 7);
+
+		{
+			TList<int> list(arr_ints, n_ints);
+			EXPECT_TRUE(list.Count() == 7);
+			EXPECT_TRUE(list[0] == 0);
+			EXPECT_TRUE(list[1] == 1);
+			EXPECT_TRUE(list[2] == 2);
+			EXPECT_TRUE(list[3] == 3);
+			EXPECT_TRUE(list[4] == 4);
+			EXPECT_TRUE(list[5] == 5);
+			EXPECT_TRUE(list[6] == 6);
+		}
+
+		{
+			int* arr_ints_claimable = (int*)cl3::system::memory::Alloc(n_ints * sizeof(int), NULL);
+			memcpy(arr_ints_claimable, arr_ints, n_ints * sizeof(int));
+
+			TList<int> list(arr_ints_claimable, n_ints, true);
+			EXPECT_TRUE(list.Count() == 7);
+			EXPECT_TRUE(list[0] == 0);
+			EXPECT_TRUE(list[1] == 1);
+			EXPECT_TRUE(list[2] == 2);
+			EXPECT_TRUE(list[3] == 3);
+			EXPECT_TRUE(list[4] == 4);
+			EXPECT_TRUE(list[5] == 5);
+			EXPECT_TRUE(list[6] == 6);
+
+			arr_ints_claimable[0] = 100;
+			arr_ints_claimable[1] = 101;
+			arr_ints_claimable[2] = 102;
+			arr_ints_claimable[3] = 103;
+			arr_ints_claimable[4] = 104;
+			arr_ints_claimable[5] = 105;
+			arr_ints_claimable[6] = 106;
+
+			EXPECT_TRUE(list[0] == 100);
+			EXPECT_TRUE(list[1] == 101);
+			EXPECT_TRUE(list[2] == 102);
+			EXPECT_TRUE(list[3] == 103);
+			EXPECT_TRUE(list[4] == 104);
+			EXPECT_TRUE(list[5] == 105);
+			EXPECT_TRUE(list[6] == 106);
+		}
+
+		{
+			int* arr_ints_claimable = (int*)cl3::system::memory::Alloc(n_ints * sizeof(int), NULL);
+			memcpy(arr_ints_claimable, arr_ints, n_ints * sizeof(int));
+
+			TList<int> list(arr_ints_claimable, n_ints, false);
+			EXPECT_TRUE(list.Count() == 7);
+			EXPECT_TRUE(list[0] == 0);
+			EXPECT_TRUE(list[1] == 1);
+			EXPECT_TRUE(list[2] == 2);
+			EXPECT_TRUE(list[3] == 3);
+			EXPECT_TRUE(list[4] == 4);
+			EXPECT_TRUE(list[5] == 5);
+			EXPECT_TRUE(list[6] == 6);
+
+			arr_ints_claimable[0] = 100;
+			arr_ints_claimable[1] = 101;
+			arr_ints_claimable[2] = 102;
+			arr_ints_claimable[3] = 103;
+			arr_ints_claimable[4] = 104;
+			arr_ints_claimable[5] = 105;
+			arr_ints_claimable[6] = 106;
+
+			EXPECT_TRUE(list[0] == 0);
+			EXPECT_TRUE(list[1] == 1);
+			EXPECT_TRUE(list[2] == 2);
+			EXPECT_TRUE(list[3] == 3);
+			EXPECT_TRUE(list[4] == 4);
+			EXPECT_TRUE(list[5] == 5);
+			EXPECT_TRUE(list[6] == 6);
+
+			cl3::system::memory::Free(arr_ints_claimable);
+		}
+
+		{
+			TList<int> list;
+			EXPECT_TRUE(list.Count() == 0);
+		}
+	}
 
 	TEST(List, Add_Remove_Clear)
 	{
@@ -237,5 +326,229 @@ namespace
 		EXPECT_TRUE(list.Count() == 0);
 
 		list.Clear();
+	}
+
+	TEST(List, Copy)
+	{
+		TList<int> source_list;
+
+		source_list.Add(0);
+		source_list.Add(1);
+		source_list.Add(2);
+		source_list.Add(3);
+		source_list.Add(4);
+		source_list.Add(5);
+		source_list.Add(6);
+		source_list.Add(7);
+		source_list.Add(8);
+		source_list.Add(9);
+
+		TList<int> dest_list(source_list);
+
+		EXPECT_TRUE(dest_list.Count() == 10);
+
+		EXPECT_TRUE(dest_list[0] == 0);
+		EXPECT_TRUE(dest_list[1] == 1);
+		EXPECT_TRUE(dest_list[2] == 2);
+		EXPECT_TRUE(dest_list[3] == 3);
+		EXPECT_TRUE(dest_list[4] == 4);
+		EXPECT_TRUE(dest_list[5] == 5);
+		EXPECT_TRUE(dest_list[6] == 6);
+		EXPECT_TRUE(dest_list[7] == 7);
+		EXPECT_TRUE(dest_list[8] == 8);
+		EXPECT_TRUE(dest_list[9] == 9);
+	}
+
+	TEST(List, Assign)
+	{
+		TList<int> source_list;
+
+		source_list.Add(0);
+		source_list.Add(1);
+		source_list.Add(2);
+		source_list.Add(3);
+		source_list.Add(4);
+		source_list.Add(5);
+		source_list.Add(6);
+		source_list.Add(7);
+		source_list.Add(8);
+		source_list.Add(9);
+
+		TList<int> dest_list;
+
+		dest_list.Add(100);
+		dest_list.Add(101);
+		dest_list.Add(102);
+		dest_list.Add(103);
+		dest_list.Add(104);
+		dest_list.Add(105);
+
+		EXPECT_TRUE(dest_list.Count() == 6);
+
+		EXPECT_TRUE(dest_list[0] == 100);
+		EXPECT_TRUE(dest_list[1] == 101);
+		EXPECT_TRUE(dest_list[2] == 102);
+		EXPECT_TRUE(dest_list[3] == 103);
+		EXPECT_TRUE(dest_list[4] == 104);
+		EXPECT_TRUE(dest_list[5] == 105);
+
+		dest_list = source_list;
+
+		EXPECT_TRUE(dest_list.Count() == 10);
+
+		EXPECT_TRUE(dest_list[0] == 0);
+		EXPECT_TRUE(dest_list[1] == 1);
+		EXPECT_TRUE(dest_list[2] == 2);
+		EXPECT_TRUE(dest_list[3] == 3);
+		EXPECT_TRUE(dest_list[4] == 4);
+		EXPECT_TRUE(dest_list[5] == 5);
+		EXPECT_TRUE(dest_list[6] == 6);
+		EXPECT_TRUE(dest_list[7] == 7);
+		EXPECT_TRUE(dest_list[8] == 8);
+		EXPECT_TRUE(dest_list[9] == 9);
+	}
+
+	TEST(List, Grow)
+	{
+		TList<int> list;
+
+		list.Add(0);
+		list.Add(1);
+		list.Add(2);
+		list.Add(3);
+		list.Add(4);
+
+		EXPECT_TRUE(list.Count() == 5);
+
+		EXPECT_TRUE(list[0] == 0);
+		EXPECT_TRUE(list[1] == 1);
+		EXPECT_TRUE(list[2] == 2);
+		EXPECT_TRUE(list[3] == 3);
+		EXPECT_TRUE(list[4] == 4);
+
+		list.Grow(5, 100);
+
+		EXPECT_TRUE(list.Count() == 10);
+
+		EXPECT_TRUE(list[0] == 0);
+		EXPECT_TRUE(list[1] == 1);
+		EXPECT_TRUE(list[2] == 2);
+		EXPECT_TRUE(list[3] == 3);
+		EXPECT_TRUE(list[4] == 4);
+		EXPECT_TRUE(list[5] == 100);
+		EXPECT_TRUE(list[6] == 100);
+		EXPECT_TRUE(list[7] == 100);
+		EXPECT_TRUE(list[8] == 100);
+		EXPECT_TRUE(list[9] == 100);
+	}
+
+	TEST(List, Shrink)
+	{
+		TList<int> list;
+
+		list.Add(0);
+		list.Add(1);
+		list.Add(2);
+		list.Add(3);
+		list.Add(4);
+
+		EXPECT_TRUE(list.Count() == 5);
+
+		EXPECT_TRUE(list[0] == 0);
+		EXPECT_TRUE(list[1] == 1);
+		EXPECT_TRUE(list[2] == 2);
+		EXPECT_TRUE(list[3] == 3);
+		EXPECT_TRUE(list[4] == 4);
+
+		list.Shrink(2);
+
+		EXPECT_TRUE(list.Count() == 3);
+
+		EXPECT_TRUE(list[0] == 0);
+		EXPECT_TRUE(list[1] == 1);
+		EXPECT_TRUE(list[2] == 2);
+	}
+
+	TEST(List, ItemPtr)
+	{
+		TList<int> list;
+
+		list.Add(0);
+		list.Add(1);
+		list.Add(2);
+		list.Add(3);
+		list.Add(4);
+
+		EXPECT_TRUE(list.Count() == 5);
+
+		int* base = list.ItemPtr(0);
+
+		EXPECT_TRUE(list.ItemPtr(1) == &list[1]);
+		EXPECT_TRUE(list.ItemPtr(2) == &list[2]);
+		EXPECT_TRUE(list.ItemPtr(3) == &list[3]);
+		EXPECT_TRUE(list.ItemPtr(4) == &list[4]);
+
+		EXPECT_TRUE(list.ItemPtr(1) == base+1);
+		EXPECT_TRUE(list.ItemPtr(2) == base+2);
+		EXPECT_TRUE(list.ItemPtr(3) == base+3);
+		EXPECT_TRUE(list.ItemPtr(4) == base+4);
+	}
+
+	TEST(List, fifo)
+	{
+		int buffer[8];
+		const int arr_ints[] = { 0, 1, 2, 3, 4, 5, 6 };
+		const usys_t n_ints = sizeof(arr_ints) / sizeof(int);	//	must be 7
+		EXPECT_TRUE(n_ints == 7);
+
+		TList<int> list;
+
+		list.Write(arr_ints, n_ints);
+
+		EXPECT_TRUE(list.Count() == 7);
+
+		EXPECT_TRUE(list[0] == 0);
+		EXPECT_TRUE(list[1] == 1);
+		EXPECT_TRUE(list[2] == 2);
+		EXPECT_TRUE(list[3] == 3);
+		EXPECT_TRUE(list[4] == 4);
+		EXPECT_TRUE(list[5] == 5);
+		EXPECT_TRUE(list[6] == 6);
+
+		EXPECT_TRUE(list.Read(buffer, 8, 7) == 7);
+
+		EXPECT_TRUE(list.Count() == 0);
+
+		list.Write(arr_ints, n_ints);
+
+		EXPECT_TRUE(list.Count() == 7);
+
+		EXPECT_TRUE(list.Read(buffer, 5, 1) == 5);
+
+		EXPECT_TRUE(list.Count() == 2);
+
+		EXPECT_TRUE(list[0] == 5);
+		EXPECT_TRUE(list[1] == 6);
+	}
+
+	TEST(List, CountMinMax)
+	{
+		TList<int> list;
+
+		list.Grow(10, 100);
+
+		EXPECT_TRUE(list.Count() == 10);
+
+		EXPECT_TRUE(list.CountMin(0));
+		EXPECT_TRUE(list.CountMin(1));
+		EXPECT_TRUE(list.CountMin(9));
+		EXPECT_TRUE(list.CountMin(10));
+		EXPECT_TRUE(!list.CountMin(11));
+
+		EXPECT_TRUE(!list.CountMax(0));
+		EXPECT_TRUE(!list.CountMax(1));
+		EXPECT_TRUE(!list.CountMax(9));
+		EXPECT_TRUE(list.CountMax(10));
+		EXPECT_TRUE(list.CountMax(11));
 	}
 }
