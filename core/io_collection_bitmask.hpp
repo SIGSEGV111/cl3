@@ -33,9 +33,9 @@ namespace	cl3
 		{
 			namespace	bitmask
 			{
-				class	TBitmask;
+				class	CL3PUBT	TBitmask;
 
-				class	TBoolProxy
+				class	CL3PUBT	TBoolProxy
 				{
 					protected:
 						TBitmask* bm;
@@ -48,19 +48,19 @@ namespace	cl3
 						CLASS	TBoolProxy	(TBitmask* bm, usys_t index) : bm(bm), index(index) {}
 				};
 
-				struct	IBitmask : public IStaticCollection<TBoolProxy>
+				struct	CL3PUBT	IBitmask : public IStaticCollection<TBoolProxy>
 				{
 					virtual	bool	Bit		(usys_t index) GETTER = 0;
 					virtual	void	Bit		(usys_t index, bool value) SETTER = 0;
 				};
 
-				struct	IIterator : public virtual IStaticIterator<TBoolProxy>, public virtual stream::IOut<bool>, public virtual stream::IIn<bool>
+				struct	CL3PUBT	IIterator : public virtual IStaticIterator<TBoolProxy>, public virtual stream::IOut<bool>, public virtual stream::IIn<bool>
 				{
 					virtual	usys_t	Index	() const GETTER = 0;
 					virtual	void	Index	(usys_t new_index) SETTER = 0;
 				};
 
-				class	TIterator : public IIterator, protected TBoolProxy
+				class	CL3PUBT	TIterator : public IIterator, protected TBoolProxy
 				{
 					protected:
 						void	CheckIndex	() const;
@@ -114,7 +114,7 @@ namespace	cl3
 						inline	CLASS	TIterator	(TBitmask* bm, usys_t index) : TBoolProxy(bm, index) {}
 				};
 
-				class	TBitmask : public IBitmask
+				class	CL3PUBT	TBitmask : public IBitmask
 				{
 					friend class TIterator;
 					protected:

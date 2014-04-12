@@ -356,7 +356,10 @@ namespace	cl3
 				usys_t	TList<T>::AbsIndex	(ssys_t rindex) const
 				{
 					if(rindex < 0)
-						return n_items_current - rindex;
+					{
+						const usys_t tmp = -rindex;
+						return n_items_current - tmp;
+					}
 					else
 						return rindex;
 				}

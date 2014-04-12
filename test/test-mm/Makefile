@@ -2,7 +2,7 @@
 
 GTEST_DIR=$(CURDIR)/../gtest
 CXX=$(shell which clang)
-CXX_OPT=-fPIC -std=c++11 -g -O1 -Wall -Wextra -Werror -Winvalid-pch -I../include -fvisibility=hidden
+CXX_OPT=-std=c++11 -g -O1 -Wall -Wextra -Werror -Winvalid-pch -I../include
 OBJS=$(shell ls -1 *.cpp | sed 's/\.cpp/\.o/' -)
 
 all: run

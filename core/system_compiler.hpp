@@ -80,8 +80,8 @@ namespace	cl3
 
 				#define	CL3_CXX_EXPORT_FUNC	__attribute__ ((visibility("default")))
 				#define	CL3_CXX_IMPORT_FUNC	__attribute__ ((visibility("default")))
-				#define	CL3_CXX_EXPORT_TYPE	__attribute__ ((visibility("default")))
-				#define	CL3_CXX_IMPORT_TYPE	__attribute__ ((visibility("default")))
+				#define	CL3_CXX_EXPORT_TYPE	__attribute__ ((visibility("default"))) __attribute__ ((weak))
+				#define	CL3_CXX_IMPORT_TYPE	__attribute__ ((visibility("default"))) __attribute__ ((weak))
 
 				#define CL3_PACK( ... ) __VA_ARGS__ __attribute__((__packed__))
 				#define	CL3_WARN_UNUSED_RESULT	__attribute__((warn_unused_result))

@@ -30,29 +30,27 @@ namespace	cl3
 		{
 			namespace	bitmask
 			{
-				class	TBitmask;
+				class	CL3PUBT	TBitmask;
 			}
 
 			namespace	list
 			{
-				template<class T>
-				struct	IList;
-
-				template<class T>
-				class	TList;
+				template<class T>	struct	CL3PUBT	IList;
+				template<class T>	class	CL3PUBT	TList;
 			}
 
-			class	TIndexOutOfBoundsException : public error::TException
+			class	CL3PUBT	TIndexOutOfBoundsException : public virtual error::TException
 			{
 				public:
 					ssys_t index;
 					usys_t count;
 
 					CL3PUBF	CLASS	TIndexOutOfBoundsException	(ssys_t index, usys_t count);
+					CL3PUBF	virtual	CLASS	~TIndexOutOfBoundsException	() {}
 			};
 
 			template<class T>
-			struct	IMatcher
+			struct	CL3PUBT	IMatcher
 			{
 				virtual	bool	Match	(const T& item_match) const = 0;	//	compares "item_match" against the ciriteria and returns true if the item matches, false otherwise
 				virtual	void	Match	(const T* arr_items_match, bitmask::TBitmask& bm_result) const = 0;	//	compares all items within the array against the criteria and sets the coresponding bits in the bitmask to 1 if the item matches or to 0 if it does not match, the size of the array is taken from the bitmask
@@ -112,7 +110,7 @@ namespace	cl3
 			};
 
 			template<class T>
-			struct	IStaticIterator<const T> : stream::IIn<T>
+			struct	CL3PUBT	IStaticIterator<const T> : stream::IIn<T>
 			{
 				virtual	const IStaticCollection<T>&	Collection	() const = 0;
 				virtual	bool	FindNext	(const IMatcher<T>& matcher) = 0;	//	forward searches thru the collection for an item that matches starting with the next item, if an item was found the function returns thruw and place sthe iterator on that item, otherwise false is returned and the iterator is places on tail
@@ -129,7 +127,7 @@ namespace	cl3
 			};
 
 			template<class T>
-			struct	IStaticIterator : virtual IStaticIterator<const T>, stream::IOut<T>
+			struct	CL3PUBT	IStaticIterator : virtual IStaticIterator<const T>, stream::IOut<T>
 			{
 				using IStaticIterator<const T>::Item;
 				virtual	GETTER	T&	Item	() = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
@@ -137,7 +135,7 @@ namespace	cl3
 			};
 
 			template<class T>
-			struct	IDynamicIterator<const T> : IStaticIterator<T>
+			struct	CL3PUBT	IDynamicIterator<const T> : IStaticIterator<T>
 			{
 				virtual	void	Insert	(const T& item_insert) = 0;	//	inserts an item before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to it
 				virtual	void	Insert	(const T* arr_items_insert, usys_t n_items_insert) = 0;	//	inserts items before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to the first of the inserted items (does nothing if the array is empty)
@@ -146,12 +144,12 @@ namespace	cl3
 			};
 
 			template<class T>
-			struct	IDynamicIterator : IDynamicIterator<const T>
+			struct	CL3PUBT	IDynamicIterator : IDynamicIterator<const T>
 			{
 			};
 
 			template<class T>
-			struct	IStaticCollection : event::IObservable< IStaticCollection<T>, TOnChangeData<T> >
+			struct	CL3PUBT	IStaticCollection : event::IObservable< IStaticCollection<T>, TOnChangeData<T> >
 			{
 				virtual	system::memory::TUniquePtr<IStaticIterator<T> >			CreateStaticIterator	() CL3_WARN_UNUSED_RESULT = 0;
 				virtual	system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT = 0;
@@ -162,7 +160,7 @@ namespace	cl3
 			};
 
 			template<class T>
-			struct	IDynamicCollection : virtual IStaticCollection<T>, public virtual stream::IIn<T>, public virtual stream::IOut<T>
+			struct	CL3PUBT	IDynamicCollection : virtual IStaticCollection<T>, public virtual stream::IIn<T>, public virtual stream::IOut<T>
 			{
 				//	IIn removes read items, while IOut adds written items (no strict FIFO requirements!)
 

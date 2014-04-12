@@ -1,8 +1,8 @@
 .PHONY: all clean pch test
 
 CXX=$(shell which clang)
-CXX_OPT_INT=-fPIC -std=c++11 -g -O1 -Wall -Wextra -Werror -Iinclude -DINSIDE_CL3 -fvisibility=hidden
-CXX_OPT_EXT=-fPIC -std=c++11 -g -O1 -Wall -Wextra -Werror -Iinclude -fvisibility=hidden
+CXX_OPT_INT=-fPIC -std=c++11 -g -O1 -Wall -Wextra -Werror -Iinclude -DINSIDE_CL3 -fvisibility=default
+CXX_OPT_EXT=-fPIC -std=c++11 -g -O1 -Wall -Wextra -Werror -Iinclude -fvisibility=default
 OBJS=$(shell ls -1 *.cpp | sed 's/\.cpp/\.o/' -)
 PCHS=$(shell ls -1 *.hpp | sed 's/\.hpp/\.hpp\.gch/' -)
 DHHS=$(shell ls -1 *.hpp | sed 's/\.hpp/\.dhh/' -)

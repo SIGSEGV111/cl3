@@ -93,6 +93,7 @@ namespace
 
 namespace
 {
+	using namespace cl3::io::collection;
 	using namespace cl3::io::collection::list;
 	using namespace cl3::system::types;
 
@@ -301,6 +302,21 @@ namespace
 		EXPECT_TRUE(list[2] == 1);
 
 		list.Insert(0, 3);
+		EXPECT_TRUE(list.Count() == 4);
+		EXPECT_TRUE(list[0] == 3);
+		EXPECT_TRUE(list[1] == 0);
+		EXPECT_TRUE(list[2] == 2);
+		EXPECT_TRUE(list[3] == 1);
+
+		list.Insert(4, 5);
+		EXPECT_TRUE(list.Count() == 5);
+		EXPECT_TRUE(list[0] == 3);
+		EXPECT_TRUE(list[1] == 0);
+		EXPECT_TRUE(list[2] == 2);
+		EXPECT_TRUE(list[3] == 1);
+		EXPECT_TRUE(list[4] == 5);
+
+		list.Remove(4, 1);
 		EXPECT_TRUE(list.Count() == 4);
 		EXPECT_TRUE(list[0] == 3);
 		EXPECT_TRUE(list[1] == 0);
@@ -550,5 +566,50 @@ namespace
 		EXPECT_TRUE(!list.CountMax(9));
 		EXPECT_TRUE(list.CountMax(10));
 		EXPECT_TRUE(list.CountMax(11));
+	}
+
+	TEST(List, NegativeIndex)
+	{
+		TList<int> list;
+
+		list.Add(0);
+		list.Add(1);
+		list.Add(2);
+		list.Add(3);
+		list.Add(4);
+		list.Add(5);
+		list.Add(6);
+		list.Add(7);
+		list.Add(8);
+		list.Add(9);
+
+		EXPECT_TRUE(list.Count() == 10);
+
+		EXPECT_TRUE(list[0] == 0);
+		EXPECT_TRUE(list[1] == 1);
+		EXPECT_TRUE(list[2] == 2);
+		EXPECT_TRUE(list[3] == 3);
+		EXPECT_TRUE(list[4] == 4);
+		EXPECT_TRUE(list[5] == 5);
+		EXPECT_TRUE(list[6] == 6);
+		EXPECT_TRUE(list[7] == 7);
+		EXPECT_TRUE(list[8] == 8);
+		EXPECT_TRUE(list[9] == 9);
+
+		EXPECT_TRUE(list[-10] == 0);
+		EXPECT_TRUE(list[- 9] == 1);
+		EXPECT_TRUE(list[- 8] == 2);
+		EXPECT_TRUE(list[- 7] == 3);
+		EXPECT_TRUE(list[- 6] == 4);
+		EXPECT_TRUE(list[- 5] == 5);
+		EXPECT_TRUE(list[- 4] == 6);
+		EXPECT_TRUE(list[- 3] == 7);
+		EXPECT_TRUE(list[- 2] == 8);
+		EXPECT_TRUE(list[- 1] == 9);
+
+		list.Insert(-1, 10);
+
+		EXPECT_TRUE(list[- 2] == 10);
+		EXPECT_TRUE(list[- 1] ==  9);
 	}
 }
