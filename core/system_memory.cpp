@@ -84,7 +84,7 @@ namespace	cl3
 					cxx_free(p_mem);
 				}
 
-				void*	Realloc	(void* p_mem, usys_t sz_bytes_new)
+				void*	Realloc	(void* p_mem, usys_t sz_bytes_new, bool inplace)
 				{
 					return cxx_realloc(p_mem, sz_bytes_new);
 				}
@@ -117,11 +117,11 @@ namespace	cl3
 				sz_current -= sz_mb;
 			}
 
-			void*	TRestrictAllocator::Realloc	(void* p_mem, usys_t sz_bytes_new)
+			void*	TRestrictAllocator::Realloc	(void* p_mem, usys_t sz_bytes_new, bool inplace)
 			{
 				const usys_t sz_mb = allocator->SizeOf(p_mem);
 				CL3_CLASS_LOGIC_ERROR(sz_mb > sz_current);
-				p_mem = allocator->Realloc(p_mem, sz_bytes_new);
+				p_mem = allocator->Realloc(p_mem, sz_bytes_new, inplace);
 				sz_current -= sz_mb;
 				sz_current += sz_bytes_new;
 				return p_mem;
@@ -199,7 +199,7 @@ namespace	cl3
 					return NULL;
 			}
 
-			void*	Realloc	(void* p_mem, usys_t n_items_new, const typeinfo::TRTTI* rtti)
+			void*	Realloc	(void* p_mem, usys_t n_items_new, const typeinfo::TRTTI* rtti, bool inplace)
 			{
 				const usys_t sz_bytes_new = rtti == NULL ? n_items_new : n_items_new * rtti->sz_bytes;
 
@@ -211,9 +211,15 @@ namespace	cl3
 					if(sz_bytes_new)
 					{
 						if(owner)
-							p_base = reinterpret_cast<IDynamicAllocator**>(owner->Realloc(p_base, sizeof(IDynamicAllocator*) + sz_bytes_new));
+							p_base = reinterpret_cast<IDynamicAllocator**>(owner->Realloc(p_base, sizeof(IDynamicAllocator*) + sz_bytes_new, inplace));
 						else
-							p_base = reinterpret_cast<IDynamicAllocator**>(cxx_realloc(p_base, sizeof(IDynamicAllocator*) + sz_bytes_new));
+						{
+							//	FIXME
+							if(inplace)
+								return NULL;
+							else
+								p_base = reinterpret_cast<IDynamicAllocator**>(cxx_realloc(p_base, sizeof(IDynamicAllocator*) + sz_bytes_new));
+						}
 
 						return p_base+1;
 					}

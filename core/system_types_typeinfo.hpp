@@ -265,7 +265,7 @@ namespace	cl3
 				};
 
 				template<class T>
-				struct	CL3PUBT	TCTTI
+				struct	TCTTI
 				{
 					const static bool is_constant = false;
 					const static bool is_signed = false;
@@ -290,7 +290,7 @@ namespace	cl3
 				};
 
 				template<class T>
-				struct	CL3PUBT	TCTTI<const T>
+				struct	TCTTI<const T>
 				{
 					const static bool is_constant = true;
 					const static bool is_signed = TCTTI<T>::is_signed;
@@ -315,7 +315,7 @@ namespace	cl3
 				};
 
 				template<class T>
-				struct	CL3PUBT	TCTTI<T*>
+				struct	TCTTI<T*>
 				{
 					const static bool is_constant = TCTTI<T>::is_constant;
 					const static bool is_signed = TCTTI<T>::is_signed;
@@ -340,7 +340,7 @@ namespace	cl3
 				};
 
 				template<class T>
-				struct	CL3PUBT	TCTTI<T&>
+				struct	TCTTI<T&>
 				{
 					const static bool is_constant = TCTTI<T>::is_constant;
 					const static bool is_signed = TCTTI<T>::is_signed;
@@ -418,14 +418,17 @@ namespace	cl3
 		}
 	}
 
-	namespace	system
+	/*namespace	system
 	{
 		namespace	memory
 		{
-			template<class T>	T*	Alloc	(usys_t n_items)				{ return reinterpret_cast<T*>(Alloc(n_items, &typeinfo::TCTTI<T>::rtti)); }
-			template<class T>	T*	Realloc	(T* p_mem, usys_t n_items_new)	{ return reinterpret_cast<T*>(Realloc(p_mem, n_items_new, &typeinfo::TCTTI<T>::rtti)); }
+			template<class T>	T*	Alloc	(usys_t n_items)
+			{ return reinterpret_cast<T*>(Alloc(n_items, &typeinfo::TCTTI<T>::rtti)); }
+
+			template<class T>	T*	Realloc	(void* p_mem, usys_t n_items_new, bool inplace)
+			{ return reinterpret_cast<T*>(Realloc(p_mem, n_items_new, &typeinfo::TCTTI<T>::rtti, inplace)); }
 		}
-	}
+	}*/
 }
 
 #endif

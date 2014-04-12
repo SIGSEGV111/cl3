@@ -17,7 +17,7 @@
 */
 
 #include "system_memory.hpp"
-#include "system_types_typeinfo.hpp"
+//#include "system_types_typeinfo.hpp"
 #include "io_collection_bitmask.hpp"
 #include <string.h>
 
@@ -210,7 +210,7 @@ namespace	cl3
 
 				void		TBitmask::Count		(usys_t new_count)
 				{
-					arr_bits = Realloc<byte_t>(arr_bits, new_count / 8U + (((new_count % 8U) != 0U) ? 1U : 0U));
+					arr_bits = (byte_t*)Realloc(arr_bits, new_count / 8U + (((new_count % 8U) != 0U) ? 1U : 0U), NULL, false);
 					n_bits = new_count;
 				}
 
@@ -248,7 +248,7 @@ namespace	cl3
 
 				CLASS		TBitmask::TBitmask	(const TBitmask& other)
 				{
-					arr_bits = reinterpret_cast<byte_t*>(Alloc<byte_t>(other.n_bits / 8U + (((other.n_bits % 8U) != 0U) ? 1U : 0U)));
+					arr_bits = reinterpret_cast<byte_t*>(Alloc(other.n_bits / 8U + (((other.n_bits % 8U) != 0U) ? 1U : 0U), NULL));
 					n_bits = other.n_bits;
 				}
 

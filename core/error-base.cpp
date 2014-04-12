@@ -24,7 +24,7 @@
 #include <stdarg.h>
 #include "error-base.hpp"
 #include "util.hpp"
-#include "system_types_typeinfo.hpp"
+//#include "system_types_typeinfo.hpp"
 #include "system_memory.hpp"
 
 namespace	cl3
@@ -45,7 +45,7 @@ namespace	cl3
 				if(l <= 0) throw "TException: printf format error (ctor)";
 
 				va_start(list, format);
-				message = Alloc<char>(l);
+				message = (char*)Alloc(l, NULL);
  				if(message == NULL) { va_end(list); throw "TException: out of memory (ctor)"; }
 				vsnprintf(message, l, format, list);
 				va_end(list);

@@ -37,7 +37,7 @@ namespace	cl3
 			template<class T>	struct	ISource;
 			template<class T>	struct	ISink;
 
-			class	TIOException : public error::TException
+			class	CL3PUBT	TIOException : public error::TException
 			{
 				public:
 					CL3PUBF	CLASS	TIOException	();
@@ -45,7 +45,7 @@ namespace	cl3
 					CL3PUBF	CLASS	~TIOException	();
 			};
 
-			class	TSourceDryException : public TIOException
+			class	CL3PUBT	TSourceDryException : public TIOException
 			{
 				public:
 					uoff_t n_items_requested_read_max;
@@ -58,7 +58,7 @@ namespace	cl3
 					CL3PUBF	CLASS	~TSourceDryException();
 			};
 
-			class	TSinkFloodedException : public TIOException
+			class	CL3PUBT	TSinkFloodedException : public TIOException
 			{
 				public:
 					uoff_t n_items_requested_write_max;

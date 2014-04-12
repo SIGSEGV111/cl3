@@ -2,7 +2,7 @@
 
 GTEST_DIR=$(CURDIR)/../gtest
 CXX=$(shell which clang)
-CXX_OPT=-fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -Winvalid-pch -I../include -Wno-unused-parameter
+CXX_OPT=-fPIC -std=c++11 -g -O1 -Wall -Wextra -Werror -Winvalid-pch -I../include -fvisibility=hidden -Wno-unused-parameter
 OBJS=$(shell ls -1 *.cpp | sed 's/\.cpp/\.o/' -)
 
 all: run
@@ -21,7 +21,7 @@ clean:
 
 exe: $(OBJS)
 	$(MAKE) libcl3-core.so -C ../../core
-	$(CXX) -L../lib $(CXX_OPT) $(OBJS) -lcl3-core -lstdc++ -lrt -pthread -lgtest -lgmock ../lib/libgtest_main.a ../lib/libgmock_main.a -o $@
+	$(CXX) -L../lib $(CXX_OPT) -rdynamic $(OBJS) -lcl3-core -lstdc++ -lrt -pthread -lgtest -lgmock ../lib/libgtest_main.a ../lib/libgmock_main.a -o $@
 
 run: exe
-	LD_LIBRARY_PATH=$(CURDIR)/../lib valgrind -q --leak-check=full --show-reachable=yes --track-origins=yes ./exe
+	LD_LIBRARY_PATH=$(CURDIR)/../lib valgrind -q --leak-check=summary --show-reachable=yes --track-origins=yes ./exe

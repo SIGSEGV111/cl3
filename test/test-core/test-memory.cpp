@@ -35,15 +35,15 @@ namespace
 	{
 		void*	Alloc	(usys_t) CL3_WARN_UNUSED_RESULT { throw TTestException(); }
 		void	Free	(void*) { throw TTestException(); }
-		void*	Realloc	(void*, usys_t) CL3_WARN_UNUSED_RESULT  { throw TTestException(); }
+		void*	Realloc	(void*, usys_t, bool) CL3_WARN_UNUSED_RESULT  { throw TTestException(); }
 		usys_t	SizeOf	(void*) const GETTER  { throw TTestException(); }
 	};
 
 	TEST(Memory, Alloc_Realloc_Free)
 	{
-		byte_t* bytes = Alloc<byte_t>(128);
+		byte_t* bytes = (byte_t*)Alloc(128, NULL);
 		memset(bytes, 1, 128);
-		bytes = (byte_t*)Realloc(bytes, 256);
+		bytes = (byte_t*)Realloc(bytes, 256, NULL, false);
 		memset(bytes, 2, 256);
 		Free(bytes);
 	}
@@ -53,10 +53,10 @@ namespace
 		TFailAllocator fail_allocator;
 		byte_t* bytes = NULL;
 
-		bytes = Alloc<byte_t>(128);
+		bytes = (byte_t*)Alloc(128, NULL);
 
 		CL3_PARAMETER_STACK_PUSH(allocator, &fail_allocator);
-		bytes = (byte_t*)Realloc(bytes, 256);
+		bytes = (byte_t*)Realloc(bytes, 256, NULL, false);
 		Free(bytes);
 	}
 
@@ -95,10 +95,14 @@ namespace
 		//	request one byte more than the limit (this must fail)
 		EXPECT_THROW(array = new byte_t[sz_limit-sizeof(int)*3+1], TBadAllocException);
 
+		//	if the above succeeded (which it should not, but anyway), we have to delete[] array again
+		//	if the above did not succeeded (as it should), we can safely delete[] a NULL-pointer
+		delete[] array;
+
 		//	this should work (-256 because of alignment and padding which might be required)
 		array = new byte_t[sz_limit-sizeof(int)*3-256];
 
-		delete array;
+		delete[] array;
 		delete x;
 		delete y;
 		delete z;

@@ -1,8 +1,8 @@
 .PHONY: all clean pch test
 
 CXX=$(shell which clang)
-CXX_OPT_INT=-fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -Winvalid-pch -Iinclude -DINSIDE_CL3
-CXX_OPT_EXT=-fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -Winvalid-pch -Iinclude
+CXX_OPT_INT=-fPIC -std=c++11 -g -O1 -Wall -Wextra -Werror -Iinclude -DINSIDE_CL3 -fvisibility=hidden
+CXX_OPT_EXT=-fPIC -std=c++11 -g -O1 -Wall -Wextra -Werror -Iinclude -fvisibility=hidden
 OBJS=$(shell ls -1 *.cpp | sed 's/\.cpp/\.o/' -)
 PCHS=$(shell ls -1 *.hpp | sed 's/\.hpp/\.hpp\.gch/' -)
 DHHS=$(shell ls -1 *.hpp | sed 's/\.hpp/\.dhh/' -)
@@ -32,7 +32,7 @@ pch: $(PCHS)
 
 libcl3-mm.so: $(OBJS)
 	$(MAKE) libcl3-core.so -C ../core
-	$(CXX) -Llib -lcl3-core -lstdc++ -lrt -shared $(CXX_OPT_INT) $(OBJS) -o $@
+	$(CXX) -Llib -lcl3-core -lstdc++ -lrt -shared -rdynamic $(CXX_OPT_INT) $(OBJS) -o $@
 
 libcl3-mm.a: $(OBJS)
 	ar rcs $@ $(OBJS)

@@ -128,7 +128,7 @@ namespace	cl3
 			{
 				virtual	void*	Alloc	(usys_t sz_bytes) CL3_WARN_UNUSED_RESULT = 0;
 				virtual	void	Free	(void* p_mem) = 0;
-				virtual	void*	Realloc	(void* p_mem, usys_t sz_byte_ts_new) CL3_WARN_UNUSED_RESULT = 0;
+				virtual	void*	Realloc	(void* p_mem, usys_t sz_bytes_new, bool inplace) CL3_WARN_UNUSED_RESULT = 0;
 				virtual	usys_t	SizeOf	(void* p_mem) const GETTER = 0;
 			};
 
@@ -145,7 +145,7 @@ namespace	cl3
 				public:
 					CL3PUBF	void*	Alloc	(usys_t sz_bytes) CL3_WARN_UNUSED_RESULT;
 					CL3PUBF	void	Free	(void* p_mem);
-					CL3PUBF	void*	Realloc	(void* p_mem, usys_t sz_byte_ts_new) CL3_WARN_UNUSED_RESULT;
+					CL3PUBF	void*	Realloc	(void* p_mem, usys_t sz_bytes_new, bool inplace) CL3_WARN_UNUSED_RESULT;
 					CL3PUBF	usys_t	SizeOf	(void* p_mem) const GETTER;
 					CL3PUBF	usys_t	BytesAllocated	() const GETTER;
 					CL3PUBF	usys_t	BytesLimit		() const GETTER;
@@ -158,9 +158,9 @@ namespace	cl3
 			CL3PUBF extern IDynamicAllocator* exception_allocator;
 
 			CL3PUBF	void	Free	(void*);
-			CL3PUBF	void*	Alloc	(usys_t, const typeinfo::TRTTI*);
-			CL3PUBF	void*	Realloc	(void*, usys_t, const typeinfo::TRTTI*);
-			CL3PUBF	usys_t	SizeOf	(void*);
+			CL3PUBF	void*	Alloc	(usys_t, const typeinfo::TRTTI*) CL3_WARN_UNUSED_RESULT;
+			CL3PUBF	void*	Realloc	(void* p_mem, usys_t n_items_new, const typeinfo::TRTTI* rtti, bool inplace) CL3_WARN_UNUSED_RESULT;
+			CL3PUBF	usys_t	SizeOf	(void*) GETTER;
 
 			//template<class T>	T*	Alloc	(usys_t n_items);	//	defined in system_types_typeinfo.hpp
 		}

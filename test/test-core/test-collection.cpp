@@ -95,7 +95,7 @@ namespace
 {
 	using namespace cl3::io::collection::list;
 
-	TEST(List, Add_Remove)
+	TEST(List, Add_Remove_Clear)
 	{
 		TList<int> list;
 
@@ -184,5 +184,58 @@ namespace
 		EXPECT_TRUE(list[7] == 20);
 		EXPECT_TRUE(list[8] == 21);
 		EXPECT_TRUE(list[9] == 22);
+
+		list.Clear();
+
+		EXPECT_TRUE(list.Count() == 0);
+	}
+
+	TEST(List, Insert_Remove_Clear)
+	{
+		TList<int> list;
+
+		EXPECT_TRUE(list.Count() == 0);
+
+		list.Insert(0, 0);
+		EXPECT_TRUE(list.Count() == 1);
+		EXPECT_TRUE(list[0] == 0);
+
+		list.Insert(1, 1);
+		EXPECT_TRUE(list.Count() == 2);
+		EXPECT_TRUE(list[0] == 0);
+		EXPECT_TRUE(list[1] == 1);
+
+		list.Insert(1, 2);
+		EXPECT_TRUE(list.Count() == 3);
+		EXPECT_TRUE(list[0] == 0);
+		EXPECT_TRUE(list[1] == 2);
+		EXPECT_TRUE(list[2] == 1);
+
+		list.Insert(0, 3);
+		EXPECT_TRUE(list.Count() == 4);
+		EXPECT_TRUE(list[0] == 3);
+		EXPECT_TRUE(list[1] == 0);
+		EXPECT_TRUE(list[2] == 2);
+		EXPECT_TRUE(list[3] == 1);
+
+		list.Remove(3, 1);
+		EXPECT_TRUE(list.Count() == 3);
+		EXPECT_TRUE(list[0] == 3);
+		EXPECT_TRUE(list[1] == 0);
+		EXPECT_TRUE(list[2] == 2);
+
+		list.Remove(1, 1);
+		EXPECT_TRUE(list.Count() == 2);
+		EXPECT_TRUE(list[0] == 3);
+		EXPECT_TRUE(list[1] == 2);
+
+		list.Remove(0, 1);
+		EXPECT_TRUE(list.Count() == 1);
+		EXPECT_TRUE(list[0] == 2);
+
+		list.Remove(0, 1);
+		EXPECT_TRUE(list.Count() == 0);
+
+		list.Clear();
 	}
 }
