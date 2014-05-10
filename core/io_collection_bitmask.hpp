@@ -50,14 +50,14 @@ namespace	cl3
 
 				struct	CL3PUBT	IBitmask : public IStaticCollection<TBoolProxy>
 				{
-					virtual	bool	Bit		(usys_t index) GETTER = 0;
-					virtual	void	Bit		(usys_t index, bool value) SETTER = 0;
+					virtual	bool	Bit		(usys_t index) CL3_GETTER = 0;
+					virtual	void	Bit		(usys_t index, bool value) CL3_SETTER = 0;
 				};
 
 				struct	CL3PUBT	IIterator : public virtual IStaticIterator<TBoolProxy>, public virtual stream::IOut<bool>, public virtual stream::IIn<bool>
 				{
-					virtual	usys_t	Index	() const GETTER = 0;
-					virtual	void	Index	(usys_t new_index) SETTER = 0;
+					virtual	usys_t	Index	() const CL3_GETTER = 0;
+					virtual	void	Index	(usys_t new_index) CL3_SETTER = 0;
 				};
 
 				class	CL3PUBT	TIterator : public IIterator, protected TBoolProxy
@@ -70,8 +70,8 @@ namespace	cl3
 						CL3PUBF	const IStaticCollection<TBoolProxy>&	Collection	() const;
 						CL3PUBF	bool		FindNext	(const IMatcher<TBoolProxy>& matcher);
 						CL3PUBF	bool		FindPrev	(const IMatcher<TBoolProxy>& matcher);
-						CL3PUBF	bool		IsValid		() const GETTER;
-						CL3PUBF	const TBoolProxy&	Item() const GETTER;
+						CL3PUBF	bool		IsValid		() const CL3_GETTER;
+						CL3PUBF	const TBoolProxy&	Item() const CL3_GETTER;
 						CL3PUBF	void		MoveHead	();
 						CL3PUBF	void		MoveTail	();
 						CL3PUBF	bool		MoveFirst	();
@@ -80,7 +80,7 @@ namespace	cl3
 						CL3PUBF	bool		MovePrev	();
 
 						//	from IStaticIterator<TBoolProxy>
-						CL3PUBF	TBoolProxy&	Item		() GETTER;
+						CL3PUBF	TBoolProxy&	Item		() CL3_GETTER;
 
 						//	from IOut<TBoolProxy>
 						CL3PUBF	usys_t	Write	(const TBoolProxy* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
@@ -107,8 +107,8 @@ namespace	cl3
 						CL3PUBF	uoff_t	WriteOut(io::stream::IOut<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
 
 						//	from IIterator
-						CL3PUBF	usys_t	Index	() const GETTER;
-						CL3PUBF	void	Index	(usys_t new_index) SETTER;
+						CL3PUBF	usys_t	Index	() const CL3_GETTER;
+						CL3PUBF	void	Index	(usys_t new_index) CL3_SETTER;
 
 						//	from TIterator
 						inline	CLASS	TIterator	(TBitmask* bm, usys_t index) : TBoolProxy(bm, index) {}
@@ -124,7 +124,7 @@ namespace	cl3
 
 					public:
 						//	from IObservable
-						inline const event::TEvent<IStaticCollection<TBoolProxy>, TOnChangeData<TBoolProxy> >& OnChange() const GETTER
+						inline const event::TEvent<IStaticCollection<TBoolProxy>, TOnChangeData<TBoolProxy> >& OnChange() const CL3_GETTER
 						{ return on_change; }
 
 						//	from IStaticCollection
@@ -134,14 +134,14 @@ namespace	cl3
 						inline system::memory::TUniquePtr<IStaticIterator<const TBoolProxy> > CreateStaticIterator() const CL3_WARN_UNUSED_RESULT
 						{ return system::memory::MakeUniquePtr<IStaticIterator<const TBoolProxy> >(new TIterator(const_cast<TBitmask*>(this), n_bits > 0 ? 0 : (usys_t)-1)); }
 
-						CL3PUBF	usys_t	Count	() const GETTER;
+						CL3PUBF	usys_t	Count	() const CL3_GETTER;
 
 						//	from IBitmask
-						CL3PUBF	bool	Bit		(usys_t index) GETTER;
-						CL3PUBF	void	Bit		(usys_t index, bool value) SETTER;
+						CL3PUBF	bool	Bit		(usys_t index) CL3_GETTER;
+						CL3PUBF	void	Bit		(usys_t index, bool value) CL3_SETTER;
 
 						//	from TBitmask
-						CL3PUBF	void	Count	(usys_t new_count) SETTER;
+						CL3PUBF	void	Count	(usys_t new_count) CL3_SETTER;
 						CL3PUBF	TBitmask&	operator=	(const TBitmask&);
 
 						CL3PUBF	CLASS	TBitmask();

@@ -115,8 +115,8 @@ namespace	cl3
 				virtual	const IStaticCollection<T>&	Collection	() const = 0;
 				virtual	bool	FindNext	(const IMatcher<T>& matcher) = 0;	//	forward searches thru the collection for an item that matches starting with the next item, if an item was found the function returns thruw and place sthe iterator on that item, otherwise false is returned and the iterator is places on tail
 				virtual	bool	FindPrev	(const IMatcher<T>& matcher) = 0;	//	backward searches thru the collection for an item that matches starting with the previous item,  if an item was found the function returns thruw and place sthe iterator on that item, otherwise false is returned and the iterator is places on head
-				virtual	bool	IsValid		() const GETTER = 0;	//	returns whether the iterator is placed on a valid item (not on head or tail)
-				virtual	const T&	Item	() const GETTER = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
+				virtual	bool	IsValid		() const CL3_GETTER = 0;	//	returns whether the iterator is placed on a valid item (not on head or tail)
+				virtual	const T&	Item	() const CL3_GETTER = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
 				virtual	void	MoveHead	() = 0;	//	move before the first item
 				virtual	void	MoveTail	() = 0;	//	move after last item
 				virtual	bool	MoveFirst	() = 0;	//	move to the first item (returns false if there is no first item / the collection is empty)
@@ -130,7 +130,7 @@ namespace	cl3
 			struct	CL3PUBT	IStaticIterator : virtual IStaticIterator<const T>, stream::IOut<T>
 			{
 				using IStaticIterator<const T>::Item;
-				virtual	GETTER	T&	Item	() = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
+				virtual	CL3_GETTER	T&	Item	() = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
 				virtual	CLASS	~IStaticIterator	() {}
 			};
 
@@ -154,9 +154,9 @@ namespace	cl3
 				virtual	system::memory::TUniquePtr<IStaticIterator<T> >			CreateStaticIterator	() CL3_WARN_UNUSED_RESULT = 0;
 				virtual	system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT = 0;
 
-				virtual	usys_t	Count		() const GETTER = 0;
-				virtual	bool	CountMin	(usys_t count_min) const GETTER { return Count() >= count_min; }
-				virtual	bool	CountMax	(usys_t count_max) const GETTER { return Count() <= count_max; }
+				virtual	usys_t	Count		() const CL3_GETTER = 0;
+				virtual	bool	CountMin	(usys_t count_min) const CL3_GETTER { return Count() >= count_min; }
+				virtual	bool	CountMax	(usys_t count_max) const CL3_GETTER { return Count() <= count_max; }
 			};
 
 			template<class T>

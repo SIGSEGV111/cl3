@@ -20,7 +20,7 @@
 #define	_include_cl3_core_system_task_synchronization_hpp_
 
 #include "system_compiler.hpp"
-#include "time.hpp"
+#include "system_time.hpp"
 #include "event.hpp"
 
 namespace	cl3
@@ -75,7 +75,7 @@ namespace	cl3
 					virtual	void	Acquire		(EAccess) = 0;
 					virtual	bool	Acquire		(time::TTime timeout, EAccess) CL3_WARN_UNUSED_RESULT = 0;
 					virtual	void	Release		(EAccess) = 0;
-					virtual	bool	HasAcquired	(EAccess) const GETTER = 0;	//	returns wheter or not, the calling thread has acquired this mutex
+					virtual	bool	HasAcquired	(EAccess) const CL3_GETTER = 0;	//	returns wheter or not, the calling thread has acquired this mutex
 					inline	bool	TryAcquire	(EAccess access) CL3_WARN_UNUSED_RESULT { return Acquire(time::TTime(0,0), access); }
 				};
 
@@ -98,7 +98,7 @@ namespace	cl3
 						CL3PUBF	void	Acquire		(EAccess access = MUTEX_ACCESS_WRITE);
 						CL3PUBF	bool	Acquire		(time::TTime timeout, EAccess access = MUTEX_ACCESS_WRITE) CL3_WARN_UNUSED_RESULT;
 						CL3PUBF	void	Release		(EAccess access = MUTEX_ACCESS_WRITE);
-						CL3PUBF	bool	HasAcquired	(EAccess access = MUTEX_ACCESS_WRITE) const GETTER;
+						CL3PUBF	bool	HasAcquired	(EAccess access = MUTEX_ACCESS_WRITE) const CL3_GETTER;
 
 						CL3PUBF	CLASS	TMutex	();
 						CL3PUBF	CLASS	~TMutex	();
@@ -116,7 +116,7 @@ namespace	cl3
 						CL3PUBF	void	Acquire		(EAccess access);
 						CL3PUBF	bool	Acquire		(time::TTime timeout, EAccess access) CL3_WARN_UNUSED_RESULT;
 						CL3PUBF	void	Release		(EAccess access);
-						CL3PUBF	bool	HasAcquired	(EAccess access) const GETTER;
+						CL3PUBF	bool	HasAcquired	(EAccess access) const CL3_GETTER;
 
 						CL3PUBF	CLASS	TRWMutex	();
 						CL3PUBF	CLASS	~TRWMutex	();
@@ -124,7 +124,7 @@ namespace	cl3
 
 				/*struct	IInterlocked
 				{
-					virtual	GETTER	IMutex&	Mutex	() = 0;
+					virtual	CL3_GETTER	IMutex&	Mutex	() = 0;
 				};*/
 
 				template<class T>
@@ -134,8 +134,8 @@ namespace	cl3
 						T object;
 
 					public:
-						inline	const T&	R	() const GETTER	{ CL3_CLASS_LOGIC_ERROR(!HasAcquired(MUTEX_ACCESS_READ)); return object; }
-						inline	T&			W	() GETTER		{ CL3_CLASS_LOGIC_ERROR(!HasAcquired(MUTEX_ACCESS_WRITE)); return object; }
+						inline	const T&	R	() const CL3_GETTER	{ CL3_CLASS_LOGIC_ERROR(!HasAcquired(MUTEX_ACCESS_READ)); return object; }
+						inline	T&			W	() CL3_GETTER		{ CL3_CLASS_LOGIC_ERROR(!HasAcquired(MUTEX_ACCESS_WRITE)); return object; }
 
 						CLASS	TInterlocked	() : object() {}
 						CLASS	TInterlocked	(const T& object) : object(object) {}

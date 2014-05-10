@@ -52,8 +52,8 @@ namespace	cl3
 				template<class T>
 				struct	CL3PUBT	IIterator : public virtual IDynamicIterator<T>
 				{
-					virtual	usys_t	Index	() const GETTER = 0;	//	returns the index on which the iterator is currently positioned (might change on Insert()/Remove/Count(x), as the iterator is repositioned to stay on the same item)
-					virtual	void	Index	(usys_t new_index) SETTER = 0;	//	positiones the iterator on the item with the specified index
+					virtual	usys_t	Index	() const CL3_GETTER = 0;	//	returns the index on which the iterator is currently positioned (might change on Insert()/Remove/Count(x), as the iterator is repositioned to stay on the same item)
+					virtual	void	Index	(usys_t new_index) CL3_SETTER = 0;	//	positiones the iterator on the item with the specified index
 				};
 
 				template<class T>
@@ -66,14 +66,14 @@ namespace	cl3
 					virtual	IList&	operator=	(const IStaticCollection<T>& rhs) = 0;
 					virtual	IList&	operator=	(IStaticCollection<T>&& rhs) = 0;
 
-					virtual	T&			operator[]	(ssys_t rindex) GETTER = 0;	//	returns a reference to the item at index "index", the reference will remain valid until the next function call which changes the size of the list (Insert()/Remove()/Count(x))
-					virtual	const T&	operator[]	(ssys_t rindex) const GETTER = 0;	//	as above
-					virtual	T*			ItemPtr		(ssys_t rindex) GETTER = 0;	//	returns a pointer to the item at index "index", the pointer will remain valid until the next function call which changes the size of the list (Insert()/Remove()/Count(x))
-					virtual	const T*	ItemPtr		(ssys_t rindex) const GETTER = 0;	//	as above
+					virtual	T&			operator[]	(ssys_t rindex) CL3_GETTER = 0;	//	returns a reference to the item at index "index", the reference will remain valid until the next function call which changes the size of the list (Insert()/Remove()/Count(x))
+					virtual	const T&	operator[]	(ssys_t rindex) const CL3_GETTER = 0;	//	as above
+					virtual	T*			ItemPtr		(ssys_t rindex) CL3_GETTER = 0;	//	returns a pointer to the item at index "index", the pointer will remain valid until the next function call which changes the size of the list (Insert()/Remove()/Count(x))
+					virtual	const T*	ItemPtr		(ssys_t rindex) const CL3_GETTER = 0;	//	as above
 
 					virtual	void	Shrink		(usys_t n_items_shrink) = 0;
 					virtual	void	Grow		(usys_t n_items_grow, const T& item_init) = 0;
-					virtual	void	Count		(usys_t new_count, const T& item_init = T()) SETTER = 0;	//	reallocates the list to the specified size, removing items at the end when shrinking and appending new items when enlarging (new items get initialized by copy-constructor from "item_init")
+					virtual	void	Count		(usys_t new_count, const T& item_init = T()) CL3_SETTER = 0;	//	reallocates the list to the specified size, removing items at the end when shrinking and appending new items when enlarging (new items get initialized by copy-constructor from "item_init")
 
 					virtual	void	Insert		(ssys_t rindex, const T& item_insert) = 0;	//	inserts a new item at index "index" which will get copy-constructed from "item_insert"
 					virtual	void	Insert		(ssys_t rindex, const T* arr_items_insert, usys_t n_items_insert) = 0;	//	inserts "n_items_insert" new item at index "index" which will get copy-constructed from the items in "arr_items_insert"
@@ -100,8 +100,8 @@ namespace	cl3
 						const IStaticCollection<T>&	Collection	() const;
 						bool	FindNext	(const IMatcher<T>& matcher);
 						bool	FindPrev	(const IMatcher<T>& matcher);
-						bool	IsValid		() const GETTER;
-						const T&Item		() const GETTER;
+						bool	IsValid		() const CL3_GETTER;
+						const T&Item		() const CL3_GETTER;
 						void	MoveHead	();
 						void	MoveTail	();
 						bool	MoveFirst	();
@@ -110,7 +110,7 @@ namespace	cl3
 						bool	MovePrev	();
 
 						//	from IStaticIterator<T>
-						T&		Item		() GETTER;
+						T&		Item		() CL3_GETTER;
 
 						//	from IDynamicIterator<T>
 						void	Insert		(const T& item_insert);
@@ -126,8 +126,8 @@ namespace	cl3
 						uoff_t	WriteOut	(io::stream::IOut<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
 
 						//	from IIterator
-						usys_t	Index		() const GETTER;
-						void	Index		(usys_t new_index) SETTER;
+						usys_t	Index		() const CL3_GETTER;
+						void	Index		(usys_t new_index) CL3_SETTER;
 
 						//	from TIterator
 						CLASS	TIterator	(TList<T>* list, usys_t index);
@@ -148,14 +148,14 @@ namespace	cl3
 
 					public:
 						//	from IObservable
-						const event::TEvent<IStaticCollection<T>, TOnChangeData<T> >&	OnChange	() const GETTER;
+						const event::TEvent<IStaticCollection<T>, TOnChangeData<T> >&	OnChange	() const CL3_GETTER;
 
 						//	from IStaticCollection
 						system::memory::TUniquePtr<IStaticIterator<T> >			CreateStaticIterator	() CL3_WARN_UNUSED_RESULT;
 						system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT;
-						usys_t	Count		() const GETTER;
-						bool	CountMin	(usys_t count_min) const GETTER;
-						bool	CountMax	(usys_t count_max) const GETTER;
+						usys_t	Count		() const CL3_GETTER;
+						bool	CountMin	(usys_t count_min) const CL3_GETTER;
+						bool	CountMax	(usys_t count_max) const CL3_GETTER;
 
 						//	from IDynamicCollection
 						system::memory::TUniquePtr<IDynamicIterator<T> >		CreateDynamicIterator	() CL3_WARN_UNUSED_RESULT;
@@ -178,13 +178,13 @@ namespace	cl3
 						//	from IList
 						TList<T>&	operator=	(const IStaticCollection<T>& rhs);
 						TList<T>&	operator=	(IStaticCollection<T>&& rhs);
-						T&			operator[]	(ssys_t rindex) GETTER;
-						const T&	operator[]	(ssys_t rindex) const GETTER;
-						T*			ItemPtr		(ssys_t rindex) GETTER;
-						const T*	ItemPtr		(ssys_t rindex) const GETTER;
+						T&			operator[]	(ssys_t rindex) CL3_GETTER;
+						const T&	operator[]	(ssys_t rindex) const CL3_GETTER;
+						T*			ItemPtr		(ssys_t rindex) CL3_GETTER;
+						const T*	ItemPtr		(ssys_t rindex) const CL3_GETTER;
 						void		Shrink		(usys_t n_items_shrink);
 						void		Grow		(usys_t n_items_grow, const T& item_init);
-						void		Count		(usys_t new_count, const T& item_init = T()) SETTER;
+						void		Count		(usys_t new_count, const T& item_init = T()) CL3_SETTER;
 						void		Insert		(ssys_t rindex, const T& item_insert);
 						void		Insert		(ssys_t rindex, const T* arr_items_insert, usys_t n_items_insert);
 						void		Insert		(ssys_t rindex, const IStaticCollection<T>& collection);

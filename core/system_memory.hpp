@@ -82,25 +82,25 @@ namespace	cl3
 						return *this;
 					}
 
-					SETTER	void	Object		(T* new_object)
+					CL3_SETTER	void	Object		(T* new_object)
 					{
 						Release();
 						object = new_object;
 					}
 
-					GETTER	T&		Object		() { return *object; }
-					GETTER	T*		Claim		() { T* tmp = object; object = NULL; return tmp; }
+					CL3_GETTER	T&		Object		() { return *object; }
+					CL3_GETTER	T*		Claim		() { T* tmp = object; object = NULL; return tmp; }
 					void			Reset		() { object = NULL; }	//	does *NOT* release any memory - just removes control of the object from this class
 
-					GETTER	const T*	Object		() const { return object; }
+					CL3_GETTER	const T*	Object		() const { return object; }
 
 					CLASS	TUniquePtr	() throw() : object(NULL) {}
 					CLASS	TUniquePtr	(const TUniquePtr& other) throw() : object(other.object) { other.object = NULL; }
 					CLASS	~TUniquePtr	() { Release(); }
 			};
 
-			template<class T> GETTER static TUniquePtr<T, UPTR_OBJECT> MakeUniquePtr(T* object) { TUniquePtr<T, UPTR_OBJECT> uptr; uptr.Object(object); return uptr; }
-			template<EUnqiuePtrType type, class T> GETTER static TUniquePtr<T, type> MakeUniquePtr(T* object) { TUniquePtr<T, type> uptr; uptr.Object(object); return uptr; }
+			template<class T> CL3_GETTER static TUniquePtr<T, UPTR_OBJECT> MakeUniquePtr(T* object) { TUniquePtr<T, UPTR_OBJECT> uptr; uptr.Object(object); return uptr; }
+			template<EUnqiuePtrType type, class T> CL3_GETTER static TUniquePtr<T, type> MakeUniquePtr(T* object) { TUniquePtr<T, type> uptr; uptr.Object(object); return uptr; }
 
 			class	CL3PUBT	TBadAllocException : public error::TException
 			{
@@ -129,7 +129,7 @@ namespace	cl3
 				virtual	void*	Alloc	(usys_t sz_bytes) CL3_WARN_UNUSED_RESULT = 0;
 				virtual	void	Free	(void* p_mem) = 0;
 				virtual	void*	Realloc	(void* p_mem, usys_t sz_bytes_new, bool inplace) CL3_WARN_UNUSED_RESULT = 0;
-				virtual	usys_t	SizeOf	(void* p_mem) const GETTER = 0;
+				virtual	usys_t	SizeOf	(void* p_mem) const CL3_GETTER = 0;
 			};
 
 			class	CL3PUBT	TRestrictAllocator : public IDynamicAllocator
@@ -146,9 +146,9 @@ namespace	cl3
 					CL3PUBF	void*	Alloc	(usys_t sz_bytes) CL3_WARN_UNUSED_RESULT;
 					CL3PUBF	void	Free	(void* p_mem);
 					CL3PUBF	void*	Realloc	(void* p_mem, usys_t sz_bytes_new, bool inplace) CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	usys_t	SizeOf	(void* p_mem) const GETTER;
-					CL3PUBF	usys_t	BytesAllocated	() const GETTER;
-					CL3PUBF	usys_t	BytesLimit		() const GETTER;
+					CL3PUBF	usys_t	SizeOf	(void* p_mem) const CL3_GETTER;
+					CL3PUBF	usys_t	BytesAllocated	() const CL3_GETTER;
+					CL3PUBF	usys_t	BytesLimit		() const CL3_GETTER;
 
 					CL3PUBF	CLASS	TRestrictAllocator	(IDynamicAllocator* allocator, usys_t sz_limit);
 					CL3PUBF	CLASS	~TRestrictAllocator	();
@@ -160,7 +160,7 @@ namespace	cl3
 			CL3PUBF	void	Free	(void*);
 			CL3PUBF	void*	Alloc	(usys_t, const typeinfo::TRTTI*) CL3_WARN_UNUSED_RESULT;
 			CL3PUBF	void*	Realloc	(void* p_mem, usys_t n_items_new, const typeinfo::TRTTI* rtti, bool inplace) CL3_WARN_UNUSED_RESULT;
-			CL3PUBF	usys_t	SizeOf	(void*) GETTER;
+			CL3PUBF	usys_t	SizeOf	(void*) CL3_GETTER;
 
 			//template<class T>	T*	Alloc	(usys_t n_items);	//	defined in system_types_typeinfo.hpp
 		}

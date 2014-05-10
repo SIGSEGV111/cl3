@@ -33,7 +33,7 @@ namespace	cl3
 		struct	CL3PUBT	IGenericObservable
 		{
 			//	the data of the void* event parameter are defined by the class implementing the IGenericObservable interface
-			virtual	GETTER	const TEvent<IGenericObservable, void*>&	OnChange	() const = 0;
+			virtual	CL3_GETTER	const TEvent<IGenericObservable, void*>&	OnChange	() const = 0;
 		};
 
 		template<class TSender, class TData>

@@ -260,8 +260,8 @@ namespace	cl3
 					usys_t sz_bytes;	//	size of the datatype in byte_ts
 					const std::type_info* sys_type_info;	//	pointer to the type-info structure provided by C++ typeid()
 
-					CL3PUBF	GETTER	io::text::string::TUStringUPtr Name() const;	//	platform independet human-readable type-name
-					CL3PUBF	GETTER	u32_t Hash() const;	//	32bit hashcode based on type-name
+					CL3PUBF	CL3_GETTER	io::text::string::TUStringUPtr Name() const;	//	platform independet human-readable type-name
+					CL3PUBF	CL3_GETTER	u32_t Hash() const;	//	32bit hashcode based on type-name
 				};
 
 				template<class T>
@@ -417,18 +417,6 @@ namespace	cl3
 			}
 		}
 	}
-
-	/*namespace	system
-	{
-		namespace	memory
-		{
-			template<class T>	T*	Alloc	(usys_t n_items)
-			{ return reinterpret_cast<T*>(Alloc(n_items, &typeinfo::TCTTI<T>::rtti)); }
-
-			template<class T>	T*	Realloc	(void* p_mem, usys_t n_items_new, bool inplace)
-			{ return reinterpret_cast<T*>(Realloc(p_mem, n_items_new, &typeinfo::TCTTI<T>::rtti, inplace)); }
-		}
-	}*/
 }
 
 #endif

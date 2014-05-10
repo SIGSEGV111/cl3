@@ -36,7 +36,7 @@ namespace
 		void*	Alloc	(usys_t) CL3_WARN_UNUSED_RESULT { throw TTestException(); }
 		void	Free	(void*) { throw TTestException(); }
 		void*	Realloc	(void*, usys_t, bool) CL3_WARN_UNUSED_RESULT  { throw TTestException(); }
-		usys_t	SizeOf	(void*) const GETTER  { throw TTestException(); }
+		usys_t	SizeOf	(void*) const CL3_GETTER  { throw TTestException(); }
 	};
 
 	TEST(Memory, Alloc_Realloc_Free)

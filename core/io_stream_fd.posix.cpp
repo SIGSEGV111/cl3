@@ -149,7 +149,7 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TFDStream::TFDStream	(TFD fd) : p_buffer(NULL), sz_buffer(0), fd(fd)
+				CLASS	TFDStream::TFDStream	(fd_t fd) : p_buffer(NULL), sz_buffer(0), fd(fd)
 				{
 					CL3_CLASS_ERROR(fd == -1, TException, "file-descriptor is invalid");
 

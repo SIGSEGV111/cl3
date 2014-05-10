@@ -34,19 +34,13 @@ namespace	cl3
 		{
 			namespace	fd
 			{
-				#if (CL3_OS == CL3_OS_WINDOWS)
-					typedef void* TFD;	//	HANDLE
-				#elif (CL3_OS == CL3_OS_POSIX)
-					typedef int TFD;	//	fd
-				#endif
-
 				//	generic buffered io-stream for interaction with operating systems io-structures (POSIX-fd, Windows HANDLE, etc.)
 				class	TFDStream : virtual IIn<byte_t>, virtual IOut<byte_t>
 				{
 					protected:
 						byte_t* p_buffer;
 						usys_t sz_buffer;
-						TFD fd;
+						fd_t fd;
 
 					public:
 						CL3PUBF	usys_t	Read	(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min = (usys_t)-1);
@@ -55,7 +49,7 @@ namespace	cl3
 						CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
 						CL3PUBF	uoff_t	ReadIn	(IIn<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
 
-						CL3PUBF	CLASS	TFDStream	(TFD fd);	//	TFDStream takes ownership of the file-descriptor fd
+						CL3PUBF	CLASS	TFDStream	(fd_t fd);	//	TFDStream takes ownership of the file-descriptor fd
 						CL3PUBF	CLASS	TFDStream	(const TFDStream&);
 						CL3PUBF	CLASS	~TFDStream	();
 				};

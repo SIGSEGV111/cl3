@@ -20,6 +20,7 @@
 #define	_include_cl3_core_system_types_hpp_
 
 #include "system_compiler.hpp"
+#include "system_os.hpp"
 
 #if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_CLANG)
 	#include <stdint.h>
@@ -56,6 +57,12 @@
 
 				typedef s64_t	soff_t;
 				typedef u64_t	uoff_t;
+
+				#if (CL3_OS == CL3_OS_WINDOWS)
+					typedef void* fd_t;	//	HANDLE
+				#elif (CL3_OS == CL3_OS_POSIX)
+					typedef int fd_t;	//	fd
+				#endif
 			};
 		};
 	};

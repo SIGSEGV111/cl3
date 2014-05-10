@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_io_stream_base_hpp_
-#define	_include_cl3_core_io_stream_base_hpp_
+#ifndef	_include_cl3_core_io_stream_hpp_
+#define	_include_cl3_core_io_stream_hpp_
 
 #include "system_compiler.hpp"
 #include "system_types.hpp"
@@ -93,15 +93,15 @@ namespace	cl3
 			template<class T>
 			struct	ISource
 			{
-				virtual	SETTER	void		Sink	(IOut<T>* os) = 0;
-				virtual	GETTER	IOut<T>*	Sink	() const = 0;
+				virtual	CL3_SETTER	void		Sink	(IOut<T>* os) = 0;
+				virtual	CL3_GETTER	IOut<T>*	Sink	() const = 0;
 			};
 
 			template<class T>
 			struct	ISink
 			{
-				virtual	SETTER	void		Source	(IIn<T>* is) = 0;
-				virtual	GETTER	IIn<T>*		Source	() const = 0;
+				virtual	CL3_SETTER	void		Source	(IIn<T>* is) = 0;
+				virtual	CL3_GETTER	IIn<T>*		Source	() const = 0;
 			};
 		}
 	}
