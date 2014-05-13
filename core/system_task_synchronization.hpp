@@ -66,8 +66,14 @@ namespace	cl3
 
 				enum	EAccess
 				{
-					MUTEX_ACCESS_READ,
-					MUTEX_ACCESS_WRITE
+					MUTEX_ACCESS_READONLY,
+					MUTEX_ACCESS_READWRITE
+				};
+
+				enum	ESharing
+				{
+					MUTEX_PRIVATE,
+					MUTEX_SHARED
 				};
 
 				struct	IMutex
@@ -95,10 +101,10 @@ namespace	cl3
 						TMutex& operator=(const TMutex&);
 
 					public:
-						CL3PUBF	void	Acquire		(EAccess access = MUTEX_ACCESS_WRITE);
-						CL3PUBF	bool	Acquire		(time::TTime timeout, EAccess access = MUTEX_ACCESS_WRITE) CL3_WARN_UNUSED_RESULT;
-						CL3PUBF	void	Release		(EAccess access = MUTEX_ACCESS_WRITE);
-						CL3PUBF	bool	HasAcquired	(EAccess access = MUTEX_ACCESS_WRITE) const CL3_GETTER;
+						CL3PUBF	void	Acquire		(EAccess access = MUTEX_ACCESS_READWRITE);
+						CL3PUBF	bool	Acquire		(time::TTime timeout, EAccess access = MUTEX_ACCESS_READWRITE) CL3_WARN_UNUSED_RESULT;
+						CL3PUBF	void	Release		(EAccess access = MUTEX_ACCESS_READWRITE);
+						CL3PUBF	bool	HasAcquired	(EAccess access = MUTEX_ACCESS_READWRITE) const CL3_GETTER;
 
 						CL3PUBF	CLASS	TMutex	();
 						CL3PUBF	CLASS	~TMutex	();
@@ -122,23 +128,43 @@ namespace	cl3
 						CL3PUBF	CLASS	~TRWMutex	();
 				};
 
-				/*struct	IInterlocked
-				{
-					virtual	CL3_GETTER	IMutex&	Mutex	() = 0;
-				};*/
+				template<ESharing sharing, class T>
+				class	TInterlocked;
 
 				template<class T>
-				class	TInterlocked : public TRWMutex
+				class	TInterlocked<MUTEX_PRIVATE,T> : public TRWMutex
 				{
 					protected:
 						T object;
 
 					public:
-						inline	const T&	R	() const CL3_GETTER	{ CL3_CLASS_LOGIC_ERROR(!HasAcquired(MUTEX_ACCESS_READ)); return object; }
-						inline	T&			W	() CL3_GETTER		{ CL3_CLASS_LOGIC_ERROR(!HasAcquired(MUTEX_ACCESS_WRITE)); return object; }
+						inline	const T&	R	() const CL3_GETTER	{ CL3_CLASS_LOGIC_ERROR(!HasAcquired(MUTEX_ACCESS_READONLY)); return object; }
+						inline	T&			W	() CL3_GETTER		{ CL3_CLASS_LOGIC_ERROR(!HasAcquired(MUTEX_ACCESS_READWRITE)); return object; }
 
 						CLASS	TInterlocked	() : object() {}
 						CLASS	TInterlocked	(const T& object) : object(object) {}
+				};
+
+				template<class T>
+				class	TInterlocked<MUTEX_SHARED,T> : public IMutex
+				{
+					protected:
+						TRWMutex* mutex;
+						T object;
+
+					public:
+						//	from IMutex
+						inline	void	Acquire		(EAccess access) { mutex->Acquire(access); }
+						inline	bool	Acquire		(time::TTime timeout, EAccess access) CL3_WARN_UNUSED_RESULT { return mutex->Acquire(timeout, access); }
+						inline	void	Release		(EAccess access) { mutex->Release(access); }
+						inline	bool	HasAcquired	(EAccess access) const CL3_GETTER { return mutex->HasAcquired(access); }
+
+						//	from TInterlocked
+						inline	const T&	R	() const CL3_GETTER	{ CL3_CLASS_LOGIC_ERROR(!mutex->HasAcquired(MUTEX_ACCESS_READONLY)); return object; }
+						inline	T&			W	() CL3_GETTER		{ CL3_CLASS_LOGIC_ERROR(!mutex->HasAcquired(MUTEX_ACCESS_READWRITE)); return object; }
+
+						CLASS	TInterlocked	(TRWMutex* mutex) : mutex(mutex), object() { CL3_CLASS_LOGIC_ERROR(mutex == NULL); }
+						CLASS	TInterlocked	(TRWMutex* mutex, const T& object) : mutex(mutex), object(object) { CL3_CLASS_LOGIC_ERROR(mutex == NULL); }
 				};
 
 				class	TInterlockedRegion

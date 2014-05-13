@@ -28,16 +28,6 @@ namespace	cl3
 		{
 			namespace	string
 			{
-				uoff_t	TUString::Left	(usys_t sz_unit) const
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				uoff_t	TUString::Space	(usys_t sz_unit) const
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
 				CLASS	TUString::TUString	()
 				{
 					CL3_NOT_IMPLEMENTED;
@@ -70,7 +60,6 @@ namespace	cl3
 
 				CLASS	TUString::~TUString	()
 				{
-					CL3_NOT_IMPLEMENTED;
 				}
 
 				CLASS	TCString::TCString	(const TUString&, const encoding::ICodec*)

@@ -59,9 +59,6 @@ namespace	cl3
 								public virtual encoding::AWCharEncoder
 				{
 					public:
-						uoff_t	Left	(usys_t sz_unit) const;
-						uoff_t	Space	(usys_t sz_unit) const;
-
 						using collection::list::TList<TUTF32>::Append;
 						void			Append		(const char item_append);
 						void			Append		(const char* arr_items_append, usys_t n_items_append);
