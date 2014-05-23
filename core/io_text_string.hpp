@@ -45,13 +45,8 @@ namespace	cl3
 
 				typedef	system::memory::TUniquePtr<TUString>	TUStringUPtr;
 
-				struct	IString : virtual ITextStream
-				{
-					virtual	CLASS	~IString	() {}
-				};
-
 				class	CL3PUBT	TUString :
-								public virtual IString,
+								public virtual ITextStream,
 								public virtual collection::list::TList<TUTF32>,
 								public virtual encoding::ACharDecoder,
 								public virtual encoding::ACharEncoder,
@@ -69,13 +64,17 @@ namespace	cl3
 
 						usys_t			Replace		(const TUString& find, const TUString& replace, usys_t n_times = (usys_t)-1);	//	returns the number of times of which <find> was replaced with <replace>
 
+						TUString		Left		(usys_t n_chars) const;
+						TUString		Right		(usys_t n_chars) const;
+						TUString		Mid			(usys_t index, usys_t n_chars) const;
+
 						CL3PUBF	CLASS	TUString	();
 						CL3PUBF	CLASS	TUString	(const char*     str, usys_t maxlen = (usys_t)-1);
 						CL3PUBF	CLASS	TUString	(const wchar_t* wstr, usys_t maxlen = (usys_t)-1);
 						CL3PUBF	CLASS	TUString	(const TUTF32*  ustr, usys_t maxlen = (usys_t)-1);
 						CL3PUBF	CLASS	TUString	(const TUString&);
 						CL3PUBF	CLASS	TUString	(const IString&);
-						CL3PUBF	CLASS	~TUString	();
+						CL3PUBF	virtual	~TUString	();
 				};
 
 				class	CL3PUBT	TCString

@@ -403,6 +403,7 @@ namespace	cl3
 		}
 	}
 
+	//FIXME
 	namespace	io
 	{
 		namespace	text

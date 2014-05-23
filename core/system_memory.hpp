@@ -53,7 +53,9 @@ namespace	cl3
 			class	TUniquePtr
 			{
 				private:
-					CLASS		TUniquePtr	(T* object) throw() : object(object) {}
+					CLASS	TUniquePtr	(const TUniquePtr&);
+					CLASS	TUniquePtr	(T* object) throw() : object(object) {}
+
 				protected:
 					mutable T* object;
 
@@ -74,11 +76,11 @@ namespace	cl3
 					}
 
 				public:
-					TUniquePtr&	operator=	(const TUniquePtr& other)
+					TUniquePtr&	operator=	(const TUniquePtr& rhs)
 					{
 						Release();
-						this->object = other.object;
-						other.object = NULL;
+						this->object = rhs.object;
+						rhs.object = NULL;
 						return *this;
 					}
 
@@ -88,19 +90,138 @@ namespace	cl3
 						object = new_object;
 					}
 
-					CL3_GETTER	T&		Object		() { return *object; }
-					CL3_GETTER	T*		Claim		() { T* tmp = object; object = NULL; return tmp; }
+					CL3_GETTER	T&	Object		() { return *object; }
+					CL3_GETTER	T*	Claim		() { T* tmp = object; object = NULL; return tmp; }
 					void			Reset		() { object = NULL; }	//	does *NOT* release any memory - just removes control of the object from this class
 
 					CL3_GETTER	const T*	Object		() const { return object; }
 
 					CLASS	TUniquePtr	() throw() : object(NULL) {}
-					CLASS	TUniquePtr	(const TUniquePtr& other) throw() : object(other.object) { other.object = NULL; }
+					CLASS	TUniquePtr	(TUniquePtr&& rhs) throw() : object(rhs.object) { rhs.object = NULL; }
 					CLASS	~TUniquePtr	() { Release(); }
 			};
 
 			template<class T> CL3_GETTER static TUniquePtr<T, UPTR_OBJECT> MakeUniquePtr(T* object) { TUniquePtr<T, UPTR_OBJECT> uptr; uptr.Object(object); return uptr; }
 			template<EUnqiuePtrType type, class T> CL3_GETTER static TUniquePtr<T, type> MakeUniquePtr(T* object) { TUniquePtr<T, type> uptr; uptr.Object(object); return uptr; }
+
+			enum	EThreading
+			{
+				THREADING_SINGLE,
+				THREADING_MULTI
+			};
+
+			template<class T, EThreading> class TSharedPtr;
+
+			template<class T, EThreading th = THREADING_MULTI>
+			class	CL3PUBT	TRefCounter
+			{
+				friend class TSharedPtr<T, th>;
+				private:
+					mutable usys_t n_refs;
+					T object;
+
+					void	IncRef	() const
+					{
+						switch(th)
+						{
+							case THREADING_SINGLE:
+								++n_refs;
+								break;
+							case THREADING_MULTI:
+								AtomicAdd(n_refs, 1);
+								break;
+						}
+					}
+
+					void	DecRef	() const
+					{
+						usys_t n_refs_now;
+						switch(th)
+						{
+							case THREADING_SINGLE:
+								n_refs_now = --n_refs;
+								break;
+							case THREADING_MULTI:
+								n_refs_now = AtomicSub(n_refs, 1);
+								break;
+						}
+						if(n_refs_now == 0)
+							delete this;
+					}
+
+					CLASS	~TRefCounter() {}
+					CLASS	TRefCounter	(const TRefCounter&);
+
+				public:
+					CLASS	TRefCounter	() : n_refs(0), object() {}
+
+					template<class A1>
+					CLASS   TRefCounter(A1 a1) : n_refs(0), object(a1) {}
+
+					template<class A1, class A2>
+					CLASS   TRefCounter(A1 a1, A2 a2) : n_refs(0), object(a1, a2) {}
+
+					template<class A1, class A2, class A3>
+					CLASS   TRefCounter(A1 a1, A2 a2, A3 a3) : n_refs(0), object(a1, a2, a3) {}
+
+					template<class A1, class A2, class A3, class A4>
+					CLASS   TRefCounter(A1 a1, A2 a2, A3 a3, A4 a4) : n_refs(0), object(a1, a2, a3, a4) {}
+
+					template<class A1, class A2, class A3, class A4, class A5>
+					CLASS   TRefCounter(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) : n_refs(0), object(a1, a2, a3, a4, a5) {}
+
+					template<class A1, class A2, class A3, class A4, class A5, class A6>
+					CLASS   TRefCounter(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) : n_refs(0), object(a1, a2, a3, a4, a5, a6) {}
+
+					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+					CLASS   TRefCounter(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7) {}
+
+					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+					CLASS   TRefCounter(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8) {}
+
+					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+					CLASS   TRefCounter(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9) {}
+
+					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+					CLASS   TRefCounter(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) {}
+
+					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
+					CLASS   TRefCounter(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) {}
+
+					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
+					CLASS   TRefCounter(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12) {}
+
+					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
+					CLASS   TRefCounter(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13) {}
+
+					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+					CLASS   TRefCounter(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14) {}
+
+					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+					CLASS   TRefCounter(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) {}
+			};
+
+			template<class T, EThreading th = THREADING_MULTI>
+			class	CL3PUBT	TSharedPtr
+			{
+				protected:
+					TRefCounter<T, th>* rcobj;
+
+				public:
+					inline	T*			operator->	() { return &rcobj->object; }
+					inline	const T*	operator->	() const { return &rcobj->object; }
+					inline	T&			operator*	() { return rcobj->object; }
+					inline	const T&	operator*	() const { return rcobj->object; }
+					inline	TSharedPtr&	operator=	(const TSharedPtr& rhs) { if(rcobj != rhs.rcobj) { if(rcobj) rcobj->DecRef(); rcobj = rhs.rcobj; if(rcobj) rcobj->IncRef(); } }
+					inline	TSharedPtr&	operator=	(const TRefCounter<T,th>* _rcobj) { if(rcobj != _rcobj) { if(rcobj) rcobj->DecRef(); rcobj = _rcobj; if(rcobj) rcobj->IncRef(); } }
+
+					CLASS	TSharedPtr	(TUniquePtr<T>&& uptr);
+					CLASS	TSharedPtr	(TRefCounter<T,th>* rcobj = NULL) : rcobj(rcobj) { if(rcobj) rcobj->IncRef(); }
+					CLASS	TSharedPtr	(const TSharedPtr& rhs) : rcobj(rhs.rcobj)   { if(rcobj) rcobj->IncRef(); }
+					CLASS	~TSharedPtr	() { if(rcobj) rcobj->DecRef(); }
+			};
+
+			template<class T, EThreading th = THREADING_MULTI> static TUniquePtr< TRefCounter<T,th> > MakeSharedPtr();
 
 			class	CL3PUBT	TBadAllocException : public error::TException
 			{
