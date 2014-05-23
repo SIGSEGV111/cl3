@@ -215,7 +215,7 @@ namespace	cl3
 					inline	TSharedPtr&	operator=	(const TSharedPtr& rhs) { if(rcobj != rhs.rcobj) { if(rcobj) rcobj->DecRef(); rcobj = rhs.rcobj; if(rcobj) rcobj->IncRef(); } }
 					inline	TSharedPtr&	operator=	(const TRefCounter<T,th>* _rcobj) { if(rcobj != _rcobj) { if(rcobj) rcobj->DecRef(); rcobj = _rcobj; if(rcobj) rcobj->IncRef(); } }
 
-					CLASS	TSharedPtr	(TUniquePtr<T>&& uptr);
+					CLASS	TSharedPtr	(TUniquePtr< TRefCounter<T> >&& uptr) : rcobj(uptr.Claim()) { if(rcobj) rcobj->IncRef(); }
 					CLASS	TSharedPtr	(TRefCounter<T,th>* rcobj = NULL) : rcobj(rcobj) { if(rcobj) rcobj->IncRef(); }
 					CLASS	TSharedPtr	(const TSharedPtr& rhs) : rcobj(rhs.rcobj)   { if(rcobj) rcobj->IncRef(); }
 					CLASS	~TSharedPtr	() { if(rcobj) rcobj->DecRef(); }
@@ -282,8 +282,6 @@ namespace	cl3
 			CL3PUBF	void*	Alloc	(usys_t, const typeinfo::TRTTI*) CL3_WARN_UNUSED_RESULT;
 			CL3PUBF	void*	Realloc	(void* p_mem, usys_t n_items_new, const typeinfo::TRTTI* rtti, bool inplace) CL3_WARN_UNUSED_RESULT;
 			CL3PUBF	usys_t	SizeOf	(void*) CL3_GETTER;
-
-			//template<class T>	T*	Alloc	(usys_t n_items);	//	defined in system_types_typeinfo.hpp
 		}
 	}
 }

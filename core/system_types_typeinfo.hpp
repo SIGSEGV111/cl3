@@ -38,13 +38,13 @@ namespace	cl3
 
 			namespace	string
 			{
-				class	TUString;
-				typedef	system::memory::TUniquePtr<TUString>	TUStringUPtr;
+				class	TString;
+				typedef	system::memory::TUniquePtr<TString>	TStringUPtr;
 
-				CL3PUBF	TUStringUPtr	Stringify	(FPrint print, const void* object);
+				CL3PUBF	TStringUPtr	Stringify	(FPrint print, const void* object);
 
 				template<class T>
-				TUStringUPtr			Stringify	(const T& object);
+				TStringUPtr			Stringify	(const T& object);
 			}
 		}
 
@@ -260,7 +260,7 @@ namespace	cl3
 					usys_t sz_bytes;	//	size of the datatype in byte_ts
 					const std::type_info* sys_type_info;	//	pointer to the type-info structure provided by C++ typeid()
 
-					CL3PUBF	CL3_GETTER	io::text::string::TUStringUPtr Name() const;	//	platform independet human-readable type-name
+					CL3PUBF	CL3_GETTER	io::text::string::TStringUPtr Name() const;	//	platform independet human-readable type-name
 					CL3PUBF	CL3_GETTER	u32_t Hash() const;	//	32bit hashcode based on type-name
 				};
 
@@ -411,7 +411,7 @@ namespace	cl3
 			namespace	string
 			{
 				template<class T>
-				TUStringUPtr	Stringify	(const T& object)
+				TStringUPtr	Stringify	(const T& object)
 				{
 					return Stringify(system::types::typeinfo::TCTTI<T>::print, &object);
 				}

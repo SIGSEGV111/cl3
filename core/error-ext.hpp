@@ -30,7 +30,7 @@ namespace	cl3
 		class	TArgumentException : public TException
 		{
 			public:
-				io::text::string::TUString msgbuf;
+				io::text::string::TString msgbuf;
 				template<class T>
 				CL3PUBF	CLASS	TArgumentException	(const char* name, const T& value) :
 						TException("function-call argument \"%s\" has invalid value \"%s\"", name,

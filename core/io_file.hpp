@@ -92,7 +92,7 @@ namespace	cl3
 					CL3PUBF	system::memory::TUniquePtr<buffer::IBufferedStream<byte_t> >	CreateStream	() CL3_WARN_UNUSED_RESULT;
 
 					CL3PUBF	CLASS	TFile	();
-					CL3PUBF	CLASS	TFile	(const text::string::TUString& name, int access = FILE_ACCESS_READ, ECreate create = FILE_CREATE_NEVER);
+					CL3PUBF	CLASS	TFile	(const text::string::TString& name, int access = FILE_ACCESS_READ, ECreate create = FILE_CREATE_NEVER);
 					CL3PUBF	CLASS	TFile	(const TFile&);
 					CL3PUBF	CLASS	~TFile	();
 			};
@@ -109,7 +109,7 @@ namespace	cl3
 
 			struct	TFileInfo
 			{
-				text::string::TUString name;
+				text::string::TString name;
 				EEntryType type;
 				uoff_t sz_virtual;
 				uoff_t sz_physical;
@@ -124,14 +124,14 @@ namespace	cl3
 					fd_t fd;
 
 				public:
-					CL3PUBF	const text::string::TUString&
+					CL3PUBF	const text::string::TString&
 									AbsolutePath		() const;
-					CL3PUBF	void	EnterSubDirectory	(const text::string::TUString& name);	//	use ".." to go to the parent directory
+					CL3PUBF	void	EnterSubDirectory	(const text::string::TString& name);	//	use ".." to go to the parent directory
 					CL3PUBF	void	EnumEntries			(collection::list::TList<TFileInfo>&) const;
-					CL3PUBF	void	EnumEntries			(collection::list::TList<text::string::TUString>&) const;
+					CL3PUBF	void	EnumEntries			(collection::list::TList<text::string::TString>&) const;
 
 					CL3PUBF	CLASS	TDiectoryBrowser	();	//	starts in current working directory
-					CL3PUBF	CLASS	TDiectoryBrowser	(const text::string::TUString& path);
+					CL3PUBF	CLASS	TDiectoryBrowser	(const text::string::TString& path);
 					CL3PUBF	CLASS	TDiectoryBrowser	(const TDiectoryBrowser&);
 					CL3PUBF	CLASS	~TDiectoryBrowser	();
 			};

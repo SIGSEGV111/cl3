@@ -40,12 +40,12 @@ namespace	cl3
 			namespace	string
 			{
 				struct	IString;
-				class	TUString;
+				class	TString;
 				class	TCString;
 
-				typedef	system::memory::TUniquePtr<TUString>	TUStringUPtr;
+				typedef	system::memory::TUniquePtr<TString>	TStringUPtr;
 
-				class	CL3PUBT	TUString :
+				class	CL3PUBT	TString :
 								public virtual ITextStream,
 								public virtual collection::list::TList<TUTF32>,
 								public virtual encoding::ACharDecoder,
@@ -55,26 +55,30 @@ namespace	cl3
 				{
 					public:
 						using collection::list::TList<TUTF32>::Append;
-						void			Append		(const char item_append);
-						void			Append		(const char* arr_items_append, usys_t n_items_append);
-						void			Append		(const collection::IStaticCollection<char>& collection);
-						void			Append		(const wchar_t item_append);
-						void			Append		(const wchar_t* arr_items_append, usys_t n_items_append);
-						void			Append		(const collection::IStaticCollection<wchar_t>& collection);
+						CL3PUBF	void	Append		(const char item_append);
+						CL3PUBF	void	Append		(const char* arr_items_append, usys_t n_items_append);
+						CL3PUBF	void	Append		(const collection::IStaticCollection<char>& collection);
+						CL3PUBF	void	Append		(const wchar_t item_append);
+						CL3PUBF	void	Append		(const wchar_t* arr_items_append, usys_t n_items_append);
+						CL3PUBF	void	Append		(const collection::IStaticCollection<wchar_t>& collection);
 
-						usys_t			Replace		(const TUString& find, const TUString& replace, usys_t n_times = (usys_t)-1);	//	returns the number of times of which <find> was replaced with <replace>
+						CL3PUBF	usys_t	Replace		(const TString& find, const TString& replace, usys_t n_times = (usys_t)-1);	//	returns the number of times of which <find> was replaced with <replace>
 
-						TUString		Left		(usys_t n_chars) const;
-						TUString		Right		(usys_t n_chars) const;
-						TUString		Mid			(usys_t index, usys_t n_chars) const;
+						CL3PUBF	TString	Left		(usys_t n_chars) const;
+						CL3PUBF	TString	Right		(usys_t n_chars) const;
+						CL3PUBF	TString	Mid			(usys_t index, usys_t n_chars) const;
 
-						CL3PUBF	CLASS	TUString	();
-						CL3PUBF	CLASS	TUString	(const char*     str, usys_t maxlen = (usys_t)-1);
-						CL3PUBF	CLASS	TUString	(const wchar_t* wstr, usys_t maxlen = (usys_t)-1);
-						CL3PUBF	CLASS	TUString	(const TUTF32*  ustr, usys_t maxlen = (usys_t)-1);
-						CL3PUBF	CLASS	TUString	(const TUString&);
-						CL3PUBF	CLASS	TUString	(const IString&);
-						CL3PUBF	virtual	~TUString	();
+						CL3PUBF	void	Pad			(usys_t n_pad, TUTF32 uchr_pad);
+						CL3PUBF	void	ToLower		();
+						CL3PUBF	void	ToUpper		();
+
+						CL3PUBF	CLASS	TString	();
+						CL3PUBF	CLASS	TString	(const char*     str, usys_t maxlen = (usys_t)-1);
+						CL3PUBF	CLASS	TString	(const wchar_t* wstr, usys_t maxlen = (usys_t)-1);
+						CL3PUBF	CLASS	TString	(const TUTF32*  ustr, usys_t maxlen = (usys_t)-1);
+						CL3PUBF	CLASS	TString	(const TString&);
+						CL3PUBF	CLASS	TString	(const IString&);
+						CL3PUBF	virtual	~TString	();
 				};
 
 				class	CL3PUBT	TCString
@@ -87,10 +91,10 @@ namespace	cl3
 						byte_t*			Bytes		() const { return arr_bytes; }
 						usys_t			Count		() const { return n_bytes; }
 
-						CL3PUBF	CLASS	TCString	(const TUString&, const encoding::ICodec*);
+						CL3PUBF	CLASS	TCString	(const TString&, const encoding::ICodec*);
 				};
 
-				CL3PUBF	TUStringUPtr	Stringify	(FPrint print, const void* object);
+				CL3PUBF	TStringUPtr	Stringify	(FPrint print, const void* object);
 			}
 		}
 	}

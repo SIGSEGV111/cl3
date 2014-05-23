@@ -41,11 +41,11 @@ namespace	cl3
 				using namespace system::memory;
 				using namespace io::text::string;
 
-				TUStringUPtr UnifyTypename(const TUString& name);
+				TStringUPtr UnifyTypename(const TString& name);
 
-				TUStringUPtr TRTTI::Name() const
+				TStringUPtr TRTTI::Name() const
 				{
-					TUString name;
+					TString name;
 					CL3_CLASS_ERROR((name = abi::__cxa_demangle(sys_type_info->name(), NULL, NULL, NULL)).Count() == 0, error::TException, "name decoding failed");
 					return UnifyTypename(name);
 				}

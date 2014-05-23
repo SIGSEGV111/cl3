@@ -28,56 +28,56 @@ namespace	cl3
 		{
 			namespace	string
 			{
-				CLASS	TUString::TUString	()
+				CLASS	TString::TString	()
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TUString::TUString	(const char*     str, usys_t maxlen)
+				CLASS	TString::TString	(const char*     str, usys_t maxlen)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TUString::TUString	(const wchar_t* wstr, usys_t maxlen)
+				CLASS	TString::TString	(const wchar_t* wstr, usys_t maxlen)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TUString::TUString	(const TUTF32*  ustr, usys_t maxlen)
+				CLASS	TString::TString	(const TUTF32*  ustr, usys_t maxlen)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TUString::TUString	(const TUString& other) : TList<TUTF32>(other)
+				CLASS	TString::TString	(const TString& other) : TList<TUTF32>(other)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TUString::TUString	(const IString&)
+				CLASS	TString::TString	(const IString&)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TUString::~TUString	()
+				CLASS	TString::~TString	()
 				{
 				}
 
-				CLASS	TCString::TCString	(const TUString&, const encoding::ICodec*)
+				CLASS	TCString::TCString	(const TString&, const encoding::ICodec*)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				TUStringUPtr	Stringify	(FPrint print, const void* object)
+				TStringUPtr	Stringify	(FPrint print, const void* object)
 				{
-					TUStringUPtr ret;
+					TStringUPtr ret;
 					if(print)
 					{
-						ret = system::memory::MakeUniquePtr(new TUString());
+						ret = system::memory::MakeUniquePtr(new TString());
 						print(ret.Object(), object);
 					}
 					else
 					{
-						ret = system::memory::MakeUniquePtr(new TUString(L"<unprintable>"));
+						ret = system::memory::MakeUniquePtr(new TString(L"<unprintable>"));
 					}
 					return ret;
 				}

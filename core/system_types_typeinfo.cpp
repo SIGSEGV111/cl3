@@ -58,7 +58,7 @@ namespace	cl3
 
 				u32_t TRTTI::Hash() const
 				{
-					TUStringUPtr name(Name());
+					TStringUPtr name(Name());
 					return JenkinsHash(reinterpret_cast<const u8_t*>(name.Object().ItemPtr(0)), name.Object().Count() * 4);
 				}
 
@@ -114,11 +114,11 @@ namespace	cl3
 					return NULL;
 				}*/
 
-				TUStringUPtr UnifyTypename(const TUString& oldname)
+				TStringUPtr UnifyTypename(const TString& oldname)
 				{
 					CL3_NOT_IMPLEMENTED;
 
-					/*TUStringUPtr newname = MakeUniquePtr(new TUString());
+					/*TStringUPtr newname = MakeUniquePtr(new TString());
 
 					const TUTF32* token_start = oldname.ItemPtr(0);
 					for(usys_t i = 0; ; ++i)
