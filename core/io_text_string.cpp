@@ -53,11 +53,6 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(const IString&)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
 				CLASS	TString::~TString	()
 				{
 				}

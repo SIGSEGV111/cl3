@@ -39,7 +39,6 @@ namespace	cl3
 		{
 			namespace	string
 			{
-				struct	IString;
 				class	TString;
 				class	TCString;
 
@@ -64,9 +63,9 @@ namespace	cl3
 
 						CL3PUBF	usys_t	Replace		(const TString& find, const TString& replace, usys_t n_times = (usys_t)-1);	//	returns the number of times of which <find> was replaced with <replace>
 
-						CL3PUBF	TString	Left		(usys_t n_chars) const;
-						CL3PUBF	TString	Right		(usys_t n_chars) const;
-						CL3PUBF	TString	Mid			(usys_t index, usys_t n_chars) const;
+						CL3PUBF	TString	Left		(usys_t n_chars) const CL3_GETTER;
+						CL3PUBF	TString	Right		(usys_t n_chars) const CL3_GETTER;
+						CL3PUBF	TString	Mid			(usys_t index, usys_t n_chars) const CL3_GETTER;
 
 						CL3PUBF	void	Pad			(usys_t n_pad, TUTF32 uchr_pad);
 						CL3PUBF	void	ToLower		();
@@ -77,7 +76,6 @@ namespace	cl3
 						CL3PUBF	CLASS	TString	(const wchar_t* wstr, usys_t maxlen = (usys_t)-1);
 						CL3PUBF	CLASS	TString	(const TUTF32*  ustr, usys_t maxlen = (usys_t)-1);
 						CL3PUBF	CLASS	TString	(const TString&);
-						CL3PUBF	CLASS	TString	(const IString&);
 						CL3PUBF	virtual	~TString	();
 				};
 
