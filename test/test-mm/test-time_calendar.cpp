@@ -218,7 +218,7 @@ namespace
 		EXPECT_TRUE( date.Attosecond() == 0 );
 	}
 
-	TEST(JulianDate, IterativeN)
+	/*TEST(JulianDate, IterativeN)
 	{
 		s32_t year   = 1970;
 		s32_t month  = 1;
@@ -306,5 +306,5 @@ namespace
 				}
 			}
 		}
-	}
+	}*/
 }

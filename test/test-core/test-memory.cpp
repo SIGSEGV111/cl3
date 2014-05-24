@@ -156,4 +156,84 @@ namespace
 
 		EXPECT_TRUE(ra.BytesLimit() == sz_limit);
 	}
+
+	enum	ELastOp
+	{
+		OP_UNDEFINED,
+		OP_CONSTRUCT,
+		OP_COPYCONSTRUCT,
+		OP_COPY,
+		OP_DESTRUCT,
+		OP_ASSIGN
+	};
+
+	struct	TCDCTester
+	{
+		ELastOp* op;
+		int value;
+
+		TCDCTester& operator=(int new_value) { *op = OP_ASSIGN; value = new_value; return *this; }
+		operator int() const { return value; }
+
+		TCDCTester(ELastOp* op, int init_value) : op(op), value(init_value) { *op = OP_CONSTRUCT; }
+		TCDCTester(const TCDCTester& other) { *op = OP_COPYCONSTRUCT; *other.op = OP_COPY; }
+		~TCDCTester() { *op = OP_DESTRUCT; }
+	};
+
+	TEST(SharedPtr, basic)
+	{
+		ELastOp op1 = OP_UNDEFINED, op2 = OP_UNDEFINED, op3 = OP_UNDEFINED;
+
+		auto p1 = MakeSharedPtr<TCDCTester, THREADING_SINGLE>(&op1, 0);
+		auto p2 = MakeSharedPtr<TCDCTester, THREADING_SINGLE>(&op2, 17);
+		auto p3 = MakeSharedPtr<TCDCTester, THREADING_MULTI>(&op3, 112);
+
+		EXPECT_TRUE(op1 == OP_CONSTRUCT);
+		EXPECT_TRUE(op2 == OP_CONSTRUCT);
+		EXPECT_TRUE(op3 == OP_CONSTRUCT);
+
+		EXPECT_TRUE(*p1 == 0);
+		EXPECT_TRUE(*p2 == 17);
+		EXPECT_TRUE(*p3 == 112);
+
+		EXPECT_TRUE(op1 == OP_CONSTRUCT);
+		EXPECT_TRUE(op2 == OP_CONSTRUCT);
+		EXPECT_TRUE(op3 == OP_CONSTRUCT);
+
+		*p1 = 18;
+		*p2 = 56;
+		*p3 = 134;
+
+		EXPECT_TRUE(op1 == OP_ASSIGN);
+		EXPECT_TRUE(op2 == OP_ASSIGN);
+		EXPECT_TRUE(op3 == OP_ASSIGN);
+
+		EXPECT_TRUE(*p1 == 18);
+		EXPECT_TRUE(*p2 == 56);
+		EXPECT_TRUE(*p3 == 134);
+
+		p2 = p1;
+
+		EXPECT_TRUE(op1 == OP_ASSIGN);
+		EXPECT_TRUE(op2 == OP_DESTRUCT);
+		EXPECT_TRUE(op3 == OP_ASSIGN);
+
+		p1 = NULL;
+
+		EXPECT_TRUE(op1 == OP_ASSIGN);
+		EXPECT_TRUE(op2 == OP_DESTRUCT);
+		EXPECT_TRUE(op3 == OP_ASSIGN);
+
+		p2 = NULL;
+
+		EXPECT_TRUE(op1 == OP_DESTRUCT);
+		EXPECT_TRUE(op2 == OP_DESTRUCT);
+		EXPECT_TRUE(op3 == OP_ASSIGN);
+
+		p3 = NULL;
+
+		EXPECT_TRUE(op1 == OP_DESTRUCT);
+		EXPECT_TRUE(op2 == OP_DESTRUCT);
+		EXPECT_TRUE(op3 == OP_DESTRUCT);
+	}
 }

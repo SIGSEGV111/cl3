@@ -3,15 +3,15 @@
 all: core mm
 
 clean:
-	$(MAKE) clean -C core
-	$(MAKE) clean -C mm
-	$(MAKE) clean -C test
+	$(MAKE) clean -C core -j
+	$(MAKE) clean -C mm -j
+	$(MAKE) clean -C test -j
 
 core:
-	$(MAKE) -C core
+	$(MAKE) -C core -j
 
 mm: core
-	$(MAKE) -C mm
+	$(MAKE) -C mm -j
 
 test: core mm
-	$(MAKE) -C test
+	$(MAKE) -C test -j
