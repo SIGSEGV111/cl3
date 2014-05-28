@@ -17,6 +17,7 @@
 */
 
 #include "io_text_encoding.hpp"
+#include "io_text_encoding_utf8.hpp"
 #include "io_text_string.hpp"
 
 namespace	cl3
@@ -27,7 +28,7 @@ namespace	cl3
 		{
 			namespace	encoding
 			{
-				const ICodec* const CODEC_CXX_CHAR = NULL;
+				const ICodec* const CODEC_CXX_CHAR = utf8::CODEC_UTF8;
 				const ICodec* const CODEC_CXX_WCHAR = NULL;
 
 				static const char* ReasonCodeToString(EReason reason)

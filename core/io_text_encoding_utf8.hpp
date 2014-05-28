@@ -39,7 +39,7 @@ namespace	cl3
 						public:
 							//	from IEncoder
 							CL3PUBF	void	Reset	();
-							CL3PUBF	usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write);
+							CL3PUBF	void	Write	(const TUTF32* arr_items_write, usys_t n_items_write);
 
 							//	from ISource<byte_t>
 							CL3PUBF	void	Sink	(stream::IOut<byte_t>* os) CL3_SETTER;
@@ -53,12 +53,13 @@ namespace	cl3
 					{
 						protected:
 							stream::IOut<TUTF32>* sink;
+							int shift;
 							u32_t state;
 
 						public:
 							//	from IDecoder
 							CL3PUBF	void	Reset	();
-							CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write);
+							CL3PUBF	void	Write	(const byte_t* arr_items_write, usys_t n_items_write);
 
 							//	from ISource<TUTF32>
 							CL3PUBF	void	Sink	(stream::IOut<TUTF32>* os) CL3_SETTER;
@@ -66,6 +67,7 @@ namespace	cl3
 
 							//	from TUTF8Decoder
 							CL3PUBF	CLASS	TUTF8Decoder	();
+							CL3PUBF	CLASS	~TUTF8Decoder	();
 					};
 
 					class	TUTF8Codec : public ICodec

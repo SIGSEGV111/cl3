@@ -37,7 +37,7 @@ namespace	cl3
 						//	nothing to do here
 					}
 
-					usys_t			TUTF8Encoder::Write	(const TUTF32* arr_items_write, usys_t n_items_write)
+					void			TUTF8Encoder::Write	(const TUTF32* arr_items_write, usys_t n_items_write)
 					{
 						CL3_CLASS_ERROR(sink == NULL, TException, "Sink() must point to a valid sink");
 						usys_t n_out = 0;
@@ -79,7 +79,6 @@ namespace	cl3
 							sink->Write(arr_out, length);
 							n_out += length;
 						}
-						return 0;
 					}
 
 					void			TUTF8Encoder::Sink	(IOut<byte_t>* os)
@@ -96,13 +95,62 @@ namespace	cl3
 
 					void			TUTF8Decoder::Reset	()
 					{
-						state = 0;
+						this->shift = 0;
+						this->state = 0U;
 					}
 
-					usys_t			TUTF8Decoder::Write	(const byte_t* arr_items_write, usys_t n_items_write)
+					void			TUTF8Decoder::Write	(const byte_t* arr_items_write, usys_t n_items_write)
 					{
 						CL3_CLASS_ERROR(sink == NULL, TException, "Sink() must point to a valid sink");
-						CL3_NOT_IMPLEMENTED;
+
+						usys_t n_out = 0;
+						for(usys_t i = 0; i < n_items_write; i++)
+						{
+							const u32_t b = arr_items_write[i];
+
+							if(this->shift == 0)
+							{
+								if((b & 0xF8) == 0xF0)
+								{
+									this->shift = 3;
+									this->state = (b & 0x07);
+								}
+								else if((b & 0xF0) == 0xE0)
+								{
+									this->shift = 2;
+									this->state = (b & 0x0F);
+								}
+								else if((b & 0xE0) == 0xC0)
+								{
+									this->shift = 1;
+									this->state = (b & 0x1F);
+								}
+								else if((b & 0x80) == 0x00)
+								{
+									this->shift = 0;
+									this->state = b;
+								}
+								else	//	errors...
+									CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INVALID, i, n_out);
+							}
+							else
+							{
+								if((b & 0xC0) == 0x80)
+								{
+									this->shift--;
+									this->state <<= 6;
+									this->state |= (b & 0x3F);
+								}
+								else	//	errors...
+									CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INVALID, i, n_out);
+							}
+
+							if(this->shift == 0)
+							{
+								sink->Write((const TUTF32*)&state, 1);
+								n_out++;
+							}
+						}
 					}
 
 					void			TUTF8Decoder::Sink	(IOut<TUTF32>* os)
@@ -115,11 +163,15 @@ namespace	cl3
 						return sink;
 					}
 
-					CLASS	TUTF8Decoder::TUTF8Decoder	() : sink(NULL), state(0) {}
+					CLASS	TUTF8Decoder::TUTF8Decoder	() : sink(NULL), shift(0), state(0U) {}
+					CLASS	TUTF8Decoder::~TUTF8Decoder	()
+					{
+						CL3_CLASS_ERROR(this->shift != 0, TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INCOMPLETE, this->shift, 0);
+					}
 
 					string::TString	TUTF8Codec::Name	() const
 					{
-						return L"utf8";
+						return "utf8";
 					}
 
 					system::memory::TUniquePtr<IEncoder>	TUTF8Codec::CreateEncoder	() const

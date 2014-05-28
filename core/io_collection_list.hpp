@@ -92,8 +92,13 @@ namespace	cl3
 				class	CL3PUBT	TIterator : public virtual IIterator<T>
 				{
 					protected:
+						static const usys_t INDEX_TAIL = (usys_t)-1;
+						static const usys_t INDEX_HEAD = (usys_t)-2;
+
 						TList<T>* list;
-						usys_t index;
+						mutable usys_t index;
+
+						void	FixIndex	() const;
 
 					public:
 						//	from IStaticIterator<const T>
@@ -234,13 +239,16 @@ namespace	cl3
 				template<class T>
 				bool	TIterator<T>::IsValid	() const
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->FixIndex();
+					return this->index != INDEX_TAIL && this->index != INDEX_HEAD;
 				}
 
 				template<class T>
 				const T&TIterator<T>::Item		() const
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->FixIndex();
+					CL3_CLASS_ERROR(this->index == INDEX_TAIL || this->index == INDEX_HEAD, TIndexOutOfBoundsException, this->index, this->list->Count());
+					return (*list)[this->index];
 				}
 
 				template<class T>
@@ -283,7 +291,9 @@ namespace	cl3
 				template<class T>
 				T&		TIterator<T>::Item		()
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->FixIndex();
+					CL3_CLASS_ERROR(this->index == INDEX_TAIL || this->index == INDEX_HEAD, TIndexOutOfBoundsException, this->index, this->list->Count());
+					return (*list)[this->index];
 				}
 
 				//	from IDynamicIterator<T>
@@ -335,19 +345,30 @@ namespace	cl3
 				template<class T>
 				usys_t	TIterator<T>::Index		() const
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->FixIndex();
+					return this->index;
 				}
 
 				template<class T>
 				void	TIterator<T>::Index		(usys_t new_index)
 				{
-					CL3_NOT_IMPLEMENTED;
+					CL3_CLASS_ERROR(new_index > this->list->Count(), TIndexOutOfBoundsException, new_index, this->list->Count());
+					this->index = new_index;
+					this->FixIndex();
 				}
 
 				//	from TIterator
 				template<class T>
-				CLASS	TIterator<T>::TIterator	(TList<T>* list, usys_t index) : list(list), index(index)
+				void	TIterator<T>::FixIndex	() const
 				{
+					if(this->index >= this->list->Count())
+						this->index = INDEX_TAIL;
+				}
+
+				template<class T>
+				CLASS	TIterator<T>::TIterator	(TList<T>* list, usys_t index) : list(list)
+				{
+					this->Index(index);
 				}
 
 				/**************************************************************/

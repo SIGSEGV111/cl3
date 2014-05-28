@@ -43,14 +43,14 @@ namespace	cl3
 				timespec ts;
 				clockid_t id = -1;
 				rusage ru;
-	
+
 				switch(clock)
 				{
 					case TIME_CLOCK_TAI:
 					case TIME_CLOCK_REALTIME:
 						id = CLOCK_REALTIME;
 						break;
-	
+
 					case TIME_CLOCK_MONOTONIC:
 						#if (_OST == OST_LINUX)
 							id = CLOCK_MONOTONIC_RAW;
@@ -58,40 +58,40 @@ namespace	cl3
 							id = CLOCK_MONOTONIC;
 						#endif
 						break;
-	
+
 					case TIME_CLOCK_PROCESS:
 						id = CLOCK_PROCESS_CPUTIME_ID;
 						break;
-	
+
 					case TIME_CLOCK_THREAD:
 						id = CLOCK_THREAD_CPUTIME_ID;
 						break;
-	
+
 					case TIME_CLOCK_PROCESS_USER:
 						CL3_NONCLASS_SYSERR(getrusage(RUSAGE_SELF, &ru));
 						return TTime(ru.ru_utime.tv_sec, (s64_t)ru.ru_utime.tv_usec * (s64_t)1000000000000);
-	
+
 					case TIME_CLOCK_PROCESS_SYS:
 						CL3_NONCLASS_SYSERR(getrusage(RUSAGE_SELF, &ru));
 						return TTime(ru.ru_stime.tv_sec, (s64_t)ru.ru_stime.tv_usec * (s64_t)1000000000000);
-	
+
 					case TIME_CLOCK_THREAD_USER:
 						CL3_NONCLASS_SYSERR(getrusage(RUSAGE_THREAD, &ru));
 						return TTime(ru.ru_utime.tv_sec, (s64_t)ru.ru_utime.tv_usec * (s64_t)1000000000000);
-	
+
 					case TIME_CLOCK_THREAD_SYS:
 						CL3_NONCLASS_SYSERR(getrusage(RUSAGE_THREAD, &ru));
 						return TTime(ru.ru_stime.tv_sec, (s64_t)ru.ru_stime.tv_usec * (s64_t)1000000000000);
 				}
-	
+
 				CL3_NONCLASS_SYSERR(clock_gettime(id, &ts));
-	
+
 				if(clock == TIME_CLOCK_TAI)
-					ts.tv_sec -= 17;
-	
+					ts.tv_sec -= 35;
+
 				return TTime((s64_t)ts.tv_sec, (s64_t)ts.tv_nsec * (s64_t)1000000000);
 			}
-	
+
 			/*TTime	TTime::LocalTime	() const
 			{
 				struct ::timeval tv;

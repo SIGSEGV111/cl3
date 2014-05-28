@@ -58,9 +58,9 @@ namespace	cl3
 
 				struct	CL3PUBT	ICodec
 				{
-					virtual	string::TString	Name	() const = 0;
-					virtual	system::memory::TUniquePtr<IEncoder>	CreateEncoder	() const = 0;
-					virtual	system::memory::TUniquePtr<IDecoder>	CreateDecoder	() const = 0;
+					virtual	string::TString	Name	() const CL3_GETTER = 0;
+					virtual	system::memory::TUniquePtr<IEncoder>	CreateEncoder	() const CL3_WARN_UNUSED_RESULT = 0;
+					virtual	system::memory::TUniquePtr<IDecoder>	CreateDecoder	() const CL3_WARN_UNUSED_RESULT = 0;
 				};
 
 				struct	CL3PUBT	IEncoder : stream::ISource<byte_t>
@@ -69,7 +69,7 @@ namespace	cl3
 					virtual	void	Reset	() = 0;
 
 					//	encodes the UTF32 characters into bytes, returns the number of characters left in the internal state buffer after processing
-					virtual	usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write) = 0;
+					virtual	void	Write	(const TUTF32* arr_items_write, usys_t n_items_write) = 0;
 
 					virtual	CLASS	~IEncoder	() {}
 				};
@@ -80,7 +80,7 @@ namespace	cl3
 					virtual	void	Reset	() = 0;
 
 					//	decodes the bytes into UTF32 characters, returns the number of bytes left in the internal state buffer after processing
-					virtual	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write) = 0;
+					virtual	void	Write	(const byte_t* arr_items_write, usys_t n_items_write) = 0;
 
 					virtual	CLASS	~IDecoder	() {}
 				};

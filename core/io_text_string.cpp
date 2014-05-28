@@ -17,6 +17,9 @@
 */
 
 #include "io_text_string.hpp"
+#include "io_text_encoding.hpp"
+
+extern "C" size_t strnlen(const char *s, size_t maxlen) throw();
 
 namespace	cl3
 {
@@ -28,14 +31,19 @@ namespace	cl3
 		{
 			namespace	string
 			{
+				using namespace system::memory;
+				using namespace encoding;
+
 				CLASS	TString::TString	()
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(const char*     str, usys_t maxlen)
+				CLASS	TString::TString	(const char*     str, usys_t maxlen) : TList()
 				{
-					CL3_NOT_IMPLEMENTED;
+					TUniquePtr<IDecoder> d = CODEC_CXX_CHAR->CreateDecoder();
+					d.Object().Sink(this);
+					d.Object().Write((const byte_t*)str, strnlen(str, maxlen));
 				}
 
 				CLASS	TString::TString	(const wchar_t* wstr, usys_t maxlen)

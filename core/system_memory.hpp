@@ -1,19 +1,19 @@
 /*
-    libcl3 - common library version 3
-    Copyright (C) 2013	Simon Brennecke
+	 libcl3 - common library version 3
+	 Copyright (C) 2013	Simon Brennecke
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	 This program is free software: you can redistribute it and/or modify
+	 it under the terms of the GNU General Public License as published by
+	 the Free Software Foundation, either version 3 of the License, or
+	 (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	 This program is distributed in the hope that it will be useful,
+	 but WITHOUT ANY WARRANTY; without even the implied warranty of
+	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	 GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	 You should have received a copy of the GNU General Public License
+	 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef	_include_cl3_core_system_memory_hpp_
@@ -84,7 +84,7 @@ namespace	cl3
 						return *this;
 					}
 
-					CL3_SETTER	void	Object		(T* new_object)
+					CL3_SETTER	void	Object	(T* new_object)
 					{
 						Release();
 						object = new_object;
@@ -156,35 +156,35 @@ namespace	cl3
 				public:
 					CLASS	TShared	() : n_refs(0), object() {}
 					template<class A1>
-					CLASS   TShared(A1 a1) : n_refs(0), object(a1) {}
+					CLASS	TShared(A1 a1) : n_refs(0), object(a1) {}
 					template<class A1, class A2>
-					CLASS   TShared(A1 a1, A2 a2) : n_refs(0), object(a1, a2) {}
+					CLASS	TShared(A1 a1, A2 a2) : n_refs(0), object(a1, a2) {}
 					template<class A1, class A2, class A3>
-					CLASS   TShared(A1 a1, A2 a2, A3 a3) : n_refs(0), object(a1, a2, a3) {}
+					CLASS	TShared(A1 a1, A2 a2, A3 a3) : n_refs(0), object(a1, a2, a3) {}
 					template<class A1, class A2, class A3, class A4>
-					CLASS   TShared(A1 a1, A2 a2, A3 a3, A4 a4) : n_refs(0), object(a1, a2, a3, a4) {}
+					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4) : n_refs(0), object(a1, a2, a3, a4) {}
 					template<class A1, class A2, class A3, class A4, class A5>
-					CLASS   TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) : n_refs(0), object(a1, a2, a3, a4, a5) {}
+					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) : n_refs(0), object(a1, a2, a3, a4, a5) {}
 					template<class A1, class A2, class A3, class A4, class A5, class A6>
-					CLASS   TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) : n_refs(0), object(a1, a2, a3, a4, a5, a6) {}
+					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) : n_refs(0), object(a1, a2, a3, a4, a5, a6) {}
 					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7>
-					CLASS   TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7) {}
+					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7) {}
 					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
-					CLASS   TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8) {}
+					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8) {}
 					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
-					CLASS   TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9) {}
+					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9) {}
 					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
-					CLASS   TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) {}
+					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) {}
 					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
-					CLASS   TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) {}
+					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) {}
 					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
-					CLASS   TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12) {}
+					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12) {}
 					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
-					CLASS   TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13) {}
+					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13) {}
 					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
-					CLASS   TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14) {}
+					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14) {}
 					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
-					CLASS   TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) {}
+					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) {}
 			};
 
 			template<class T, EThreading th = THREADING_MULTI>
