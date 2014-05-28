@@ -17,6 +17,7 @@
 */
 
 #include "io_text_encoding.hpp"
+#include "io_text_string.hpp"
 
 namespace	cl3
 {
@@ -28,6 +29,41 @@ namespace	cl3
 			{
 				const ICodec* const CODEC_CXX_CHAR = NULL;
 				const ICodec* const CODEC_CXX_WCHAR = NULL;
+
+				static const char* ReasonCodeToString(EReason reason)
+				{
+					switch(reason)
+					{
+						case REASON_INCOMPLETE:
+							return "input was incomplete";
+						case REASON_NOT_REPRESENTABLE:
+							return "input was unrepresentable in the target encoding";
+						case REASON_INVALID:
+							return "input was invalid";
+					}
+				}
+
+				CLASS	TTranscodeException::TTranscodeException(
+						const ICodec* codec,
+						EDirection direction,
+						EReason reason,
+						usys_t n_input_items_processed,
+						usys_t n_output_items_written
+					)
+					: TException(
+							"unable to transcode from %s to %s because %s after processing %lu input items into %lu output items",
+							(direction == DIRECTION_ENCODE ? "utf32" : string::TCString(codec->Name(), CODEC_CXX_CHAR).Chars()),
+							(direction == DIRECTION_ENCODE ? string::TCString(codec->Name(), CODEC_CXX_CHAR).Chars() : "utf32"),
+							ReasonCodeToString(reason),
+							n_input_items_processed,
+							n_output_items_written
+						),
+	  					codec(codec),
+						direction(direction),
+						reason(reason),
+						n_input_items_processed(n_input_items_processed),
+						n_output_items_written(n_output_items_written)
+				{}
 
 				usys_t	ACharDecoder::Write		(const char* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{

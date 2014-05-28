@@ -136,7 +136,7 @@ namespace	cl3
 				return *this;
 			}
 
-			ITextReader&	ITextReader::operator>>	(string::IString&)
+			ITextReader&	ITextReader::operator>>	(string::TString&)
 			{
 				CL3_NOT_IMPLEMENTED;
 				return *this;
@@ -227,7 +227,7 @@ namespace	cl3
 				return *this;
 			}
 
-			ITextWriter&	ITextWriter::operator<<	(const string::IString&)
+			ITextWriter&	ITextWriter::operator<<	(const string::TString&)
 			{
 				CL3_NOT_IMPLEMENTED;
 				return *this;

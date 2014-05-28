@@ -38,13 +38,12 @@ namespace	cl3
 		{
 			namespace	string
 			{
-				struct	IString;
+				class	TString;
 			}
 
 			namespace	encoding
 			{
-				class	TDecodeException;
-				class	TEncodeException;
+				struct	TTranscodeException;
 				struct	ICodec;
 				struct	IEncoder;
 				struct	IDecoder;
@@ -136,7 +135,7 @@ namespace	cl3
 				CL3PUBF	ITextReader&	operator>>	(u64_t&);
 				CL3PUBF	ITextReader&	operator>>	(f32_t&);
 				CL3PUBF	ITextReader&	operator>>	(f64_t&);
-				CL3PUBF	ITextReader&	operator>>	(string::IString&);
+				CL3PUBF	ITextReader&	operator>>	(string::TString&);
 			};
 
 			struct	ITextWriter : public virtual stream::IOut<TUTF32>, public virtual stream::IOut<wchar_t>, public virtual stream::IOut<char>
@@ -161,7 +160,7 @@ namespace	cl3
 				CL3PUBF	ITextWriter&	operator<<	(u64_t);
 				CL3PUBF	ITextWriter&	operator<<	(f32_t);
 				CL3PUBF	ITextWriter&	operator<<	(f64_t);
-				CL3PUBF	ITextWriter&	operator<<	(const string::IString&);
+				CL3PUBF	ITextWriter&	operator<<	(const string::TString&);
 				CL3PUBF	ITextWriter&	operator<<	(const char*);
 				CL3PUBF	ITextWriter&	operator<<	(const wchar_t*);
 			};

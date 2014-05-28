@@ -53,23 +53,39 @@ namespace	cl3
 								public virtual encoding::AWCharEncoder
 				{
 					public:
-						using collection::list::TList<TUTF32>::Append;
-						CL3PUBF	void	Append		(const char item_append);
-						CL3PUBF	void	Append		(const char* arr_items_append, usys_t n_items_append);
-						CL3PUBF	void	Append		(const collection::IStaticCollection<char>& collection);
-						CL3PUBF	void	Append		(const wchar_t item_append);
-						CL3PUBF	void	Append		(const wchar_t* arr_items_append, usys_t n_items_append);
-						CL3PUBF	void	Append		(const collection::IStaticCollection<wchar_t>& collection);
+						//	append string
+						CL3PUBF	TString&	operator+=	(const char chr_append);
+						CL3PUBF	TString&	operator+=	(const wchar_t chr_append);
+						CL3PUBF	TString&	operator+=	(const TUTF32 chr_append);
+						CL3PUBF	TString&	operator+=	(const char* str_append);
+						CL3PUBF	TString&	operator+=	(const wchar_t* str_append);
+						CL3PUBF	TString&	operator+=	(const TUTF32* str_append);
+						CL3PUBF	TString&	operator+=	(const collection::IStaticCollection<char>& collection_append);
+						CL3PUBF	TString&	operator+=	(const collection::IStaticCollection<wchar_t>& collection_append);
+						CL3PUBF	TString&	operator+=	(const collection::IStaticCollection<TUTF32>& collection_append);
 
-						CL3PUBF	usys_t	Replace		(const TString& find, const TString& replace, usys_t n_times = (usys_t)-1);	//	returns the number of times of which <find> was replaced with <replace>
+						//	remove string
+						CL3PUBF	TString&	operator-=	(const char chr_remove);
+						CL3PUBF	TString&	operator-=	(const wchar_t chr_remove);
+						CL3PUBF	TString&	operator-=	(const TUTF32 chr_remove);
+						CL3PUBF	TString&	operator-=	(const char* str_remove);
+						CL3PUBF	TString&	operator-=	(const wchar_t* str_remove);
+						CL3PUBF	TString&	operator-=	(const TUTF32* str_remove);
+						CL3PUBF	TString&	operator-=	(const collection::IStaticCollection<char>& collection_remove);
+						CL3PUBF	TString&	operator-=	(const collection::IStaticCollection<wchar_t>& collection_remove);
+						CL3PUBF	TString&	operator-=	(const collection::IStaticCollection<TUTF32>& collection_remove);
 
-						CL3PUBF	TString	Left		(usys_t n_chars) const CL3_GETTER;
-						CL3PUBF	TString	Right		(usys_t n_chars) const CL3_GETTER;
-						CL3PUBF	TString	Mid			(usys_t index, usys_t n_chars) const CL3_GETTER;
+						CL3PUBF	usys_t		Replace		(const TString& find, const TString& replace, usys_t n_times = (usys_t)-1);	//	returns the number of times of which <find> was replaced with <replace>
 
-						CL3PUBF	void	Pad			(usys_t n_pad, TUTF32 uchr_pad);
-						CL3PUBF	void	ToLower		();
-						CL3PUBF	void	ToUpper		();
+						CL3PUBF	TString		Left		(usys_t n_chars) const CL3_GETTER;
+						CL3PUBF	TString		Right		(usys_t n_chars) const CL3_GETTER;
+						CL3PUBF	TString		Mid			(usys_t index, usys_t n_chars) const CL3_GETTER;
+						CL3PUBF	TString		Lower		() const CL3_GETTER;
+						CL3PUBF	TString		Upper		() const CL3_GETTER;
+
+						CL3PUBF	TString&	Pad			(usys_t n_pad, TUTF32 uchr_pad);
+						CL3PUBF	TString&	ToLower		();
+						CL3PUBF	TString&	ToUpper		();
 
 						CL3PUBF	CLASS	TString	();
 						CL3PUBF	CLASS	TString	(const char*     str, usys_t maxlen = (usys_t)-1);
@@ -86,7 +102,8 @@ namespace	cl3
 						usys_t n_bytes;
 
 					public:
-						byte_t*			Bytes		() const { return arr_bytes; }
+						const char*		Chars		() const { return (const char*)arr_bytes; }
+						const byte_t*	Bytes		() const { return arr_bytes; }
 						usys_t			Count		() const { return n_bytes; }
 
 						CL3PUBF	CLASS	TCString	(const TString&, const encoding::ICodec*);
