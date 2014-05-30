@@ -28,8 +28,60 @@ namespace	cl3
 		{
 			namespace	encoding
 			{
-				const ICodec* const CODEC_CXX_CHAR = utf8::CODEC_UTF8;
-				const ICodec* const CODEC_CXX_WCHAR = NULL;
+				using namespace error;
+
+				struct	TUTF32Encoder : IEncoder
+				{
+					stream::IOut<byte_t>* sink;
+
+					//	from IEncoder
+					void	Reset	() {}
+
+					//	from IOut<TUTF32>
+					usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+					{
+						CL3_CLASS_ERROR(this->sink == NULL, TException, "Sink() must point to a valid sink");
+						if(n_items_write_min == (usys_t)-1)
+							n_items_write_min = n_items_write_max;
+						return sink->Write((const byte_t*)arr_items_write, n_items_write_max * 4, n_items_write_min * 4);
+					}
+
+					//	from ISource<byte_t>
+					void	Sink	(stream::IOut<byte_t>* os) CL3_SETTER { this->sink = os; }
+					stream::IOut<byte_t>*	Sink	() const CL3_GETTER { return this->sink; }
+				};
+
+				struct	TUTF32Decoder : IDecoder
+				{
+					stream::IOut<TUTF32>* sink;
+
+					//	from IDecoder
+					void	Reset	() {}
+
+					//	from IOut<byte_t>
+					usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+					{
+						CL3_CLASS_ERROR(this->sink == NULL, TException, "Sink() must point to a valid sink");
+						if(n_items_write_min == (usys_t)-1)
+							n_items_write_min = n_items_write_max;
+						return sink->Write((const TUTF32*)arr_items_write, n_items_write_max / 4, n_items_write_min / 4);
+					}
+
+					//	from ISource<TUTF32>
+					void	Sink	(stream::IOut<TUTF32>* os) CL3_SETTER { this->sink = os; }
+					stream::IOut<TUTF32>*	Sink	() const CL3_GETTER { return this->sink; }
+				};
+
+				struct	TUTF32Codec : ICodec
+				{
+					string::TString	Name	() const { return "utf32"; }
+					system::memory::TUniquePtr<IEncoder>	CreateEncoder	() const { return system::memory::MakeUniquePtr<IEncoder>(new TUTF32Encoder()); }
+					system::memory::TUniquePtr<IDecoder>	CreateDecoder	() const { return system::memory::MakeUniquePtr<IDecoder>(new TUTF32Decoder()); }
+					CLASS	TUTF32Codec	() {}
+				};
+
+				static const TUTF32Codec _CODEC_UTF32;
+				const ICodec* const CODEC_UTF32 = &_CODEC_UTF32;
 
 				static const char* ReasonCodeToString(EReason reason)
 				{

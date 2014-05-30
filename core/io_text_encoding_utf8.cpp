@@ -39,7 +39,7 @@ namespace	cl3
 
 					usys_t			TUTF8Encoder::Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t)
 					{
-						CL3_CLASS_ERROR(sink == NULL, TException, "Sink() must point to a valid sink");
+						CL3_CLASS_ERROR(this->sink == NULL, TException, "Sink() must point to a valid sink");
 						usys_t n_out = 0;
 						for(usys_t i = 0; i < n_items_write_max; i++)
 						{
@@ -87,7 +87,7 @@ namespace	cl3
 								}
 							}
 
-							sink->Write(arr_out, length);
+							this->sink->Write(arr_out, length);
 							n_out += length;
 						}
 
@@ -114,7 +114,7 @@ namespace	cl3
 
 					usys_t			TUTF8Decoder::Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t)
 					{
-						CL3_CLASS_ERROR(sink == NULL, TException, "Sink() must point to a valid sink");
+						CL3_CLASS_ERROR(this->sink == NULL, TException, "Sink() must point to a valid sink");
 
 						usys_t n_out = 0;
 						for(usys_t i = 0; i < n_items_write_max; i++)
@@ -184,7 +184,7 @@ namespace	cl3
 
 							if(this->shift == 0)
 							{
-								sink->Write((const TUTF32*)&state, 1);
+								this->sink->Write((const TUTF32*)&state, 1);
 								n_out++;
 							}
 						}

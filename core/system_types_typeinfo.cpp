@@ -59,7 +59,7 @@ namespace	cl3
 				u32_t TRTTI::Hash() const
 				{
 					TStringUPtr name(Name());
-					return JenkinsHash(reinterpret_cast<const u8_t*>(name.Object().ItemPtr(0)), name.Object().Count() * 4);
+					return JenkinsHash(reinterpret_cast<const u8_t*>(name->ItemPtr(0)), name->Count() * 4);
 				}
 
 

@@ -53,6 +53,9 @@ namespace	cl3
 								public virtual encoding::AWCharEncoder
 				{
 					public:
+						CL3PUBF	TString&	operator=	(const TString&);
+						CL3PUBF	TString&	operator=	(TString&&);
+
 						//	append string
 						CL3PUBF	TString&	operator+=	(const char chr_append);
 						CL3PUBF	TString&	operator+=	(const wchar_t chr_append);
@@ -87,15 +90,23 @@ namespace	cl3
 						CL3PUBF	TString&	ToLower		();
 						CL3PUBF	TString&	ToUpper		();
 
+						//	determines the actual length in characters of the string
+						//	this might differ from Count() as Length() stops at the first termination character
+						//	while in contrast Count() ignores the termination character and retuns the internally
+						//	accounted number of allocated characters stored within the string
+						//	thus Length() has to scan the string, while Count() only returns the value of a member variable
+						CL3PUBF	usys_t		Length		() const CL3_GETTER;
+
 						CL3PUBF	CLASS	TString	();
-						CL3PUBF	CLASS	TString	(const char*     str, usys_t maxlen = (usys_t)-1);
+						CL3PUBF	CLASS	TString	(const char*    cstr, usys_t maxlen = (usys_t)-1);
 						CL3PUBF	CLASS	TString	(const wchar_t* wstr, usys_t maxlen = (usys_t)-1);
 						CL3PUBF	CLASS	TString	(const TUTF32*  ustr, usys_t maxlen = (usys_t)-1);
 						CL3PUBF	CLASS	TString	(const TString&);
-						CL3PUBF	virtual	~TString	();
+						CL3PUBF	CLASS	TString	(TString&&);
+						CL3PUBF	virtual	~TString();
 				};
 
-				class	CL3PUBT	TCString
+				class	CL3PUBT	TCString : public collection::list::TList<byte_t>
 				{
 					protected:
 						byte_t* arr_bytes;

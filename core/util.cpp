@@ -62,7 +62,7 @@ namespace	cl3
 
 			usys_t l = ::strlen(str) + 1;
 			TUniquePtr<char,UPTR_MALLOC> cpy(MakeUniquePtr<UPTR_MALLOC>((char*)Alloc(l, NULL)));
-			::memcpy(&cpy.Object(), str, l);
+			::memcpy(cpy.UObjPtr(), str, l);
 			return cpy;
 		}
 	}

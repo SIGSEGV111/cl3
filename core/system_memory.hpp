@@ -90,9 +90,15 @@ namespace	cl3
 						object = new_object;
 					}
 
-					CL3_GETTER	T&	Object		() { return *object; }
-					CL3_GETTER	T*	Claim		() { T* tmp = object; object = NULL; return tmp; }
-					void			Reset		() { object = NULL; }	//	does *NOT* release any memory - just removes control of the object from this class
+					T*			operator->	() CL3_GETTER { return object; }
+					T&			operator*	() CL3_GETTER { return *object; }
+					const T*	operator->	() const CL3_GETTER { return object; }
+					const T&	operator*	() const CL3_GETTER { return *object; }
+
+					T*			UObjPtr	() CL3_GETTER { return object; }
+					const T*	UObjPtr	() const CL3_GETTER { return object; }
+					T*			Claim	() CL3_GETTER { T* tmp = object; object = NULL; return tmp; }
+					void		Reset	() { object = NULL; }	//	does *NOT* release any memory - just removes control of the object from this class
 
 					CL3_GETTER	const T*	Object		() const { return object; }
 

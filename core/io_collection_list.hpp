@@ -694,9 +694,9 @@ namespace	cl3
 						usys_t index = AbsIndex(rindex);
 						CL3_CLASS_ERROR(index > n_items_current, TIndexOutOfBoundsException, index, n_items_current);
 						system::memory::TUniquePtr<IStaticIterator<const T> > it = collection.CreateStaticIterator();
-						it.Object().MoveHead();
-						while(it.Object().MoveNext())
-							Insert(index++, it.Object().Item());
+						it->MoveHead();
+						while(it->MoveNext())
+							Insert(index++, it->Item());
 					}
 				}
 
@@ -741,9 +741,9 @@ namespace	cl3
 					else
 					{
 						system::memory::TUniquePtr<IStaticIterator<const T> > it = collection.CreateStaticIterator();
-						it.Object().MoveHead();
-						while(it.Object().MoveNext())
-							Append(it.Object().Item());
+						it->MoveHead();
+						while(it->MoveNext())
+							Append(it->Item());
 					}
 				}
 

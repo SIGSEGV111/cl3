@@ -30,8 +30,9 @@ namespace	cl3
 		{
 			namespace	encoding
 			{
-				CL3PUBF extern const ICodec* const CODEC_CXX_CHAR;
-				CL3PUBF extern const ICodec* const CODEC_CXX_WCHAR;
+				CL3PUBF extern const ICodec* CODEC_CXX_CHAR;
+				CL3PUBF extern const ICodec* CODEC_CXX_WCHAR;
+				CL3PUBF extern const ICodec* const CODEC_UTF32;	//	fake codec (just passes thru all data)
 
 				enum	EDirection
 				{
@@ -119,8 +120,12 @@ namespace	cl3
 
 
 
+
 				class	CL3PUBT	ADecoder : public virtual stream::IOut<TUTF32>, public virtual stream::IOut<byte_t>
 				{
+					protected:
+						system::memory::TUniquePtr<IDecoder> decoder;
+
 					public:
 						using stream::IOut<TUTF32>::Write;
 						using stream::IOut<TUTF32>::ReadIn;
@@ -134,6 +139,9 @@ namespace	cl3
 
 				class	CL3PUBT	AEncoder : public virtual stream::IOut<TUTF32>, public virtual stream::IOut<byte_t>
 				{
+					protected:
+						system::memory::TUniquePtr<IEncoder> encoder;
+
 					public:
 						using stream::IOut<byte_t>::Write;
 						using stream::IOut<byte_t>::ReadIn;

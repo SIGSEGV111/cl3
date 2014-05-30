@@ -46,8 +46,8 @@ namespace
 		TUniquePtr<IEncoder> e = CODEC_UTF8->CreateEncoder();
 		TUniquePtr<IDecoder> d = CODEC_UTF8->CreateDecoder();
 
-		EXPECT_TRUE(&e.Object() != NULL);
-		EXPECT_TRUE(&d.Object() != NULL);
+		EXPECT_TRUE(e.UObjPtr() != NULL);
+		EXPECT_TRUE(d.UObjPtr() != NULL);
 	}
 
 	TEST(io_text_encoding_utf8, decode)
