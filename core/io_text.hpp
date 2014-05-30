@@ -45,8 +45,8 @@ namespace	cl3
 			{
 				struct	TTranscodeException;
 				struct	ICodec;
-				struct	IEncoder;
-				struct	IDecoder;
+				class	IEncoder;
+				class	IDecoder;
 			};
 
 			struct	TUTF32
@@ -59,7 +59,7 @@ namespace	cl3
 
 				CL3PUBF	CLASS	TUTF32	(char chr);
 				CL3PUBF	CLASS	TUTF32	(wchar_t wchr);
-				inline	CLASS	TUTF32	(u32_t code) throw() : code(code) {}
+				inline	CLASS	TUTF32	(u32_t code = 0U) throw() : code(code) {}
 			};
 
 			struct	TNumberFormat

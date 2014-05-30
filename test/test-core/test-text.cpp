@@ -50,17 +50,13 @@ namespace
 		EXPECT_TRUE(&d.Object() != NULL);
 	}
 
-	TEST(io_text_encoding_utf8, encode)
-	{
-	}
-
 	TEST(io_text_encoding_utf8, decode)
 	{
 		TUTF8Decoder d;
 		TList<TUTF32> o;
 		d.Sink(&o);
 
-		const u32_t arr_expected[] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9',0x00E4,0x00F6,0x00FC,'+','#','-',0x20AC,'!',0x1D11E,'&',0x1D11E};
+		const u32_t arr_expected[] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9',0x00E4U,0x00F6U,0x00FCU,'+','#','-',0x20ACU,'!',0x1D11EU,'&',0x1D11EU};
 
 		d.Write((const byte_t*)"abcdefghijklmnopqrstuvwxyz0123456789äöü+#-€!\xF0\x9D\x84\x9E&", 54);
 		EXPECT_TRUE(o.Count() == 46);
@@ -73,5 +69,22 @@ namespace
 
 		for(usys_t i = 0; i < CL3_MIN(sizeof(arr_expected)/4, o.Count()); i++)
 			EXPECT_TRUE(o[i].code == arr_expected[i]);
+	}
+
+	TEST(io_text_encoding_utf8, encode)
+	{
+		TUTF8Encoder e;
+		TList<byte_t> o;
+		e.Sink(&o);
+
+		const TUTF32 arr_in[] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9',0x00E4U,0x00F6U,0x00FCU,'+','#','-',0x20ACU,'!',0x1D11EU,'&',0x1D11EU};
+
+		const char* arr_expected = "abcdefghijklmnopqrstuvwxyz0123456789äöü+#-€!\xF0\x9D\x84\x9E&\xF0\x9D\x84\x9E";
+
+		e.Write(arr_in, sizeof(arr_in) / 4);
+		EXPECT_TRUE(o.Count() == 58);
+
+		for(usys_t i = 0; i < CL3_MIN(sizeof(arr_expected), o.Count()); i++)
+			EXPECT_TRUE(o[i] == arr_expected[i]);
 	}
 }

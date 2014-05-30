@@ -37,11 +37,11 @@ namespace	cl3
 						//	nothing to do here
 					}
 
-					void			TUTF8Encoder::Write	(const TUTF32* arr_items_write, usys_t n_items_write)
+					usys_t			TUTF8Encoder::Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t)
 					{
 						CL3_CLASS_ERROR(sink == NULL, TException, "Sink() must point to a valid sink");
 						usys_t n_out = 0;
-						for(usys_t i = 0; i < n_items_write; i++)
+						for(usys_t i = 0; i < n_items_write_max; i++)
 						{
 							const u32_t u = arr_items_write[i].code;
 							byte_t arr_out[4];
@@ -74,11 +74,24 @@ namespace	cl3
 								length = 4;
 							}
 							else	//	errors...
-								CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_ENCODE, REASON_INVALID, i, n_out);
+							{
+								TTranscodeException e(CODEC_UTF8, DIRECTION_ENCODE, REASON_INVALID, i, n_out);
+								on_error.Raise(*this, e);
+								switch(e.action)
+								{
+									case ERRORACTION_CONTINUE:
+										continue;
+									case ERRORACTION_ABORT:
+										CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_ENCODE, REASON_INVALID, i, n_out);
+										break;
+								}
+							}
 
 							sink->Write(arr_out, length);
 							n_out += length;
 						}
+
+						return n_items_write_max;
 					}
 
 					void			TUTF8Encoder::Sink	(IOut<byte_t>* os)
@@ -99,15 +112,16 @@ namespace	cl3
 						this->state = 0U;
 					}
 
-					void			TUTF8Decoder::Write	(const byte_t* arr_items_write, usys_t n_items_write)
+					usys_t			TUTF8Decoder::Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t)
 					{
 						CL3_CLASS_ERROR(sink == NULL, TException, "Sink() must point to a valid sink");
 
 						usys_t n_out = 0;
-						for(usys_t i = 0; i < n_items_write; i++)
+						for(usys_t i = 0; i < n_items_write_max; i++)
 						{
 							const u32_t b = arr_items_write[i];
 
+							gt_again:;
 							if(this->shift == 0)
 							{
 								if((b & 0xF8) == 0xF0)
@@ -131,7 +145,18 @@ namespace	cl3
 									this->state = b;
 								}
 								else	//	errors...
-									CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INVALID, i, n_out);
+								{
+									TTranscodeException e(CODEC_UTF8, DIRECTION_DECODE, REASON_INVALID, i, n_out);
+									on_error.Raise(*this, e);
+									switch(e.action)
+									{
+										case ERRORACTION_CONTINUE:
+											continue;
+										case ERRORACTION_ABORT:
+											CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INVALID, i, n_out);
+											break;
+									}
+								}
 							}
 							else
 							{
@@ -142,7 +167,19 @@ namespace	cl3
 									this->state |= (b & 0x3F);
 								}
 								else	//	errors...
-									CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INVALID, i, n_out);
+								{
+									TTranscodeException e(CODEC_UTF8, DIRECTION_DECODE, REASON_INVALID, i, n_out);
+									on_error.Raise(*this, e);
+									switch(e.action)
+									{
+										case ERRORACTION_CONTINUE:
+											Reset();
+											goto gt_again;
+										case ERRORACTION_ABORT:
+											CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INVALID, i, n_out);
+											break;
+									}
+								}
 							}
 
 							if(this->shift == 0)
@@ -151,6 +188,8 @@ namespace	cl3
 								n_out++;
 							}
 						}
+
+						return n_items_write_max;
 					}
 
 					void			TUTF8Decoder::Sink	(IOut<TUTF32>* os)

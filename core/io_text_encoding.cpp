@@ -63,7 +63,8 @@ namespace	cl3
 						direction(direction),
 						reason(reason),
 						n_input_items_processed(n_input_items_processed),
-						n_output_items_written(n_output_items_written)
+						n_output_items_written(n_output_items_written),
+						action(ERRORACTION_ABORT)
 				{}
 
 				usys_t	ACharDecoder::Write		(const char* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)

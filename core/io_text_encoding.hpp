@@ -20,6 +20,7 @@
 #define	_include_cl3_core_io_text_encoding_hpp_
 
 #include "io_text.hpp"
+#include "event.hpp"
 
 namespace	cl3
 {
@@ -45,6 +46,12 @@ namespace	cl3
 					REASON_INVALID
 				};
 
+				enum	EErrorAction
+				{
+					ERRORACTION_CONTINUE,	//	ignore current input item and continue with next
+					ERRORACTION_ABORT		//	throw TTranscodeException
+				};
+
 				struct	CL3PUBT	TTranscodeException : error::TException
 				{
 					const ICodec* codec;
@@ -52,6 +59,7 @@ namespace	cl3
 					EReason reason;
 					usys_t n_input_items_processed;
 					usys_t n_output_items_written;
+					EErrorAction action;
 
 					CL3PUBF	CLASS	TTranscodeException	(const ICodec* codec, EDirection direction, EReason reason, usys_t n_input_items_processed, usys_t n_output_items_written);
 				};
@@ -63,27 +71,87 @@ namespace	cl3
 					virtual	system::memory::TUniquePtr<IDecoder>	CreateDecoder	() const CL3_WARN_UNUSED_RESULT = 0;
 				};
 
-				struct	CL3PUBT	IEncoder : stream::ISource<byte_t>
+				class	CL3PUBT	IEncoder : public stream::ISource<byte_t>, public virtual stream::AOutPassive<TUTF32>
 				{
-					//	resets the internal state of the encoder
-					virtual	void	Reset	() = 0;
+					protected:
+						event::TEvent<IEncoder,TTranscodeException> on_error;
 
-					//	encodes the UTF32 characters into bytes, returns the number of characters left in the internal state buffer after processing
-					virtual	void	Write	(const TUTF32* arr_items_write, usys_t n_items_write) = 0;
+					public:
+						inline	const event::TEvent<IEncoder,TTranscodeException>&	OnError	() const { return on_error; }
 
-					virtual	CLASS	~IEncoder	() {}
+						//	resets the internal state of the encoder
+						virtual	void	Reset	() = 0;
+
+						//	encodes the UTF32 characters into bytes, returns the number of characters left in the internal state buffer after processing
+						//	virtual	usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1) = 0;
+
+						virtual	CLASS	~IEncoder	() {}
 				};
 
-				struct	CL3PUBT	IDecoder : stream::ISource<TUTF32>
+				class	CL3PUBT	IDecoder : public stream::ISource<TUTF32>, public virtual stream::AOutPassive<byte_t>
 				{
-					//	resets the internal state of the decoder
-					virtual	void	Reset	() = 0;
+					protected:
+						event::TEvent<IDecoder,TTranscodeException> on_error;
 
-					//	decodes the bytes into UTF32 characters, returns the number of bytes left in the internal state buffer after processing
-					virtual	void	Write	(const byte_t* arr_items_write, usys_t n_items_write) = 0;
+					public:
+						inline	const event::TEvent<IDecoder,TTranscodeException>&	OnError	() const { return on_error; }
 
-					virtual	CLASS	~IDecoder	() {}
+						//	resets the internal state of the decoder
+						virtual	void	Reset	() = 0;
+
+						//	decodes the bytes into UTF32 characters, returns the number of bytes left in the internal state buffer after processing
+						//	virtual	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1) = 0;
+
+						virtual	CLASS	~IDecoder	() {}
 				};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+				class	CL3PUBT	ADecoder : public virtual stream::IOut<TUTF32>, public virtual stream::IOut<byte_t>
+				{
+					public:
+						using stream::IOut<TUTF32>::Write;
+						using stream::IOut<TUTF32>::ReadIn;
+
+						CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
+						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
+
+						CL3PUBF	CLASS	ADecoder	(const ICodec* codec);
+						CL3PUBF	virtual	~ADecoder	();
+				};
+
+				class	CL3PUBT	AEncoder : public virtual stream::IOut<TUTF32>, public virtual stream::IOut<byte_t>
+				{
+					public:
+						using stream::IOut<byte_t>::Write;
+						using stream::IOut<byte_t>::ReadIn;
+
+						CL3PUBF	usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
+						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<TUTF32>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
+
+						CL3PUBF	CLASS	AEncoder	(const ICodec* codec);
+						CL3PUBF	virtual	~AEncoder	();
+				};
+
+
+
+
+
+
+
+
 
 				class	CL3PUBT	ACharDecoder : public virtual stream::IOut<TUTF32>, public virtual stream::IOut<char>
 				{
