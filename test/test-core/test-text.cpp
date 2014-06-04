@@ -87,4 +87,90 @@ namespace
 		for(usys_t i = 0; i < CL3_MIN(sizeof(arr_expected), o.Count()); i++)
 			EXPECT_TRUE(o[i] == arr_expected[i]);
 	}
+
+	TEST(io_text_string, length)
+	{
+		TString a = "hällo wörld";
+		EXPECT_TRUE(a.Length() == 11);
+		EXPECT_TRUE(a.Count() == 11);
+		a += "abc\0def";
+		EXPECT_TRUE(a.Length() == 14);
+		EXPECT_TRUE(a.Count() == 14);
+		a.Append("abc\0def", 7);
+		EXPECT_TRUE(a.Length() == 17);
+		EXPECT_TRUE(a.Count() == 21);
+	}
+
+	TEST(io_text_string, append)
+	{
+		TString a = "hällo wörld";
+		EXPECT_TRUE(a.Length() == 11);
+		EXPECT_TRUE(a.Count() == 11);
+
+		a += "abc\0def";
+		EXPECT_TRUE(a.Length() == 14);
+		EXPECT_TRUE(a.Count() == 14);
+
+		a += L"abc\0def";
+		EXPECT_TRUE(a.Length() == 17);
+		EXPECT_TRUE(a.Count() == 17);
+
+		const TUTF32 s[] = { 'a', 'b', 'c', TUTF32::TERMINATOR, 'd', 'e', 'f' };
+		a += s;
+		EXPECT_TRUE(a.Length() == 20);
+		EXPECT_TRUE(a.Count() == 20);
+	}
+
+	TEST(io_text_string, compare)
+	{
+		TString s = "hello world";
+		EXPECT_TRUE(s == "hello world");
+		EXPECT_TRUE(s != "hello");
+		EXPECT_TRUE(s != "world");
+		EXPECT_TRUE(s != "aaaaaaaaaaa");
+		EXPECT_TRUE(s != "aaaaaaaaaaaaaaaaaaaaaa");
+		EXPECT_TRUE(s != "hello worlt");
+		EXPECT_TRUE(s != "mello worlt");
+
+		s = "spe world";
+		EXPECT_TRUE(s != "special world");
+	}
+
+	TEST(io_text_string, Replace_by_index)
+	{
+		TString s = "hello world";
+		s.Replace(0, 5, "new");
+		EXPECT_TRUE(s == "new world");
+		s.Replace(0, 3, "special");
+		EXPECT_TRUE(s == "special world");
+		s.Replace(8, 5, "test");
+		EXPECT_TRUE(s == "special test");
+		s.Replace(7, 1, "-");
+		EXPECT_TRUE(s == "special-test");
+	}
+
+	TEST(io_text_string, Find)
+	{
+		TString s = "hello world foo";
+		EXPECT_TRUE(s.Find("hello") == 0);
+		EXPECT_TRUE(s.Find("world") == 6);
+		EXPECT_TRUE(s.Find("foo") == 12);
+		EXPECT_TRUE(s.Find("hello world foo") == 0);
+		EXPECT_TRUE(s.Find("world foo") == 6);
+		EXPECT_TRUE(s.Find("hello foo") == (usys_t)-1);
+		EXPECT_TRUE(s.Find("hello world foo ") == (usys_t)-1);
+	};
+
+	TEST(io_text_string, Find_and_Replace)
+	{
+		TString s = "hello world foo";
+		s.Replace("hello", "foo");
+		EXPECT_TRUE(s == "foo world foo");
+		s.Replace("foo", "abc");
+		EXPECT_TRUE(s == "abc world abc");
+		s.Replace("abc", "abcdef");
+		EXPECT_TRUE(s == "abcdef world abcdef");
+		s.Replace("abcdef", "new", 1);
+		EXPECT_TRUE(s == "new world abcdef");
+	}
 }

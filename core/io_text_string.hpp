@@ -53,8 +53,15 @@ namespace	cl3
 								public virtual encoding::AWCharEncoder
 				{
 					public:
-						CL3PUBF	TString&	operator=	(const TString&);
-						CL3PUBF	TString&	operator=	(TString&&);
+						using collection::list::TList<TUTF32>::Append;
+						using collection::list::TList<TUTF32>::Find;
+
+						CL3PUBF	void		Append		(const char& item_append);
+						CL3PUBF	void		Append		(const char* arr_items_append, usys_t n_items_append);
+						CL3PUBF	void		Append		(const IStaticCollection<char>& collection);
+						CL3PUBF	void		Append		(const wchar_t& item_append);
+						CL3PUBF	void		Append		(const wchar_t* arr_items_append, usys_t n_items_append);
+						CL3PUBF	void		Append		(const IStaticCollection<wchar_t>& collection);
 
 						//	append string
 						CL3PUBF	TString&	operator+=	(const char chr_append);
@@ -78,7 +85,19 @@ namespace	cl3
 						CL3PUBF	TString&	operator-=	(const collection::IStaticCollection<wchar_t>& collection_remove);
 						CL3PUBF	TString&	operator-=	(const collection::IStaticCollection<TUTF32>& collection_remove);
 
-						CL3PUBF	usys_t		Replace		(const TString& find, const TString& replace, usys_t n_times = (usys_t)-1);	//	returns the number of times of which <find> was replaced with <replace>
+						//	assign
+						CL3PUBF	TString&	operator=	(const TString&);
+						CL3PUBF	TString&	operator=	(TString&&);
+
+						//	compare
+						CL3PUBF	bool		operator==	(const TString&) const CL3_GETTER;
+						CL3PUBF	bool		operator!=	(const TString&) const CL3_GETTER;
+
+						//	string manipulation functions
+						CL3PUBF	void		Replace		(usys_t index, usys_t length, const TString& str_replace);
+						CL3PUBF	usys_t		Replace		(const TString& str_find, const TString& str_replace, usys_t n_times_max = (usys_t)-1);	//	returns the number of times of which <find> was replaced with <replace>
+
+						CL3PUBF	usys_t		Find		(const TString& str_find, usys_t idx_start = 0, collection::list::EDirection direction = collection::list::DIRECTION_FORWARD) const CL3_GETTER;
 
 						CL3PUBF	TString		Left		(usys_t n_chars) const CL3_GETTER;
 						CL3PUBF	TString		Right		(usys_t n_chars) const CL3_GETTER;
@@ -106,16 +125,16 @@ namespace	cl3
 						CL3PUBF	virtual	~TString();
 				};
 
-				class	CL3PUBT	TCString : public collection::list::TList<byte_t>
+				class	CL3PUBT	TCString : protected virtual collection::list::TList<byte_t>, public virtual collection::IStaticCollection<byte_t>
 				{
 					protected:
-						byte_t* arr_bytes;
-						usys_t n_bytes;
+						const encoding::ICodec* codec;
 
 					public:
-						const char*		Chars		() const { return (const char*)arr_bytes; }
-						const byte_t*	Bytes		() const { return arr_bytes; }
-						usys_t			Count		() const { return n_bytes; }
+						const encoding::ICodec*
+										Codec		() const { return this->codec; }
+						const char*		Chars		() const { return (const char*)this->ItemPtr(0); }
+						const byte_t*	Bytes		() const { return this->ItemPtr(0); }
 
 						CL3PUBF	CLASS	TCString	(const TString&, const encoding::ICodec*);
 				};
