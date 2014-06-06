@@ -612,4 +612,31 @@ namespace
 		EXPECT_TRUE(list[- 2] == 10);
 		EXPECT_TRUE(list[- 1] ==  9);
 	}
+
+	TEST(List, Cut)
+	{
+		TList<int> list;
+
+		list.Add(0);
+		list.Add(1);
+		list.Add(2);
+		list.Add(3);
+		list.Add(4);
+		list.Add(5);
+		list.Add(6);
+		list.Add(7);
+		list.Add(8);
+		list.Add(9);
+
+		EXPECT_TRUE(list.Count() == 10);
+
+		list.Cut(2, 3);
+		EXPECT_TRUE(list.Count() == 5);
+
+		EXPECT_TRUE(list[0] == 2);
+		EXPECT_TRUE(list[1] == 3);
+		EXPECT_TRUE(list[2] == 4);
+		EXPECT_TRUE(list[3] == 5);
+		EXPECT_TRUE(list[4] == 6);
+	}
 }

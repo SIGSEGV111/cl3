@@ -63,6 +63,8 @@ namespace	cl3
 				inline	CLASS	TUTF32	(u32_t code = 0U) throw() : code(code) {}
 			};
 
+			CL3PUBF extern const collection::IStaticCollection<const TUTF32>* COLLECTION_WHITESPACE;
+
 			struct	TNumberFormat
 			{
 				enum	ESymbolPlacement

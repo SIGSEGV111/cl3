@@ -42,6 +42,12 @@ namespace	cl3
 				class	TString;
 				class	TCString;
 
+				enum	EPosition
+				{
+					POSITION_HEAD = 1,
+					POSITION_TAIL = 2
+				};
+
 				typedef	system::memory::TUniquePtr<TString>	TStringUPtr;
 
 				class	CL3PUBT	TString :
@@ -93,21 +99,26 @@ namespace	cl3
 						CL3PUBF	bool		operator==	(const TString&) const CL3_GETTER;
 						CL3PUBF	bool		operator!=	(const TString&) const CL3_GETTER;
 
-						//	string manipulation functions
+						//	replace by index / find & replace
 						CL3PUBF	void		Replace		(usys_t index, usys_t length, const TString& str_replace);
 						CL3PUBF	usys_t		Replace		(const TString& str_find, const TString& str_replace, usys_t n_times_max = (usys_t)-1);	//	returns the number of times of which <find> was replaced with <replace>
 
+						//	find substring
 						CL3PUBF	usys_t		Find		(const TString& str_find, usys_t idx_start = 0, collection::list::EDirection direction = collection::list::DIRECTION_FORWARD) const CL3_GETTER;
 
+						//	return parts of the string
 						CL3PUBF	TString		Left		(usys_t n_chars) const CL3_GETTER;
 						CL3PUBF	TString		Right		(usys_t n_chars) const CL3_GETTER;
 						CL3PUBF	TString		Mid			(usys_t index, usys_t n_chars) const CL3_GETTER;
-						CL3PUBF	TString		Lower		() const CL3_GETTER;
-						CL3PUBF	TString		Upper		() const CL3_GETTER;
 
-						CL3PUBF	TString&	Pad			(usys_t n_pad, TUTF32 uchr_pad);
+						//	remove/append whitespace (or other characters)
+						CL3PUBF	void		Trim		(const IStaticCollection<const TUTF32>& collection = *COLLECTION_WHITESPACE, int position = POSITION_HEAD | POSITION_TAIL);
+						CL3PUBF	void		Pad			(EPosition position, usys_t n_pad, TUTF32 chr_pad = ' ');
+
 						CL3PUBF	TString&	ToLower		();
 						CL3PUBF	TString&	ToUpper		();
+						CL3PUBF	TString		Lower		() const CL3_GETTER;
+						CL3PUBF	TString		Upper		() const CL3_GETTER;
 
 						//	determines the actual length in characters of the string
 						//	this might differ from Count() as Length() stops at the first termination character

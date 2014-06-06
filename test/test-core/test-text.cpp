@@ -39,7 +39,7 @@ namespace
 	using namespace cl3::io::text::encoding::utf8;
 	using namespace cl3::io::collection::list;
 
-	TEST(io_text_encoding_utf8, codec)
+	TEST(io_text_encoding_utf8, Codec)
 	{
 		EXPECT_TRUE(CODEC_UTF8 != NULL);
 
@@ -50,7 +50,7 @@ namespace
 		EXPECT_TRUE(d.UObjPtr() != NULL);
 	}
 
-	TEST(io_text_encoding_utf8, decode)
+	TEST(io_text_encoding_utf8, Decode)
 	{
 		TUTF8Decoder d;
 		TList<TUTF32> o;
@@ -71,7 +71,7 @@ namespace
 			EXPECT_TRUE(o[i].code == arr_expected[i]);
 	}
 
-	TEST(io_text_encoding_utf8, encode)
+	TEST(io_text_encoding_utf8, Encode)
 	{
 		TUTF8Encoder e;
 		TList<byte_t> o;
@@ -88,7 +88,7 @@ namespace
 			EXPECT_TRUE(o[i] == arr_expected[i]);
 	}
 
-	TEST(io_text_string, length)
+	TEST(String, Length)
 	{
 		TString a = "hällo wörld";
 		EXPECT_TRUE(a.Length() == 11);
@@ -101,7 +101,7 @@ namespace
 		EXPECT_TRUE(a.Count() == 21);
 	}
 
-	TEST(io_text_string, append)
+	TEST(String, Append)
 	{
 		TString a = "hällo wörld";
 		EXPECT_TRUE(a.Length() == 11);
@@ -121,7 +121,7 @@ namespace
 		EXPECT_TRUE(a.Count() == 20);
 	}
 
-	TEST(io_text_string, compare)
+	TEST(String, Compare)
 	{
 		TString s = "hello world";
 		EXPECT_TRUE(s == "hello world");
@@ -136,7 +136,7 @@ namespace
 		EXPECT_TRUE(s != "special world");
 	}
 
-	TEST(io_text_string, Replace_by_index)
+	TEST(String, Replace_by_Index)
 	{
 		TString s = "hello world";
 		s.Replace(0, 5, "new");
@@ -149,7 +149,7 @@ namespace
 		EXPECT_TRUE(s == "special-test");
 	}
 
-	TEST(io_text_string, Find)
+	TEST(String, Find)
 	{
 		TString s = "hello world foo";
 		EXPECT_TRUE(s.Find("hello") == 0);
@@ -161,7 +161,7 @@ namespace
 		EXPECT_TRUE(s.Find("hello world foo ") == (usys_t)-1);
 	};
 
-	TEST(io_text_string, Find_and_Replace)
+	TEST(String, Find_and_Replace)
 	{
 		TString s = "hello world foo";
 		s.Replace("hello", "foo");
@@ -172,5 +172,53 @@ namespace
 		EXPECT_TRUE(s == "abcdef world abcdef");
 		s.Replace("abcdef", "new", 1);
 		EXPECT_TRUE(s == "new world abcdef");
+	}
+
+	TEST(String, Left_Right_Mid)
+	{
+		TString s = "hello world foo";
+
+		EXPECT_TRUE(s.Left(5) == "hello");
+		EXPECT_TRUE(s.Right(3) == "foo");
+		EXPECT_TRUE(s.Mid(6, 5) == "world");
+
+		EXPECT_TRUE(s.Left(15) == "hello world foo");
+		EXPECT_TRUE(s.Right(15) == "hello world foo");
+		EXPECT_TRUE(s.Mid(0, 15) == "hello world foo");
+	}
+
+	TEST(String, Pad)
+	{
+		{
+			TString s = "hello world foo";
+
+			s.Pad(POSITION_HEAD, 2, ' ');
+			EXPECT_TRUE(s == "  hello world foo");
+
+			s.Pad(POSITION_TAIL, 2, ' ');
+			EXPECT_TRUE(s == "  hello world foo  ");
+		}
+
+		{
+			TString s;
+
+			s.Pad(POSITION_HEAD, 2, ' ');
+			EXPECT_TRUE(s == "  ");
+		}
+
+		{
+			TString s;
+
+			s.Pad(POSITION_TAIL, 2, ' ');
+			EXPECT_TRUE(s == "  ");
+		}
+	}
+
+	TEST(String, Trim)
+	{
+		TString s = " \t hello world foo \n \t \t\t";
+
+		s.Trim();
+		EXPECT_TRUE(s == "hello world foo");
 	}
 }

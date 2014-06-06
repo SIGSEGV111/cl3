@@ -85,6 +85,9 @@ namespace	cl3
 					virtual	void	Append		(const T* arr_items_append, usys_t n_items_append) = 0;
 					virtual	void	Append		(const IStaticCollection<T>& collection) = 0;
 
+					//	removed n_head items at the start of the list and n_tail items at the end of the list
+					virtual	void	Cut			(usys_t n_head, usys_t n_tail) = 0;
+
 					virtual	usys_t	Find		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) const CL3_WARN_UNUSED_RESULT = 0;
 				};
 
@@ -199,6 +202,8 @@ namespace	cl3
 						void		Append		(const T* arr_items_append, usys_t n_items_append);
 						void		Append		(const IStaticCollection<T>& collection);
 						void		Append		(const TList& list);
+
+						void		Cut			(usys_t n_head, usys_t n_tail);
 
 						usys_t		Find		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) const CL3_WARN_UNUSED_RESULT;
 
@@ -751,6 +756,13 @@ namespace	cl3
 				void		TList<T>::Append	(const TList& list)
 				{
 					Append(list.arr_items, list.n_items_current);
+				}
+
+				template<class T>
+				void		TList<T>::Cut		(usys_t n_head, usys_t n_tail)
+				{
+					this->Remove(this->n_items_current - n_tail, n_tail);
+					this->Remove(0, n_head);
 				}
 
 				template<class T>

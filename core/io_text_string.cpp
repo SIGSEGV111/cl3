@@ -262,17 +262,83 @@ namespace	cl3
 
 				TString		TString::Left		(usys_t n_chars) const
 				{
-					CL3_NOT_IMPLEMENTED;
+					CL3_CLASS_ERROR(n_chars > this->Count(), collection::TIndexOutOfBoundsException, n_chars-1, this->Count());
+					TString r;
+					r.Append(this->ItemPtr(0), n_chars);
+					return r;
 				}
 
 				TString		TString::Right		(usys_t n_chars) const
 				{
-					CL3_NOT_IMPLEMENTED;
+					CL3_CLASS_ERROR(n_chars > this->Count(), collection::TIndexOutOfBoundsException, n_chars-1, this->Count());
+					TString r;
+					r.Append(this->ItemPtr(this->Count() - n_chars), n_chars);
+					return r;
 				}
 
 				TString		TString::Mid		(usys_t index, usys_t n_chars) const
 				{
-					CL3_NOT_IMPLEMENTED;
+					CL3_CLASS_ERROR(index + n_chars > this->Count(), collection::TIndexOutOfBoundsException, index + n_chars - 1, this->Count());
+					TString r;
+					r.Append(this->ItemPtr(index), n_chars);
+					return r;
+				}
+
+				void		TString::Trim		(const IStaticCollection<const TUTF32>& collection, int position)
+				{
+					TUniquePtr<collection::IStaticIterator<const TUTF32> > it = collection.CreateStaticIterator();
+
+					const usys_t n = this->Count();
+					usys_t n_head = 0;
+					usys_t n_tail = 0;
+
+					if(position & POSITION_HEAD)
+					{
+						for(; n_head < n; n_head++)
+						{
+							const TUTF32 chr = (*this)[n_head];
+							it->MoveHead();
+							while(it->MoveNext())
+								if( chr == it->Item() )
+									goto gt_next_head;
+							break;
+							gt_next_head:;
+						}
+					}
+
+					if(position & POSITION_TAIL)
+					{
+						for(; n_tail < n; n_tail++)
+						{
+							const TUTF32 chr = (*this)[n-1-n_tail];
+							it->MoveHead();
+							while(it->MoveNext())
+								if( chr == it->Item() )
+									goto gt_next_tail;
+							break;
+							gt_next_tail:;
+						}
+					}
+
+					this->Cut(n_head, n_tail);
+				}
+
+				void		TString::Pad			(EPosition position, usys_t n_pad, TUTF32 chr_pad)
+				{
+					switch(position)
+					{
+						case POSITION_HEAD:
+							this->Prealloc(n_pad);
+							memmove(this->arr_items + n_pad, this->arr_items, this->n_items_current * sizeof(TUTF32));
+							this->n_items_current += n_pad;
+							this->n_items_prealloc -= n_pad;
+							for(usys_t i = 0; i < n_pad; i++)
+								this->arr_items[i] = chr_pad;
+							break;
+						case POSITION_TAIL:
+							this->Grow(n_pad, chr_pad);
+							break;
+					}
 				}
 
 				TString		TString::Lower		() const
@@ -281,11 +347,6 @@ namespace	cl3
 				}
 
 				TString		TString::Upper		() const
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				TString&	TString::Pad		(usys_t n_pad, TUTF32 uchr_pad)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
