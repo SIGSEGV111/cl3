@@ -105,7 +105,6 @@ namespace	cl3
 
 					public:
 						//	from IStaticIterator<const T>
-						const IStaticCollection<T>&	Collection	() const;
 						bool	FindNext	(const IMatcher<T>& matcher);
 						bool	FindPrev	(const IMatcher<T>& matcher);
 						bool	IsValid		() const CL3_GETTER;
@@ -222,13 +221,6 @@ namespace	cl3
 				/**************************************************************/
 
 				//	from IStaticIterator<const T>
-				template<class T>
-				const IStaticCollection<T>&
-						TIterator<T>::Collection() const
-				{
-					return *list;
-				}
-
 				template<class T>
 				bool	TIterator<T>::FindNext	(const IMatcher<T>& matcher)
 				{
@@ -709,7 +701,7 @@ namespace	cl3
 				void		TList<T>::Remove	(ssys_t rindex, usys_t n_items_remove)
 				{
 					const usys_t index = AbsIndex(rindex);
-					CL3_CLASS_ERROR(index >= n_items_current, TIndexOutOfBoundsException, index, n_items_current);
+					CL3_CLASS_ERROR(index + n_items_remove > n_items_current, TIndexOutOfBoundsException, index + n_items_remove, n_items_current);
 
 					const usys_t n_items_after = n_items_current - index - n_items_remove;
 

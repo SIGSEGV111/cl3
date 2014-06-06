@@ -110,9 +110,8 @@ namespace	cl3
 			};
 
 			template<class T>
-			struct	CL3PUBT	IStaticIterator<const T> : stream::IIn<T>
+			struct	CL3PUBT	IStaticIterator<const T> : virtual stream::IIn<T>
 			{
-				virtual	const IStaticCollection<T>&	Collection	() const = 0;
 				virtual	bool	FindNext	(const IMatcher<T>& matcher) = 0;	//	forward searches thru the collection for an item that matches starting with the next item, if an item was found the function returns thruw and place sthe iterator on that item, otherwise false is returned and the iterator is places on tail
 				virtual	bool	FindPrev	(const IMatcher<T>& matcher) = 0;	//	backward searches thru the collection for an item that matches starting with the previous item,  if an item was found the function returns thruw and place sthe iterator on that item, otherwise false is returned and the iterator is places on head
 				virtual	bool	IsValid		() const CL3_GETTER = 0;	//	returns whether the iterator is placed on a valid item (not on head or tail)
@@ -127,15 +126,15 @@ namespace	cl3
 			};
 
 			template<class T>
-			struct	CL3PUBT	IStaticIterator : virtual IStaticIterator<const T>, stream::IOut<T>
+			struct	CL3PUBT	IStaticIterator : virtual IStaticIterator<const T>, virtual stream::IOut<T>
 			{
 				using IStaticIterator<const T>::Item;
-				virtual	CL3_GETTER	T&	Item	() = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
+				virtual	T&		Item				() CL3_GETTER = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
 				virtual	CLASS	~IStaticIterator	() {}
 			};
 
 			template<class T>
-			struct	CL3PUBT	IDynamicIterator<const T> : IStaticIterator<T>
+			struct	CL3PUBT	IDynamicIterator<const T> : virtual IStaticIterator<T>
 			{
 				virtual	void	Insert	(const T& item_insert) = 0;	//	inserts an item before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to it
 				virtual	void	Insert	(const T* arr_items_insert, usys_t n_items_insert) = 0;	//	inserts items before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to the first of the inserted items (does nothing if the array is empty)
@@ -144,12 +143,12 @@ namespace	cl3
 			};
 
 			template<class T>
-			struct	CL3PUBT	IDynamicIterator : IDynamicIterator<const T>
+			struct	CL3PUBT	IDynamicIterator : virtual IDynamicIterator<const T>
 			{
 			};
 
 			template<class T>
-			struct	CL3PUBT	IStaticCollection : event::IObservable< IStaticCollection<T>, TOnChangeData<T> >
+			struct	CL3PUBT	IStaticCollection : virtual event::IObservable< IStaticCollection<T>, TOnChangeData<T> >
 			{
 				virtual	system::memory::TUniquePtr<IStaticIterator<T> >			CreateStaticIterator	() CL3_WARN_UNUSED_RESULT = 0;
 				virtual	system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT = 0;
@@ -160,7 +159,7 @@ namespace	cl3
 			};
 
 			template<class T>
-			struct	CL3PUBT	IDynamicCollection : virtual IStaticCollection<T>, public virtual stream::IIn<T>, public virtual stream::IOut<T>
+			struct	CL3PUBT	IDynamicCollection : virtual IStaticCollection<T>, virtual stream::IIn<T>, virtual stream::IOut<T>
 			{
 				//	IIn removes read items, while IOut adds written items (no strict FIFO requirements!)
 

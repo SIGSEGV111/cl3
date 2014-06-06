@@ -216,7 +216,7 @@ namespace
 
 	TEST(String, Trim)
 	{
-		TString s = " \t hello world foo \n \t \t\t";
+		TString s = " \t hello world foo \n \t \n\x0D\x0A\x09\x0B \t\t";
 
 		s.Trim();
 		EXPECT_TRUE(s == "hello world foo");

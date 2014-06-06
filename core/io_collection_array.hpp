@@ -30,45 +30,65 @@ namespace	cl3
 			namespace	array
 			{
 				template<class T> class TArray;
+				template<class T> class TIterator;
 
 				template<class T>
-				struct	CL3PUBT	TIterator : public virtual IStaticIterator<T>
+				class	CL3PUBT	TIterator<const T> : public virtual IStaticIterator<const T>
 				{
-					//	from IStaticIterator<const T>
-					const IStaticCollection<T>&	Collection	() const;
-					bool	FindNext	(const IMatcher<T>& matcher);
-					bool	FindPrev	(const IMatcher<T>& matcher);
-					bool	IsValid		() const CL3_GETTER;
-					const T&Item		() const CL3_GETTER;
-					void	MoveHead	();
-					void	MoveTail	();
-					bool	MoveFirst	();
-					bool	MoveLast	();
-					bool	MoveNext	();
-					bool	MovePrev	();
+					protected:
+						static const usys_t INDEX_TAIL = (usys_t)-1;
+						static const usys_t INDEX_HEAD = (usys_t)-2;
 
+						const TArray<const T>* array;
+						mutable usys_t index;
+
+						void	FixIndex	() const;
+
+					public:
+						//	from IStaticIterator<const T>
+						bool	FindNext	(const IMatcher<T>& matcher);
+						bool	FindPrev	(const IMatcher<T>& matcher);
+						bool	IsValid		() const CL3_GETTER;
+						const T&Item		() const CL3_GETTER;
+						void	MoveHead	();
+						void	MoveTail	();
+						bool	MoveFirst	();
+						bool	MoveLast	();
+						bool	MoveNext	();
+						bool	MovePrev	();
+
+						//	from IIn<T>
+						usys_t	Read		(T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
+						uoff_t	WriteOut	(io::stream::IOut<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
+
+						//	from TIterator
+						CLASS	TIterator	(const TArray<const T>* array, usys_t index);
+				};
+
+				template<class T>
+				class	CL3PUBT	TIterator : public virtual TIterator<const T>, public virtual IStaticIterator<T>
+				{
+					public:
 						//	from IStaticIterator<T>
-					T&		Item		() CL3_GETTER;
+						T&		Item		() CL3_GETTER;
 
-					//	from IOut<T>
-					usys_t	Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
-					uoff_t	ReadIn		(io::stream::IIn<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
+						//	from IOut<T>
+						usys_t	Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
+						uoff_t	ReadIn		(io::stream::IIn<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
 
-					//	from IIn<T>
-					usys_t	Read		(T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
-					uoff_t	WriteOut	(io::stream::IOut<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
+						//	from IIterator
+						usys_t	Index		() const CL3_GETTER;
+						void	Index		(usys_t new_index) CL3_SETTER;
 
-					//	from IIterator
-					usys_t	Index		() const CL3_GETTER;
-					void	Index		(usys_t new_index) CL3_SETTER;
-
-					//	from TIterator
-					CLASS	TIterator	(TArray<T>* list, usys_t index);
+						//	from TIterator
+						CLASS	TIterator	(const TArray<T>* array, usys_t index);
 				};
 
 				template<class T>
 				class	TArray : public virtual IStaticCollection<T>
 				{
+					friend class TIterator<T>;
+					friend class TIterator<const T>;
 					protected:
 						T* arr_items;
 						usys_t n_items;
@@ -96,6 +116,183 @@ namespace	cl3
 
 						CLASS		TArray		(T* arr_items, usys_t n_items);
 				};
+
+				/*********************************************************************/
+
+				//	from TIterator<const T>
+				template<class T>
+				void	TIterator<const T>::FixIndex	() const
+				{
+					switch(this->index)
+					{
+						case INDEX_TAIL:
+						case INDEX_HEAD:
+							break;
+						default:
+							if(this->index >= this->array->n_items)
+								this->index = INDEX_TAIL;
+							break;
+					}
+				}
+
+				//	from IStaticIterator<const T>
+				template<class T>
+				bool	TIterator<const T>::FindNext	(const IMatcher<T>& matcher)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				bool	TIterator<const T>::FindPrev	(const IMatcher<T>& matcher)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				bool	TIterator<const T>::IsValid		() const
+				{
+					return this->index != INDEX_TAIL && this->index != INDEX_HEAD;
+				}
+
+				template<class T>
+				const T&TIterator<const T>::Item		() const
+				{
+					CL3_CLASS_ERROR(!this->IsValid(), TIndexOutOfBoundsException, this->index, this->array->n_items);
+					return this->array->arr_items[this->index];
+				}
+
+				template<class T>
+				void	TIterator<const T>::MoveHead	()
+				{
+					this->index = INDEX_HEAD;
+				}
+
+				template<class T>
+				void	TIterator<const T>::MoveTail	()
+				{
+					this->index = INDEX_TAIL;
+				}
+
+				template<class T>
+				bool	TIterator<const T>::MoveFirst	()
+				{
+					this->index = 0;
+					this->FixIndex();
+					return this->index != INDEX_TAIL && this->index != INDEX_HEAD;
+				}
+
+				template<class T>
+				bool	TIterator<const T>::MoveLast	()
+				{
+					this->index = this->array->n_items - 1;
+					this->FixIndex();
+					return this->IsValid();
+				}
+
+				template<class T>
+				bool	TIterator<const T>::MoveNext	()
+				{
+					switch(this->index)
+					{
+						case INDEX_TAIL:
+							return false;
+						case INDEX_HEAD:
+							this->index = 0;
+							break;
+						default:
+							this->index++;
+							break;
+					}
+					this->FixIndex();
+					return this->IsValid();
+				}
+
+				template<class T>
+				bool	TIterator<const T>::MovePrev	()
+				{
+					switch(this->index)
+					{
+						case INDEX_TAIL:
+							if(this->array->n_items > 0)
+							{
+								this->index = this->array->n_items - 1;
+								return true;
+							}
+							else
+								return false;
+						case INDEX_HEAD:
+							return false;
+						case 0:
+							this->index = INDEX_HEAD;
+							return false;
+						default:
+							this->index--;
+							return true;
+					}
+				}
+
+				//	from IIn<T>
+				template<class T>
+				usys_t	TIterator<const T>::Read		(T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				uoff_t	TIterator<const T>::WriteOut	(io::stream::IOut<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				//	from TIterator
+				template<class T>
+				CLASS	TIterator<const T>::TIterator	(const TArray<const T>* array, usys_t index) : array(array), index(index)
+				{
+				}
+
+				/*********************************************************************/
+
+				//	from IStaticIterator<T>
+				template<class T>
+				T&		TIterator<T>::Item		()
+				{
+					this->FixIndex();
+					return this->array->arr_items[this->index];
+				}
+
+				//	from IOut<T>
+				template<class T>
+				usys_t	TIterator<T>::Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				uoff_t	TIterator<T>::ReadIn	(io::stream::IIn<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				//	from IIterator
+				template<class T>
+				usys_t	TIterator<T>::Index		() const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T>
+				void	TIterator<T>::Index		(usys_t new_index)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				//	from TIterator
+				template<class T>
+				CLASS	TIterator<T>::TIterator	(const TArray<T>* array, usys_t index) : TIterator<const T>(array, index)
+				{
+				}
+
+				/*********************************************************************/
 
 				template<class T>
 				const event::TEvent<IStaticCollection<T>, TOnChangeData<T> >&	TArray<T>::OnChange	() const
