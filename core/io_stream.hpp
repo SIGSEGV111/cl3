@@ -177,6 +177,80 @@ namespace	cl3
 					return n_items_processed;
 				}
 			};
+
+			template<class T>
+			struct	CL3PUBT	AInPassive : public virtual IIn<T>
+			{
+				using IIn<T>::Read;
+
+				CL3PUBF	uoff_t	WriteOut(IOut<T>& os, uoff_t n_items_wo_max = (usys_t)-1, uoff_t n_items_wo_min = (uoff_t)-1)
+				{
+					/*
+						n_items_wo_max == -1 && n_items_wo_min == -1 => until source runs dry
+						n_items_wo_max != -1 && n_items_wo_min != -1 => at least min, but up to max
+						n_items_wo_max == -1 && n_items_wo_min != -1 => at least min, but up to source dry
+						n_items_wo_max != -1 && n_items_wo_min == -1 => exactly max items
+					*/
+
+					if(n_items_wo_min == (uoff_t)-1)
+						n_items_wo_min = n_items_wo_max;
+
+					const bool b_srcctl_min = n_items_wo_min == (uoff_t)-1;
+					const bool b_srcctl_max = n_items_wo_max == (uoff_t)-1;
+
+					uoff_t n_items_processed = 0;
+					const usys_t n_items_buffer = CL3_MAX(1, 256 / sizeof(T));
+					T arr_items_buffer[n_items_buffer];
+
+					if(b_srcctl_min)
+					{
+						uoff_t n_items_now;
+						do
+						{
+							n_items_now = CL3_MIN(n_items_buffer, n_items_wo_min - n_items_processed);
+							n_items_now = this->Read(arr_items_buffer, n_items_now, 0);
+							os.Write(arr_items_buffer, n_items_now);
+							n_items_processed += n_items_now;
+						}
+						while(n_items_now > 0);
+					}
+					else
+					{
+						while(n_items_processed < n_items_wo_min)
+						{
+							const uoff_t n_items_now = CL3_MIN(n_items_buffer, n_items_wo_min - n_items_processed);
+							this->Read(arr_items_buffer, n_items_now);
+							os.Write(arr_items_buffer, n_items_now);
+							n_items_processed += n_items_now;
+						}
+					}
+
+					if(b_srcctl_max)
+					{
+						uoff_t n_items_now;
+						do
+						{
+							n_items_now = CL3_MIN(n_items_buffer, n_items_wo_max - n_items_processed);
+							n_items_now = this->Read(arr_items_buffer, n_items_now, 0);
+							os.Write(arr_items_buffer, n_items_now);
+							n_items_processed += n_items_now;
+						}
+						while(n_items_now > 0);
+					}
+					else
+					{
+						while(n_items_processed < n_items_wo_max)
+						{
+							uoff_t n_items_now = CL3_MIN(n_items_buffer, n_items_wo_max - n_items_processed);
+							n_items_now = this->Read(arr_items_buffer, n_items_now, 0);
+							os.Write(arr_items_buffer, n_items_now);
+							n_items_processed += n_items_now;
+						}
+					}
+
+					return n_items_processed;
+				}
+			};
 		}
 	}
 }

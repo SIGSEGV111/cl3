@@ -52,7 +52,7 @@ namespace	cl3
 				FILE_CREATE_CAN		//	only create if the file does not yet exist
 			};
 
-			class	TFileStream : public virtual buffer::IBufferedStream<byte_t>
+			class	TStream : public virtual buffer::IBufferedStream<byte_t>
 			{
 				protected:
 					TFile* file;
@@ -71,9 +71,9 @@ namespace	cl3
 					CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
 					CL3PUBF	uoff_t	ReadIn	(IIn<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
 
-					CL3PUBF	CLASS	TFileStream	(TFile*);
-					CL3PUBF	CLASS	TFileStream	(const TStream&);
-					CL3PUBF	CLASS	~TFileStream();
+					CL3PUBF	CLASS	TStream	(TFile*);
+					CL3PUBF	CLASS	TStream	(const TStream&);
+					CL3PUBF	CLASS	~TStream();
 			};
 
 			class	TFile : public virtual buffer::IBuffer<byte_t>
@@ -99,6 +99,7 @@ namespace	cl3
 
 			enum	EEntryType
 			{
+				ENTRY_TYPE_UNKNOWN = 0,
 				ENTRY_TYPE_FILE,
 				ENTRY_TYPE_DIRECTORY,
 				ENTRY_TYPE_PIPE,
@@ -111,8 +112,8 @@ namespace	cl3
 			{
 				text::string::TString name;
 				EEntryType type;
-				uoff_t sz_virtual;
-				uoff_t sz_physical;
+				uoff_t sz_virtual;	//	virtual file size, or "reserved" file size
+				uoff_t sz_physical;	//	physical file size, or "actual disk usage"
 				system::time::TTime ts_create;
 				system::time::TTime ts_change;
 				system::time::TTime ts_access;
@@ -133,6 +134,7 @@ namespace	cl3
 					CL3PUBF	CLASS	TDiectoryBrowser	();	//	starts in current working directory
 					CL3PUBF	CLASS	TDiectoryBrowser	(const text::string::TString& path);
 					CL3PUBF	CLASS	TDiectoryBrowser	(const TDiectoryBrowser&);
+					CL3PUBF	CLASS	TDiectoryBrowser	(TDiectoryBrowser&&);
 					CL3PUBF	CLASS	~TDiectoryBrowser	();
 			};
 		}

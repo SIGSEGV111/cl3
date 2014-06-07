@@ -28,7 +28,7 @@ namespace
 	using namespace cl3::system::time;
 	using namespace cl3::system::time::calendar;
 
-	TEST(JulianDate, D_1970_01_01__00_00_00)
+	TEST(system_time_calendar_TJulianDate, D_1970_01_01__00_00_00)
 	{
 		TJulianDate date( TTime(0,0) );
 
@@ -44,7 +44,7 @@ namespace
 		EXPECT_TRUE( date.Attosecond() == 0 );
 	}
 
-	TEST(JulianDate, D_1970_01_02__00_00_00)
+	TEST(system_time_calendar_TJulianDate, D_1970_01_02__00_00_00)
 	{
 		TJulianDate date( TTime(86400,0) );
 
@@ -60,7 +60,7 @@ namespace
 		EXPECT_TRUE( date.Attosecond() == 0 );
 	}
 
-	TEST(JulianDate, D_1970_02_01__00_00_00)
+	TEST(system_time_calendar_TJulianDate, D_1970_02_01__00_00_00)
 	{
 		TJulianDate date( TTime(86400*31,0) );
 
@@ -76,7 +76,7 @@ namespace
 		EXPECT_TRUE( date.Attosecond() == 0 );
 	}
 
-	TEST(JulianDate, D_1969_12_01__00_00_00)
+	TEST(system_time_calendar_TJulianDate, D_1969_12_01__00_00_00)
 	{
 		TJulianDate date( TTime(-86400*31,0) );
 
@@ -92,7 +92,7 @@ namespace
 		EXPECT_TRUE( date.Attosecond() == 0 );
 	}
 
-	TEST(JulianDate, D_1972_01_01__00_00_00)
+	TEST(system_time_calendar_TJulianDate, D_1972_01_01__00_00_00)
 	{
 		TJulianDate date( TTime(31536000*2,0) );
 
@@ -110,7 +110,7 @@ namespace
 		EXPECT_TRUE( date.Attosecond() == 0 );
 	}
 
-	TEST(JulianDate, D_1972_02_29__00_00_00)
+	TEST(system_time_calendar_TJulianDate, D_1972_02_29__00_00_00)
 	{
 		TJulianDate date( TTime(31536000*2 + 86400 * (31 + 28),0) );
 
@@ -128,7 +128,7 @@ namespace
 		EXPECT_TRUE( date.Attosecond() == 0 );
 	}
 
-	TEST(JulianDate, D_1971_02_05__07_17_19__123456)
+	TEST(system_time_calendar_TJulianDate, D_1971_02_05__07_17_19__123456)
 	{
 		TJulianDate date( TTime((365LL + 35LL) * 24LL * 3600LL + 7LL * 3600LL + 17LL * 60LL + 19LL, 123456) );
 
@@ -146,7 +146,7 @@ namespace
 		EXPECT_TRUE( date.Attosecond() == 123456 );
 	}
 
-	TEST(JulianDate, D_1973_02_04__07_17_19__123456)
+	TEST(system_time_calendar_TJulianDate, D_1973_02_04__07_17_19__123456)
 	{
 		TJulianDate date( TTime((3*365LL + 35LL) * 24LL * 3600LL + 7LL * 3600LL + 17LL * 60LL + 19LL, 123456) );
 
@@ -164,7 +164,7 @@ namespace
 		EXPECT_TRUE( date.Attosecond() == 123456 );
 	}
 
-	TEST(JulianDate, D_0001_01_01__18_00_00)
+	TEST(system_time_calendar_TJulianDate, D_0001_01_01__18_00_00)
 	{
 		TJulianDate date( TTime(-62136914400,0) );
 
@@ -182,7 +182,7 @@ namespace
 		EXPECT_TRUE( date.Attosecond() == 0 );
 	}
 
-	TEST(JulianDate, D_1969_12_31__23_59_59)
+	TEST(system_time_calendar_TJulianDate, D_1969_12_31__23_59_59)
 	{
 		TJulianDate date( TTime(-1,0) );
 
@@ -201,7 +201,7 @@ namespace
 	}
 
 	//FIXME
-	/*TEST(JulianDate, D_1968_12_31__23_59_59)
+	/*TEST(system_time_calendar_TJulianDate, D_1968_12_31__23_59_59)
 	{
 		TJulianDate date( TTime(-1 - 86400*365,0) );
 
@@ -220,7 +220,7 @@ namespace
 	}*/
 
 	//FIXME
-	/*TEST(JulianDate, IterativeN)
+	/*TEST(system_time_calendar_TJulianDate, IterativeN)
 	{
 		s32_t year   = 1970;
 		s32_t month  = 1;
@@ -266,7 +266,7 @@ namespace
 	}
 
 	//FIXME
-	TEST(JulianDate, IterativeP)
+	TEST(system_time_calendar_TJulianDate, IterativeP)
 	{
 		s32_t year   = 1970;
 		s32_t month  = 1;

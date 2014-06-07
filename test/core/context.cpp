@@ -38,7 +38,7 @@ namespace
 		EXPECT_TRUE(CL3_PARAMETER_STACK_VALUE(some_namespace::my_int_stack) == 0);
 	}
 
-	TEST(Context, ParameterStack)
+	TEST(context, ParameterStack)
 	{
 		EXPECT_TRUE(CL3_PARAMETER_STACK_VALUE(some_namespace::my_int_stack) == 10);
 

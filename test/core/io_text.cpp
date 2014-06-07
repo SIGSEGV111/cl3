@@ -88,7 +88,7 @@ namespace
 			EXPECT_TRUE(o[i] == arr_expected[i]);
 	}
 
-	TEST(String, Length)
+	TEST(io_text_string_TString, Length)
 	{
 		TString a = "hällo wörld";
 		EXPECT_TRUE(a.Length() == 11);
@@ -101,7 +101,7 @@ namespace
 		EXPECT_TRUE(a.Count() == 21);
 	}
 
-	TEST(String, Append)
+	TEST(io_text_string_TString, Append)
 	{
 		TString a = "hällo wörld";
 		EXPECT_TRUE(a.Length() == 11);
@@ -121,7 +121,7 @@ namespace
 		EXPECT_TRUE(a.Count() == 20);
 	}
 
-	TEST(String, Compare)
+	TEST(io_text_string_TString, Compare)
 	{
 		TString s = "hello world";
 		EXPECT_TRUE(s == "hello world");
@@ -136,7 +136,7 @@ namespace
 		EXPECT_TRUE(s != "special world");
 	}
 
-	TEST(String, Replace_by_Index)
+	TEST(io_text_string_TString, Replace_by_Index)
 	{
 		TString s = "hello world";
 		s.Replace(0, 5, "new");
@@ -149,7 +149,7 @@ namespace
 		EXPECT_TRUE(s == "special-test");
 	}
 
-	TEST(String, Find)
+	TEST(io_text_string_TString, Find)
 	{
 		TString s = "hello world foo";
 		EXPECT_TRUE(s.Find("hello") == 0);
@@ -161,7 +161,7 @@ namespace
 		EXPECT_TRUE(s.Find("hello world foo ") == (usys_t)-1);
 	};
 
-	TEST(String, Find_and_Replace)
+	TEST(io_text_string_TString, Find_and_Replace)
 	{
 		TString s = "hello world foo";
 		s.Replace("hello", "foo");
@@ -174,7 +174,7 @@ namespace
 		EXPECT_TRUE(s == "new world abcdef");
 	}
 
-	TEST(String, Left_Right_Mid)
+	TEST(io_text_string_TString, Left_Right_Mid)
 	{
 		TString s = "hello world foo";
 
@@ -187,7 +187,7 @@ namespace
 		EXPECT_TRUE(s.Mid(0, 15) == "hello world foo");
 	}
 
-	TEST(String, Pad)
+	TEST(io_text_string_TString, Pad)
 	{
 		{
 			TString s = "hello world foo";
@@ -214,11 +214,34 @@ namespace
 		}
 	}
 
-	TEST(String, Trim)
+	TEST(io_text_string_TString, Trim)
 	{
 		TString s = " \t hello world foo \n \t \n\x0D\x0A\x09\x0B \t\t";
 
 		s.Trim();
 		EXPECT_TRUE(s == "hello world foo");
+	}
+
+	TEST(io_text_string_TString, Operator_Add)
+	{
+		TString s;
+
+		s = "hello";
+		EXPECT_TRUE(s == "hello");
+
+		s += " ";
+		EXPECT_TRUE(s == "hello ");
+
+		s += "world";
+		EXPECT_TRUE(s == "hello world");
+
+		TString x = " test";
+		TString y = s + " test";
+		TString z = s + x;
+
+		EXPECT_TRUE(s == "hello world");
+		EXPECT_TRUE(y == "hello world test");
+		EXPECT_TRUE(z == "hello world test");
+		EXPECT_TRUE(x == " test");
 	}
 }

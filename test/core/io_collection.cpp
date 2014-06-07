@@ -27,7 +27,7 @@ namespace
 {
 	using namespace cl3::io::collection::bitmask;
 
-	TEST(Bitmask, Set_Get_Bits)
+	TEST(io_colection_bitmask_TBitmask, Set_Get_Bits)
 	{
 		TBitmask bm;
 		bm.Count(256);
@@ -62,7 +62,7 @@ namespace
 		EXPECT_TRUE(!bm.Bit(255));
 	}
 
-	TEST(Bitmask, Realloc)
+	TEST(io_colection_bitmask_TBitmask, Realloc)
 	{
 		TBitmask bm;
 		bm.Count(256);
@@ -97,7 +97,7 @@ namespace
 	using namespace cl3::io::collection::list;
 	using namespace cl3::system::types;
 
-	TEST(List, Construct)
+	TEST(io_colection_list_TList, Construct)
 	{
 		const int arr_ints[] = { 0, 1, 2, 3, 4, 5, 6 };
 		const usys_t n_ints = sizeof(arr_ints) / sizeof(int);	//	must be 7
@@ -185,7 +185,7 @@ namespace
 		}
 	}
 
-	TEST(List, Add_Remove_Clear)
+	TEST(io_colection_list_TList, Add_Remove_Clear)
 	{
 		TList<int> list;
 
@@ -280,7 +280,7 @@ namespace
 		EXPECT_TRUE(list.Count() == 0);
 	}
 
-	TEST(List, Insert_Remove_Clear)
+	TEST(io_colection_list_TList, Insert_Remove_Clear)
 	{
 		TList<int> list;
 
@@ -344,7 +344,7 @@ namespace
 		list.Clear();
 	}
 
-	TEST(List, Copy)
+	TEST(io_colection_list_TList, Copy)
 	{
 		TList<int> source_list;
 
@@ -375,7 +375,7 @@ namespace
 		EXPECT_TRUE(dest_list[9] == 9);
 	}
 
-	TEST(List, Assign)
+	TEST(io_colection_list_TList, Assign)
 	{
 		TList<int> source_list;
 
@@ -424,7 +424,7 @@ namespace
 		EXPECT_TRUE(dest_list[9] == 9);
 	}
 
-	TEST(List, Grow)
+	TEST(io_colection_list_TList, Grow)
 	{
 		TList<int> list;
 
@@ -458,7 +458,7 @@ namespace
 		EXPECT_TRUE(list[9] == 100);
 	}
 
-	TEST(List, Shrink)
+	TEST(io_colection_list_TList, Shrink)
 	{
 		TList<int> list;
 
@@ -485,7 +485,7 @@ namespace
 		EXPECT_TRUE(list[2] == 2);
 	}
 
-	TEST(List, ItemPtr)
+	TEST(io_colection_list_TList, ItemPtr)
 	{
 		TList<int> list;
 
@@ -510,7 +510,7 @@ namespace
 		EXPECT_TRUE(list.ItemPtr(4) == base+4);
 	}
 
-	TEST(List, fifo)
+	TEST(io_colection_list_TList, fifo)
 	{
 		int buffer[8];
 		const int arr_ints[] = { 0, 1, 2, 3, 4, 5, 6 };
@@ -547,7 +547,7 @@ namespace
 		EXPECT_TRUE(list[1] == 6);
 	}
 
-	TEST(List, CountMinMax)
+	TEST(io_colection_list_TList, CountMinMax)
 	{
 		TList<int> list;
 
@@ -568,7 +568,7 @@ namespace
 		EXPECT_TRUE(list.CountMax(11));
 	}
 
-	TEST(List, NegativeIndex)
+	TEST(io_colection_list_TList, NegativeIndex)
 	{
 		TList<int> list;
 
@@ -613,7 +613,7 @@ namespace
 		EXPECT_TRUE(list[- 1] ==  9);
 	}
 
-	TEST(List, Cut)
+	TEST(io_colection_list_TList, Cut)
 	{
 		TList<int> list;
 

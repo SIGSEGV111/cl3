@@ -35,7 +35,7 @@ namespace	cl3
 			namespace	fd
 			{
 				//	generic buffered io-stream for interaction with operating systems io-structures (POSIX-fd, Windows HANDLE, etc.)
-				class	TFDStream : virtual IIn<byte_t>, virtual IOut<byte_t>
+				class	TFDStream : public virtual AInPassive<byte_t>, public virtual AOutPassive<byte_t>
 				{
 					protected:
 						byte_t* p_buffer;
@@ -44,10 +44,7 @@ namespace	cl3
 
 					public:
 						CL3PUBF	usys_t	Read	(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min = (usys_t)-1);
-						CL3PUBF	uoff_t	WriteOut(IOut<byte_t>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min = (uoff_t)-1);
-
 						CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
-						CL3PUBF	uoff_t	ReadIn	(IIn<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
 
 						CL3PUBF	CLASS	TFDStream	(fd_t fd);	//	TFDStream takes ownership of the file-descriptor fd
 						CL3PUBF	CLASS	TFDStream	(const TFDStream&);

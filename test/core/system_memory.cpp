@@ -39,7 +39,7 @@ namespace
 		usys_t	SizeOf	(void*) const CL3_GETTER  { throw TTestException(); }
 	};
 
-	TEST(Memory, Alloc_Realloc_Free)
+	TEST(system_memory, Alloc_Realloc_Free)
 	{
 		byte_t* bytes = (byte_t*)Alloc(128, NULL);
 		memset(bytes, 1, 128);
@@ -48,7 +48,7 @@ namespace
 		Free(bytes);
 	}
 
-	TEST(Memory, Alloc_Realloc_Free_w_allocator_switch)
+	TEST(system_memory, Alloc_Realloc_Free_w_allocator_switch)
 	{
 		TFailAllocator fail_allocator;
 		byte_t* bytes = NULL;
@@ -60,7 +60,7 @@ namespace
 		Free(bytes);
 	}
 
-	TEST(Memory, New_Delete)
+	TEST(system_memory, New_Delete)
 	{
 		//	fails if the libcl3-core is linked after libstdc++ (then the wrong operator new() implemention is used)
 		int* x = new int(17);
@@ -76,7 +76,7 @@ namespace
 		delete z;
 	}
 
-	TEST(RestrictAllocator, bust_limit)
+	TEST(system_memory_TRestrictAllocator, bust_limit)
 	{
 		const usys_t sz_limit = 0x10000;
 		TRestrictAllocator ra(CL3_PARAMETER_STACK_VALUE(allocator), sz_limit);
@@ -108,7 +108,7 @@ namespace
 		delete z;
 	}
 
-	TEST(RestrictAllocator, accounting)
+	TEST(system_memory_TRestrictAllocator, accounting)
 	{
 		//	this test could get influenced by gtest's own memory allocations (currently gtest does not seem to allocates additional memory during test execution)
 		const usys_t sz_limit = 0x10000;
@@ -180,7 +180,7 @@ namespace
 		~TCDCTester() { *op = OP_DESTRUCT; }
 	};
 
-	TEST(SharedPtr, basic)
+	TEST(system_memory_TSharedPtr, basic)
 	{
 		ELastOp op1 = OP_UNDEFINED, op2 = OP_UNDEFINED, op3 = OP_UNDEFINED;
 

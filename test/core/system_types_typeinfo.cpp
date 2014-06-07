@@ -84,7 +84,7 @@ namespace
 
 	//	*************************************************
 
-	TEST(TypeInfo, StandardConstructor)
+	TEST(system_types_typeinfo, StandardConstructor)
 	{
 		volatile FStandardConstructor v;
 
@@ -110,7 +110,7 @@ namespace
 		EXPECT_TRUE(v == NULL);
 	}
 
-	TEST(TypeInfo, Destructor)
+	TEST(system_types_typeinfo, Destructor)
 	{
 		volatile FDestructor v;
 
@@ -133,7 +133,7 @@ namespace
 		EXPECT_TRUE(v != NULL);
 	}
 
-	TEST(TypeInfo, CopyConstructor)
+	TEST(system_types_typeinfo, CopyConstructor)
 	{
 		volatile FCopyConstructor v;
 
@@ -158,7 +158,7 @@ namespace
 
 	//	*************************************************
 
-	TEST(TypeInfo, Print)
+	TEST(system_types_typeinfo, Print)
 	{
 		volatile cl3::io::text::FPrint v;
 

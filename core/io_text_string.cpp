@@ -140,6 +140,18 @@ namespace	cl3
 					return *this;
 				}
 
+				TString		TString::operator+	(const TString& rhs)
+				{
+					return TString(*this) += rhs;
+				}
+
+				TString		TString::operator+	(TString&& rhs)
+				{
+					rhs.Insert(0, *this);
+					return rhs;
+				}
+
+				/*
 				TString&	TString::operator-=	(const char chr_remove)
 				{
 					CL3_NOT_IMPLEMENTED;
@@ -184,6 +196,7 @@ namespace	cl3
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
+				*/
 
 				TString&	TString::operator=	(const TString& other)
 				{

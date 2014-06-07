@@ -1,8 +1,8 @@
-.PHONY: test-core test-mm prereqs
+.PHONY: core mm prereqs
 
 all: prereqs
-	$(MAKE) run -C test-core -j
-	$(MAKE) run -C test-mm -j
+	$(MAKE) run -C core -j
+	$(MAKE) run -C mm -j
 
 prereqs: gtest/lib/.libs/libgtest_main.a gmock/lib/.libs/libgmock_main.a
 
@@ -12,12 +12,12 @@ gtest/lib/.libs/libgtest_main.a:
 gmock/lib/.libs/libgmock_main.a: gtest/lib/.libs/libgtest_main.a
 	rm -Rf gmock-1.7.0 && unzip gmock-1.7.0.zip && cd gmock && ./configure --with-gtest=../gtest && make -j4
 
-test-core:
-	$(MAKE) run -C test-core -j
+core:
+	$(MAKE) run -C core -j
 
-test-mm:
-	$(MAKE) run -C test-mm -j
+mm:
+	$(MAKE) run -C mm -j
 
 clean:
-	$(MAKE) clean -C test-core -j
-	$(MAKE) clean -C test-mm -j
+	$(MAKE) clean -C core -j
+	$(MAKE) clean -C mm -j

@@ -42,6 +42,8 @@ namespace	cl3
 			{
 				using namespace error;
 
+				/******************************************************************/
+
 				usys_t	TFDStream::Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
 				{
 					bool b_would_block = false;
@@ -90,10 +92,7 @@ namespace	cl3
 					return n_already_read;
 				}
 
-				uoff_t	TFDStream::WriteOut(IOut<byte_t>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
+				/******************************************************************/
 
 				usys_t	TFDStream::Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
@@ -144,10 +143,7 @@ namespace	cl3
 					return n_already_written;
 				}
 
-				uoff_t	TFDStream::ReadIn	(IIn<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
+				/******************************************************************/
 
 				CLASS	TFDStream::TFDStream	(fd_t fd) : p_buffer(NULL), sz_buffer(0), fd(fd)
 				{
@@ -160,11 +156,15 @@ namespace	cl3
 						CL3_CLASS_SYSERR(::fcntl(fd, F_SETFL, flags | O_NONBLOCK));
 				}
 
+				/******************************************************************/
+
 				CLASS	TFDStream::TFDStream	(const TFDStream& other) : p_buffer(NULL), sz_buffer(0)
 				{
 					//	duplicate the file-descriptor and while doing so, atomically set O_CLOEXEC flag
 					CL3_CLASS_SYSERR(this->fd = ::fcntl(other.fd, F_DUPFD_CLOEXEC, 0));
 				}
+
+				/******************************************************************/
 
 				CLASS	TFDStream::~TFDStream	()
 				{

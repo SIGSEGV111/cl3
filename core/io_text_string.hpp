@@ -80,7 +80,11 @@ namespace	cl3
 						CL3PUBF	TString&	operator+=	(const collection::IStaticCollection<wchar_t>& collection_append);
 						CL3PUBF	TString&	operator+=	(const collection::IStaticCollection<TUTF32>& collection_append);
 
+						CL3PUBF	TString		operator+	(const TString& rhs);
+						CL3PUBF	TString		operator+	(TString&& rhs);
+
 						//	remove string
+						/*
 						CL3PUBF	TString&	operator-=	(const char chr_remove);
 						CL3PUBF	TString&	operator-=	(const wchar_t chr_remove);
 						CL3PUBF	TString&	operator-=	(const TUTF32 chr_remove);
@@ -90,6 +94,7 @@ namespace	cl3
 						CL3PUBF	TString&	operator-=	(const collection::IStaticCollection<char>& collection_remove);
 						CL3PUBF	TString&	operator-=	(const collection::IStaticCollection<wchar_t>& collection_remove);
 						CL3PUBF	TString&	operator-=	(const collection::IStaticCollection<TUTF32>& collection_remove);
+						*/
 
 						//	assign
 						CL3PUBF	TString&	operator=	(const TString&);
