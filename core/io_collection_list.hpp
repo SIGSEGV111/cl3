@@ -125,12 +125,12 @@ namespace	cl3
 						void	Remove		();
 
 						//	from IOut<T>
-						usys_t	Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
-						uoff_t	ReadIn		(io::stream::IIn<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
+						usys_t	Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+						uoff_t	ReadIn		(io::stream::IIn<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from IIn<T>
-						usys_t	Read		(T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
-						uoff_t	WriteOut	(io::stream::IOut<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
+						usys_t	Read		(T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+						uoff_t	WriteOut	(io::stream::IOut<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from IIterator
 						usys_t	Index		() const CL3_GETTER;
@@ -174,13 +174,15 @@ namespace	cl3
 						void	Add		(const IStaticCollection<T>& collection);
 						bool	Remove	(const T* item_remove);
 
-						//	from IOut
-						usys_t	Write	(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
-						uoff_t	ReadIn	(io::stream::IIn<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
+						//	from IOut<T>
+						using stream::IOut<T>::Write;
+						usys_t	Write	(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+						uoff_t	ReadIn	(io::stream::IIn<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
-						//	from IIn
-						usys_t	Read	(T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
-						uoff_t	WriteOut(io::stream::IOut<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
+						//	from IIn<T>
+						using stream::IIn<T>::Read;
+						usys_t	Read	(T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+						uoff_t	WriteOut(io::stream::IOut<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from IList
 						TList<T>&	operator=	(const IStaticCollection<T>& rhs);

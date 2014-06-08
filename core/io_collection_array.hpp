@@ -58,8 +58,8 @@ namespace	cl3
 						bool	MovePrev	();
 
 						//	from IIn<T>
-						usys_t	Read		(T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
-						uoff_t	WriteOut	(io::stream::IOut<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
+						usys_t	Read		(T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+						uoff_t	WriteOut	(io::stream::IOut<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from TIterator
 						CLASS	TIterator	(const TArray<const T>* array, usys_t index);
@@ -73,8 +73,8 @@ namespace	cl3
 						T&		Item		() CL3_GETTER;
 
 						//	from IOut<T>
-						usys_t	Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
-						uoff_t	ReadIn		(io::stream::IIn<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
+						usys_t	Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+						uoff_t	ReadIn		(io::stream::IIn<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from IIterator
 						usys_t	Index		() const CL3_GETTER;
@@ -82,6 +82,21 @@ namespace	cl3
 
 						//	from TIterator
 						CLASS	TIterator	(const TArray<T>* array, usys_t index);
+				};
+
+				template<class T>
+				struct	IArray : public virtual IStaticCollection<T>
+				{
+					virtual	IArray&		operator=	(const IArray<T>& rhs) = 0;
+					virtual	IArray&		operator=	(IArray<T>&& rhs) = 0;
+					virtual	T&			operator[]	(usys_t index) CL3_GETTER = 0;
+					virtual	const T&	operator[]	(usys_t index) const CL3_GETTER = 0;
+					virtual	T*			ItemPtr		(usys_t index) CL3_GETTER = 0;
+					virtual	const T*	ItemPtr		(usys_t index) const CL3_GETTER = 0;
+					virtual	usys_t		Read		(uoff_t index, T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) CL3_WARN_UNUSED_RESULT = 0;
+					virtual	usys_t		WriteOut	(uoff_t index, stream::IOut<T>& os, usys_t n_items_wo_max, usys_t n_items_wo_min) CL3_WARN_UNUSED_RESULT = 0;
+					virtual	usys_t		Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT = 0;
+					virtual	usys_t		ReadIn		(uoff_t index, stream::IIn<T>& is, usys_t n_items_ri_max, usys_t n_items_ri_min) CL3_WARN_UNUSED_RESULT = 0;
 				};
 
 				template<class T>
@@ -105,7 +120,7 @@ namespace	cl3
 						bool	CountMin	(usys_t count_min) const CL3_GETTER;
 						bool	CountMax	(usys_t count_max) const CL3_GETTER;
 
-						//	from TArray
+						//	from IArray
 						TArray&		operator=	(const TArray<T>& rhs);
 						TArray&		operator=	(TArray<T>&& rhs);
 

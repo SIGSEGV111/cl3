@@ -43,7 +43,7 @@ namespace	cl3
 						CL3_CLASS_ERROR(this->sink == NULL, TException, "Sink() must point to a valid sink");
 						if(n_items_write_min == (usys_t)-1)
 							n_items_write_min = n_items_write_max;
-						return sink->Write((const byte_t*)arr_items_write, n_items_write_max * 4, n_items_write_min * 4);
+						return sink->Write((const byte_t*)arr_items_write, n_items_write_max * 4, n_items_write_min * 4) / 4;
 					}
 
 					//	from ISource<byte_t>
@@ -64,7 +64,7 @@ namespace	cl3
 						CL3_CLASS_ERROR(this->sink == NULL, TException, "Sink() must point to a valid sink");
 						if(n_items_write_min == (usys_t)-1)
 							n_items_write_min = n_items_write_max;
-						return sink->Write((const TUTF32*)arr_items_write, n_items_write_max / 4, n_items_write_min / 4);
+						return sink->Write((const TUTF32*)arr_items_write, n_items_write_max / 4, n_items_write_min / 4) * 4;
 					}
 
 					//	from ISource<TUTF32>

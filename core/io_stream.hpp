@@ -79,15 +79,23 @@ namespace	cl3
 			template<class T>
 			struct	IIn : virtual IStream<T>
 			{
-				virtual	usys_t	Read	(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min = (usys_t)-1) = 0;	//	reads at least "n_items_read_min" and at most "n_items_read_max" items from the stream into "arr_items_read", returns the amount of items actually read
-				virtual	uoff_t	WriteOut(IOut<T>& os, uoff_t n_items_wo_max = (usys_t)-1, uoff_t n_items_wo_min = (uoff_t)-1) = 0;
+				virtual	usys_t	Read	(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) CL3_WARN_UNUSED_RESULT = 0;	//	reads at least "n_items_read_min" and at most "n_items_read_max" items from the stream into "arr_items_read", returns the amount of items actually read
+				virtual	uoff_t	WriteOut(IOut<T>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min) CL3_WARN_UNUSED_RESULT = 0;
+
+				inline	void	Read	(T* arr_items_read, usys_t n_items_read)	{ CL3_CLASS_LOGIC_ERROR(this->Read(arr_items_read, n_items_read, n_items_read) != n_items_read); }
+				inline	void	WriteOut(IOut<T>& os, uoff_t n_items_wo)			{ CL3_CLASS_LOGIC_ERROR(this->WriteOut(os, n_items_wo, n_items_wo) != n_items_wo); }
+				inline	uoff_t	WriteOut(IOut<T>& os)								{ return this->WriteOut(os, (usys_t)-1, (usys_t)-1); }
 			};
 
 			template<class T>
 			struct	IOut : virtual IStream<T>
 			{
-				virtual	usys_t	Write	(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1) = 0;
-				virtual	uoff_t	ReadIn	(IIn<T>& is, uoff_t n_items_ri_max = (usys_t)-1, uoff_t n_items_ri_min = (uoff_t)-1) = 0;
+				virtual	usys_t	Write	(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT = 0;
+				virtual	uoff_t	ReadIn	(IIn<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) = 0;
+
+				inline	void	Write	(const T* arr_items_write, usys_t n_items_write)	{ CL3_CLASS_LOGIC_ERROR(this->Write(arr_items_write, n_items_write, n_items_write) != n_items_write); }
+				inline	void	ReadIn	(IIn<T>& is, uoff_t n_items_ri_max)					{ CL3_CLASS_LOGIC_ERROR(this->WriteOut(is, n_items_ri_max, n_items_ri_max) != n_items_ri_max); }
+				inline	uoff_t	ReadIn	(IIn<T>& is)										{ return this->WriteOut(is, (usys_t)-1, (usys_t)-1); }
 			};
 
 			template<class T>

@@ -79,13 +79,7 @@ namespace	cl3
 
 					public:
 						inline	const event::TEvent<IEncoder,TTranscodeException>&	OnError	() const { return on_error; }
-
-						//	resets the internal state of the encoder
 						virtual	void	Reset	() = 0;
-
-						//	encodes the UTF32 characters into bytes, returns the number of characters left in the internal state buffer after processing
-						//	virtual	usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1) = 0;
-
 						virtual	CLASS	~IEncoder	() {}
 				};
 
@@ -96,13 +90,7 @@ namespace	cl3
 
 					public:
 						inline	const event::TEvent<IDecoder,TTranscodeException>&	OnError	() const { return on_error; }
-
-						//	resets the internal state of the decoder
 						virtual	void	Reset	() = 0;
-
-						//	decodes the bytes into UTF32 characters, returns the number of bytes left in the internal state buffer after processing
-						//	virtual	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1) = 0;
-
 						virtual	CLASS	~IDecoder	() {}
 				};
 
@@ -130,8 +118,8 @@ namespace	cl3
 						using stream::IOut<TUTF32>::Write;
 						using stream::IOut<TUTF32>::ReadIn;
 
-						CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
-						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
+						CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min);
+						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min);
 
 						CL3PUBF	CLASS	ADecoder	(const ICodec* codec);
 						CL3PUBF	virtual	~ADecoder	();
@@ -146,8 +134,8 @@ namespace	cl3
 						using stream::IOut<byte_t>::Write;
 						using stream::IOut<byte_t>::ReadIn;
 
-						CL3PUBF	usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
-						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<TUTF32>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
+						CL3PUBF	usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min);
+						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<TUTF32>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min);
 
 						CL3PUBF	CLASS	AEncoder	(const ICodec* codec);
 						CL3PUBF	virtual	~AEncoder	();
@@ -167,8 +155,8 @@ namespace	cl3
 						using stream::IOut<TUTF32>::Write;
 						using stream::IOut<TUTF32>::ReadIn;
 
-						CL3PUBF	usys_t	Write	(const char* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
-						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<char>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
+						CL3PUBF	usys_t	Write	(const char* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min);
+						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<char>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min);
 				};
 
 				class	CL3PUBT	AWCharDecoder : public virtual stream::IOut<TUTF32>, public virtual stream::IOut<wchar_t>
@@ -177,8 +165,8 @@ namespace	cl3
 						using stream::IOut<TUTF32>::Write;
 						using stream::IOut<TUTF32>::ReadIn;
 
-						CL3PUBF	usys_t	Write	(const wchar_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
-						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<wchar_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
+						CL3PUBF	usys_t	Write	(const wchar_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min);
+						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<wchar_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min);
 				};
 
 				class	CL3PUBT	ACharEncoder : public virtual stream::IIn<TUTF32>, public virtual stream::IIn<char>
@@ -187,8 +175,8 @@ namespace	cl3
 						using stream::IIn<TUTF32>::Read;
 						using stream::IIn<TUTF32>::WriteOut;
 
-						CL3PUBF	usys_t	Read	(char* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min = (usys_t)-1);
-						CL3PUBF	uoff_t	WriteOut(io::stream::IOut<char>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min = (uoff_t)-1);
+						CL3PUBF	usys_t	Read	(char* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min);
+						CL3PUBF	uoff_t	WriteOut(io::stream::IOut<char>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min);
 				};
 
 				class	CL3PUBT	AWCharEncoder : public virtual stream::IIn<TUTF32>, public virtual stream::IIn<wchar_t>
@@ -197,8 +185,8 @@ namespace	cl3
 						using stream::IIn<TUTF32>::Read;
 						using stream::IIn<TUTF32>::WriteOut;
 
-						CL3PUBF	usys_t	Read	(wchar_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min = (usys_t)-1);
-						CL3PUBF	uoff_t	WriteOut(io::stream::IOut<wchar_t>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min = (uoff_t)-1);
+						CL3PUBF	usys_t	Read	(wchar_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min);
+						CL3PUBF	uoff_t	WriteOut(io::stream::IOut<wchar_t>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min);
 				};
 			}
 		}

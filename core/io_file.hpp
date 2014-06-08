@@ -22,7 +22,7 @@
 #include "system_compiler.hpp"
 #include "system_types.hpp"
 #include "io_stream.hpp"
-#include "io_buffer.hpp"
+//#include "io_buffer.hpp"
 #include "io_text_string.hpp"
 #include "io_collection_list.hpp"
 #include "system_time.hpp"
@@ -52,7 +52,7 @@ namespace	cl3
 				FILE_CREATE_CAN		//	only create if the file does not yet exist
 			};
 
-			class	TStream : public virtual buffer::IBufferedStream<byte_t>
+			class	TStream : public virtual collection::IStaticIterator<byte_t>
 			{
 				protected:
 					TFile* file;
@@ -64,32 +64,33 @@ namespace	cl3
 					CL3PUBF	uoff_t	Index	() const CL3_GETTER;
 
 					//	from IIn<byte_t>
-					CL3PUBF	usys_t	Read	(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min = (usys_t)-1);
-					CL3PUBF	uoff_t	WriteOut(IOut<byte_t>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min = (uoff_t)-1);
+					CL3PUBF	usys_t	Read	(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min);
+					CL3PUBF	uoff_t	WriteOut(IOut<byte_t>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min);
 
 					//	from IOut<byte_t>
-					CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
-					CL3PUBF	uoff_t	ReadIn	(IIn<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min = (uoff_t)-1);
+					CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min);
+					CL3PUBF	uoff_t	ReadIn	(IIn<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min);
 
 					CL3PUBF	CLASS	TStream	(TFile*);
 					CL3PUBF	CLASS	TStream	(const TStream&);
 					CL3PUBF	CLASS	~TStream();
 			};
 
-			class	TFile : public virtual buffer::IBuffer<byte_t>
+			class	TFile : public virtual collection::IStaticCollection<byte_t>
 			{
 				protected:
 					fd_t fd;
-					byte_t* p_data;
-					usys_t sz_data;
+					byte_t* p_map;
+					usys_t sz_map;
 
 				public:
-					//	from IBuffer<byte_t>
-					CL3PUBF	void	Read	(uoff_t index, byte_t* arr_items_read, usys_t n_items_read);
+					CL3PUBF	usys_t	Read	(uoff_t index, byte_t* arr_items_read, usys_t n_items_read);
 					CL3PUBF	void	WriteOut(uoff_t index, stream::IOut<byte_t>& os, usys_t n_items_wo);
 					CL3PUBF	void	Write	(uoff_t index, const byte_t* arr_items_write, usys_t n_items_write);
 					CL3PUBF	void	ReadIn	(uoff_t index, stream::IIn<byte_t>& is, usys_t n_items_ri);
-					CL3PUBF	system::memory::TUniquePtr<buffer::IBufferedStream<byte_t> >	CreateStream	() CL3_WARN_UNUSED_RESULT;
+
+					CL3PUBF	uoff_t	Size	() const CL3_GETTER;
+					CL3PUBF	void	Size	(uoff_t) CL3_SETTER;
 
 					CL3PUBF	CLASS	TFile	();
 					CL3PUBF	CLASS	TFile	(const text::string::TString& name, int access = FILE_ACCESS_READ, ECreate create = FILE_CREATE_NEVER);

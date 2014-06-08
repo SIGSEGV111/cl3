@@ -82,7 +82,7 @@ namespace	cl3
 		{
 		}
 
-		CLASS	TLogicException::TLogicException	() : TException("The program logic violated the expectations of the programmer")
+		CLASS	TLogicException::TLogicException	() : TException("programming error: the actual program logic violated the expectations of the programmer")
 		{
 		}
 

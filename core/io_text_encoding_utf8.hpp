@@ -41,7 +41,8 @@ namespace	cl3
 							CL3PUBF	void	Reset	();
 
 							//	from IOut<TUTF32>
-							CL3PUBF	usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
+							using IOut<TUTF32>::Write;
+							CL3PUBF	usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
 
 							//	from ISource<byte_t>
 							CL3PUBF	void	Sink	(stream::IOut<byte_t>* os) CL3_SETTER;
@@ -63,7 +64,8 @@ namespace	cl3
 							CL3PUBF	void	Reset	();
 
 							//	from IOut<byte_t>
-							CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
+							using IOut<byte_t>::Write;
+							CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
 
 							//	from ISource<TUTF32>
 							CL3PUBF	void	Sink	(stream::IOut<TUTF32>* os) CL3_SETTER;

@@ -87,6 +87,7 @@ namespace	cl3
 								}
 							}
 
+							//	FIXME, use internal buffer, dont force ouput stream unless minimum required
 							this->sink->Write(arr_out, length);
 							n_out += length;
 						}
@@ -184,6 +185,7 @@ namespace	cl3
 
 							if(this->shift == 0)
 							{
+								//	FIXME, as above
 								this->sink->Write((const TUTF32*)&state, 1);
 								n_out++;
 							}
