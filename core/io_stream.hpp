@@ -82,9 +82,9 @@ namespace	cl3
 				virtual	usys_t	Read	(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) CL3_WARN_UNUSED_RESULT = 0;	//	reads at least "n_items_read_min" and at most "n_items_read_max" items from the stream into "arr_items_read", returns the amount of items actually read
 				virtual	uoff_t	WriteOut(IOut<T>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min) CL3_WARN_UNUSED_RESULT = 0;
 
-				inline	void	Read	(T* arr_items_read, usys_t n_items_read)	{ CL3_CLASS_LOGIC_ERROR(this->Read(arr_items_read, n_items_read, n_items_read) != n_items_read); }
-				inline	void	WriteOut(IOut<T>& os, uoff_t n_items_wo)			{ CL3_CLASS_LOGIC_ERROR(this->WriteOut(os, n_items_wo, n_items_wo) != n_items_wo); }
-				inline	uoff_t	WriteOut(IOut<T>& os)								{ return this->WriteOut(os, (usys_t)-1, (usys_t)-1); }
+				inline	void	Read	(T* arr_items_read, usys_t n_items_read)			{ CL3_CLASS_LOGIC_ERROR(this->Read(arr_items_read, n_items_read, n_items_read) != n_items_read); }
+				inline	void	WriteOut(IOut<T>& os, uoff_t n_items_wo)					{ CL3_CLASS_LOGIC_ERROR(this->WriteOut(os, n_items_wo, n_items_wo) != n_items_wo); }
+				inline	uoff_t	WriteOut(IOut<T>& os)										{ return this->WriteOut(os, (usys_t)-1, (usys_t)-1); }
 			};
 
 			template<class T>

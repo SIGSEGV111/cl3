@@ -134,7 +134,7 @@ namespace	cl3
 			};
 
 			template<class T>
-			struct	CL3PUBT	IDynamicIterator<const T> : virtual IStaticIterator<T>
+			struct	CL3PUBT	IDynamicIterator<const T> : virtual IStaticIterator<const T>
 			{
 				virtual	void	Insert	(const T& item_insert) = 0;	//	inserts an item before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to it
 				virtual	void	Insert	(const T* arr_items_insert, usys_t n_items_insert) = 0;	//	inserts items before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to the first of the inserted items (does nothing if the array is empty)
@@ -143,19 +143,27 @@ namespace	cl3
 			};
 
 			template<class T>
-			struct	CL3PUBT	IDynamicIterator : virtual IDynamicIterator<const T>
+			struct	CL3PUBT	IDynamicIterator : virtual IDynamicIterator<const T>, virtual IStaticIterator<T>
 			{
 			};
 
+			template<class T> struct IStaticCollection;
+
 			template<class T>
-			struct	CL3PUBT	IStaticCollection : virtual event::IObservable< IStaticCollection<T>, TOnChangeData<T> >
+			struct	CL3PUBT	IStaticCollection<const T> : virtual event::IObservable< const IStaticCollection<const T>, TOnChangeData<const T> >
 			{
-				virtual	system::memory::TUniquePtr<IStaticIterator<T> >			CreateStaticIterator	() CL3_WARN_UNUSED_RESULT = 0;
 				virtual	system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT = 0;
 
 				virtual	usys_t	Count		() const CL3_GETTER = 0;
 				virtual	bool	CountMin	(usys_t count_min) const CL3_GETTER { return Count() >= count_min; }
 				virtual	bool	CountMax	(usys_t count_max) const CL3_GETTER { return Count() <= count_max; }
+			};
+
+			template<class T>
+			struct	CL3PUBT	IStaticCollection : virtual IStaticCollection<const T>
+			{
+				using IStaticCollection<const T>::CreateStaticIterator;
+				virtual	system::memory::TUniquePtr<IStaticIterator<T> >			CreateStaticIterator	() CL3_WARN_UNUSED_RESULT = 0;
 			};
 
 			template<class T>

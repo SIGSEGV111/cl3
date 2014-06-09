@@ -55,8 +55,9 @@ namespace	cl3
 
 				u32_t code;
 
-				inline bool operator==(TUTF32 rhs) const { return code == rhs.code; }
-				inline bool operator!=(TUTF32 rhs) const { return code != rhs.code; }
+				inline	TUTF32&	operator=	(const TUTF32& rhs) { this->code = rhs.code; return *this; }
+				inline	bool	operator==	(TUTF32 rhs) const { return code == rhs.code; }
+				inline	bool	operator!=	(TUTF32 rhs) const { return code != rhs.code; }
 
 				CL3PUBF	CLASS	TUTF32	(char chr);
 				CL3PUBF	CLASS	TUTF32	(wchar_t wchr);

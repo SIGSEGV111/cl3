@@ -84,10 +84,6 @@ namespace	cl3
 					usys_t sz_map;
 
 				public:
-					CL3PUBF	usys_t	Read	(uoff_t index, byte_t* arr_items_read, usys_t n_items_read);
-					CL3PUBF	void	WriteOut(uoff_t index, stream::IOut<byte_t>& os, usys_t n_items_wo);
-					CL3PUBF	void	Write	(uoff_t index, const byte_t* arr_items_write, usys_t n_items_write);
-					CL3PUBF	void	ReadIn	(uoff_t index, stream::IIn<byte_t>& is, usys_t n_items_ri);
 
 					CL3PUBF	uoff_t	Size	() const CL3_GETTER;
 					CL3PUBF	void	Size	(uoff_t) CL3_SETTER;

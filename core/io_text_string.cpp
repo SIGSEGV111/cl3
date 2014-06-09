@@ -418,12 +418,36 @@ namespace	cl3
 					//	nothing to do
 				}
 
-				CLASS	TCString::TCString	(const TString& str, const encoding::ICodec* codec) : TList(), codec(codec)
+				TCString&	TCString::operator=	(const TCString& rhs)
+				{
+					static_cast<TList<byte_t>&>(*this) = rhs;
+					this->codec = rhs.codec;
+					return *this;
+				}
+
+				TCString&	TCString::operator=	(TCString&& rhs)
+				{
+					static_cast<TList<byte_t>&>(*this) = rhs;
+					this->codec = rhs.codec;
+					return *this;
+				}
+
+				CLASS		TCString::TCString	(const TString& str, const encoding::ICodec* codec) : TList(), codec(codec)
 				{
 					TUniquePtr<IEncoder> e = codec->CreateEncoder();
 					e->Sink(this);
 					e->Write(str.ItemPtr(0), str.Length());
 					e->Write(&TUTF32::TERMINATOR, 1);
+				}
+
+				CLASS		TCString::TCString	(const TCString& other) : TList<byte_t>(other), codec(other.codec)
+				{
+					//	nothing else to do
+				}
+
+				CLASS		TCString::TCString	(TCString&& other) : TList<byte_t>(other), codec(other.codec)
+				{
+					//	nothing else to do
 				}
 
 				TStringUPtr	Stringify	(FPrint print, const void* object)

@@ -152,7 +152,12 @@ namespace	cl3
 						const char*		Chars		() const { return (const char*)this->ItemPtr(0); }
 						const byte_t*	Bytes		() const { return this->ItemPtr(0); }
 
+						CL3PUBF	TCString&	operator=	(const TCString&);
+						CL3PUBF	TCString&	operator=	(TCString&&);
+
 						CL3PUBF	CLASS	TCString	(const TString&, const encoding::ICodec*);
+						CL3PUBF	CLASS	TCString	(const TCString&);
+						CL3PUBF	CLASS	TCString	(TCString&&);
 				};
 
 				CL3PUBF	TStringUPtr	Stringify	(FPrint print, const void* object);

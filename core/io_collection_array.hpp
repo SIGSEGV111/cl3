@@ -84,34 +84,58 @@ namespace	cl3
 						CLASS	TIterator	(const TArray<T>* array, usys_t index);
 				};
 
+				template<class T> struct IArray;
+
 				template<class T>
-				struct	IArray : public virtual IStaticCollection<T>
+				struct	CL3PUBT	IArray<const T> : virtual IStaticCollection<const T>
 				{
-					virtual	IArray&		operator=	(const IArray<T>& rhs) = 0;
-					virtual	IArray&		operator=	(IArray<T>&& rhs) = 0;
-					virtual	T&			operator[]	(usys_t index) CL3_GETTER = 0;
-					virtual	const T&	operator[]	(usys_t index) const CL3_GETTER = 0;
-					virtual	T*			ItemPtr		(usys_t index) CL3_GETTER = 0;
-					virtual	const T*	ItemPtr		(usys_t index) const CL3_GETTER = 0;
-					virtual	usys_t		Read		(uoff_t index, T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) CL3_WARN_UNUSED_RESULT = 0;
-					virtual	usys_t		WriteOut	(uoff_t index, stream::IOut<T>& os, usys_t n_items_wo_max, usys_t n_items_wo_min) CL3_WARN_UNUSED_RESULT = 0;
-					virtual	usys_t		Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT = 0;
-					virtual	usys_t		ReadIn		(uoff_t index, stream::IIn<T>& is, usys_t n_items_ri_max, usys_t n_items_ri_min) CL3_WARN_UNUSED_RESULT = 0;
+					usys_t	AbsIndex	(ssys_t rindex) const CL3_GETTER;
+
+					virtual	const T&	operator[]	(ssys_t index) const CL3_GETTER = 0;
+					virtual	const T*	ItemPtr		(ssys_t index) const CL3_GETTER = 0;
+
+					virtual	usys_t		Read		(uoff_t index, T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+					virtual	usys_t		WriteOut	(uoff_t index, stream::IOut<T>& os, usys_t n_items_wo_max, usys_t n_items_wo_min) CL3_WARN_UNUSED_RESULT;
+
+					inline	void		Read		(uoff_t index, T* arr_items_write, usys_t n_items_write);
+					inline	void		WriteOut	(uoff_t index, stream::IOut<T>& os, usys_t n_items_wo);
+					inline	uoff_t		WriteOut	(uoff_t index, stream::IOut<T>& os);
+
+					inline	void		Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write);
+					inline	void		ReadIn		(uoff_t index, stream::IIn<T>& is, usys_t n_items_ri);
+					inline	uoff_t		ReadIn		(uoff_t index, stream::IIn<T>& is);
 				};
 
 				template<class T>
-				class	TArray : public virtual IStaticCollection<T>
+				struct	CL3PUBT	IArray : virtual IArray<const T>,  virtual IStaticCollection<T>
+				{
+					using array::IArray<const T>::operator[];
+					using array::IArray<const T>::ItemPtr;
+					using array::IArray<const T>::Write;
+					using array::IArray<const T>::ReadIn;
+					using array::IArray<const T>::Read;
+					using array::IArray<const T>::WriteOut;
+
+					virtual	T&			operator[]	(ssys_t index) CL3_GETTER = 0;
+					virtual	T*			ItemPtr		(ssys_t index) CL3_GETTER = 0;
+
+					virtual	usys_t		Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+					virtual	usys_t		ReadIn		(uoff_t index, stream::IIn<T>& is, usys_t n_items_ri_max, usys_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
+				};
+
+				template<class T>
+				class	CL3PUBT	TArray : public virtual IArray<T>
 				{
 					friend class TIterator<T>;
 					friend class TIterator<const T>;
 					protected:
 						T* arr_items;
 						usys_t n_items;
-						const event::TEvent<IStaticCollection<T>, TOnChangeData<T> > on_change;
+						const event::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> > on_change;
 
 					public:
 						//	from IObservable
-						const event::TEvent<IStaticCollection<T>, TOnChangeData<T> >&	OnChange	() const CL3_GETTER;
+						const event::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> >&	OnChange	() const CL3_GETTER;
 
 						//	from IStaticCollection
 						system::memory::TUniquePtr<IStaticIterator<T> >			CreateStaticIterator	() CL3_WARN_UNUSED_RESULT;
@@ -120,17 +144,115 @@ namespace	cl3
 						bool	CountMin	(usys_t count_min) const CL3_GETTER;
 						bool	CountMax	(usys_t count_max) const CL3_GETTER;
 
-						//	from IArray
-						TArray&		operator=	(const TArray<T>& rhs);
-						TArray&		operator=	(TArray<T>&& rhs);
+						//	from IStaticCollection<T>
+						TArray&		operator=	(const IStaticCollection<T>& rhs);
+						TArray&		operator=	(IStaticCollection<T>&& rhs);
 
-						T&			operator[]	(usys_t index) CL3_GETTER;
-						const T&	operator[]	(usys_t index) const CL3_GETTER;
-						T*			ItemPtr		(usys_t index) CL3_GETTER;
-						const T*	ItemPtr		(usys_t index) const CL3_GETTER;
+						T&			operator[]	(ssys_t rindex) CL3_GETTER;
+						const T&	operator[]	(ssys_t rindex) const CL3_GETTER;
+						T*			ItemPtr		(ssys_t rindex) CL3_GETTER;
+						const T*	ItemPtr		(ssys_t rindex) const CL3_GETTER;
 
 						CLASS		TArray		(T* arr_items, usys_t n_items);
 				};
+
+				/*********************************************************************/
+
+				template<class T>
+				usys_t	IArray<const T>::AbsIndex		(ssys_t rindex) const
+				{
+					if(rindex < 0)
+					{
+						const usys_t tmp = -rindex;
+						return this->Count() - tmp;
+					}
+					else
+						return rindex;
+				}
+
+				template<class T>
+				usys_t		IArray<const T>::Read		(uoff_t index, T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				{
+					const T* const arr_items = this->ItemPtr(0);
+					const usys_t n_items = this->Count();
+
+					if(n_items_write_min == (usys_t)-1)
+						n_items_write_min = n_items_write_max;
+
+					CL3_CLASS_ERROR(index + n_items_write_min > n_items, TIndexOutOfBoundsException, index + n_items_write_min, n_items);
+
+					const usys_t n_items_write = CL3_MIN(n_items - index, n_items_write_max);
+
+					for(usys_t i = 0; i < n_items_write; i++)
+						arr_items_write[i] = arr_items[index + i];
+
+					return n_items_write;
+				}
+
+				template<class T>
+				usys_t		IArray<const T>::WriteOut	(uoff_t index, stream::IOut<T>& os, usys_t n_items_wo_max, usys_t n_items_wo_min)
+				{
+					const T* const arr_items = this->ItemPtr(0);
+					const usys_t n_items = this->Count();
+
+					CL3_CLASS_ERROR(index > n_items, TIndexOutOfBoundsException, index, n_items);
+
+					if(n_items_wo_max == (usys_t)-1)
+						n_items_wo_max = n_items - index;
+
+					if(n_items_wo_min == (usys_t)-1)
+						n_items_wo_min = n_items_wo_max;
+
+					CL3_CLASS_ERROR(index + n_items_wo_min > n_items, TIndexOutOfBoundsException, index + n_items_wo_min, n_items);
+
+					const usys_t n_items_process = CL3_MIN(n_items - index, n_items_wo_max);
+
+					os.Write(arr_items + index, n_items_process);
+
+					return n_items_process;
+				}
+
+				template<class T>
+				usys_t		IArray<T>::Write	(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				{
+					T* const arr_items = this->ItemPtr(0);
+					const usys_t n_items = this->Count();
+
+					if(n_items_write_min == (usys_t)-1)
+						n_items_write_min = n_items_write_max;
+
+					CL3_CLASS_ERROR(index + n_items_write_min > n_items, TIndexOutOfBoundsException, index + n_items_write_min, n_items);
+
+					const usys_t n_items_write = CL3_MIN(n_items - index, n_items_write_max);
+
+					for(usys_t i = 0; i < n_items_write; i++)
+						arr_items[index + i] = arr_items_write[i];
+
+					return n_items_write;
+				}
+
+				template<class T>
+				usys_t		IArray<T>::ReadIn	(uoff_t index, stream::IIn<T>& is, usys_t n_items_ri_max, usys_t n_items_ri_min)
+				{
+					T* const arr_items = this->ItemPtr(0);
+					const usys_t n_items = this->Count();
+
+					CL3_CLASS_ERROR(index > n_items, TIndexOutOfBoundsException, index, n_items);
+
+					if(n_items_ri_max == (usys_t)-1)
+						n_items_ri_max = n_items - index;
+
+					if(n_items_ri_min == (usys_t)-1)
+						n_items_ri_min = n_items_ri_max;
+
+					CL3_CLASS_ERROR(index + n_items_ri_min > n_items, TIndexOutOfBoundsException, index + n_items_ri_min, n_items);
+
+					const usys_t n_items_process = CL3_MIN(n_items - index, n_items_ri_max);
+
+					is.Read(arr_items + index, n_items_process);
+
+					return n_items_process;
+				}
 
 				/*********************************************************************/
 
@@ -310,7 +432,7 @@ namespace	cl3
 				/*********************************************************************/
 
 				template<class T>
-				const event::TEvent<IStaticCollection<T>, TOnChangeData<T> >&	TArray<T>::OnChange	() const
+				const event::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> >&	TArray<T>::OnChange	() const
 				{
 					return this->on_change;
 				}
@@ -346,45 +468,51 @@ namespace	cl3
 				}
 
 				template<class T>
-				TArray<T>&	TArray<T>::operator=	(const TArray<T>& rhs)
+				TArray<T>&	TArray<T>::operator=	(const IStaticCollection<T>& rhs)
 				{
-					this->arr_items = rhs.arr_items;
-					this->n_items = rhs.n_items;
-					return *this;
+					CL3_NOT_IMPLEMENTED;
+// 					this->arr_items = rhs.arr_items;
+// 					this->n_items = rhs.n_items;
+// 					return *this;
 				}
 
 				template<class T>
-				TArray<T>&	TArray<T>::operator=	(TArray<T>&& rhs)
+				TArray<T>&	TArray<T>::operator=	(IStaticCollection<T>&& rhs)
 				{
-					this->arr_items = rhs.arr_items;
-					this->n_items = rhs.n_items;
-					return *this;
+					CL3_NOT_IMPLEMENTED;
+// 					this->arr_items = rhs.arr_items;
+// 					this->n_items = rhs.n_items;
+// 					return *this;
 				}
 
 				template<class T>
-				T&			TArray<T>::operator[]	(usys_t index)
+				T&			TArray<T>::operator[]	(ssys_t rindex)
 				{
+					const usys_t index = this->AbsIndex(rindex);
 					CL3_CLASS_ERROR(index >= n_items, TIndexOutOfBoundsException, index, n_items);
 					return arr_items[index];
 				}
 
 				template<class T>
-				const T&	TArray<T>::operator[]	(usys_t index) const
+				const T&	TArray<T>::operator[]	(ssys_t rindex) const
 				{
+					const usys_t index = this->AbsIndex(rindex);
 					CL3_CLASS_ERROR(index >= n_items, TIndexOutOfBoundsException, index, n_items);
 					return arr_items[index];
 				}
 
 				template<class T>
-				T*			TArray<T>::ItemPtr		(usys_t index)
+				T*			TArray<T>::ItemPtr		(ssys_t rindex)
 				{
+					const usys_t index = this->AbsIndex(rindex);
 					CL3_CLASS_ERROR(index >= n_items, TIndexOutOfBoundsException, index, n_items);
 					return arr_items + index;
 				}
 
 				template<class T>
-				const T*	TArray<T>::ItemPtr		(usys_t index) const
+				const T*	TArray<T>::ItemPtr		(ssys_t rindex) const
 				{
+					const usys_t index = this->AbsIndex(rindex);
 					CL3_CLASS_ERROR(index >= n_items, TIndexOutOfBoundsException, index, n_items);
 					return arr_items + index;
 				}
