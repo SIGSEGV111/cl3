@@ -72,7 +72,7 @@ namespace	cl3
 					virtual	system::memory::TUniquePtr<IDecoder>	CreateDecoder	() const CL3_WARN_UNUSED_RESULT = 0;
 				};
 
-				class	CL3PUBT	IEncoder : public stream::ISource<byte_t>, public virtual stream::AOutPassive<TUTF32>
+				class	CL3PUBT	IEncoder : public stream::ISource<byte_t>, public virtual stream::IOut<TUTF32>
 				{
 					protected:
 						event::TEvent<IEncoder,TTranscodeException> on_error;
@@ -83,7 +83,7 @@ namespace	cl3
 						virtual	CLASS	~IEncoder	() {}
 				};
 
-				class	CL3PUBT	IDecoder : public stream::ISource<TUTF32>, public virtual stream::AOutPassive<byte_t>
+				class	CL3PUBT	IDecoder : public stream::ISource<TUTF32>, public virtual stream::IOut<byte_t>
 				{
 					protected:
 						event::TEvent<IDecoder,TTranscodeException> on_error;
@@ -116,7 +116,6 @@ namespace	cl3
 
 					public:
 						using stream::IOut<TUTF32>::Write;
-						using stream::IOut<TUTF32>::ReadIn;
 
 						CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min);
 						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min);
@@ -132,7 +131,6 @@ namespace	cl3
 
 					public:
 						using stream::IOut<byte_t>::Write;
-						using stream::IOut<byte_t>::ReadIn;
 
 						CL3PUBF	usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min);
 						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<TUTF32>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min);
@@ -153,40 +151,32 @@ namespace	cl3
 				{
 					public:
 						using stream::IOut<TUTF32>::Write;
-						using stream::IOut<TUTF32>::ReadIn;
 
 						CL3PUBF	usys_t	Write	(const char* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min);
-						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<char>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min);
 				};
 
 				class	CL3PUBT	AWCharDecoder : public virtual stream::IOut<TUTF32>, public virtual stream::IOut<wchar_t>
 				{
 					public:
 						using stream::IOut<TUTF32>::Write;
-						using stream::IOut<TUTF32>::ReadIn;
 
 						CL3PUBF	usys_t	Write	(const wchar_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min);
-						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<wchar_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min);
 				};
 
 				class	CL3PUBT	ACharEncoder : public virtual stream::IIn<TUTF32>, public virtual stream::IIn<char>
 				{
 					public:
 						using stream::IIn<TUTF32>::Read;
-						using stream::IIn<TUTF32>::WriteOut;
 
 						CL3PUBF	usys_t	Read	(char* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min);
-						CL3PUBF	uoff_t	WriteOut(io::stream::IOut<char>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min);
 				};
 
 				class	CL3PUBT	AWCharEncoder : public virtual stream::IIn<TUTF32>, public virtual stream::IIn<wchar_t>
 				{
 					public:
 						using stream::IIn<TUTF32>::Read;
-						using stream::IIn<TUTF32>::WriteOut;
 
 						CL3PUBF	usys_t	Read	(wchar_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min);
-						CL3PUBF	uoff_t	WriteOut(io::stream::IOut<wchar_t>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min);
 				};
 			}
 		}

@@ -29,8 +29,11 @@ namespace	cl3
 		{
 			namespace	array
 			{
+				template<class T> struct IArray;
 				template<class T> class TArray;
 				template<class T> class TIterator;
+
+				/************************************************************************/
 
 				template<class T>
 				class	CL3PUBT	TIterator<const T> : public virtual IStaticIterator<const T>
@@ -59,7 +62,6 @@ namespace	cl3
 
 						//	from IIn<T>
 						usys_t	Read		(T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-						uoff_t	WriteOut	(io::stream::IOut<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from TIterator
 						CLASS	TIterator	(const TArray<const T>* array, usys_t index);
@@ -74,7 +76,6 @@ namespace	cl3
 
 						//	from IOut<T>
 						usys_t	Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-						uoff_t	ReadIn		(io::stream::IIn<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from IIterator
 						usys_t	Index		() const CL3_GETTER;
@@ -84,7 +85,7 @@ namespace	cl3
 						CLASS	TIterator	(const TArray<T>* array, usys_t index);
 				};
 
-				template<class T> struct IArray;
+				/************************************************************************/
 
 				template<class T>
 				struct	CL3PUBT	IArray<const T> : virtual IStaticCollection<const T>
@@ -95,15 +96,7 @@ namespace	cl3
 					virtual	const T*	ItemPtr		(ssys_t index) const CL3_GETTER = 0;
 
 					virtual	usys_t		Read		(uoff_t index, T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-					virtual	usys_t		WriteOut	(uoff_t index, stream::IOut<T>& os, usys_t n_items_wo_max, usys_t n_items_wo_min) CL3_WARN_UNUSED_RESULT;
-
 					inline	void		Read		(uoff_t index, T* arr_items_write, usys_t n_items_write);
-					inline	void		WriteOut	(uoff_t index, stream::IOut<T>& os, usys_t n_items_wo);
-					inline	uoff_t		WriteOut	(uoff_t index, stream::IOut<T>& os);
-
-					inline	void		Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write);
-					inline	void		ReadIn		(uoff_t index, stream::IIn<T>& is, usys_t n_items_ri);
-					inline	uoff_t		ReadIn		(uoff_t index, stream::IIn<T>& is);
 				};
 
 				template<class T>
@@ -111,17 +104,16 @@ namespace	cl3
 				{
 					using array::IArray<const T>::operator[];
 					using array::IArray<const T>::ItemPtr;
-					using array::IArray<const T>::Write;
-					using array::IArray<const T>::ReadIn;
 					using array::IArray<const T>::Read;
-					using array::IArray<const T>::WriteOut;
 
 					virtual	T&			operator[]	(ssys_t index) CL3_GETTER = 0;
 					virtual	T*			ItemPtr		(ssys_t index) CL3_GETTER = 0;
 
 					virtual	usys_t		Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-					virtual	usys_t		ReadIn		(uoff_t index, stream::IIn<T>& is, usys_t n_items_ri_max, usys_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
+					inline	void		Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write);
 				};
+
+				/************************************************************************/
 
 				template<class T>
 				class	CL3PUBT	TArray : public virtual IArray<T>
@@ -190,29 +182,6 @@ namespace	cl3
 				}
 
 				template<class T>
-				usys_t		IArray<const T>::WriteOut	(uoff_t index, stream::IOut<T>& os, usys_t n_items_wo_max, usys_t n_items_wo_min)
-				{
-					const T* const arr_items = this->ItemPtr(0);
-					const usys_t n_items = this->Count();
-
-					CL3_CLASS_ERROR(index > n_items, TIndexOutOfBoundsException, index, n_items);
-
-					if(n_items_wo_max == (usys_t)-1)
-						n_items_wo_max = n_items - index;
-
-					if(n_items_wo_min == (usys_t)-1)
-						n_items_wo_min = n_items_wo_max;
-
-					CL3_CLASS_ERROR(index + n_items_wo_min > n_items, TIndexOutOfBoundsException, index + n_items_wo_min, n_items);
-
-					const usys_t n_items_process = CL3_MIN(n_items - index, n_items_wo_max);
-
-					os.Write(arr_items + index, n_items_process);
-
-					return n_items_process;
-				}
-
-				template<class T>
 				usys_t		IArray<T>::Write	(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
 					T* const arr_items = this->ItemPtr(0);
@@ -231,30 +200,7 @@ namespace	cl3
 					return n_items_write;
 				}
 
-				template<class T>
-				usys_t		IArray<T>::ReadIn	(uoff_t index, stream::IIn<T>& is, usys_t n_items_ri_max, usys_t n_items_ri_min)
-				{
-					T* const arr_items = this->ItemPtr(0);
-					const usys_t n_items = this->Count();
-
-					CL3_CLASS_ERROR(index > n_items, TIndexOutOfBoundsException, index, n_items);
-
-					if(n_items_ri_max == (usys_t)-1)
-						n_items_ri_max = n_items - index;
-
-					if(n_items_ri_min == (usys_t)-1)
-						n_items_ri_min = n_items_ri_max;
-
-					CL3_CLASS_ERROR(index + n_items_ri_min > n_items, TIndexOutOfBoundsException, index + n_items_ri_min, n_items);
-
-					const usys_t n_items_process = CL3_MIN(n_items - index, n_items_ri_max);
-
-					is.Read(arr_items + index, n_items_process);
-
-					return n_items_process;
-				}
-
-				/*********************************************************************/
+				/************************************************************************/
 
 				//	from TIterator<const T>
 				template<class T>
@@ -375,19 +321,13 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				template<class T>
-				uoff_t	TIterator<const T>::WriteOut	(io::stream::IOut<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
 				//	from TIterator
 				template<class T>
 				CLASS	TIterator<const T>::TIterator	(const TArray<const T>* array, usys_t index) : array(array), index(index)
 				{
 				}
 
-				/*********************************************************************/
+				/************************************************************************/
 
 				//	from IStaticIterator<T>
 				template<class T>
@@ -400,12 +340,6 @@ namespace	cl3
 				//	from IOut<T>
 				template<class T>
 				usys_t	TIterator<T>::Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				template<class T>
-				uoff_t	TIterator<T>::ReadIn	(io::stream::IIn<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -429,7 +363,7 @@ namespace	cl3
 				{
 				}
 
-				/*********************************************************************/
+				/************************************************************************/
 
 				template<class T>
 				const event::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> >&	TArray<T>::OnChange	() const

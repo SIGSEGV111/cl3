@@ -63,9 +63,7 @@ namespace	cl3
 					using IStaticCollection<const T>::Count;
 					using IDynamicCollection<T>::Remove;
 					using stream::IIn<T>::Read;
-					using stream::IIn<T>::WriteOut;
 					using stream::IOut<T>::Write;
-					using stream::IOut<T>::ReadIn;
 
 					inline	IList&	operator+=	(const IStaticCollection<T>& rhs) { Append(rhs); return *this; }
 					virtual	IList&	operator=	(const IStaticCollection<T>& rhs) = 0;
@@ -126,11 +124,9 @@ namespace	cl3
 
 						//	from IOut<T>
 						usys_t	Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-						uoff_t	ReadIn		(io::stream::IIn<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from IIn<T>
 						usys_t	Read		(T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-						uoff_t	WriteOut	(io::stream::IOut<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from IIterator
 						usys_t	Index		() const CL3_GETTER;
@@ -154,13 +150,9 @@ namespace	cl3
 
 					public:
 						using stream::IOut<T>::Write;
-						using stream::IOut<T>::ReadIn;
 						using stream::IIn<T>::Read;
-						using stream::IIn<T>::WriteOut;
 						using array::IArray<T>::Write;
-						using array::IArray<T>::ReadIn;
 						using array::IArray<T>::Read;
-						using array::IArray<T>::WriteOut;
 
 						//	from IObservable
 						const event::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> >&	OnChange	() const CL3_GETTER;
@@ -184,16 +176,13 @@ namespace	cl3
 
 						//	from IOut<T>
 						usys_t		Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-						uoff_t		ReadIn		(io::stream::IIn<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from IIn<T>
 						usys_t		Read		(T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-						uoff_t		WriteOut	(io::stream::IOut<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from IArray<T>
-						//	Read/WriteOut are taken from IArray<T> as they are, we only override Write & ReadIn here
+						//	Read is taken from IArray<T> as-is, we only override Write here
 						usys_t		Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-						usys_t		ReadIn		(uoff_t index, stream::IIn<T>& is, usys_t n_items_ri_max, usys_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from IList
 						TList<T>&	operator=	(const IStaticCollection<T>& rhs);
@@ -332,21 +321,9 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				template<class T>
-				uoff_t	TIterator<T>::ReadIn	(io::stream::IIn<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
 				//	from IIn<T>
 				template<class T>
 				usys_t	TIterator<T>::Read		(T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				template<class T>
-				uoff_t	TIterator<T>::WriteOut	(io::stream::IOut<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -527,12 +504,6 @@ namespace	cl3
 					return n_items_write_max;
 				}
 
-				template<class T>
-				uoff_t		TList<T>::ReadIn	(io::stream::IIn<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
 				//	from IIn
 				template<class T>
 				usys_t	TList<T>::Read		(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
@@ -549,19 +520,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				uoff_t	TList<T>::WriteOut		(io::stream::IOut<T>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				template<class T>
 				usys_t	TList<T>::Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				template<class T>
-				usys_t	TList<T>::ReadIn	(uoff_t index, stream::IIn<T>& is, usys_t n_items_ri_max, usys_t n_items_ri_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

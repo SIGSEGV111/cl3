@@ -124,17 +124,7 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				uoff_t	ACharDecoder::ReadIn	(io::stream::IIn<char>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
 				usys_t	AWCharDecoder::Write	(const wchar_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				uoff_t	AWCharDecoder::ReadIn	(io::stream::IIn<wchar_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -144,17 +134,7 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				uoff_t	ACharEncoder::WriteOut	(io::stream::IOut<char>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
 				usys_t	AWCharEncoder::Read		(wchar_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				uoff_t	AWCharEncoder::WriteOut	(io::stream::IOut<wchar_t>& os, uoff_t n_items_wo_max, uoff_t n_items_wo_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

@@ -134,17 +134,7 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				uoff_t		TIterator::ReadIn	(io::stream::IIn<TBoolProxy>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
 				usys_t		TIterator::Read		(TBoolProxy* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				uoff_t		TIterator::WriteOut	(io::stream::IOut<TBoolProxy>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -154,17 +144,7 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				uoff_t		TIterator::ReadIn	(io::stream::IIn<bool>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
 				usys_t		TIterator::Read		(bool* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				uoff_t		TIterator::WriteOut	(io::stream::IOut<bool>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -174,17 +154,7 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				uoff_t		TIterator::ReadIn	(io::stream::IIn<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
 				usys_t		TIterator::Read		(byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				uoff_t		TIterator::WriteOut	(io::stream::IOut<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

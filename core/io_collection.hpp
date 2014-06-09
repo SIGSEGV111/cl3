@@ -109,6 +109,8 @@ namespace	cl3
 				const IStaticIterator<T>* iterator;
 			};
 
+			/************************************************************************/
+
 			template<class T>
 			struct	CL3PUBT	IStaticIterator<const T> : virtual stream::IIn<T>
 			{
@@ -133,6 +135,8 @@ namespace	cl3
 				virtual	CLASS	~IStaticIterator	() {}
 			};
 
+			/************************************************************************/
+
 			template<class T>
 			struct	CL3PUBT	IDynamicIterator<const T> : virtual IStaticIterator<const T>
 			{
@@ -147,7 +151,7 @@ namespace	cl3
 			{
 			};
 
-			template<class T> struct IStaticCollection;
+			/************************************************************************/
 
 			template<class T>
 			struct	CL3PUBT	IStaticCollection<const T> : virtual event::IObservable< const IStaticCollection<const T>, TOnChangeData<const T> >
@@ -166,6 +170,8 @@ namespace	cl3
 				virtual	system::memory::TUniquePtr<IStaticIterator<T> >			CreateStaticIterator	() CL3_WARN_UNUSED_RESULT = 0;
 			};
 
+			/************************************************************************/
+
 			template<class T>
 			struct	CL3PUBT	IDynamicCollection : virtual IStaticCollection<T>, virtual stream::IIn<T>, virtual stream::IOut<T>
 			{
@@ -180,61 +186,6 @@ namespace	cl3
 				virtual	void	Add		(const IStaticCollection<T>& collection) = 0;	//	inserts another collection into this collection, it is left to the implementation to determine where the new items are positioned
 				virtual	bool	Remove	(const T* item_remove) = 0;	//	removes the specified item from the collection, the pointer is free to point to any valid item - the item needs not to be a member of the collection, if however so, then exactly the specified item is removed, if not, one item which compares equal to the specified item is removed - if multiple items compare equal to the specified item, the implementation is free to choose one among them, if no matching item is found false is returned
 			};
-
-			/*template<class T>
-			class	TSelection : public IStaticCollection<T>
-			{
-				protected:
-					IStaticCollection<T>* collection;
-					IMatcher<T>* matcher;
-
-				public:
-					template<class TT>	class	TIterator;
-
-					template<class TT>
-					class	TIterator<const TT> : public virtual IStaticIterator<const TT>
-					{
-						protected:
-							TSelection* selection;
-							IStaticIterator<TT>* iterator;
-
-						public:
-							CLASS	TIterator	(TSelection* selection) : selection(selection) {}
-
-							system::memory::TUniquePtr<TIterator>	Clone	() const;
-							bool	FindNext	(const IMatcher<TT>& matcher);
-							bool	FindPrev	(const IMatcher<TT>& matcher);
-							bool	IsValid		() const;
-							const TT&	Item	() const;
-							void	MoveHead	();
-							void	MoveTail	();
-							bool	MoveFirst	();
-							bool	MoveLast	();
-							bool	MoveNext	();
-							bool	MovePrev	();
-
-							usys_t	Read	(TT* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min = (usys_t)-1);
-							usys_t	WriteOut(stream::IOut<TT>& os, usys_t n_items_wo_max, usys_t n_items_wo_min = (usys_t)-1);
-					};
-
-					template<class TT>
-					class	TIterator : public TIterator<const TT>, public virtual IStaticIterator<TT>
-					{
-						public:
-							TT&		Item	();
-							usys_t	Write	(const TT* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
-							usys_t	ReadIn	(stream::IIn<TT>& is, usys_t n_items_ri_max, usys_t n_items_ri_min = (usys_t)-1);
-					};
-
-					CLASS	TSelection	(IStaticCollection<T>* collection, IMatcher<T>* matcher) : collection(collection), matcher(matcher) {}
-
-					TIterator<T>*		CreateIterator	() { return new TIterator<T>(this); }
-					TIterator<const T>*	CreateIterator	() const { return new TIterator<const T>(this); }
-
-					usys_t	Count		() const;
-					bool	CountMin	(usys_t count_min) const;
-					bool	CountMax	(usys_t count_max) const;
-			};*/
 		}
 	}
 }

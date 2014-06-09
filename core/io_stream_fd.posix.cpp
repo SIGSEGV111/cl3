@@ -56,13 +56,13 @@ namespace	cl3
 						{
 							//	we already know that the next read-syscall would block (if it weren't marked as O_NONBLOCK)
 							//	instead of busy-waiting for more data, we use poll() to actually block until more data is available
-							struct ::pollfd pfd = { fd, POLLIN, 0 };
+							struct ::pollfd pfd = { this->fd, POLLIN, 0 };
 							CL3_CLASS_SYSERR(::poll(&pfd, 1, -1));
 							CL3_CLASS_ERROR(pfd.revents != POLLIN, TException, "unknown events were returned by ::poll()");
 						}
 
 						const usys_t n_read_now = n_items_read_max - n_already_read;	//	calculate how much to read at most in this loop iteration
-						const ssys_t status = ::read(fd, arr_items_read + n_already_read, n_read_now);	//	do the actual read-syscall to the kernel
+						const ssys_t status = ::read(this->fd, arr_items_read + n_already_read, n_read_now);	//	do the actual read-syscall to the kernel
 
 						if(status > 0 && errno == 0)
 						{
@@ -106,13 +106,13 @@ namespace	cl3
 						{
 							//	we already know that the next write-syscall would block (if it weren't marked as O_NONBLOCK)
 							//	instead of busy-waiting for more space, we use poll() to actually block until we can write more data
-							struct ::pollfd pfd = { fd, POLLOUT, 0 };
+							struct ::pollfd pfd = { this->fd, POLLOUT, 0 };
 							CL3_CLASS_SYSERR(::poll(&pfd, 1, -1));
 							CL3_CLASS_ERROR(pfd.revents != POLLOUT, TException, "unknown events were returned by ::poll()");
 						}
 
 						const usys_t n_write_now = n_items_write_max - n_already_written;	//	calculate how much to write at most in this loop iteration
-						const ssys_t status = ::write(fd, arr_items_write + n_already_written, n_write_now);	//	do the actual write-syscall to the kernel
+						const ssys_t status = ::write(this->fd, arr_items_write + n_already_written, n_write_now);	//	do the actual write-syscall to the kernel
 
 						if(status > 0 && errno == 0)
 						{
@@ -145,7 +145,7 @@ namespace	cl3
 
 				/******************************************************************/
 
-				CLASS	TFDStream::TFDStream	(fd_t fd) : p_buffer(NULL), sz_buffer(0), fd(fd)
+				CLASS	TFDStream::TFDStream	(fd_t fd) : fd(fd)
 				{
 					CL3_CLASS_ERROR(fd == -1, TException, "file-descriptor is invalid");
 
@@ -158,17 +158,23 @@ namespace	cl3
 
 				/******************************************************************/
 
-				CLASS	TFDStream::TFDStream	(const TFDStream& other) : p_buffer(NULL), sz_buffer(0)
+				CLASS	TFDStream::TFDStream	(const TFDStream& other)
 				{
 					//	duplicate the file-descriptor and while doing so, atomically set O_CLOEXEC flag
 					CL3_CLASS_SYSERR(this->fd = ::fcntl(other.fd, F_DUPFD_CLOEXEC, 0));
+				}
+
+				CLASS	TFDStream::TFDStream	(TFDStream&& other) : fd(other.fd)
+				{
+					other.fd = -1;
 				}
 
 				/******************************************************************/
 
 				CLASS	TFDStream::~TFDStream	()
 				{
-					CL3_CLASS_SYSERR(::close(fd));
+					if(this->fd != -1)
+						CL3_CLASS_SYSERR(::close(this->fd));
 				}
 			}
 		}

@@ -84,27 +84,21 @@ namespace	cl3
 
 						//	from IOut<TBoolProxy>
 						CL3PUBF	usys_t	Write	(const TBoolProxy* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<TBoolProxy>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from IIn<TBoolProxy>
 						CL3PUBF	usys_t	Read	(TBoolProxy* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-						CL3PUBF	uoff_t	WriteOut(io::stream::IOut<TBoolProxy>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from IOut<bool>
 						CL3PUBF	usys_t	Write	(const bool* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<bool>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from IIn<bool>
 						CL3PUBF	usys_t	Read	(bool* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-						CL3PUBF	uoff_t	WriteOut(io::stream::IOut<bool>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from IOut<byte_t>
 						CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from IIn<byte_t>
 						CL3PUBF	usys_t	Read	(byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-						CL3PUBF	uoff_t	WriteOut(io::stream::IOut<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from IIterator
 						CL3PUBF	usys_t	Index	() const CL3_GETTER;
