@@ -25,11 +25,77 @@ namespace
 {
 	using namespace cl3::system::types;
 	using namespace cl3::io::file;
+	using namespace cl3::error;
 
 	TEST(io_file_TFile, create_always)
 	{
-		TFile file("io_file_TFile_create_new.tmp", FILE_ACCESS_READ | FILE_ACCESS_WRITE, FILE_CREATE_ALWAYS);
-		TStream stream(&file);
-		stream.Write((const byte_t*)"hello world\n", 12);
+		{
+			//	create the file once
+			TFile file("io_file_TFile_create_always.tmp", FILE_ACCESS_READ | FILE_ACCESS_WRITE, FILE_CREATE_ALWAYS);
+			TStream stream(&file);
+			stream.Write((const byte_t*)"fail\n", 5);
+		}
+
+		{
+			//	now the file already exists and has to be replaced
+			TFile file("io_file_TFile_create_always.tmp", FILE_ACCESS_READ | FILE_ACCESS_WRITE, FILE_CREATE_ALWAYS);
+			TStream stream(&file);
+			stream.Write((const byte_t*)"hello world\n", 12);
+		}
+	}
+
+	TEST(io_file_TFile, create_never)
+	{
+		{
+			//	create the file
+			TFile file("io_file_TFile_create_never.tmp", FILE_ACCESS_READ | FILE_ACCESS_WRITE, FILE_CREATE_ALWAYS);
+			TStream stream(&file);
+			stream.Write((const byte_t*)"fail\n", 5);
+		}
+
+		{
+			//	now open the file we created
+			TFile file("io_file_TFile_create_never.tmp", FILE_ACCESS_READ | FILE_ACCESS_WRITE, FILE_CREATE_NEVER);
+			TStream stream(&file);
+			stream.Write((const byte_t*)"hello world\n", 12);
+		}
+
+		{
+			//	this must fail
+			bool ok = false;
+			try
+			{
+				TFile file("io_file_TFile_create_never2.tmp", FILE_ACCESS_READ | FILE_ACCESS_WRITE, FILE_CREATE_NEVER);
+			}
+			catch(TException& e)
+			{
+				ok = true;
+			}
+			EXPECT_TRUE(ok);
+		}
+	}
+
+	TEST(io_file_TFile, create_can)
+	{
+		{
+			//	create the file
+			TFile file("io_file_TFile_create_can.tmp", FILE_ACCESS_READ | FILE_ACCESS_WRITE, FILE_CREATE_ALWAYS);
+			TStream stream(&file);
+			stream.Write((const byte_t*)"fail\n", 5);
+		}
+
+		{
+			//	now open the file we created
+			TFile file("io_file_TFile_create_can.tmp", FILE_ACCESS_READ | FILE_ACCESS_WRITE, FILE_CREATE_CAN);
+			TStream stream(&file);
+			stream.Write((const byte_t*)"hello world\n", 12);
+		}
+
+		{
+			//	now try to open a file which does not exist yet
+			TFile file("io_file_TFile_create_can2.tmp", FILE_ACCESS_READ | FILE_ACCESS_WRITE, FILE_CREATE_CAN);
+			TStream stream(&file);
+			stream.Write((const byte_t*)"hello world\n", 12);
+		}
 	}
 }

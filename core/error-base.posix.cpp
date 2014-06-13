@@ -38,7 +38,12 @@ namespace	cl3
 		//	not all versions of strerror_r return the buffer (POSIX and GNU define different return values)
 		static inline char* strerror_helper(char* buffer, int err_no)
 		{
-			strerror_r(err_no, buffer, 256);
+			char* msg = ::strerror_r(err_no, buffer, 256);
+			if(msg < buffer || msg > buffer + 256)	//	check if msg is within buffer, or if a independet char* was returned
+			{
+				::strncpy(buffer, msg, 255);
+				buffer[255] = '\0';
+			}
 			return buffer;
 		}
 
