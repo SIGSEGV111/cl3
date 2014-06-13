@@ -24,7 +24,8 @@
 #include "io_stream.hpp"
 #include "io_stream_fd.hpp"
 #include "io_text_string.hpp"
-#include "io_collection_list.hpp"
+#include "io_collection.hpp"
+#include "io_collection_array.hpp"
 #include "system_time.hpp"
 
 namespace	cl3
@@ -44,9 +45,9 @@ namespace	cl3
 
 			enum	EAccess
 			{
-				FILE_ACCESS_READ,
-				FILE_ACCESS_WRITE,
-				FILE_ACCESS_EXECUTE
+				FILE_ACCESS_READ = 1,
+				FILE_ACCESS_WRITE = 2,
+				FILE_ACCESS_EXECUTE = 4
 			};
 
 			enum	ECreate
@@ -78,13 +79,39 @@ namespace	cl3
 				system::time::TTime ts_access;
 			};
 
+			static const usys_t MAP_COUNT_FULL_FILE = (usys_t)-1;
+			static const usys_t INDEX_HEAD = (usys_t)-1;
+			static const usys_t INDEX_TAIL = (usys_t)-2;
+
+			/************************************************************************/
+
+			class	CL3PUBT	TMapping : public virtual collection::array::TArray<byte_t>
+			{
+				friend class TStream;
+				protected:
+					TFile* file;
+					uoff_t index;
+
+				public:
+					using collection::array::TArray<byte_t>::Count;
+
+					CL3PUBF	void	Remap		(uoff_t new_index, usys_t new_count);
+					CL3PUBF	void	Count		(usys_t) CL3_SETTER;
+					CL3PUBF	void	Index		(uoff_t) CL3_SETTER;
+					CL3PUBF	uoff_t	Index		() const CL3_GETTER;
+
+					CL3PUBF	CLASS	TMapping	(TFile* file, uoff_t index = 0, usys_t count = (usys_t)-1);
+					CL3PUBF	CLASS	TMapping	(TMapping&&);
+					CL3PUBF	CLASS	~TMapping	();
+			};
+
 			/************************************************************************/
 
 			class	CL3PUBT	TStream : public virtual collection::IStaticIterator<byte_t>, public virtual stream::IOut<byte_t>
 			{
 				protected:
-					TFile* file;
-					usys_t index;
+					uoff_t index;
+					TMapping map;
 
 				public:
 					//	from IIn<byte_t>
@@ -118,18 +145,13 @@ namespace	cl3
 
 			/************************************************************************/
 
-			class	CL3PUBT	TMapping
-			{
-			};
-
-			/************************************************************************/
-
 			class	CL3PUBT	TFile : public virtual collection::IStaticCollection<byte_t>
 			{
 				friend class TStream;
 				friend class TMapping;
 				protected:
 					fd_t fd;
+					int access;
 					const event::TEvent<const collection::IStaticCollection<const byte_t>, collection::TOnChangeData<const byte_t> > on_change;
 
 				public:
@@ -163,8 +185,8 @@ namespace	cl3
 					CL3PUBF	const text::string::TString&
 									AbsolutePath		() const;
 					CL3PUBF	void	EnterSubDirectory	(const text::string::TString& name);	//	use ".." to go to the parent directory
-					CL3PUBF	void	EnumEntries			(collection::list::TList<TFileInfo>&) const;
-					CL3PUBF	void	EnumEntries			(collection::list::TList<text::string::TString>&) const;
+					CL3PUBF	void	EnumEntries			(collection::IDynamicCollection<TFileInfo>&) const;
+					CL3PUBF	void	EnumEntries			(collection::IDynamicCollection<text::string::TString>&) const;
 
 					CL3PUBF	CLASS	TDiectoryBrowser	();	//	starts in current working directory
 					CL3PUBF	CLASS	TDiectoryBrowser	(const text::string::TString& path);

@@ -26,6 +26,8 @@
 #include "io_file.hpp"
 
 #include <sys/types.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <poll.h>
 #include <errno.h>
@@ -42,6 +44,66 @@ namespace	cl3
 			using namespace error;
 			using namespace stream;
 
+			void	TMapping::Remap		(uoff_t new_index, usys_t new_count)
+			{
+				const uoff_t sz_file = file->Count();
+				if(new_count == MAP_COUNT_FULL_FILE)
+					new_count = sz_file - new_index;
+
+				const int access	= ((file->access & FILE_ACCESS_READ) != 0 ? PROT_READ : 0)
+									| ((file->access & FILE_ACCESS_WRITE) != 0 ? PROT_WRITE : 0)
+									| ((file->access & FILE_ACCESS_EXECUTE) != 0 ? PROT_EXEC : 0);
+
+				CL3_CLASS_ERROR(new_index + new_count > sz_file, collection::TIndexOutOfBoundsException, index, sz_file);
+
+				if(this->arr_items != NULL && this->arr_items != (byte_t*)-1L)
+					CL3_CLASS_SYSERR(::munmap(this->arr_items, this->n_items));
+
+				if(new_count != 0)
+					CL3_CLASS_SYSERR(this->arr_items = (byte_t*)::mmap(NULL, new_count, access, MAP_SHARED|MAP_NONBLOCK, file->fd, new_index));
+
+				this->n_items = new_count;
+				this->index = new_index;
+			}
+
+			void	TMapping::Count		(usys_t new_count)
+			{
+				this->Remap(this->index, new_count);
+			}
+
+			void	TMapping::Index		(uoff_t new_index)
+			{
+				this->Remap(new_index, this->n_items);
+			}
+
+			uoff_t	TMapping::Index		() const
+			{
+				return index;
+			}
+
+			CLASS	TMapping::TMapping	(TFile* file, uoff_t index, usys_t count) : TArray<const byte_t>(NULL,0), TArray<byte_t>(NULL,0), file(file), index(index)
+			{
+				this->Remap(index, count);
+			}
+
+			CLASS	TMapping::TMapping	(TMapping&& other) : TArray<const byte_t>(NULL,0), TArray<byte_t>(NULL,0), file(other.file), index(other.index)
+			{
+				this->arr_items = other.arr_items;
+				this->n_items = other.n_items;
+				other.arr_items = NULL;
+				other.n_items = 0;
+				other.index = 0;
+				other.file = NULL;
+			}
+
+			CLASS	TMapping::~TMapping	()
+			{
+				if(this->arr_items != NULL && this->arr_items != (byte_t*)-1L)
+					CL3_CLASS_SYSERR(::munmap(this->arr_items, this->n_items));
+			}
+
+			/**********************************************************************/
+
 			usys_t	TStream::Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
 			{
 				if(n_items_read_min == (usys_t)-1)
@@ -52,7 +114,7 @@ namespace	cl3
 
 				while(n_items_read < n_items_read_min)
 				{
-					CL3_CLASS_SYSERR(status = ::pread(this->file->fd, arr_items_read + n_items_read, n_items_read_max - n_items_read, this->index));
+					CL3_CLASS_SYSERR(status = ::pread(this->map.file->fd, arr_items_read + n_items_read, n_items_read_max - n_items_read, this->index));
 					CL3_CLASS_LOGIC_ERROR(status < 0);
 					CL3_CLASS_ERROR(status == 0, TSourceDryException, n_items_read_max, n_items_read_min, n_items_read, 0);
 					this->index += status;
@@ -61,7 +123,7 @@ namespace	cl3
 
 				while(n_items_read < n_items_read_max)
 				{
-					CL3_CLASS_SYSERR(status = ::pread(this->file->fd, arr_items_read + n_items_read, n_items_read_max - n_items_read, this->index));
+					CL3_CLASS_SYSERR(status = ::pread(this->map.file->fd, arr_items_read + n_items_read, n_items_read_max - n_items_read, this->index));
 					CL3_CLASS_LOGIC_ERROR(status < 0);
 					if(status == 0) break;
 					this->index += status;
@@ -81,7 +143,7 @@ namespace	cl3
 
 				while(n_items_written < n_items_write_min)
 				{
-					CL3_CLASS_SYSERR(status = ::pwrite(this->file->fd, arr_items_write + n_items_written, n_items_write_max - n_items_written, this->index));
+					CL3_CLASS_SYSERR(status = ::pwrite(this->map.file->fd, arr_items_write + n_items_written, n_items_write_max - n_items_written, this->index));
 					CL3_CLASS_LOGIC_ERROR(status < 0);
 					CL3_CLASS_ERROR(status == 0, TSinkFloodedException, n_items_write_max, n_items_write_min, n_items_written, 0);
 					this->index += status;
@@ -90,7 +152,7 @@ namespace	cl3
 
 				while(n_items_written < n_items_write_max)
 				{
-					CL3_CLASS_SYSERR(status = ::pwrite(this->file->fd, arr_items_write + n_items_written, n_items_write_max - n_items_written, this->index));
+					CL3_CLASS_SYSERR(status = ::pwrite(this->map.file->fd, arr_items_write + n_items_written, n_items_write_max - n_items_written, this->index));
 					CL3_CLASS_LOGIC_ERROR(status < 0);
 					if(status == 0) break;
 					this->index += status;
@@ -102,16 +164,20 @@ namespace	cl3
 
 			const byte_t&	TStream::Item	() const
 			{
-				CL3_NOT_IMPLEMENTED;
+				CL3_CLASS_ERROR(!IsValid(), TException, "no current item");
+				return this->map[this->index];
 			}
 
 			byte_t&			TStream::Item	()
 			{
-				CL3_NOT_IMPLEMENTED;
+				CL3_CLASS_ERROR(!IsValid(), TException, "no current item");
+				return this->map[this->index];
 			}
 
 			bool	TStream::FindNext	(const collection::IMatcher<byte_t>& matcher)
 			{
+				const_cast<TStream*>(this)->map.Remap(0, MAP_COUNT_FULL_FILE);	//	try Remap()
+				CL3_CLASS_ERROR(!IsValid(), TException, "no current item");
 				CL3_NOT_IMPLEMENTED;
 			}
 
@@ -122,17 +188,17 @@ namespace	cl3
 
 			bool	TStream::IsValid	() const
 			{
-				CL3_NOT_IMPLEMENTED;
+				return this->index >= this->map.Index() && this->index < this->map.Index() + this->map.Count();
 			}
 
 			void	TStream::MoveHead	()
 			{
-				CL3_NOT_IMPLEMENTED;
+				this->index = INDEX_HEAD;
 			}
 
 			void	TStream::MoveTail	()
 			{
-				CL3_NOT_IMPLEMENTED;
+				this->index = INDEX_TAIL;
 			}
 
 			bool	TStream::MoveFirst	()
@@ -165,12 +231,12 @@ namespace	cl3
 				return index;
 			}
 
-			CLASS	TStream::TStream	(TFile* file) : file(file), index(0)
+			CLASS	TStream::TStream	(TFile* file) : index(0), map(file)
 			{
 				//	nothing else to do
 			}
 
-			CLASS	TStream::TStream	(const TStream& other) : file(other.file), index(other.index)
+			CLASS	TStream::TStream	(const TStream& other) : index(other.index), map(other.map.file)
 			{
 				//	nothing else to do
 			}
@@ -187,9 +253,18 @@ namespace	cl3
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			usys_t	TFile::Count		() const
+			usys_t	TFile::Count	() const
 			{
-				CL3_NOT_IMPLEMENTED;
+				struct ::stat s;
+				CL3_CLASS_SYSERR(::fstat(this->fd, &s));
+				return (usys_t)s.st_size;
+
+				/*
+				off64_t off_end, off_current;
+				CL3_CLASS_SYSERR(off_current = lseek64(this->fd, 0, SEEK_CUR));
+				CL3_CLASS_SYSERR(off_end = lseek64(this->fd, 0, SEEK_END));
+				CL3_CLASS_SYSERR(lseek64(this->fd, off_current, SEEK_SET));
+				*/
 			}
 
 			void	TFile::Count	(uoff_t)
@@ -207,18 +282,18 @@ namespace	cl3
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			CLASS	TFile::TFile	(const text::string::TString& name, int access, ECreate create)
+			CLASS	TFile::TFile	(const text::string::TString& name, int access, ECreate create) : fd(-1), access(access)
 			{
 				int flags = O_LARGEFILE|O_NOCTTY;
 				int mode = (access & FILE_ACCESS_EXECUTE) ? 0777 : 0666;
 
-				CL3_CLASS_ERROR( !((access & FILE_ACCESS_READ) || (access & FILE_ACCESS_WRITE)), TException, "file access mode is invalid");
+				CL3_CLASS_ERROR( (access & FILE_ACCESS_READ) == 0 && (access & FILE_ACCESS_WRITE) == 0, TException, "file access mode is invalid");
 
-				if( (access & FILE_ACCESS_READ) && (access & FILE_ACCESS_WRITE) )
+				if( (access & FILE_ACCESS_READ) != 0 && (access & FILE_ACCESS_WRITE) != 0 )
 					flags |= O_RDWR;
-				else if(access & FILE_ACCESS_READ)
+				else if( (access & FILE_ACCESS_READ) != 0)
 					flags |= O_RDONLY;
-				else
+				else if( (access & FILE_ACCESS_WRITE) != 0)
 					flags |= O_WRONLY;
 
 				switch(create)
