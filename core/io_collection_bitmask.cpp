@@ -16,6 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef INSIDE_CL3
+#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#endif
+
 #include "system_memory.hpp"
 //#include "system_types_typeinfo.hpp"
 #include "io_collection_bitmask.hpp"

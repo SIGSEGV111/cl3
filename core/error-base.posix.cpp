@@ -51,6 +51,10 @@ namespace	cl3
 		{
 		}
 
+		CLASS	TSyscallException::TSyscallException	(int err_no) : TException("syscall failed (errno: %d, message: \"%s\")", err_no, strerror_helper(message_buffer, err_no)), err_no(err_no)
+		{
+		}
+
 		CLASS	TSyscallException::TSyscallException	(const TSyscallException& other) : TException(other), err_no(other.err_no)
 		{
 			memcpy(message_buffer, other.message_buffer, sizeof(message_buffer));

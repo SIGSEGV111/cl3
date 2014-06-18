@@ -41,9 +41,13 @@ namespace	cl3
 						fd_t fd;
 
 					public:
+						CL3PUBF	fd_t	FD		() const CL3_GETTER;
+						CL3PUBF	void	FD		(fd_t) CL3_SETTER;
+
 						CL3PUBF	usys_t	Read	(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min = (usys_t)-1);
 						CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
 
+						CL3PUBF	CLASS	TFDStream	();
 						CL3PUBF	CLASS	TFDStream	(fd_t fd);	//	TFDStream takes ownership of the file-descriptor fd
 						CL3PUBF	CLASS	TFDStream	(const TFDStream&);
 						CL3PUBF	CLASS	TFDStream	(TFDStream&&);

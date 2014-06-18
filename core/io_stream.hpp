@@ -93,15 +93,15 @@ namespace	cl3
 			template<class T>
 			struct	ISource
 			{
-				virtual	CL3_SETTER	void		Sink	(IOut<T>* os) = 0;
-				virtual	CL3_GETTER	IOut<T>*	Sink	() const = 0;
+				virtual	void		Sink	(IOut<T>* os) CL3_SETTER = 0;
+				virtual	IOut<T>*	Sink	() const CL3_GETTER = 0;
 			};
 
 			template<class T>
 			struct	ISink
 			{
-				virtual	CL3_SETTER	void		Source	(IIn<T>* is) = 0;
-				virtual	CL3_GETTER	IIn<T>*		Source	() const = 0;
+				virtual	void		Source	(IIn<T>* is) CL3_SETTER = 0;
+				virtual	IIn<T>*		Source	() const CL3_GETTER = 0;
 			};
 		}
 	}

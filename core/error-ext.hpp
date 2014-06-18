@@ -34,7 +34,7 @@ namespace	cl3
 				template<class T>
 				CL3PUBF	CLASS	TArgumentException	(const char* name, const T& value) :
 						TException("function-call argument \"%s\" has invalid value \"%s\"", name,
-									io::text::string::TCString(*io::text::string::Stringify(value).UObjPtr(), io::text::encoding::CODEC_CXX_CHAR).Bytes()) {}
+									io::text::string::TCString(*io::text::string::Stringify(value).UObjPtr(), io::text::encoding::CODEC_CXX_CHAR).Chars()) {}
 
 				CL3PUBF	CLASS	TArgumentException	(const TArgumentException&) : TException(NULL) { CL3_NOT_IMPLEMENTED; }
 				CL3PUBF	CLASS	~TArgumentException	() { CL3_NOT_IMPLEMENTED; }

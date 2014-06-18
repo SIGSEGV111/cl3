@@ -16,6 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef INSIDE_CL3
+#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#endif
+
 #define _LARGEFILE64_SOURCE
 #define _FILE_OFFSET_BITS 64
 
@@ -42,6 +46,31 @@ namespace	cl3
 			{
 				using namespace error;
 
+				fd_t	TFDStream::FD		() const
+				{
+					return this->fd;
+				}
+
+				void	TFDStream::FD		(fd_t new_fd)
+				{
+					if(new_fd == this->fd)
+						return;
+
+					if(this->fd != -1)
+						CL3_CLASS_SYSERR(close(this->fd));
+
+					this->fd = new_fd;
+
+					if(this->fd != -1)
+					{
+						//	read the flags on the file-descriptor and make sure they contain O_NONBLOCK
+						long flags;
+						CL3_CLASS_SYSERR(flags = ::fcntl(this->fd, F_GETFL));
+						if((flags & O_NONBLOCK) == 0)
+							CL3_CLASS_SYSERR(::fcntl(this->fd, F_SETFL, flags | O_NONBLOCK));
+					}
+				}
+
 				/******************************************************************/
 
 				usys_t	TFDStream::Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
@@ -58,7 +87,10 @@ namespace	cl3
 							//	instead of busy-waiting for more data, we use poll() to actually block until more data is available
 							struct ::pollfd pfd = { this->fd, POLLIN, 0 };
 							CL3_CLASS_SYSERR(::poll(&pfd, 1, -1));
-							CL3_CLASS_ERROR(pfd.revents != POLLIN, TException, "unknown events were returned by ::poll()");
+
+							CL3_CLASS_ERROR(pfd.revents & POLLERR || pfd.revents & POLLNVAL, TSyscallException, errno);
+							CL3_CLASS_ERROR((pfd.revents & POLLHUP) != 0 && (pfd.revents & POLLIN) == 0 && n_already_read < n_items_read_min, TSourceDryException, n_items_read_max, n_items_read_min, n_items_read_min - n_already_read, 0);
+							CL3_CLASS_LOGIC_ERROR((pfd.revents & POLLIN) == 0);	//	not error, not HUP, but also no data available? unknown situation...
 						}
 
 						const usys_t n_read_now = n_items_read_max - n_already_read;	//	calculate how much to read at most in this loop iteration
@@ -75,7 +107,7 @@ namespace	cl3
 							if(errno == EAGAIN || errno == EWOULDBLOCK)
 								//	this read would normally have blocked, but didn't since it was marked as O_NONBLOCK
 								b_would_block = true;
-							if(status == 0)
+							else if(status == 0)
 							{
 								CL3_CLASS_ERROR(n_already_read < n_items_read_min, TSourceDryException, n_items_read_max, n_items_read_min, n_items_read_min - n_already_read, 0);
 								break;
@@ -108,7 +140,10 @@ namespace	cl3
 							//	instead of busy-waiting for more space, we use poll() to actually block until we can write more data
 							struct ::pollfd pfd = { this->fd, POLLOUT, 0 };
 							CL3_CLASS_SYSERR(::poll(&pfd, 1, -1));
-							CL3_CLASS_ERROR(pfd.revents != POLLOUT, TException, "unknown events were returned by ::poll()");
+
+							CL3_CLASS_ERROR(pfd.revents & POLLERR || pfd.revents & POLLNVAL, TSyscallException, errno);
+							CL3_CLASS_ERROR(pfd.revents & POLLHUP && n_already_written < n_items_write_min, TSinkFloodedException, n_items_write_max, n_items_write_min, n_items_write_min - n_already_written, 0);
+							CL3_CLASS_LOGIC_ERROR((pfd.revents & POLLOUT) == 0);	//	not error, not HUP, and still cannot write, unknown situation...
 						}
 
 						const usys_t n_write_now = n_items_write_max - n_already_written;	//	calculate how much to write at most in this loop iteration
@@ -145,15 +180,14 @@ namespace	cl3
 
 				/******************************************************************/
 
-				CLASS	TFDStream::TFDStream	(fd_t fd) : fd(fd)
+				CLASS	TFDStream::TFDStream	() : fd(-1)
+				{
+				}
+
+				CLASS	TFDStream::TFDStream	(fd_t fd) : fd(-1)
 				{
 					CL3_CLASS_ERROR(fd == -1, TException, "file-descriptor is invalid");
-
-					//	read the flags on the file-descriptor and make sure they contain O_NONBLOCK
-					long flags;
-					CL3_CLASS_SYSERR(flags = ::fcntl(fd, F_GETFL));
-					if((flags & O_NONBLOCK) == 0)
-						CL3_CLASS_SYSERR(::fcntl(fd, F_SETFL, flags | O_NONBLOCK));
+					FD(fd);
 				}
 
 				/******************************************************************/

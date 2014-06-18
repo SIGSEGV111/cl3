@@ -69,6 +69,8 @@ namespace	cl3
 					virtual	IList&	operator=	(const IStaticCollection<T>& rhs) = 0;
 					virtual	IList&	operator=	(IStaticCollection<T>&& rhs) = 0;
 
+					virtual	T*		Claim		() = 0;	//	takes control of the internal memory of the list
+
 					virtual	void	Shrink		(usys_t n_items_shrink) = 0;
 					virtual	void	Grow		(usys_t n_items_grow, const T& item_init) = 0;
 					virtual	void	Count		(usys_t new_count, const T& item_init = T()) CL3_SETTER = 0;	//	reallocates the list to the specified size, removing items at the end when shrinking and appending new items when enlarging (new items get initialized by copy-constructor from "item_init")
@@ -81,7 +83,7 @@ namespace	cl3
 
 					virtual	void	Append		(const T& item_append) = 0;
 					virtual	void	Append		(const T* arr_items_append, usys_t n_items_append) = 0;
-					virtual	void	Append		(const IStaticCollection<T>& collection) = 0;
+					virtual	void	Append		(const IStaticCollection<const T>& collection) = 0;
 
 					//	removed n_head items at the start of the list and n_tail items at the end of the list
 					virtual	void	Cut			(usys_t n_head, usys_t n_tail) = 0;
@@ -171,7 +173,7 @@ namespace	cl3
 						void	Clear	();
 						void	Add		(const T& item_add);
 						void	Add		(const T* arr_items_add, usys_t n_items_add);
-						void	Add		(const IStaticCollection<T>& collection);
+						void	Add		(const IStaticCollection<const T>& collection);
 						bool	Remove	(const T* item_remove);
 
 						//	from IOut<T>
@@ -189,6 +191,7 @@ namespace	cl3
 						TList<T>&	operator=	(IStaticCollection<T>&& rhs);
 						T&			operator[]	(ssys_t rindex) CL3_GETTER;
 						const T&	operator[]	(ssys_t rindex) const CL3_GETTER;
+						T*			Claim		();
 						T*			ItemPtr		(ssys_t rindex) CL3_GETTER;
 						const T*	ItemPtr		(ssys_t rindex) const CL3_GETTER;
 						void		Shrink		(usys_t n_items_shrink);
@@ -201,7 +204,7 @@ namespace	cl3
 
 						void		Append		(const T& item_append);
 						void		Append		(const T* arr_items_append, usys_t n_items_append);
-						void		Append		(const IStaticCollection<T>& collection);
+						void		Append		(const IStaticCollection<const T>& collection);
 						void		Append		(const TList& list);
 
 						void		Cut			(usys_t n_head, usys_t n_tail);
@@ -215,7 +218,7 @@ namespace	cl3
 						CLASS		TList		();
 						CLASS		TList		(T* arr_items, usys_t n_items, bool claim);
 						CLASS		TList		(const T* arr_items, usys_t n_items);
-						CLASS		TList		(const IStaticCollection<T>&);
+						CLASS		TList		(const IStaticCollection<const T>&);
 						CLASS		TList		(const TList&);
 						CLASS		~TList		();
 				};
@@ -253,37 +256,89 @@ namespace	cl3
 				template<class T>
 				void	TIterator<T>::MoveHead	()
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->index = INDEX_HEAD;
 				}
 
 				template<class T>
 				void	TIterator<T>::MoveTail	()
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->index = INDEX_TAIL;
 				}
 
 				template<class T>
 				bool	TIterator<T>::MoveFirst	()
 				{
-					CL3_NOT_IMPLEMENTED;
+					if(this->list->Count())
+					{
+						this->index = 0;
+						return true;
+					}
+					else
+					{
+						this->index = INDEX_HEAD;
+						return false;
+					}
 				}
 
 				template<class T>
 				bool	TIterator<T>::MoveLast	()
 				{
-					CL3_NOT_IMPLEMENTED;
+					if(this->list->Count())
+					{
+						this->index = this->list->Count() - 1;
+						return true;
+					}
+					else
+					{
+						this->index = INDEX_TAIL;
+						return false;
+					}
 				}
 
 				template<class T>
 				bool	TIterator<T>::MoveNext	()
 				{
-					CL3_NOT_IMPLEMENTED;
+					switch(this->index)
+					{
+						case INDEX_HEAD:
+							return MoveFirst();
+						case INDEX_TAIL:
+							return false;
+						default:
+							if(this->index + 1 < this->list->Count())
+							{
+								this->index++;
+								return true;
+							}
+							else
+							{
+								this->index = INDEX_TAIL;
+								return false;
+							}
+					}
 				}
 
 				template<class T>
 				bool	TIterator<T>::MovePrev	()
 				{
-					CL3_NOT_IMPLEMENTED;
+					switch(this->index)
+					{
+						case INDEX_HEAD:
+							return false;
+						case INDEX_TAIL:
+							return MoveLast();
+						default:
+							if(this->index > 0 && this->list->Count())
+							{
+								this->index--;
+								return true;
+							}
+							else
+							{
+								this->index = INDEX_HEAD;
+								return false;
+							}
+					}
 				}
 
 				//	from IStaticIterator<T>
@@ -339,9 +394,18 @@ namespace	cl3
 				template<class T>
 				void	TIterator<T>::Index		(usys_t new_index)
 				{
-					CL3_CLASS_ERROR(new_index > this->list->Count(), TIndexOutOfBoundsException, new_index, this->list->Count());
-					this->index = new_index;
-					this->FixIndex();
+					switch(new_index)
+					{
+						case INDEX_HEAD:
+						case INDEX_TAIL:
+							this->index = new_index;
+							break;
+						default:
+							CL3_CLASS_ERROR(new_index > this->list->Count(), TIndexOutOfBoundsException, new_index, this->list->Count());
+							this->index = new_index;
+							this->FixIndex();
+							break;
+					}
 				}
 
 				//	from TIterator
@@ -474,7 +538,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				void	TList<T>::Add		(const IStaticCollection<T>& collection)
+				void	TList<T>::Add		(const IStaticCollection<const T>& collection)
 				{
 					Append(collection);
 				}
@@ -568,6 +632,15 @@ namespace	cl3
 					const usys_t index = this->AbsIndex(rindex);
 					CL3_CLASS_ERROR(index >= n_items_current, TIndexOutOfBoundsException, index, n_items_current);
 					return arr_items[index];
+				}
+
+				template<class T>
+				T*			TList<T>::Claim		()
+				{
+					T* tmp = this->arr_items;
+					this->arr_items = NULL;
+					this->n_items_current = 0;
+					return tmp;
 				}
 
 				template<class T>
@@ -702,7 +775,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				void		TList<T>::Append	(const IStaticCollection<T>& collection)
+				void		TList<T>::Append	(const IStaticCollection<const T>& collection)
 				{
 					const TList<T>* list = dynamic_cast<const TList<T>*>(&collection);
 					if(list)
@@ -799,7 +872,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TList<T>::TList		(const IStaticCollection<T>& collection) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), on_change(), guard_resize(false)
+				CLASS		TList<T>::TList		(const IStaticCollection<const T>& collection) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), on_change(), guard_resize(false)
 				{
 					Append(collection);
 				}

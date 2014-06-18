@@ -148,12 +148,13 @@ namespace	cl3
 
 					public:
 						const encoding::ICodec*
-										Codec		() const { return this->codec; }
-						const char*		Chars		() const { return (const char*)this->ItemPtr(0); }
-						const byte_t*	Bytes		() const { return this->ItemPtr(0); }
+										Codec	() const { return this->codec; }
+						const char*		Chars	() const { return (const char*)this->ItemPtr(0); }
 
 						CL3PUBF	TCString&	operator=	(const TCString&);
 						CL3PUBF	TCString&	operator=	(TCString&&);
+
+						using collection::list::TList<byte_t>::Claim;
 
 						CL3PUBF	CLASS	TCString	(const TString&, const encoding::ICodec*);
 						CL3PUBF	CLASS	TCString	(const TCString&);

@@ -23,6 +23,9 @@
 #include "system_types.hpp"
 #include "system_task_synchronization.hpp"
 #include "io_collection.hpp"
+#include "io_stream_fd.hpp"
+#include "io_text_string.hpp"
+#include "system_time.hpp"
 
 namespace	cl3
 {
@@ -41,58 +44,62 @@ namespace	cl3
 			class CL3PUBT TAffinity;
 
 			#if (CL3_OS == CL3_OS_POSIX)
-				typedef int TPID;
+				typedef int pid_t;
 			#elif (CL3_OS == CL3_OS_WINDOWS)
-				typedef u32_t TPID;
+				typedef u32_t pid_t;
 			#else
-				#error "define TPID for this OS"
+				#error "define pid_t for this OS"
 			#endif
 
-			class	TNumaNode : public io::collection::IStaticCollection<TCPU*>
+			enum	EState
+			{
+				STATE_DEAD,
+				STATE_ALIVE_SUSPENDED,
+				STATE_ALIVE_EXECUTING
+			};
+
+			class	CL3PUBT	TNumaNode : public io::collection::IStaticCollection<TCPU*>
 			{
 				public:
 					CL3PUBF	CL3_GETTER	THost&	Host	() const;	//	returns the host machine to which this node belongs
 			};
 
-			class	TCPU
+			class	CL3PUBT	TCPU
 			{
 				public:
 					CL3PUBF	CL3_GETTER	TNumaNode&	NumaNode	() const;	//	returns the numa node on which this CPU is located
 			};
 
-			class	TProcessInfo
+			class	CL3PUBT	TProcessInfo
 			{
 				public:
-					CL3PUBF	CL3_GETTER	TPID		ID		() const;
+					CL3PUBF	CL3_GETTER	pid_t		ID		() const;
 					CL3PUBF CL3_GETTER	TProcess*	Open	() const;	//	open the process for direct access
 			};
 
-			class	THost
+			class	CL3PUBT	THost
 			{
 				public:
 					CL3PUBF	usys_t	EnumProcesses	(io::collection::IDynamicCollection<TProcessInfo>&) const;	//	enumerates all processes on this host and adds them to the list; returns the number of processes added
 			};
 
-			class	TProcess : public TProcessInfo
+			class	CL3PUBT	TProcess : public TProcessInfo
 			{
 				public:
 					CL3PUBF	CL3_GETTER	const char*	Name	() const;	//	name of the process
 					CL3PUBF	CL3_SETTER	void		Name	(const char* new_name);
 					CL3PUBF	CL3_GETTER	const io::collection::IDynamicCollection<const char*>&	CommandlineArguments	() const;	//	commandline arguments (like argv[] in main())
 					CL3PUBF	CL3_GETTER	const io::collection::IDynamicCollection<IThread*>&		Threads	() const;	//	list of threads that belong to this process. for the calling threads process all registered threads are listed (even dead ones), but for other processed only those the operating system knows about are listed (usually only those that are alive)
+
+					CL3PUBF	void	Shutdown	();	//	requests the process to shut down
+					CL3PUBF	void	Suspend		();	//	suspends the execution of the process (suspends all threads)
+					CL3PUBF	void	Resume		();	//	resumes the execution of the process (resumes all threads)
 			};
 
-			class	IThread
+			class	CL3PUBT	IThread
 			{
 				public:
-					enum	EState
-					{
-						STATE_DEAD,
-						STATE_ALIVE_SUSPENDED,
-						STATE_ALIVE_EXECUTING
-					};
-
-					CL3PUBF	static	IThread&	Self	() CL3_GETTER { CL3_NOT_IMPLEMENTED; }	//	returns the IThread& for the calling thread
+					CL3PUBF	static	IThread&	Self	() CL3_GETTER;	//	returns the IThread& for the calling thread
 
 					CL3PUBF	const char*	Name	() const CL3_GETTER;	//	returns the name of the thread
 					CL3PUBF	TProcess&	Process	() CL3_GETTER;	//	returns the process to which the thread belongs
@@ -103,9 +110,9 @@ namespace	cl3
 					CL3PUBF	void*	StackStart	() const CL3_GETTER;	//	start address of the execution stack - might be less than end (stack grows down)
 					CL3PUBF	void*	StackEnd	() const CL3_GETTER;	//	end address of the execution stack - might be bigger than start (stack grows up)
 					CL3PUBF	void*	StackCurrent() const CL3_GETTER;	//	current address of the stack pointer (NOTE: obviously highly volatile if the thread is not suspended)
-					CL3PUBF	usys_t	StackSize	() const CL3_GETTER;	//	returns the size in byte_ts of the stacks size
-					CL3PUBF	usys_t	StackFree	() const CL3_GETTER;	//	returns the size in byte_ts of free (still unused / available) stack space (computed from Current() and End())
-					CL3PUBF	usys_t	StackUsed	() const CL3_GETTER;	//	returns the size in byte_ts of used stack space (computed from Current() and Start())
+					CL3PUBF	usys_t	StackSize	() const CL3_GETTER;	//	returns the size in bytes of the stacks size
+					CL3PUBF	usys_t	StackFree	() const CL3_GETTER;	//	returns the size in bytes of free (still unused / available) stack space (computed from Current() and End())
+					CL3PUBF	usys_t	StackUsed	() const CL3_GETTER;	//	returns the size in bytes of used stack space (computed from Current() and Start())
 
 					CL3PUBF	void	Start		(usys_t sz_stack = -1UL);	//	starts the thread if it is not alive yet, throws if it is already alive
 					CL3PUBF	void	Shutdown	();	//	sets the "request shutdown" flag, throws if the thread is not alive
@@ -115,6 +122,43 @@ namespace	cl3
 				protected:
 					CL3PUBF	void	Name		(const char* new_name) CL3_SETTER;
 					virtual	void	ThreadMain	() = 0;
+			};
+
+			class	CL3PUBT	TProcessRunner : public virtual io::stream::IIn<byte_t>, public virtual io::stream::IOut<byte_t>
+			{
+				private:
+					TProcessRunner(const TProcessRunner&);	//	no copy constructor
+
+				protected:
+					io::text::string::TString exe;
+					io::collection::list::TList<io::text::string::TString> args;
+					io::stream::fd::TFDStream is;
+					io::stream::fd::TFDStream os;
+					pid_t pid_child;
+
+				public:
+					//	from IIn<byte_t>
+					using io::stream::IIn<byte_t>::Read;
+					CL3PUBF	usys_t	Read	(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) CL3_WARN_UNUSED_RESULT;
+
+					//	from IOut<byte_t>
+					using io::stream::IOut<byte_t>::Write;
+					CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+
+					//	from TProcessRunner
+					CL3PUBF	void	Start		();	//	starts the process
+					CL3PUBF	void	Shutdown	();	//	requests the process to shut down
+					CL3PUBF	void	Suspend		();	//	suspends the execution of the process (suspends all threads)
+					CL3PUBF	void	Resume		();	//	resumes the execution of the process (resumes all threads)
+					CL3PUBF	int		Wait		(time::TTime timeout = -1);	//	waits until the process has shut down (this will not send a shutdown request by its own)
+					CL3PUBF	void	Kill		();	//	kills the process, unsaved data might get lost
+					CL3PUBF	EState	State		() const CL3_GETTER;	//	returns the process' current state
+
+					CL3PUBF	void	CloseTX		();
+					CL3PUBF	void	CloseRX		();
+
+					CL3PUBF	CLASS	TProcessRunner	(const io::text::string::TString& exe, const io::collection::IStaticCollection<const io::text::string::TString>& args);
+					CL3PUBF	CLASS	~TProcessRunner	();
 			};
 		}
 	}

@@ -33,6 +33,7 @@ namespace	cl3
 	namespace	util
 	{
 		using namespace system::memory;
+		using namespace system::types;
 
 // 		TUniquePtr<char,UPTR_MALLOC> mprintf(const char* format, ...)
 // 		{
@@ -64,6 +65,17 @@ namespace	cl3
 			TUniquePtr<char,UPTR_MALLOC> cpy(MakeUniquePtr<UPTR_MALLOC>((char*)Alloc(l, NULL)));
 			::memcpy(cpy.UObjPtr(), str, l);
 			return cpy;
+		}
+
+		void	Hexdump	(const void* p_mem, usys_t sz_mem)
+		{
+			for(usys_t i = 0; i < sz_mem; i++)
+			{
+				if(i && (i % 16) == 0 && i + 1 < sz_mem)
+					putchar('\n');
+				printf("%02hhx ", ((unsigned char*)p_mem)[i]);
+			}
+			putchar('\n');
 		}
 	}
 }

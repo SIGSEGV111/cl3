@@ -58,6 +58,7 @@ namespace	cl3
 
 			public:
 				CL3PUBF	CLASS	TSyscallException	();
+				CL3PUBF	CLASS	TSyscallException	(int err_no);
 				CL3PUBF	CLASS	TSyscallException	(const TSyscallException&);
 				CL3PUBF	virtual	~TSyscallException	();
 		};
