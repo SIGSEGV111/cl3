@@ -17,16 +17,26 @@
 */
 
 #include <cl3/core/io_text.hpp>
+#include <cl3/core/io_text_string.hpp>
 #include <cl3/core/system_types.hpp>
 #include <cl3/core/system_types_typeinfo.hpp>
 #include <gtest/gtest.h>
 
 using namespace ::testing;
 
+namespace __
+{
+	template<class A, class B, int x>
+	class	TTest {};
+}
+
 namespace
 {
 	using namespace cl3::system::types;
 	using namespace cl3::system::types::typeinfo;
+	using namespace cl3::io::text;
+	using namespace cl3::io::text::string;
+	using namespace cl3::io::text::encoding;
 
 	struct	TTestException {};
 
@@ -84,7 +94,7 @@ namespace
 
 	//	*************************************************
 
-	TEST(system_types_typeinfo, StandardConstructor)
+	TEST(system_types_typeinfo_TCTTI, StandardConstructor)
 	{
 		volatile FStandardConstructor v;
 
@@ -110,7 +120,7 @@ namespace
 		EXPECT_TRUE(v == NULL);
 	}
 
-	TEST(system_types_typeinfo, Destructor)
+	TEST(system_types_typeinfo_TCTTI, Destructor)
 	{
 		volatile FDestructor v;
 
@@ -133,7 +143,7 @@ namespace
 		EXPECT_TRUE(v != NULL);
 	}
 
-	TEST(system_types_typeinfo, CopyConstructor)
+	TEST(system_types_typeinfo_TCTTI, CopyConstructor)
 	{
 		volatile FCopyConstructor v;
 
@@ -158,7 +168,7 @@ namespace
 
 	//	*************************************************
 
-	TEST(system_types_typeinfo, Print)
+	TEST(system_types_typeinfo_TCTTI, Print)
 	{
 		volatile cl3::io::text::FPrint v;
 
@@ -181,5 +191,61 @@ namespace
 		EXPECT_TRUE(v == NULL);
 
 		EXPECT_THROW(TCTTI<TT_POD>::print(*reinterpret_cast<cl3::io::text::ITextWriter*>(NULL), NULL), TTestException);
+	}
+
+	//	*************************************************
+
+	TEST(system_types_typeinfo_TRTTI, Name)
+	{
+		//	puts(TCString(*TCTTI<TTestException>::rtti.Name(), CODEC_CXX_CHAR).Chars());
+
+		EXPECT_TRUE( *TCTTI<signed char>::rtti.Name() == "s8_t" );
+		EXPECT_TRUE( *TCTTI<unsigned char>::rtti.Name() == "u8_t" );
+
+		EXPECT_TRUE( *TCTTI<signed short>::rtti.Name() == "s16_t" );
+		EXPECT_TRUE( *TCTTI<unsigned short>::rtti.Name() == "u16_t" );
+
+		EXPECT_TRUE( *TCTTI<signed int>::rtti.Name() == "s32_t" );
+		EXPECT_TRUE( *TCTTI<unsigned int>::rtti.Name() == "u32_t" );
+
+		if(sizeof(long) == 4)
+		{
+			EXPECT_TRUE( *TCTTI<signed long>::rtti.Name() == "s32_t" );
+			EXPECT_TRUE( *TCTTI<unsigned long>::rtti.Name() == "u32_t" );
+		}
+		else if(sizeof(long) == 8)
+		{
+			EXPECT_TRUE( *TCTTI<signed long>::rtti.Name() == "s64_t" );
+			EXPECT_TRUE( *TCTTI<unsigned long>::rtti.Name() == "u64_t" );
+		}
+		else
+			throw;
+
+		EXPECT_TRUE( *TCTTI<float>::rtti.Name() == "f32_t" );
+		EXPECT_TRUE( *TCTTI<double>::rtti.Name() == "f64_t" );
+
+		EXPECT_TRUE( *TCTTI<s8_t>::rtti.Name() == "s8_t" );
+		EXPECT_TRUE( *TCTTI<u8_t>::rtti.Name() == "u8_t" );
+
+		EXPECT_TRUE( *TCTTI<s16_t>::rtti.Name() == "s16_t" );
+		EXPECT_TRUE( *TCTTI<u16_t>::rtti.Name() == "u16_t" );
+
+		EXPECT_TRUE( *TCTTI<s32_t>::rtti.Name() == "s32_t" );
+		EXPECT_TRUE( *TCTTI<u32_t>::rtti.Name() == "u32_t" );
+
+		EXPECT_TRUE( *TCTTI<s64_t>::rtti.Name() == "s64_t" );
+		EXPECT_TRUE( *TCTTI<u64_t>::rtti.Name() == "u64_t" );
+
+		EXPECT_TRUE( *TCTTI<f32_t>::rtti.Name() == "f32_t" );
+		EXPECT_TRUE( *TCTTI<f64_t>::rtti.Name() == "f64_t" );
+
+		//	*************************************************
+
+		EXPECT_TRUE( *TCTTI<TTestException>::rtti.Name() == "(anonymous namespace)::TTestException" );
+		EXPECT_TRUE( *TCTTI<TT_POD>::rtti.Name() == "(anonymous namespace)::TT_POD" );
+
+		//	*************************************************
+
+		EXPECT_TRUE( (*TCTTI< __::TTest<signed short,signed char,17L> >::rtti.Name()) == "__::TTest<s16_t, s8_t, 17>" );
 	}
 }

@@ -20,6 +20,10 @@
 #error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
 #endif
 
+#include "system_os.hpp"
+
+#if (CL3_OS == CL3_OS_POSIX)
+
 #include "system_task.hpp"
 
 #include <string.h>
@@ -65,16 +69,14 @@ namespace	cl3
 				return this->os.Write(arr_items_write, n_items_write_max, n_items_write_min);
 			}
 
-			void	TProcessRunner::Start		()
+			void	TProcessRunner::Start		(const io::collection::IStaticCollection<const io::text::string::TString>& args)
 			{
-				CL3_CLASS_ERROR(this->State() != STATE_DEAD, TException, "process is already/still running and cannot be started a second time in parallel");
+				CL3_CLASS_ERROR(this->pid_child != -1, TException, "process is already/still running and cannot be started a second time in parallel");
 
 				int pipe_c2p[2] = {-1,-1};
 				int pipe_p2c[2] = {-1,-1};
-				CL3_CLASS_SYSERR(::pipe(pipe_c2p));
-				CL3_CLASS_SYSERR(::pipe(pipe_p2c));
 
-				TCString cstr_exe(exe, CODEC_CXX_CHAR);
+				TCString cstr_exe(this->exe, CODEC_CXX_CHAR);
 				TList<char*> ls_cstr_args;
 
 				ls_cstr_args.Append((char*)cstr_exe.Chars());
@@ -85,6 +87,8 @@ namespace	cl3
 				this->pid_child = -1;
 				try
 				{
+					CL3_CLASS_SYSERR(::pipe(pipe_c2p));
+					CL3_CLASS_SYSERR(::pipe(pipe_p2c));
 					CL3_CLASS_SYSERR(this->pid_child = fork());
 
 					if(this->pid_child == 0)
@@ -98,7 +102,7 @@ namespace	cl3
 							CL3_CLASS_SYSERR( ::dup2(pipe_p2c[0], STDIN_FILENO ));	//	replace STDIN with read-end of parent-to-child pipe
 							CL3_CLASS_SYSERR(::close(pipe_c2p[1]));	//	close original fd of the pipe
 							CL3_CLASS_SYSERR(::close(pipe_p2c[0]));	//	close original fd of the pipe
-							CL3_CLASS_SYSERR(::execvp((char*)cstr_exe.Chars(), (char**)ls_cstr_args.ItemPtr(0)));
+							CL3_CLASS_SYSERR(::execvp((char*)cstr_exe.Chars(), (char**)ls_cstr_args.ItemPtr(0)));	//	execute the new binary
 						}
 						catch(...)
 						{
@@ -117,14 +121,14 @@ namespace	cl3
 				}
 				catch(...)
 				{
-						::close(pipe_c2p[0]);
-						::close(pipe_c2p[1]);
-						::close(pipe_p2c[0]);
-						::close(pipe_p2c[1]);
-						if(this->pid_child != -1) ::kill(pid_child, SIGTERM);
-						for(usys_t i = 1; i < ls_cstr_args.Count(); i++)
-							system::memory::Free(ls_cstr_args[i]);
-						throw;
+					::close(pipe_c2p[0]);
+					::close(pipe_c2p[1]);
+					::close(pipe_p2c[0]);
+					::close(pipe_p2c[1]);
+					if(this->pid_child != -1) ::kill(pid_child, SIGTERM);
+					for(usys_t i = 1; i < ls_cstr_args.Count(); i++)
+						system::memory::Free(ls_cstr_args[i]);
+					throw;
 				}
 				for(usys_t i = 1; i < ls_cstr_args.Count(); i++)
 					system::memory::Free(ls_cstr_args[i]);
@@ -135,35 +139,33 @@ namespace	cl3
 				CL3_CLASS_LOGIC_ERROR(this->pid_child < -1 || this->pid_child == 0);
 				CL3_CLASS_ERROR(this->pid_child == -1, TException, "the process was already shut down or did never ran in the first place");
 
-				CloseTX();
-				CloseRX();
+				this->CloseTX();
+				this->CloseRX();
 
 				//	send the shutdown signal
 				if(this->pid_child > 0)
-				{
-					if(::kill(pid_child, SIGTERM) == -1)
-						if(errno != ESRCH)
-							CL3_CLASS_SYSERR(-1);
-				}
+					CL3_CLASS_ERROR(::kill(this->pid_child, SIGTERM) == -1 && errno != ESRCH, TSyscallException, errno);
 			}
 
 			void	TProcessRunner::Suspend		()
 			{
 				CL3_CLASS_ERROR(this->pid_child == -1, TException, "the process was already shut down or did never ran in the first place");
-				CL3_CLASS_SYSERR(::kill(pid_child, SIGSTOP));
+				CL3_CLASS_SYSERR(::kill(this->pid_child, SIGSTOP));
 			}
 
 			void	TProcessRunner::Resume		()
 			{
 				CL3_CLASS_ERROR(this->pid_child == -1, TException, "the process was already shut down or did never ran in the first place");
-				CL3_CLASS_SYSERR(::kill(pid_child, SIGCONT));
+				CL3_CLASS_SYSERR(::kill(this->pid_child, SIGCONT));
 			}
 
 			int		TProcessRunner::Wait		(time::TTime timeout)
 			{
+				CL3_CLASS_ERROR(this->pid_child == -1, TException, "the process was already shut down or did never ran in the first place");
 				if(timeout != -1) CL3_NOT_IMPLEMENTED;	//	FIXME
 
-				CL3_CLASS_ERROR(this->pid_child == -1, TException, "the process was already shut down or did never ran in the first place");
+				this->CloseTX();
+				this->CloseRX();
 
 				int status_child;
 				CL3_CLASS_SYSERR(waitpid(this->pid_child, &status_child, 0));
@@ -174,12 +176,14 @@ namespace	cl3
 			void	TProcessRunner::Kill		()
 			{
 				CL3_CLASS_LOGIC_ERROR(this->pid_child < -1 || this->pid_child == 0);
+				CL3_CLASS_ERROR(this->pid_child == -1, TException, "the process was already shut down or did never ran in the first place");
+
+				this->CloseTX();
+				this->CloseRX();
+
+				//	send the kill signal
 				if(this->pid_child > 0)
-				{
-					if(::kill(pid_child, SIGKILL) == -1)
-						if(errno != ESRCH)
-							CL3_CLASS_SYSERR(-1);
-				}
+					CL3_CLASS_ERROR(::kill(this->pid_child, SIGKILL) == -1 && errno != ESRCH, TSyscallException, errno);
 			}
 
 			EState	TProcessRunner::State		() const
@@ -201,16 +205,22 @@ namespace	cl3
 					this->is.FD(-1);
 			}
 
-			CLASS	TProcessRunner::TProcessRunner	(const io::text::string::TString& exe, const io::collection::IStaticCollection<const io::text::string::TString>& args) : exe(exe), args(args), is(), os(), pid_child(-1)
+			CLASS	TProcessRunner::TProcessRunner	(const io::text::string::TString& exe) : exe(exe), is(), os(), pid_child(-1)
 			{
 				//	nothing else to do
 			}
 
 			CLASS	TProcessRunner::~TProcessRunner	()
 			{
-				this->Shutdown();
-				this->Wait();
+				if(this->pid_child != -1)
+				{
+					this->CloseTX();
+					this->CloseRX();
+					this->Wait();
+				}
 			}
 		}
 	}
 }
+
+#endif

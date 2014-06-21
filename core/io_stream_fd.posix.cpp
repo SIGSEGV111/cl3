@@ -28,7 +28,6 @@
 #if (CL3_OS == CL3_OS_POSIX)
 
 #include "io_stream_fd.hpp"
-#include "error-ext.hpp"
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -57,17 +56,19 @@ namespace	cl3
 						return;
 
 					if(this->fd != -1)
+					{
 						CL3_CLASS_SYSERR(close(this->fd));
+						this->fd = -1;
+					}
 
-					this->fd = new_fd;
-
-					if(this->fd != -1)
+					if(new_fd != -1)
 					{
 						//	read the flags on the file-descriptor and make sure they contain O_NONBLOCK
 						long flags;
-						CL3_CLASS_SYSERR(flags = ::fcntl(this->fd, F_GETFL));
+						CL3_CLASS_SYSERR(flags = ::fcntl(new_fd, F_GETFL));
 						if((flags & O_NONBLOCK) == 0)
-							CL3_CLASS_SYSERR(::fcntl(this->fd, F_SETFL, flags | O_NONBLOCK));
+							CL3_CLASS_SYSERR(::fcntl(new_fd, F_SETFL, flags | O_NONBLOCK));
+						this->fd = new_fd;
 					}
 				}
 
@@ -187,7 +188,7 @@ namespace	cl3
 				CLASS	TFDStream::TFDStream	(fd_t fd) : fd(-1)
 				{
 					CL3_CLASS_ERROR(fd == -1, TException, "file-descriptor is invalid");
-					FD(fd);
+					this->FD(fd);
 				}
 
 				/******************************************************************/

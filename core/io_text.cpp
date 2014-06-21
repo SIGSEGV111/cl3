@@ -21,7 +21,7 @@
 #endif
 
 #include "io_text.hpp"
-#include "error-base.hpp"
+#include "error.hpp"
 #include "io_collection_array.hpp"
 
 #include <stdlib.h>

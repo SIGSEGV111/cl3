@@ -64,17 +64,17 @@ namespace	cl3
 			#define	CL3_OS_POSIX	1	//	Linux, Unix, SunOS, MacOS ...
 			#define	CL3_OS_WINDOWS	2	//	Windows 9x, NT, mobile, etc...
 
-			#define	CL3_OS_TYPE_POSIX_OTHER	0
-			#define	CL3_OS_TYPE_POSIX_LINUX	1
-			#define	CL3_OS_TYPE_POSIX_MACOS	2
+			#define	CL3_OS_DERIVATIVE_POSIX_OTHER	0
+			#define	CL3_OS_DERIVATIVE_POSIX_LINUX	1
+			#define	CL3_OS_DERIVATIVE_POSIX_MACOS	2
 
-			#define	CL3_OS_TYPE_WINDOWS_OTHER	0
-			#define	CL3_OS_TYPE_WINDOWS_9X		1
-			#define	CL3_OS_TYPE_WINDOWS_NT		2
+			#define	CL3_OS_DERIVATIVE_WINDOWS_OTHER	0
+			#define	CL3_OS_DERIVATIVE_WINDOWS_9X	1
+			#define	CL3_OS_DERIVATIVE_WINDOWS_NT	2
 
 			#ifdef __linux__
 				#define	CL3_OS		CL3_OS_POSIX
-				#define	CL3_OS_TYPE CL3_OS_TYPE_POSIX_LINUX
+				#define	CL3_OS_DERIVATIVE CL3_OS_DERIVATIVE_POSIX_LINUX
 				#define CL3_EXPORT_TLS
 			#endif
 
@@ -91,13 +91,13 @@ namespace	cl3
 				#error "unknown operating system"
 			#endif
 
-			#ifndef CL3_OS_TYPE
+			#ifndef CL3_OS_DERIVATIVE
 				#if (CL3_OS == CL3_OS_WINDOWS)
-					#define	CL3_OS_TYPE	CL3_OS_TYPE_WINDOWS_NT
+					#define	CL3_OS_DERIVATIVE	CL3_OS_DERIVATIVE_WINDOWS_NT
 				#endif
 
 				#if (CL3_OS == CL3_OS_POSIX)
-					#define CL3_OS_TYPE CL3_OS_TYPE_POSIX_OTHER
+					#define CL3_OS_DERIVATIVE CL3_OS_DERIVATIVE_POSIX_OTHER
 				#else
 					#error "unknown operating system variant"
 				#endif
@@ -112,21 +112,8 @@ namespace	cl3
 				#define	PATHNAME_SEPARATOR	'\\'
 				#define	DEBUGGER_BREAK	IFDBG(CL2_DBGLVL_BASIC, _CrtDbgBreak())
 			#endif
-
-			#ifndef PATH_MAX
-				#define	PATH_MAX	256
-			#endif
 		}
 	}
 }
-
-/*#if (CL3_OS == CL3_OS_POSIX)
-	#include <unistd.h>
-	#include <signal.h>
-#endif
-
-#if (CL3_OS == CL3_OS_WINDOWS)
-	#include <WinSock2.h>
-#endif*/
 
 #endif

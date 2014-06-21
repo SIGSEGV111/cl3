@@ -74,49 +74,54 @@ namespace	cl3
 
 				static const TReplace arr_replace[] =
 				{
-					{"char", "s8"},
 					{"unsigned char", "u8_t"},
-					{"signed char", "s8"},
+					{"signed char", "s8_t"},
+					{"char", ( (char)-1 > (char)0 ? "u8_t" : "s8_t") },
 
-					{"short", "s16"},
-					{"unsigned short", "u16"},
+					{"unsigned short", "u16_t"},
+					{"signed short", "s16_t"},
+					{"short", "s16_t"},
 
-					{"int", "s32"},
 					{"unsigned int", "u32_t"},
+					{"signed int", "s32_t"},
+					{"int", "s32_t"},
 
-					{"long", sizeof(long) == 4 ? "s32" : sizeof(long) == 8 ? "s64" : NULL },
-					{"unsigned long", sizeof(long) == 4 ? "u32_t" : sizeof(long) == 8 ? "u64" : NULL },
+					{"unsigned long long", sizeof(long long) == 4 ? "u32_t" : sizeof(long) == 8 ? "u64_t" : NULL },
+					{"signed long long", sizeof(long long) == 4 ? "s32_t" : sizeof(long) == 8 ? "s64_t" : NULL },
+					{"long long", sizeof(long long) == 4 ? "s32_t" : sizeof(long) == 8 ? "s64_t" : NULL },
 
-					{"__int64", "s64"},
-					{"unsigned __int64", "u64"},
+					{"unsigned long", sizeof(long) == 4 ? "u32_t" : sizeof(long) == 8 ? "u64_t" : NULL },
+					{"signed long", sizeof(long) == 4 ? "s32_t" : sizeof(long) == 8 ? "s64_t" : NULL },
+					{"long", sizeof(long) == 4 ? "s32_t" : sizeof(long) == 8 ? "s64_t" : NULL },
 
-					{"long long", "s64"},
-					{"unsigned long long", "u64"},
+					{"unsigned __int8", "u8_t"},
+					{"signed __int8", "s8_t"},
+					{"__int8", "s8_t"},
 
-					{"float", sizeof(float) == 4 ? "f32" : sizeof(float) == 8 ? "f64" : NULL },
-					{"double", sizeof(double) == 4 ? "f32" : sizeof(double) == 8 ? "f64" : NULL },
+					{"unsigned __int16", "u16_t"},
+					{"signed __int16", "s16_t"},
+					{"__int16", "s16_t"},
 
-					{"wchar_t", sizeof(wchar_t) == 1 ? "u8_t" : sizeof(wchar_t) == 2 ? "u16" : sizeof(wchar_t) == 4 ? "u32_t" : NULL },
+					{"unsigned __int32", "u32_t"},
+					{"signed __int32", "s32_t"},
+					{"__int32", "s32_t"},
 
-					{NULL,NULL}
+					{"unsigned __int64", "u64_t"},
+					{"signed __int64", "s64_t"},
+					{"__int64", "s64_t"},
+
+					{"float", sizeof(float) == 4 ? "f32_t" : sizeof(float) == 8 ? "f64_t" : NULL },
+					{"double", sizeof(double) == 4 ? "f32_t" : sizeof(double) == 8 ? "f64_t" : NULL },
+
+					{"wchar_t", sizeof(wchar_t) == 1 ? "u8_t" : sizeof(wchar_t) == 2 ? "u16_t" : sizeof(wchar_t) == 4 ? "u32_t" : NULL },
 				};
 
-				/*static	const char*	FindReplace	(const char* token, usys_t token_length)
+				TUniquePtr<TString> UnifyTypename(const TString& oldname)
 				{
-					for(usys_t i = 0; arr_replace[i].wrong != NULL; i++)
-					{
-						if(strlen(arr_replace[i].wrong) == token_length)
-						{
-							if(strncmp(arr_replace[i].wrong, token, token_length) == 0)
-								return arr_replace[i].correct;
-						}
-					}
-					return NULL;
-				}*/
-
-				TStringUPtr UnifyTypename(const TString& oldname)
-				{
-					CL3_NOT_IMPLEMENTED;
+					auto ret = MakeUniquePtr(new TString(oldname));
+					for(usys_t i = 0; i < sizeof(arr_replace) / sizeof(TReplace); i++)
+						ret->Replace(arr_replace[i].wrong, arr_replace[i].correct);
+					return ret;
 
 					/*TStringUPtr newname = MakeUniquePtr(new TString());
 

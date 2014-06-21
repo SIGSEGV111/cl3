@@ -21,7 +21,6 @@
 #endif
 
 #include "system_memory.hpp"
-#include "error-ext.hpp"
 #include "system_types_typeinfo.hpp"
 #include <malloc.h>
 
@@ -144,7 +143,7 @@ namespace	cl3
 
 			CLASS	TRestrictAllocator::TRestrictAllocator	(IDynamicAllocator* allocator, usys_t sz_limit) : allocator(allocator), sz_limit(sz_limit), sz_current(0)
 			{
-				CL3_CLASS_ARGUMENT_ERROR(allocator == NULL || allocator == (IDynamicAllocator*)this, allocator, "TRestrictAllocator requires an upcall allocator, which cannot be NULL and also not the TRestrictAllocator itself");
+				CL3_CLASS_ERROR(allocator == NULL || allocator == (IDynamicAllocator*)this, TException, "TRestrictAllocator requires an upcall allocator, which cannot be NULL and also not the TRestrictAllocator itself");
 			}
 
 			CLASS	TRestrictAllocator::~TRestrictAllocator	()

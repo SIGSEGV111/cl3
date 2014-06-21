@@ -19,7 +19,7 @@
 #ifndef	_include_cl3_core_event_hpp_
 #define	_include_cl3_core_event_hpp_
 
-#include "error-base.hpp"
+#include "error.hpp"
 #include "system_compiler.hpp"
 #include "io_collection_basiclist.hpp"
 

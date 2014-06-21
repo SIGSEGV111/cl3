@@ -25,7 +25,7 @@
 #if (CL3_OS == CL3_OS_POSIX)
 
 #include "system_time.hpp"
-#include "error-base.hpp"
+#include "error.hpp"
 #include "system_types_typeinfo.hpp"
 
 #include <sys/time.h>

@@ -36,6 +36,7 @@ namespace
 	using namespace cl3::system::types;
 	using namespace cl3::system::task;
 	using namespace cl3::system::memory;
+	using namespace cl3::system::time;
 	using namespace cl3::io::text;
 	using namespace cl3::io::file;
 	using namespace cl3::io::text::string;
@@ -47,10 +48,9 @@ namespace
 	TEST(system_task_TProcessRunner, cat)
 	{
 		byte_t buffer[32];
-		TList<TString> args;
 
 		{
-			TProcessRunner runner("cat", args);
+			TProcessRunner runner("cat");
 
 			runner.Start();
 			runner.Write((const byte_t*)"Hello World\n", 12);
@@ -69,9 +69,9 @@ namespace
 		args.Append("--fast");
 
 		{
-			TProcessRunner runner("gzip", args);
+			TProcessRunner runner("gzip");
 
-			runner.Start();
+			runner.Start(args);
 			runner.Write((const byte_t*)"Hello World\n", 12);
 			runner.CloseTX();
 			runner.Read(buffer, 32);
@@ -80,9 +80,9 @@ namespace
 
 		{
 			args.Append("--decompress");
-			TProcessRunner runner("gzip", args);
+			TProcessRunner runner("gzip");
 
-			runner.Start();
+			runner.Start(args);
 			runner.Write(buffer, 32);
 			runner.CloseTX();
 			runner.Read(buffer, 12);
@@ -92,12 +92,32 @@ namespace
 		EXPECT_TRUE(memcmp(buffer, "Hello World\n", 12) == 0);
 	}
 
-	TEST(system_task_TProcessRunner, psax)
+	TEST(system_task_TProcessRunner, sleep)
 	{
 		TList<TString> args;
-		args.Append("-c");
-		args.Append("ps ax 1>&2");
-		TProcessRunner runner("bash", args);
-		runner.Start();
+		args.Append("0.1");
+		TProcessRunner runner("sleep");
+
+		const TTime t_start = TTime::Now();
+		runner.Start(args);
+		runner.Wait();
+		const TTime t_end = TTime::Now();
+		const TTime t_delta = t_end - t_start;
+		EXPECT_TRUE(t_delta.ConvertToI(TIME_UNIT_MILLISECONDS) >= 100);
+	}
+
+	TEST(system_task_TProcessRunner, kill)
+	{
+		TList<TString> args;
+		args.Append("0.1");
+		TProcessRunner runner("sleep");
+
+		const TTime t_start = TTime::Now();
+		runner.Start(args);
+		runner.Kill();
+		runner.Wait();
+		const TTime t_end = TTime::Now();
+		const TTime t_delta = t_end - t_start;
+		EXPECT_TRUE(t_delta.ConvertToI(TIME_UNIT_MILLISECONDS) < 50);
 	}
 }

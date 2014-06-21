@@ -131,7 +131,6 @@ namespace	cl3
 
 				protected:
 					io::text::string::TString exe;
-					io::collection::list::TList<io::text::string::TString> args;
 					io::stream::fd::TFDStream is;
 					io::stream::fd::TFDStream os;
 					pid_t pid_child;
@@ -146,7 +145,7 @@ namespace	cl3
 					CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
 
 					//	from TProcessRunner
-					CL3PUBF	void	Start		();	//	starts the process
+					CL3PUBF	void	Start		(const io::collection::IStaticCollection<const io::text::string::TString>& args = io::collection::list::TList<io::text::string::TString>());	//	starts the process
 					CL3PUBF	void	Shutdown	();	//	requests the process to shut down
 					CL3PUBF	void	Suspend		();	//	suspends the execution of the process (suspends all threads)
 					CL3PUBF	void	Resume		();	//	resumes the execution of the process (resumes all threads)
@@ -157,7 +156,7 @@ namespace	cl3
 					CL3PUBF	void	CloseTX		();
 					CL3PUBF	void	CloseRX		();
 
-					CL3PUBF	CLASS	TProcessRunner	(const io::text::string::TString& exe, const io::collection::IStaticCollection<const io::text::string::TString>& args);
+					CL3PUBF	CLASS	TProcessRunner	(const io::text::string::TString& exe);
 					CL3PUBF	CLASS	~TProcessRunner	();
 			};
 		}

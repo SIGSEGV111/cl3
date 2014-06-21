@@ -21,7 +21,7 @@
 
 #include "system_compiler.hpp"
 #include "system_types.hpp"
-#include "error-base.hpp"
+#include "error.hpp"
 #include "context.hpp"
 
 extern "C" void free(void*) throw();

@@ -24,7 +24,7 @@
 
 #if (CL3_OS == CL3_OS_POSIX)
 
-#include "error-base.hpp"
+#include "error.hpp"
 #include "system_task_synchronization.hpp"
 #include "system_task.hpp"
 #include <pthread.h>

@@ -25,7 +25,7 @@
 #if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_CLANG)
 
 #include "system_types_typeinfo.hpp"
-#include "error-base.hpp"
+#include "error.hpp"
 #include "io_text_string.hpp"
 
 #include <cxxabi.h>
@@ -46,7 +46,7 @@ namespace	cl3
 				TStringUPtr TRTTI::Name() const
 				{
 					TString name;
-					CL3_CLASS_ERROR((name = abi::__cxa_demangle(sys_type_info->name(), NULL, NULL, NULL)).Count() == 0, error::TException, "name decoding failed");
+					CL3_CLASS_ERROR((name = MakeUniquePtr<UPTR_MALLOC>(abi::__cxa_demangle(sys_type_info->name(), NULL, NULL, NULL)).UObjPtr()).Count() == 0, error::TException, "name decoding failed");
 					return UnifyTypename(name);
 				}
 			}

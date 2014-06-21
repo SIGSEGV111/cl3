@@ -33,12 +33,12 @@ namespace	cl3
 {
 	namespace	io
 	{
-		using namespace collection::list;
-
 		namespace	text
 		{
 			namespace	string
 			{
+				using namespace collection;
+				using namespace collection::list;
 				using namespace system::memory;
 				using namespace encoding;
 
@@ -255,7 +255,7 @@ namespace	cl3
 					return n_times_max;
 				}
 
-				usys_t		TString::Find		(const TString& str_find, usys_t idx_start, collection::list::EDirection direction) const
+				usys_t		TString::Find		(const TString& str_find, usys_t idx_start, collection::EDirection direction) const
 				{
 					if(this->Count() < str_find.Count())
 						return (usys_t)-1;

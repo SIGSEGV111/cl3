@@ -21,7 +21,7 @@
 
 #include "io_collection.hpp"
 #include "io_collection_array.hpp"
-#include "error-base.hpp"
+#include "error.hpp"
 #include "system_memory.hpp"
 #include "util.hpp"
 //#include "system_types_typeinfo.hpp"
@@ -43,12 +43,6 @@ namespace	cl3
 
 				template<class T> struct IList;
 				template<class T> class TList;
-
-				enum	EDirection
-				{
-					DIRECTION_FORWARD,
-					DIRECTION_BACKWARD
-				};
 
 				template<class T>
 				struct	CL3PUBT	IIterator : public virtual IDynamicIterator<T>

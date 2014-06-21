@@ -26,7 +26,7 @@
 #include "util.hpp"
 #include "system_memory.hpp"
 #include "system_types_typeinfo.hpp"
-#include "error-base.hpp"
+#include "error.hpp"
 
 namespace	cl3
 {

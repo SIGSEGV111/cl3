@@ -38,13 +38,7 @@ namespace	cl3
 
 			namespace	string
 			{
-				class	TString;
-				typedef	system::memory::TUniquePtr<TString>	TStringUPtr;
-
-				CL3PUBF	TStringUPtr	Stringify	(FPrint print, const void* object);
-
-				template<class T>
-				TStringUPtr			Stringify	(const T& object);
+				class TString;
 			}
 		}
 
@@ -260,7 +254,7 @@ namespace	cl3
 					usys_t sz_bytes;	//	size of the datatype in byte_ts
 					const std::type_info* sys_type_info;	//	pointer to the type-info structure provided by C++ typeid()
 
-					CL3PUBF	CL3_GETTER	io::text::string::TStringUPtr Name() const;	//	platform independet human-readable type-name
+					CL3PUBF	CL3_GETTER	system::memory::TUniquePtr<io::text::string::TString> Name() const;	//	platform independet human-readable type-name
 					CL3PUBF	CL3_GETTER	u32_t Hash() const;	//	32bit hashcode based on type-name
 				};
 
@@ -399,22 +393,6 @@ namespace	cl3
 				template<class T> const FDeserialize			TCTTI<T&>::deserialize_instance	= NULL;
 				template<class T> const FDeserialize			TCTTI<T&>::deserialize_ctor		= NULL;
 				template<class T> const TRTTI TCTTI<T&>::rtti = { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, serialize, deserialize_instance, deserialize_ctor, sizeof(T), &typeid(T) };
-			}
-		}
-	}
-
-	//FIXME
-	namespace	io
-	{
-		namespace	text
-		{
-			namespace	string
-			{
-				template<class T>
-				TStringUPtr	Stringify	(const T& object)
-				{
-					return Stringify(system::types::typeinfo::TCTTI<T>::print, &object);
-				}
 			}
 		}
 	}

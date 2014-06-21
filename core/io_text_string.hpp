@@ -109,7 +109,7 @@ namespace	cl3
 						CL3PUBF	usys_t		Replace		(const TString& str_find, const TString& str_replace, usys_t n_times_max = (usys_t)-1);	//	returns the number of times of which <find> was replaced with <replace>
 
 						//	find substring
-						CL3PUBF	usys_t		Find		(const TString& str_find, usys_t idx_start = 0, collection::list::EDirection direction = collection::list::DIRECTION_FORWARD) const CL3_GETTER;
+						CL3PUBF	usys_t		Find		(const TString& str_find, usys_t idx_start = 0, collection::EDirection direction = collection::DIRECTION_FORWARD) const CL3_GETTER;
 
 						//	return parts of the string
 						CL3PUBF	TString		Left		(usys_t n_chars) const CL3_GETTER;

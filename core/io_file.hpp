@@ -79,7 +79,7 @@ namespace	cl3
 				system::time::TTime ts_access;
 			};
 
-			static const usys_t MAP_COUNT_FULL_FILE = (usys_t)-1;
+			static const usys_t MAP_COUNT_FULLFILE = (usys_t)-1;
 			static const usys_t INDEX_HEAD = (usys_t)-1;
 			static const usys_t INDEX_TAIL = (usys_t)-2;
 

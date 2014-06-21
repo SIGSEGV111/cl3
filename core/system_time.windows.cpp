@@ -25,7 +25,7 @@
 #if (CL3_OS == CL3_OS_WINDOWS)
 
 #include "system_time.hpp"
-#include "error-base.hpp"
+#include "error.hpp"
 #include <windows.h>
 
 using namespace cl3::system::error;

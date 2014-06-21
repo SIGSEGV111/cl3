@@ -28,6 +28,7 @@
 #if (CL3_OS == CL3_OS_POSIX)
 
 #include "io_file.hpp"
+#include "io_collection_list.hpp"
 
 #include <sys/types.h>
 #include <sys/mman.h>
@@ -51,7 +52,7 @@ namespace	cl3
 			void	TMapping::Remap		(uoff_t new_index, usys_t new_count)
 			{
 				const uoff_t sz_file = file->Count();
-				if(new_count == MAP_COUNT_FULL_FILE)
+				if(new_count == MAP_COUNT_FULLFILE)
 					new_count = sz_file - new_index;
 
 				const int access	= ((file->access & FILE_ACCESS_READ) != 0 ? PROT_READ : 0)
@@ -180,19 +181,39 @@ namespace	cl3
 
 			bool	TStream::FindNext	(const collection::IMatcher<byte_t>& matcher)
 			{
-				const_cast<TStream*>(this)->map.Remap(0, MAP_COUNT_FULL_FILE);	//	try Remap()
 				CL3_CLASS_ERROR(!IsValid(), TException, "no current item");
-				CL3_NOT_IMPLEMENTED;
+				collection::list::TList<usys_t> matches;
+				matcher.Match(collection::DIRECTION_FORWARD, this->map.ItemPtr(this->index), this->map.Count() - this->index, matches, 1);
+				if(matches.Count())
+				{
+					this->index = matches[0];
+					return true;
+				}
+				else
+					return false;
 			}
 
 			bool	TStream::FindPrev	(const collection::IMatcher<byte_t>& matcher)
 			{
-				CL3_NOT_IMPLEMENTED;
+				CL3_CLASS_ERROR(!IsValid(), TException, "no current item");
+				collection::list::TList<usys_t> matches;
+				matcher.Match(collection::DIRECTION_BACKWARD, this->map.ItemPtr(0), this->index, matches, 1);
+				if(matches.Count())
+				{
+					this->index = matches[0];
+					return true;
+				}
+				else
+					return false;
 			}
 
 			bool	TStream::IsValid	() const
 			{
-				return this->index >= this->map.Index() && this->index < this->map.Index() + this->map.Count();
+				if(this->index == INDEX_HEAD || this->index == INDEX_TAIL)
+					return false;
+				if(this->index >= this->map.Index() + this->map.Count())
+					const_cast<TStream*>(this)->map.Remap(0, MAP_COUNT_FULLFILE);
+				return this->index < this->map.Index() + this->map.Count();
 			}
 
 			void	TStream::MoveHead	()
@@ -207,22 +228,98 @@ namespace	cl3
 
 			bool	TStream::MoveFirst	()
 			{
-				CL3_NOT_IMPLEMENTED;
+				const_cast<TStream*>(this)->map.Remap(0, MAP_COUNT_FULLFILE);
+
+				if(this->map.Count())
+				{
+					this->index = 0;
+					return true;
+				}
+				else
+				{
+					this->index = INDEX_HEAD;
+					return false;
+				}
 			}
 
 			bool	TStream::MoveLast	()
 			{
-				CL3_NOT_IMPLEMENTED;
+				const_cast<TStream*>(this)->map.Remap(0, MAP_COUNT_FULLFILE);
+
+				if(this->map.Count())
+				{
+					this->index = this->map.Count() - 1;
+					return true;
+				}
+				else
+				{
+					this->index = INDEX_TAIL;
+					return false;
+				}
 			}
 
 			bool	TStream::MoveNext	()
 			{
-				CL3_NOT_IMPLEMENTED;
+				switch(this->index)
+				{
+					case INDEX_HEAD:
+						return MoveFirst();
+					case INDEX_TAIL:
+						return false;
+					default:
+						if(this->index + 1 < this->map.Count())
+						{
+							this->index++;
+							return true;
+						}
+						else
+						{
+							const_cast<TStream*>(this)->map.Remap(0, MAP_COUNT_FULLFILE);
+
+							if(this->index + 1 < this->map.Count())
+							{
+								this->index++;
+								return true;
+							}
+							else
+							{
+								this->index = INDEX_TAIL;
+								return false;
+							}
+						}
+				}
 			}
 
 			bool	TStream::MovePrev	()
 			{
-				CL3_NOT_IMPLEMENTED;
+				switch(this->index)
+				{
+					case INDEX_HEAD:
+						return false;
+					case INDEX_TAIL:
+						return MoveLast();
+					default:
+						if(this->index > 0)
+						{
+							if(this->index - 1 < this->map.Count())
+							{
+								this->index--;
+								return true;
+							}
+							else
+							{
+								const_cast<TStream*>(this)->map.Remap(0, MAP_COUNT_FULLFILE);
+
+								if(this->index - 1 < this->map.Count())
+								{
+									this->index--;
+									return true;
+								}
+							}
+						}
+						this->index = INDEX_HEAD;
+						return false;
+				}
 			}
 
 			void	TStream::Index		(uoff_t new_index)

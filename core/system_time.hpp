@@ -60,7 +60,7 @@ namespace	cl3
 				TIME_UNIT_DAYS    = 86400
 				//	no month, year, etc. because they are not constant
 			};
-	
+
 			enum	EClock
 			{
 				TIME_CLOCK_TAI,			//	counted on earth by an monotonic atomic clock (https://en.wikipedia.org/wiki/International_Atomic_Time)
@@ -73,45 +73,45 @@ namespace	cl3
 				TIME_CLOCK_THREAD_USER,	//	as above but only the portion spent in user-mode
 				TIME_CLOCK_THREAD_SYS	//	as above but only the portion spent in kernel-mode
 			};
-	
+
 			class	CL3PUBT	TTime	//	always unixtime / UTC
 			{
 				private:
 					void	Normalize	();
-	
+
 				protected:
 					s64_t	sec;	//	seconds since 1970-01-01 00:00 +0000 (UTC)
 					s64_t	asec;	//	atto-seconds (10^-18) of current second
-	
+
 				public:
 					inline	s64_t	Seconds		() const { return sec; }
 					inline	s64_t	Attoseconds	() const { return asec; }
-	
+
 					CL3PUBF	TTime&	operator+=	(const TTime op);
 					CL3PUBF	TTime&	operator-=	(const TTime op);
 					CL3PUBF	TTime	operator+	(const TTime op) const;
 					CL3PUBF	TTime	operator-	(const TTime op) const;
-	
+
 					CL3PUBF	bool	operator>	(const TTime op) const;
 					CL3PUBF	bool	operator<	(const TTime op) const;
 					CL3PUBF	bool	operator>=	(const TTime op) const;
 					CL3PUBF	bool	operator<=	(const TTime op) const;
 					CL3PUBF	bool	operator==	(const TTime op) const;
 					CL3PUBF	bool	operator!=	(const TTime op) const;
-	
+
 					CL3PUBF	s64_t			ConvertToI	(EUnit unit) const;
 					CL3PUBF	double			ConvertToF	(EUnit unit) const;
 					CL3PUBF	static TTime	ConvertFrom	(EUnit unit, s64_t value);
 					CL3PUBF	static TTime	ConvertFrom	(EUnit unit, double value);
-	
-					CL3PUBF	static	TTime	Now			(EClock clock);
+
+					CL3PUBF	static	TTime	Now			(EClock clock = TIME_CLOCK_REALTIME);
 					CL3PUBF	s64_t			UnixTimeI	() const;
 					CL3PUBF	double			UnixTimeF	() const;
 					CL3PUBF	static	TTime	UnixTime	(double unixtime);
 					CL3PUBF	static	TTime	UnixTime	(s64_t unixtime);
 					CL3PUBF	operator timespec			() const;
 					CL3PUBF	operator timeval			() const;
-	
+
 					inline	CLASS	TTime	() : sec(0), asec(0) {}
 					CL3PUBF	CLASS	TTime	(double Seconds);
 					CL3PUBF	CLASS	TTime	(s64_t seconds, s64_t attoseconds);

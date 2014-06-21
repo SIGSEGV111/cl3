@@ -22,7 +22,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include "error-base.hpp"
+#include "error.hpp"
 #include "util.hpp"
 //#include "system_types_typeinfo.hpp"
 #include "system_memory.hpp"
