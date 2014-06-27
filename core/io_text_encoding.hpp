@@ -20,7 +20,7 @@
 #define	_include_cl3_core_io_text_encoding_hpp_
 
 #include "io_text.hpp"
-#include "event.hpp"
+#include "system_task_synchronization.hpp"
 
 namespace	cl3
 {
@@ -75,10 +75,10 @@ namespace	cl3
 				class	CL3PUBT	IEncoder : public stream::ISource<byte_t>, public virtual stream::IOut<TUTF32>
 				{
 					protected:
-						event::TEvent<IEncoder,TTranscodeException> on_error;
+						system::task::synchronization::TEvent<IEncoder,TTranscodeException> on_error;
 
 					public:
-						inline	const event::TEvent<IEncoder,TTranscodeException>&	OnError	() const { return on_error; }
+						inline	const system::task::synchronization::TEvent<IEncoder,TTranscodeException>&	OnError	() const { return on_error; }
 						virtual	void	Reset	() = 0;
 						virtual	CLASS	~IEncoder	() {}
 				};
@@ -86,10 +86,10 @@ namespace	cl3
 				class	CL3PUBT	IDecoder : public stream::ISource<TUTF32>, public virtual stream::IOut<byte_t>
 				{
 					protected:
-						event::TEvent<IDecoder,TTranscodeException> on_error;
+						system::task::synchronization::TEvent<IDecoder,TTranscodeException> on_error;
 
 					public:
-						inline	const event::TEvent<IDecoder,TTranscodeException>&	OnError	() const { return on_error; }
+						inline	const system::task::synchronization::TEvent<IDecoder,TTranscodeException>&	OnError	() const { return on_error; }
 						virtual	void	Reset	() = 0;
 						virtual	CLASS	~IDecoder	() {}
 				};

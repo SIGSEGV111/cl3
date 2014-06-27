@@ -139,7 +139,7 @@ namespace	cl3
 						T* arr_items;
 						usys_t n_items_current;
 						usys_t n_items_prealloc;
-						const event::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> > on_change;
+						const system::task::synchronization::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> > on_change;
 						bool guard_resize;
 
 						void	Prealloc	(usys_t n_items_prealloc_min);
@@ -151,7 +151,7 @@ namespace	cl3
 						using array::IArray<T>::Read;
 
 						//	from IObservable
-						const event::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> >&	OnChange	() const CL3_GETTER;
+						const system::task::synchronization::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> >&	OnChange	() const CL3_GETTER;
 
 						//	from IStaticCollection
 						system::memory::TUniquePtr<IStaticIterator<T> >			CreateStaticIterator	() CL3_WARN_UNUSED_RESULT;
@@ -455,7 +455,7 @@ namespace	cl3
 
 				//	from IObservable
 				template<class T>
-				const event::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> >&
+				const system::task::synchronization::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> >&
 						TList<T>::OnChange	() const
 				{
 					return on_change;
