@@ -20,7 +20,7 @@
 #define	_include_cl3_core_io_collection_hpp_
 
 #include "io_stream.hpp"
-#include "system_task_synchronization.hpp"
+#include "event.hpp"
 
 namespace	cl3
 {
@@ -160,7 +160,7 @@ namespace	cl3
 			/************************************************************************/
 
 			template<class T>
-			struct	CL3PUBT	IStaticCollection<const T> : virtual system::task::synchronization::IObservable< const IStaticCollection<const T>, TOnChangeData<const T> >
+			struct	CL3PUBT	IStaticCollection<const T> : virtual event::IObservable< const IStaticCollection<const T>, TOnChangeData<const T> >
 			{
 				virtual	system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT = 0;
 

@@ -125,11 +125,11 @@ namespace	cl3
 					protected:
 						T* arr_items;
 						usys_t n_items;
-						const system::task::synchronization::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> > on_change;
+						const event::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> > on_change;
 
 					public:
 						//	from IObservable
-						const system::task::synchronization::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> >&	OnChange	() const CL3_GETTER;
+						const event::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> >&	OnChange	() const CL3_GETTER;
 
 						//	from IStaticCollection
 						system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT;
@@ -391,7 +391,7 @@ namespace	cl3
 				/************************************************************************/
 
 				template<class T>
-				const system::task::synchronization::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> >&	TArray<const T>::OnChange	() const
+				const event::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> >&	TArray<const T>::OnChange	() const
 				{
 					return this->on_change;
 				}

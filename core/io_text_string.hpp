@@ -117,7 +117,7 @@ namespace	cl3
 						CL3PUBF	TString		Mid			(usys_t index, usys_t n_chars) const CL3_GETTER;
 
 						//	remove/append whitespace (or other characters)
-						CL3PUBF	void		Trim		(const IStaticCollection<const TUTF32>& collection = *COLLECTION_WHITESPACE, int position = POSITION_HEAD | POSITION_TAIL);
+						CL3PUBF	void		Trim		(const IStaticCollection<const TUTF32>& collection = *whitespace, int position = POSITION_HEAD | POSITION_TAIL);
 						CL3PUBF	void		Pad			(EPosition position, usys_t n_pad, TUTF32 chr_pad = ' ');
 
 						CL3PUBF	TString&	ToLower		();

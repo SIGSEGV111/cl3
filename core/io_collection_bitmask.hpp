@@ -114,11 +114,11 @@ namespace	cl3
 					protected:
 						byte_t* arr_bits;
 						usys_t n_bits;
-						system::task::synchronization::TEvent<const IStaticCollection<const TBoolProxy>, TOnChangeData<const TBoolProxy> > on_change;
+						event::TEvent<const IStaticCollection<const TBoolProxy>, TOnChangeData<const TBoolProxy> > on_change;
 
 					public:
 						//	from IObservable
-						inline const system::task::synchronization::TEvent<const IStaticCollection<const TBoolProxy>, TOnChangeData<const TBoolProxy> >& OnChange() const CL3_GETTER
+						inline const event::TEvent<const IStaticCollection<const TBoolProxy>, TOnChangeData<const TBoolProxy> >& OnChange() const CL3_GETTER
 						{ return on_change; }
 
 						//	from IStaticCollection

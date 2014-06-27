@@ -93,15 +93,16 @@ namespace	cl3
 
 				CLASS	TMutex::TMutex	()
 				{
-					this->owner = NULL;
-					this->n_times = 0;
+					CL3_CLASS_LOGIC_ERROR(&task::IThread::Self() == NULL);
+					this->owner = &task::IThread::Self();
+					this->n_times = 1;
 					pthread_mutexattr_t attr;
 					CL3_CLASS_PTHREAD_ERROR(pthread_mutexattr_init(&attr));
 					CL3_CLASS_PTHREAD_ERROR(pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK));
 					CL3_CLASS_PTHREAD_ERROR(pthread_mutexattr_setrobust(&attr, PTHREAD_MUTEX_ROBUST));
 					CL3_CLASS_PTHREAD_ERROR(pthread_mutex_init(&this->mtx, &attr));
 					CL3_CLASS_PTHREAD_ERROR(pthread_mutexattr_destroy(&attr));
-					this->Acquire();
+					CL3_CLASS_PTHREAD_ERROR(pthread_mutex_lock(&this->mtx));
 				}
 
 				CLASS	TMutex::~TMutex	()

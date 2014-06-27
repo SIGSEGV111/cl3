@@ -87,6 +87,7 @@ namespace	cl3
 				#define	CL3_WARN_UNUSED_RESULT	__attribute__((warn_unused_result))
 				#define CL3_UNREACHABLE	__builtin_unreachable()
 				#define	CL3_LIKELY(expr)	__builtin_expect((expr), true)
+				#define	CL3_UNLIKELY(expr)	__builtin_expect((expr), false)
 
 				template<class T> inline static T AtomicAdd(T& var, T add) { return __sync_fetch_and_add(&var,add); }
 				template<class T> inline static T AtomicSub(T& var, T sub) { return __sync_fetch_and_sub(&var,sub); }
@@ -133,6 +134,7 @@ namespace	cl3
 				#define	CL3_WARN_UNUSED_RESULT	__checkReturn
 				#define	CL3_UNREACHABLE		__assume(0)
 				#define	CL3_LIKELY(expr)	(expr)
+				#define	CL3_UNLIKELY(expr)	(expr)
 
 				template<class T> inline static T AtomicAdd (T& var, T add) { if(sizeof(T) == 4) return (T)InterlockedExchangeAdd((unsigned int*)var, (unsigned int) add); else if(sizeof(T) == 8) return (T)InterlockedExchangeAdd64((LONG64*)var, (LONG64) add); }
 				template<class T> inline static T AtomicSub (T& var, T sub) { if(sizeof(T) == 4) return (T)InterlockedExchangeAdd((unsigned int*)var, (unsigned int)-sub); else if(sizeof(T) == 8) return (T)InterlockedExchangeAdd64((LONG64*)var, (LONG64)-sub); }

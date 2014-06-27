@@ -81,7 +81,7 @@ namespace	cl3
 
 		#define	CL3_CLASS_LOGIC_ERROR(expression)	do \
 			{ \
-				if(expression) \
+				if(CL3_UNLIKELY( (expression) )) \
 				{ \
 					cl3::error::TLogicException le; \
 					le.Set(this, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
@@ -91,7 +91,7 @@ namespace	cl3
 
 		#define	CL3_NONCLASS_LOGIC_ERROR(expression)	do \
 			{ \
-				if(expression) \
+				if(CL3_UNLIKELY( (expression) )) \
 				{ \
 					cl3::error::TLogicException le; \
 					le.Set(NULL, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
@@ -110,7 +110,7 @@ namespace	cl3
 			//	general purpose error macro
 			#define	CL3_NONCLASS_ERROR(expression, TExceptionClass, ...) do \
 			{ \
-				if(expression) \
+				if(CL3_UNLIKELY( (expression) )) \
 				{ \
 					TExceptionClass exception(__VA_ARGS__); \
 					exception.Set(NULL, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
@@ -121,7 +121,7 @@ namespace	cl3
 			//	use this macro inside non-static member functions - but only if the object is still valid when the exception is caught
 			#define	CL3_CLASS_ERROR(expression, TExceptionClass, ...) do \
 			{ \
-				if(expression) \
+				if(CL3_UNLIKELY( (expression) )) \
 				{ \
 					TExceptionClass exception(__VA_ARGS__); \
 					exception.Set(this, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
@@ -165,7 +165,7 @@ namespace	cl3
 		#if (CL3_OS == CL3_OS_POSIX)
 			#define	CL3_NONCLASS_SYSERR(expression) do \
 			{ \
-				if( (long)(expression) == -1L ) \
+				if( CL3_UNLIKELY((long)(expression) == -1L) ) \
 				{ \
 					cl3::error::TSyscallException exception; \
 					exception.Set(NULL, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
@@ -175,7 +175,7 @@ namespace	cl3
 
 			#define	CL3_CLASS_SYSERR(expression) do \
 			{ \
-				if( (long)(expression) == -1L ) \
+				if( CL3_UNLIKELY((long)(expression) == -1L) ) \
 				{ \
 					cl3::error::TSyscallException exception; \
 					exception.Set(this, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
@@ -185,9 +185,10 @@ namespace	cl3
 
 			#define	CL3_NONCLASS_PTHREAD_ERROR(expression) do \
 			{ \
-				if( (expression) != 0 ) \
+				int err_no; \
+				if( CL3_UNLIKELY( (err_no = (expression)) != 0 ) ) \
 				{ \
-					cl3::error::TSyscallException exception; \
+					cl3::error::TSyscallException exception(err_no); \
 					exception.Set(NULL, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
 					throw exception; \
 				} \
@@ -195,9 +196,10 @@ namespace	cl3
 
 			#define	CL3_CLASS_PTHREAD_ERROR(expression) do \
 			{ \
-				if( (expression) != 0 ) \
+				int err_no; \
+				if( CL3_UNLIKELY( (err_no = (expression)) != 0 ) ) \
 				{ \
-					cl3::error::TSyscallException exception; \
+					cl3::error::TSyscallException exception(err_no); \
 					exception.Set(this, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
 					throw exception; \
 				} \

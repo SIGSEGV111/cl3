@@ -50,6 +50,29 @@ namespace	cl3
 
 			static CL3_THREAD IThread* th_self = NULL;
 
+			namespace
+			{
+				struct	TMainThread : IThread
+				{
+					void	ThreadMain	()
+					{
+						CL3_CLASS_LOGIC_ERROR(true);
+					}
+
+					CLASS	TMainThread	()
+					{
+						th_self = this;
+					}
+
+					CLASS	~TMainThread()
+					{
+						th_self = NULL;
+					}
+				};
+
+				static TMainThread th_main;
+			}
+
 			IThread&	IThread::Self	()
 			{
 				return *th_self;

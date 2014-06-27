@@ -35,15 +35,13 @@ namespace	cl3
 
 	namespace	io
 	{
-		//	DIGITS = DIGITS DIGIT | DIGIT
-		//	NUMBER = [PLUS_SIGN | MINUS_SIGN] DIGITS
 		namespace	text
 		{
 			using namespace stream;
 
 			static const TUTF32 ARR_WHITESPACE_DEFAULT[] = { 0x0020U, 0x0009U, 0x000AU, 0x000CU, 0x000DU, 0x000BU };
 			static const collection::array::TArray<const TUTF32> COLLECTION_WHITESPACE_DEFAULT(ARR_WHITESPACE_DEFAULT, sizeof(ARR_WHITESPACE_DEFAULT) / sizeof(TUTF32));
-			const collection::IStaticCollection<const TUTF32>* COLLECTION_WHITESPACE = &COLLECTION_WHITESPACE_DEFAULT;
+			const collection::IStaticCollection<const TUTF32>* whitespace = &COLLECTION_WHITESPACE_DEFAULT;
 
 			//	*** TUTF32 ***
 
