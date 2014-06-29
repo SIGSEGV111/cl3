@@ -24,6 +24,7 @@
 #include "system_os.hpp"
 #include "system_time.hpp"
 #include "io_collection_basiclist.hpp"
+#include "event.hpp"
 
 #if (CL3_OS == CL3_OS_POSIX)
 #include <pthread.h>
@@ -74,24 +75,25 @@ namespace	cl3
 					MUTEX_SHARED
 				};
 
-				struct	IMutex
+				struct	CL3PUBT	IMutex
 				{
-					virtual	void	Acquire		(EAccess) = 0;
-					virtual	bool	Acquire		(time::TTime timeout, EAccess) CL3_WARN_UNUSED_RESULT = 0;
-					virtual	void	Release		(EAccess) = 0;
-					virtual	bool	HasAcquired	(EAccess) const CL3_GETTER = 0;	//	returns wheter or not, the calling thread has acquired this mutex
-					inline	bool	TryAcquire	(EAccess access) CL3_WARN_UNUSED_RESULT { return Acquire(time::TTime(0,0), access); }
+					virtual	void	Acquire		() = 0;
+					virtual	bool	Acquire		(time::TTime timeout) CL3_WARN_UNUSED_RESULT = 0;
+					virtual	void	Release		() = 0;
+					virtual	bool	HasAcquired	() const CL3_GETTER = 0;	//	returns wheter or not, the calling thread has acquired this mutex
+					inline	bool	TryAcquire	() CL3_WARN_UNUSED_RESULT { return Acquire(time::TTime(0,0)); }
 				};
 
-// 				struct	ISignal : IMutex
-// 				{
-// 					virtual	void	Raise	() = 0;
-// 					virtual	void	WaitFor	() = 0;
-// 					virtual	bool	WaitFor	(time::TTime timeout) CL3_WARN_UNUSED_RESULT = 0;
-//
-// 					CL3PUBF	static	void	WaitFor	(const collection::IStaticCollection<ISignal*>& signals);
-// 					CL3PUBF	static	bool	WaitFor	(const collection::IStaticCollection<ISignal*>& signals, time::TTime timeout) CL3_WARN_UNUSED_RESULT;
-// 				};
+				struct	CL3PUBT	ISignal : IMutex
+				{
+					virtual	fd_t	Handle	() const CL3_GETTER = 0;
+					virtual	void	Raise	() = 0;
+					virtual	void	WaitFor	() = 0;
+					virtual	bool	WaitFor	(time::TTime timeout) CL3_WARN_UNUSED_RESULT = 0;
+
+					inline	static	void	WaitFor	(const collection::IStaticCollection<ISignal*>& signals) { CL3_NONCLASS_LOGIC_ERROR(!ISignal::WaitFor(signals, time::TTime(-1,0))); }
+					CL3PUBF	static	bool	WaitFor	(const collection::IStaticCollection<ISignal*>& signals, time::TTime timeout) CL3_WARN_UNUSED_RESULT;
+				};
 
 				class	CL3PUBT	TMutex : public IMutex
 				{
@@ -107,16 +109,16 @@ namespace	cl3
 						unsigned n_times;
 
 					public:
-						CL3PUBF	void	Acquire		(EAccess access = MUTEX_ACCESS_READWRITE);
-						CL3PUBF	bool	Acquire		(time::TTime timeout, EAccess access = MUTEX_ACCESS_READWRITE) CL3_WARN_UNUSED_RESULT;
-						CL3PUBF	void	Release		(EAccess access = MUTEX_ACCESS_READWRITE);
-						CL3PUBF	bool	HasAcquired	(EAccess access = MUTEX_ACCESS_READWRITE) const CL3_GETTER;
+						CL3PUBF	void	Acquire		();
+						CL3PUBF	bool	Acquire		(time::TTime timeout) CL3_WARN_UNUSED_RESULT;
+						CL3PUBF	void	Release		();
+						CL3PUBF	bool	HasAcquired	() const CL3_GETTER;
 
 						CL3PUBF	CLASS	TMutex	();
 						CL3PUBF	CLASS	~TMutex	();
 				};
 
-				class	CL3PUBT	TRWMutex : public IMutex
+				/*class	CL3PUBT	TRWMutex : public IMutex
 				{
 					private:
 						IThread* owner;
@@ -138,13 +140,35 @@ namespace	cl3
 
 						CL3PUBF	CLASS	TRWMutex	();
 						CL3PUBF	CLASS	~TRWMutex	();
+				};*/
+
+				class	CL3PUBT	TSignal : public ISignal
+				{
 				};
 
-				template<ESharing sharing, class T>
-				class	TInterlocked;
+				template<class TSender, class TData>
+				class	CL3PUBT	TSignalEventReceiver : public event::TEvent<TSender,TData>::IReceiver, public ISignal
+				{
+					protected:
+						void	OnRaise	(event::TEvent<TSender,TData>& event, TSender& sender, TData data)
+						{
+						}
+
+					public:
+						inline	void	Acquire		(EAccess);
+						inline	bool	Acquire		(time::TTime timeout, EAccess) CL3_WARN_UNUSED_RESULT;
+						inline	void	Release		(EAccess);
+						inline	bool	HasAcquired	(EAccess) const CL3_GETTER;
+						inline	void	Raise		();
+						inline	void	WaitFor		();
+						inline	bool	WaitFor		(time::TTime timeout) CL3_WARN_UNUSED_RESULT;
+				};
+
+				/*template<ESharing sharing, class T>
+				class	CL3PUBT	TInterlocked;
 
 				template<class T>
-				class	TInterlocked<MUTEX_PRIVATE,T> : public TRWMutex
+				class	CL3PUBT	TInterlocked<MUTEX_PRIVATE,T> : public TRWMutex
 				{
 					protected:
 						T object;
@@ -159,7 +183,7 @@ namespace	cl3
 				};
 
 				template<class T>
-				class	TInterlocked<MUTEX_SHARED,T> : public IMutex
+				class	CL3PUBT	TInterlocked<MUTEX_SHARED,T> : public IMutex
 				{
 					protected:
 						TRWMutex* mutex;
@@ -178,19 +202,18 @@ namespace	cl3
 
 						CLASS	TInterlocked	(TRWMutex* mutex) : mutex(mutex), object() { CL3_CLASS_LOGIC_ERROR(mutex == NULL); }
 						CLASS	TInterlocked	(TRWMutex* mutex, const T& object) : mutex(mutex), object(object) { CL3_CLASS_LOGIC_ERROR(mutex == NULL); }
-				};
+				};*/
 
-				class	TInterlockedRegion
+				class	CL3PUBT	TInterlockedRegion
 				{
 					private:
-						EAccess access;
 						IMutex* mutex;
 
 						CLASS	TInterlockedRegion	(const TInterlockedRegion&);
 
 					public:
-						CLASS	TInterlockedRegion	(IMutex* mutex, EAccess access) : access(access), mutex(mutex) { mutex->Acquire(access); }
-						CLASS	~TInterlockedRegion	() { mutex->Release(access); }
+						CLASS	TInterlockedRegion	(IMutex* mutex) : mutex(mutex) { mutex->Acquire(); }
+						CLASS	~TInterlockedRegion	() { mutex->Release(); }
 				};
 
 				#define	CL3_CLASS_INTERLOCKED_REGION_BEGIN	{ cl3::system::task::synchronization::TInterlockedRegion __interlocked_region(&this->Mutex());
@@ -199,7 +222,7 @@ namespace	cl3
 				#define	CL3_NONCLASS_INTERLOCKED_REGION_BEGIN(mutex)	{ cl3::system::task::synchronization::TInterlockedRegion __interlocked_region(&(mutex));
 				#define	CL3_NONCLASS_INTERLOCKED_REGION_END				}
 
-				class	TRecurseGuard
+				class	CL3PUBT	TRecurseGuard
 				{
 					protected:
 						bool* var;

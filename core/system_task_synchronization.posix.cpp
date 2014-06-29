@@ -40,7 +40,7 @@ namespace	cl3
 			{
 				using namespace error;
 
-				void	TMutex::Acquire		(EAccess)
+				void	TMutex::Acquire		()
 				{
 					IThread* const self = &task::IThread::Self();
 					if(this->owner == self)
@@ -49,7 +49,7 @@ namespace	cl3
 						CL3_CLASS_PTHREAD_ERROR(pthread_mutex_lock(&this->mtx));
 				}
 
-				bool	TMutex::Acquire		(time::TTime timeout, EAccess)
+				bool	TMutex::Acquire		(time::TTime timeout)
 				{
 					IThread* const self = &task::IThread::Self();
 					if(this->owner == self)
@@ -76,7 +76,7 @@ namespace	cl3
 					}
 				}
 
-				void	TMutex::Release		(EAccess)
+				void	TMutex::Release		()
 				{
 					CL3_CLASS_ERROR(this->owner != &task::IThread::Self(), TException, "mutex is not owned by the calling thread");
 					if(--this->n_times == 0)
@@ -86,7 +86,7 @@ namespace	cl3
 					}
 				}
 
-				bool	TMutex::HasAcquired	(EAccess) const
+				bool	TMutex::HasAcquired	() const
 				{
 					return this->owner == &task::IThread::Self();
 				}

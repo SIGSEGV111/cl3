@@ -50,6 +50,13 @@ namespace	cl3
 				FILE_ACCESS_EXECUTE = 4
 			};
 
+			enum	ESharing
+			{
+				MAP_SHARING_RW,			//	the mappings are kept coherent at all times
+				MAP_SHARING_COW,		//	create a simple copy-on-write mapping. changes to the original file or mapping might be visible in the copy
+				MAP_SHARING_SNAPSHOT	//	take a snapshot-copy from the original mapping and employ copy-on-write semantics afterwards, changes to the original mapping are not visible in the copy
+			};
+
 			enum	ECreate
 			{
 				FILE_CREATE_NEVER,	//	never create the file - the file must exist or the call fails
@@ -88,6 +95,8 @@ namespace	cl3
 			class	CL3PUBT	TMapping : public virtual collection::array::TArray<byte_t>
 			{
 				friend class TStream;
+				private:
+					CLASS	TMapping	(const TMapping&);
 				protected:
 					TFile* file;
 					uoff_t index;
@@ -103,6 +112,8 @@ namespace	cl3
 					CL3PUBF	CLASS	TMapping	(TFile* file, uoff_t index = 0, usys_t count = (usys_t)-1);
 					CL3PUBF	CLASS	TMapping	(TMapping&&);
 					CL3PUBF	CLASS	~TMapping	();
+
+					CL3PUBF	static	TMapping	CreateSnapshot	(const TMapping& source);
 			};
 
 			/************************************************************************/
@@ -184,7 +195,7 @@ namespace	cl3
 				public:
 					CL3PUBF	const text::string::TString&
 									AbsolutePath		() const;
-					CL3PUBF	void	EnterSubDirectory	(const text::string::TString& name);	//	use ".." to go to the parent directory
+					CL3PUBF	void	EnterDirectory		(const text::string::TString& name);	//	use ".." to go to the parent directory
 					CL3PUBF	void	EnumEntries			(collection::IDynamicCollection<TFileInfo>&) const;
 					CL3PUBF	void	EnumEntries			(collection::IDynamicCollection<text::string::TString>&) const;
 

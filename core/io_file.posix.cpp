@@ -96,9 +96,11 @@ namespace	cl3
 				this->arr_items = other.arr_items;
 				this->n_items = other.n_items;
 				other.arr_items = NULL;
-				other.n_items = 0;
-				other.index = 0;
-				other.file = NULL;
+			}
+
+			CLASS	TMapping::TMapping	(const TMapping& other) : TArray<const byte_t>(NULL,0), TArray<byte_t>(NULL,0), file(other.file), index(other.index)
+			{
+				CL3_NOT_IMPLEMENTED;
 			}
 
 			CLASS	TMapping::~TMapping	()
