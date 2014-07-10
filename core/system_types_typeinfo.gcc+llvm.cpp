@@ -46,7 +46,7 @@ namespace	cl3
 				TStringUPtr TRTTI::Name() const
 				{
 					TString name;
-					CL3_CLASS_ERROR((name = MakeUniquePtr<UPTR_MALLOC>(abi::__cxa_demangle(sys_type_info->name(), NULL, NULL, NULL)).UObjPtr()).Count() == 0, error::TException, "name decoding failed");
+					CL3_CLASS_ERROR((name = MakeUniquePtr<UPTR_MALLOC>(abi::__cxa_demangle(sys_type_info->name(), NULL, NULL, NULL)).Object()).Count() == 0, error::TException, "name decoding failed");
 					return UnifyTypename(name);
 				}
 			}

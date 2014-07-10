@@ -68,7 +68,7 @@ namespace	cl3
 						TUniquePtr<IDecoder> d = CODEC_CXX_CHAR->CreateDecoder();
 						TUniquePtr<collection::IStaticIterator<const char> > it = collection.CreateStaticIterator();
 						d->Sink(this);
-						d->ReadIn(*it.UObjPtr());
+						d->ReadIn(*it.Object());
 					*/
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -460,7 +460,7 @@ namespace	cl3
 					if(print)
 					{
 						ret = system::memory::MakeUniquePtr(new TString());
-						print(*ret.UObjPtr(), object);
+						print(*ret.Object(), object);
 					}
 					else
 					{

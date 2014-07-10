@@ -48,6 +48,52 @@ namespace	cl3
 			using namespace error;
 			using namespace memory;
 
+			/**************************************************************************************/
+
+			static TProcess proc_self;
+
+			const char*	TProcess::Name	() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			void		TProcess::Name	(const char* new_name)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			const io::collection::IDynamicCollection<const char*>&	TProcess::CommandlineArguments	() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			const io::collection::IDynamicCollection<IThread*>&		TProcess::Threads	() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			void		TProcess::Shutdown	()
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			void		TProcess::Suspend	()
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			void		TProcess::Resume	()
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			TProcess*	TProcess::Self		()
+			{
+				return &proc_self;
+			}
+
+			/**************************************************************************************/
+
 			static CL3_THREAD IThread* th_self = NULL;
 
 			namespace
@@ -73,9 +119,9 @@ namespace	cl3
 				static TMainThread th_main;
 			}
 
-			IThread&	IThread::Self	()
+			IThread*	IThread::Self	()
 			{
-				return *th_self;
+				return th_self;
 			}
 
 			/**************************************************************************************/

@@ -29,6 +29,7 @@
 
 #include "io_file.hpp"
 #include "io_collection_list.hpp"
+#include "system_task.hpp"
 
 #include <sys/types.h>
 #include <sys/mman.h>
@@ -370,25 +371,15 @@ namespace	cl3
 				*/
 			}
 
-			void	TFile::Count	(uoff_t)
+			void	TFile::Count	(uoff_t new_count)
 			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			TString	TFile::Name		() const
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			CLASS	TFile::TFile	()
-			{
-				CL3_NOT_IMPLEMENTED;
+				CL3_CLASS_SYSERR(::ftruncate(this->fd, new_count));
 			}
 
 			CLASS	TFile::TFile	(const text::string::TString& name, int access, ECreate create) : fd(-1), access(access)
 			{
-				int flags = O_LARGEFILE|O_NOCTTY;
-				int mode = (access & FILE_ACCESS_EXECUTE) ? 0777 : 0666;
+				int flags = O_LARGEFILE | O_NOCTTY | O_CLOEXEC;
+				const int mode = (access & FILE_ACCESS_EXECUTE) ? 0777 : 0666;
 
 				CL3_CLASS_ERROR( (access & FILE_ACCESS_READ) == 0 && (access & FILE_ACCESS_WRITE) == 0, TException, "file access mode is invalid");
 
@@ -417,18 +408,18 @@ namespace	cl3
 				{
 					for(;;)
 					{
-						this->fd = ::open(cstr.Chars(), flags, mode);
+						this->fd = ::openat(TDirectoryBrowser::ThreadCurrentWorkingDirectory().Handle(), cstr.Chars(), flags, mode);
 						if(this->fd != -1)
 							break;
 
 						if(errno == EEXIST)
-							CL3_CLASS_SYSERR(::unlink(cstr.Chars()));
+							CL3_CLASS_SYSERR(::unlinkat(TDirectoryBrowser::ThreadCurrentWorkingDirectory().Handle(), cstr.Chars(), 0));
 						else
 							CL3_CLASS_SYSERR(-1);
 					}
 				}
 				else
-					CL3_CLASS_SYSERR(this->fd = ::open(cstr.Chars(), flags, mode));
+					CL3_CLASS_SYSERR(this->fd = ::openat(TDirectoryBrowser::ThreadCurrentWorkingDirectory().Handle(), cstr.Chars(), flags, mode));
 			}
 
 			CLASS	TFile::TFile	(TFile&& other) : fd(other.fd)
@@ -440,6 +431,114 @@ namespace	cl3
 			{
 				if(this->fd != -1)
 					CL3_CLASS_SYSERR(::close(this->fd));
+			}
+
+			/**********************************************************************/
+
+			fd_t	TDirectoryBrowser::Handle				() const
+			{
+				return this->fd;
+			}
+
+			void	TDirectoryBrowser::EnterDirectory		(const text::string::TString& name)
+			{
+				#if (CL3_OS_DERIVATIVE == CL3_OS_DERIVATIVE_POSIX_LINUX)
+					const int flags = O_RDONLY | O_CLOEXEC | O_NOCTTY | O_DIRECTORY;
+				#else
+					const int flags = O_RDONLY | O_CLOEXEC | O_NOCTTY;
+				#endif
+
+				int new_fd;
+				CL3_CLASS_SYSERR(new_fd = openat(this->fd, TCString(name, CODEC_CXX_CHAR).Chars(), flags, 0));
+
+				#if (CL3_OS_DERIVATIVE != CL3_OS_DERIVATIVE_POSIX_LINUX)
+					struct ::stat st = {};
+					CL3_CLASS_SYSERR(::fstat(new_fd, &st));
+					if(!S_ISDIR(st.st_mode))
+					{
+						CL3_CLASS_SYSERR(::close(new_fd));
+						CL3_CLASS_FAIL(TException, "the specified file-system object is not a directory");
+					}
+				#endif
+
+				const int old_fd = this->fd;
+				this->fd = new_fd;
+				CL3_CLASS_SYSERR(::close(old_fd));
+			}
+
+			void	TDirectoryBrowser::EnumEntries			(collection::IDynamicCollection<TFileInfo>&) const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			void	TDirectoryBrowser::EnumEntries			(collection::IDynamicCollection<text::string::TString>&) const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS	TDirectoryBrowser::TDirectoryBrowser	()
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS	TDirectoryBrowser::TDirectoryBrowser	(const text::string::TString& path)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS	TDirectoryBrowser::TDirectoryBrowser	(const TDirectoryBrowser&)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS	TDirectoryBrowser::TDirectoryBrowser	(TDirectoryBrowser&&)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS	TDirectoryBrowser::~TDirectoryBrowser	()
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			static CL3_THREAD TDirectoryBrowser* db_thread = NULL;
+			static bool db_thread_handler_registered = false;
+
+			/*static	void	DeleteThreadDirectoryBrowser
+					(
+						event::TEvent<collection::IStaticCollection<const system::task::IThread*>, collection::TOnChangeData<const system::task::IThread*> >& event,
+						collection::TOnChangeData<const system::task::IThread*> data,
+						const void*
+					)*/
+			static	void	DeleteThreadDirectoryBrowser
+				(
+					cl3::event::TEvent<const cl3::io::collection::IStaticCollection<cl3::system::task::IThread *const>, cl3::io::collection::TOnChangeData<cl3::system::task::IThread *const> > &,
+					const cl3::io::collection::IStaticCollection<cl3::system::task::IThread *const> &,
+					cl3::io::collection::TOnChangeData<cl3::system::task::IThread *const>,
+					void *
+				)
+			{
+				delete db_thread;
+			}
+
+			TDirectoryBrowser&	TDirectoryBrowser::ThreadCurrentWorkingDirectory	()
+			{
+				if(db_thread == NULL)
+				{
+					db_thread = new TDirectoryBrowser();
+
+					if(!db_thread_handler_registered)
+					{
+						system::task::TProcess::Self()->Threads().OnChange().Register<void>(&DeleteThreadDirectoryBrowser, NULL);
+						db_thread_handler_registered = true;
+					}
+				}
+				return *db_thread;
+			}
+
+			TDirectoryBrowser&	TDirectoryBrowser::ProcessCurrentWorkingDirectory	()
+			{
+				CL3_NOT_IMPLEMENTED;
 			}
 		}
 	}

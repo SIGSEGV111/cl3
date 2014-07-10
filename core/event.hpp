@@ -82,14 +82,14 @@ namespace	cl3
 				template<class TReceiverData>
 				struct	TStaticFuncReceiver : IReceiver, __ICleanup
 				{
-					typedef void (*FReceiver)(TEvent&, TSender&, TData, TReceiverData&);
+					typedef void (*FReceiver)(TEvent&, TSender&, TData, TReceiverData*);
 
-					TReceiverData rdata;
+					TReceiverData* rdata;
 					FReceiver func;
 
 					void OnRaise(TEvent& event, TSender& sender, TData data) { func(event, sender, data, rdata); }
 
-					CLASS	TStaticFuncReceiver	(FReceiver func, const TReceiverData& rdata) : rdata(rdata), func(func) {}
+					CLASS	TStaticFuncReceiver	(FReceiver func, TReceiverData* rdata) : rdata(rdata), func(func) {}
 				};
 
 				mutable io::collection::basiclist::TBasicList<IReceiver*> receivers;
@@ -141,9 +141,9 @@ namespace	cl3
 				}
 
 				template<class TReceiverData>
-				void	Register	(void (*func)(TEvent&,TSender&,TData,TReceiverData&), const TReceiverData& rdata) const
+				void	Register	(void (*func)(TEvent&,TSender&,TData,TReceiverData*), TReceiverData* rdata) const
 				{
-					system::memory::TUniquePtr<IReceiver> proxy(new TStaticFuncReceiver<TReceiverData>(func, rdata));
+					auto proxy = system::memory::MakeUniquePtr(new TStaticFuncReceiver<TReceiverData>(func, rdata));
 					receivers.Push(proxy.Object());
 					proxy.Reset();	//	reset after proxy has been successfully added to the list
 				}

@@ -39,7 +39,7 @@ namespace	cl3
 			class	CL3PUBT	TStream;
 			class	CL3PUBT	TMapping;
 			class	CL3PUBT	TFile;
-			class   CL3PUBT	TDiectoryBrowser;
+			class   CL3PUBT	TDirectoryBrowser;
 
 			/************************************************************************/
 
@@ -156,6 +156,24 @@ namespace	cl3
 
 			/************************************************************************/
 
+			class	CL3PUBT	TFileSystem
+			{
+				virtual	text::string::TString	Type		() const CL3_GETTER = 0;
+				virtual	text::string::TString	Device		() const CL3_GETTER = 0;
+
+				virtual	void	EnumMountPoints		(collection::IDynamicCollection<const text::string::TString>&) const = 0;
+			};
+
+			struct	CL3PUBT	IFileSystemObject
+			{
+				virtual	TFileSystem*			FileSystem	() const CL3_GETTER = 0;
+				virtual	text::string::TString	URI			() const CL3_GETTER = 0;
+				virtual	text::string::TString	Name		() const CL3_GETTER = 0;
+				virtual	void					Name		(const text::string::TString&) CL3_SETTER = 0;
+			};
+
+			/************************************************************************/
+
 			class	CL3PUBT	TFile : public virtual collection::IStaticCollection<byte_t>
 			{
 				friend class TStream;
@@ -176,10 +194,8 @@ namespace	cl3
 
 					//	from TFile
 					CL3PUBF	void	Count	(uoff_t) CL3_SETTER;
-					CL3PUBF	text::string::TString
-									Name	() const CL3_GETTER;
 
-					CL3PUBF	CLASS	TFile	();	//	create temporary file
+					CL3PUBF	CLASS	TFile	(bool executeable = false);	//	create temporary file
 					CL3PUBF	CLASS	TFile	(const text::string::TString& name, int access = FILE_ACCESS_READ, ECreate create = FILE_CREATE_NEVER);	//	open specific file
 					CL3PUBF	CLASS	TFile	(TFile&&);
 					CL3PUBF	CLASS	~TFile	();
@@ -187,23 +203,27 @@ namespace	cl3
 
 			/************************************************************************/
 
-			class   CL3PUBT	TDiectoryBrowser
+			class   CL3PUBT	TDirectoryBrowser
 			{
 				private:
 					fd_t fd;
 
 				public:
-					CL3PUBF	const text::string::TString&
+					CL3PUBF	fd_t	Handle				() const CL3_GETTER;
+					CL3PUBF	text::string::TString
 									AbsolutePath		() const;
 					CL3PUBF	void	EnterDirectory		(const text::string::TString& name);	//	use ".." to go to the parent directory
 					CL3PUBF	void	EnumEntries			(collection::IDynamicCollection<TFileInfo>&) const;
 					CL3PUBF	void	EnumEntries			(collection::IDynamicCollection<text::string::TString>&) const;
 
-					CL3PUBF	CLASS	TDiectoryBrowser	();	//	starts in current working directory
-					CL3PUBF	CLASS	TDiectoryBrowser	(const text::string::TString& path);
-					CL3PUBF	CLASS	TDiectoryBrowser	(const TDiectoryBrowser&);
-					CL3PUBF	CLASS	TDiectoryBrowser	(TDiectoryBrowser&&);
-					CL3PUBF	CLASS	~TDiectoryBrowser	();
+					CL3PUBF	CLASS	TDirectoryBrowser	();	//	starts in current working directory
+					CL3PUBF	CLASS	TDirectoryBrowser	(const text::string::TString& path);
+					CL3PUBF	CLASS	TDirectoryBrowser	(const TDirectoryBrowser&);
+					CL3PUBF	CLASS	TDirectoryBrowser	(TDirectoryBrowser&&);
+					CL3PUBF	CLASS	~TDirectoryBrowser	();
+
+					CL3PUBF	static	TDirectoryBrowser&	ThreadCurrentWorkingDirectory	();
+					CL3PUBF	static	TDirectoryBrowser&	ProcessCurrentWorkingDirectory	();
 			};
 		}
 	}

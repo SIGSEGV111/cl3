@@ -86,20 +86,22 @@ namespace	cl3
 			class	CL3PUBT	TProcess : public TProcessInfo
 			{
 				public:
-					CL3PUBF	CL3_GETTER	const char*	Name	() const;	//	name of the process
-					CL3PUBF	CL3_SETTER	void		Name	(const char* new_name);
-					CL3PUBF	CL3_GETTER	const io::collection::IDynamicCollection<const char*>&	CommandlineArguments	() const;	//	commandline arguments (like argv[] in main())
-					CL3PUBF	CL3_GETTER	const io::collection::IDynamicCollection<IThread*>&		Threads	() const;	//	list of threads that belong to this process. for the calling threads process all registered threads are listed (even dead ones), but for other processed only those the operating system knows about are listed (usually only those that are alive)
+					CL3PUBF	const char*	Name	() const CL3_GETTER;	//	name of the process
+					CL3PUBF	void		Name	(const char* new_name) CL3_SETTER;
+					CL3PUBF	const io::collection::IDynamicCollection<const char*>&	CommandlineArguments	() const CL3_GETTER;	//	commandline arguments (like argv[] in main())
+					CL3PUBF	const io::collection::IDynamicCollection<IThread*>&		Threads	() const CL3_GETTER;	//	list of threads that belong to this process. for the calling threads process all registered threads are listed (even dead ones), but for other processed only those the operating system knows about are listed (usually only those that are alive)
 
 					CL3PUBF	void	Shutdown	();	//	requests the process to shut down
 					CL3PUBF	void	Suspend		();	//	suspends the execution of the process (suspends all threads)
 					CL3PUBF	void	Resume		();	//	resumes the execution of the process (resumes all threads)
+
+					CL3PUBF	static	TProcess*	Self	() CL3_GETTER;
 			};
 
 			class	CL3PUBT	IThread
 			{
 				public:
-					CL3PUBF	static	IThread&	Self	() CL3_GETTER;	//	returns the IThread& for the calling thread
+					CL3PUBF	static	IThread*	Self	() CL3_GETTER;	//	returns the IThread& for the calling thread
 
 					CL3PUBF	const char*	Name	() const CL3_GETTER;	//	returns the name of the thread
 					CL3PUBF	TProcess&	Process	() CL3_GETTER;	//	returns the process to which the thread belongs

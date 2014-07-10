@@ -54,7 +54,7 @@ namespace	cl3
 							if(n_prealloc < count)
 							{
 								const usys_t n_prealloc_new = count + (n_items + count) / 8 + 128U / sizeof(T);
-								arr_items = Realloc(arr_items, sizeof(T) * (n_items + n_prealloc_new));
+								arr_items = (T*)system::memory::Realloc(arr_items, sizeof(T) * (n_items + n_prealloc_new), NULL, false);
 								n_prealloc = n_prealloc_new;
 							}
 							n_prealloc -= count;
@@ -69,7 +69,7 @@ namespace	cl3
 							if(n_prealloc > n_threshold)
 							{
 								const usys_t n_prealloc_new = n_items / 16 + 64U / sizeof(T);
-								arr_items = Realloc(arr_items, sizeof(T) * (n_items + n_prealloc_new));
+								arr_items = (T*)system::memory::Realloc(arr_items, sizeof(T) * (n_items + n_prealloc_new), NULL, false);
 								n_prealloc = n_prealloc_new;
 							}
 						}
