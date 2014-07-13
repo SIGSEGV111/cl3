@@ -45,6 +45,7 @@ namespace
 	using namespace cl3::io::text::encoding;
 	using namespace cl3::io::text::encoding::utf8;
 	using namespace cl3::io::collection::list;
+	using namespace cl3::io::collection;
 	using namespace cl3::error;
 
 	TEST(system_task_TProcessRunner, cat)
@@ -139,5 +140,45 @@ namespace
 
 		TProcess::Self()->Name(name_original);
 		EXPECT_TRUE(system(TCString(TString("pgrep -f ") + name_original + " >/dev/null", CODEC_CXX_CHAR).Chars()) == 0);
+	}
+
+	TEST(system_task_TProcess, Environment)
+	{
+		const IDynamicCollection<const TString>& ls = TProcess::Self()->Environment();
+		auto it = ls.CreateStaticIterator();
+
+		const TString* cmd = NULL;
+		const TString* pwd = NULL;
+		const TString* user = NULL;
+
+		for(it->MoveFirst(); it->IsValid(); it->MoveNext())
+		{
+			if(it->Item().Left(2) == "_=")
+				cmd = &it->Item();
+			if(it->Item().Left(4) == "PWD=")
+				pwd = &it->Item();
+			if(it->Item().Left(5) == "USER=")
+				user = &it->Item();
+		}
+
+		EXPECT_TRUE(cmd != NULL);
+		EXPECT_TRUE(pwd != NULL);
+		EXPECT_TRUE(user != NULL);
+	}
+
+	TEST(system_task_TProcess, CommandlineArguments)
+	{
+		const IDynamicCollection<const TString>& ls = TProcess::Self()->CommandlineArguments();
+		auto it = ls.CreateStaticIterator();
+
+		EXPECT_TRUE(it->MoveFirst());
+		EXPECT_TRUE(it->Item() == "./exe");
+		EXPECT_TRUE(it->MoveNext());
+		EXPECT_TRUE(it->Item() == "dummy1");
+		EXPECT_TRUE(it->MoveNext());
+		EXPECT_TRUE(it->Item() == "dummy2");
+		EXPECT_TRUE(it->MoveNext());
+		EXPECT_TRUE(it->Item() == "dummy3");
+		EXPECT_TRUE(!it->MoveNext());
 	}
 }

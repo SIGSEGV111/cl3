@@ -61,8 +61,8 @@ namespace	cl3
 			static char** argv = NULL;
 			static char** envv = NULL;
 
-			static const TList<const TString>* ls_args = NULL;
-			static const TList<const TString>* ls_env = NULL;
+			static TUniquePtr<const TList<const TString> > ls_args;
+			static TUniquePtr<const TList<const TString> > ls_env;
 		}
 	}
 }
@@ -80,7 +80,7 @@ static void cl3_init(int argc, char* argv[], char* envv[])
 
 	const usys_t len_progname_current = strlen(argv[0]);
 
-	if(RUNNING_ON_VALGRIND == 0)
+	if(RUNNING_ON_VALGRIND == 0)	// valgrind resets argv[0], thus libcl3 will keep execvpe()'ing until all eternity
 	{
 		if(len_progname_current < len_progname_want - 1)
 		{
@@ -149,15 +149,15 @@ namespace	cl3
 			const io::collection::IDynamicCollection<const io::text::string::TString>&
 					TProcess::CommandlineArguments	() const
 			{
-				if(ls_args == NULL)
+				if(ls_args.Object() == NULL)
 				{
-					TList<TString>* ls = new TList<TString>();
+					TUniquePtr<TList<TString> > ls = MakeUniquePtr(new TList<TString>());
 
-					for(char** p = envv; *p != NULL; p++)
+					for(char** p = argv; *p != NULL; p++)
 						ls->Append(*p);
 
-					if(compiler::AtomicSwap(ls_args, (TList<TString>*)NULL, ls) != NULL)
-						delete ls;
+					if(ls_args.AtomicSwap(NULL, ls.Object()) == NULL)
+						ls.Reset();
 				}
 
 				return *ls_args;
@@ -166,14 +166,14 @@ namespace	cl3
 			const io::collection::IDynamicCollection<const io::text::string::TString>&
 					TProcess::Environment	() const
 			{
-				if(ls_env == NULL)
+				if(ls_env.Object() == NULL)
 				{
 					TUniquePtr<TList<TString> > ls = MakeUniquePtr(new TList<TString>());
 
 					for(char** p = envv; *p != NULL; p++)
 						ls->Append(*p);
 
-					if(compiler::AtomicSwap(ls_env, (TList<TString>*)NULL, ls.Object()) != NULL)
+					if(ls_env.AtomicSwap(NULL, ls.Object()) == NULL)
 						ls.Reset();
 				}
 

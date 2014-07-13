@@ -42,10 +42,16 @@ namespace	cl3
 		{
 			using namespace types;
 
+			CL3PUBF	void	Free	(void*);
+			CL3PUBF	void*	Alloc	(usys_t, const typeinfo::TRTTI*) CL3_WARN_UNUSED_RESULT;
+			CL3PUBF	void*	Realloc	(void* p_mem, usys_t n_items_new, const typeinfo::TRTTI* rtti, bool inplace) CL3_WARN_UNUSED_RESULT;
+			CL3PUBF	usys_t	SizeOf	(void*) CL3_GETTER;
+
 			enum	EUnqiuePtrType
 			{
 				UPTR_OBJECT,
 				UPTR_ARRAY,
+				UPTR_ALLOC,
 				UPTR_MALLOC
 			};
 
@@ -70,8 +76,11 @@ namespace	cl3
 							case UPTR_ARRAY:
 								delete[] object;
 								break;
+							case UPTR_ALLOC:
+								cl3::system::memory::Free((void*)object);
+								break;
 							case UPTR_MALLOC:
-								::free(object);
+								::free((void*)object);
 								break;
 						};
 					}
@@ -101,6 +110,11 @@ namespace	cl3
 
 					T*			Claim	() CL3_GETTER { T* tmp = this->object; this->object = NULL; return tmp; }
 					void		Reset	() { this->object = NULL; }	//	does *NOT* release any memory - just removes control of the object from this class
+
+					T*	AtomicSwap	(const T* compare, const T* new_value)
+					{
+						return compiler::AtomicSwap(this->object, compare, new_value);
+					}
 
 					CLASS	TUniquePtr	() throw() : object(NULL) {}
 					CLASS	TUniquePtr	(TUniquePtr&& rhs) throw() : object(rhs.object) { rhs.object = NULL; }
@@ -284,11 +298,6 @@ namespace	cl3
 
 			CL3_PARAMETER_STACK_DECL(IDynamicAllocator*, allocator);
 			CL3PUBF extern IDynamicAllocator* exception_allocator;
-
-			CL3PUBF	void	Free	(void*);
-			CL3PUBF	void*	Alloc	(usys_t, const typeinfo::TRTTI*) CL3_WARN_UNUSED_RESULT;
-			CL3PUBF	void*	Realloc	(void* p_mem, usys_t n_items_new, const typeinfo::TRTTI* rtti, bool inplace) CL3_WARN_UNUSED_RESULT;
-			CL3PUBF	usys_t	SizeOf	(void*) CL3_GETTER;
 		}
 	}
 }

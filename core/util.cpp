@@ -35,14 +35,14 @@ namespace	cl3
 		using namespace system::memory;
 		using namespace system::types;
 
-		TUniquePtr<char,UPTR_MALLOC> mkstrcpy(const char* str, system::memory::IDynamicAllocator* local_allocator)
+		TUniquePtr<char,UPTR_ALLOC> mkstrcpy(const char* str, system::memory::IDynamicAllocator* local_allocator)
 		{
 			if(local_allocator == NULL)
 				local_allocator = CL3_PARAMETER_STACK_VALUE(allocator);
 			CL3_PARAMETER_STACK_PUSH(allocator, local_allocator);
 
 			usys_t l = ::strlen(str) + 1;
-			auto cpy = MakeUniquePtr<UPTR_MALLOC>((char*)Alloc(l, NULL));
+			auto cpy = MakeUniquePtr<UPTR_ALLOC>((char*)Alloc(l, NULL));
 			::memcpy(cpy.Object(), str, l);
 			return cpy;
 		}

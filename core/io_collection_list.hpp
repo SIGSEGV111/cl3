@@ -51,11 +51,14 @@ namespace	cl3
 				{
 					virtual	usys_t	Index	() const CL3_GETTER = 0;	//	returns the index on which the iterator is currently positioned (might change on Insert()/Remove/Count(x), as the iterator is repositioned to stay on the same item)
 					virtual	void	Index	(usys_t new_index) CL3_SETTER = 0;	//	positiones the iterator on the item with the specified index
+
+					virtual	CLASS	~IIterator	() {}
 				};
 
 				template<class T>
 				struct	CL3PUBT	IIterator : virtual IDynamicIterator<T>, virtual IIterator<const T>
 				{
+					virtual	CLASS	~IIterator	() {}
 				};
 
 				template<class T>
@@ -159,6 +162,7 @@ namespace	cl3
 
 						//	from TIterator
 						CLASS	TIterator	(TList<const T>* list, usys_t index);
+						virtual	~TIterator	() {}
 				};
 
 				template<class T>
@@ -195,6 +199,7 @@ namespace	cl3
 
 						//	from TIterator
 						CLASS	TIterator	(TList<T>* list, usys_t index);
+						virtual	~TIterator	() {}
 				};
 
 				template<class T>

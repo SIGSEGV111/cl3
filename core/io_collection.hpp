@@ -158,6 +158,7 @@ namespace	cl3
 			template<class T>
 			struct	CL3PUBT	IDynamicIterator : virtual IDynamicIterator<const T>, virtual IStaticIterator<T>
 			{
+				virtual	CLASS	~IDynamicIterator	() {}
 			};
 
 			/************************************************************************/

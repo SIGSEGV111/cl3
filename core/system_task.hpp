@@ -102,7 +102,7 @@ namespace	cl3
 
 					//	environment varaibles (like envp[] in main())
 					CL3PUBF	const io::collection::IDynamicCollection<const io::text::string::TString>&
-									Environment	() const CL3_GETTER;
+									Environment	() const CL3_GETTER;	//	TODO: use a map (KEY=VALUE) instead of a list
 
 					CL3PUBF	const io::collection::list::TList<IThread*>&
 									Threads		() const CL3_GETTER;
