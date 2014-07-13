@@ -21,6 +21,7 @@
 
 #include "io_stream.hpp"
 #include "event.hpp"
+#include "util.hpp"
 
 namespace	cl3
 {
@@ -102,17 +103,19 @@ namespace	cl3
 			template<class T>	struct	IStaticCollection;
 			template<class T>	struct	IDynamicCollection;
 
+			enum	EChange
+			{
+				CHANGE_ADD,
+				CHANGE_REMOVE
+			};
+
 			template<class T>
 			struct	TOnChangeData
 			{
-				enum	EChange
-				{
-					CHANGE_ADD,
-					CHANGE_REMOVE
-				};
-
 				EChange change;
-				const IStaticIterator<T>* iterator;
+				system::memory::TUniquePtr<IStaticIterator<T> > iterator;
+
+				CLASS	TOnChangeData	(EChange change, system::memory::TUniquePtr<IStaticIterator<T> >&& iterator) : change(change), iterator(util::move(iterator)) {}
 			};
 
 			/************************************************************************/
@@ -160,7 +163,7 @@ namespace	cl3
 			/************************************************************************/
 
 			template<class T>
-			struct	CL3PUBT	IStaticCollection<const T> : virtual event::IObservable< const IStaticCollection<const T>, TOnChangeData<const T> >
+			struct	CL3PUBT	IStaticCollection<const T> : virtual event::IObservable< const IStaticCollection<const T>, const TOnChangeData<const T>& >
 			{
 				virtual	system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT = 0;
 

@@ -51,6 +51,38 @@ namespace	cl3
 
 			/**************************************************************************************/
 
+			static CL3_THREAD IThread* th_self = NULL;
+
+			namespace
+			{
+				struct	TMainThread : IThread
+				{
+					void	ThreadMain	()
+					{
+						CL3_CLASS_LOGIC_ERROR(true);
+					}
+
+					CLASS	TMainThread	()
+					{
+						th_self = this;
+					}
+
+					CLASS	~TMainThread()
+					{
+						th_self = NULL;
+					}
+				};
+
+				static TMainThread th_main;
+			}
+
+			IThread*	IThread::Self	()
+			{
+				return th_self;
+			}
+
+			/**************************************************************************************/
+
 			static TProcess proc_self(0);
 
 			pid_t	TProcess::Handle	() const
@@ -92,6 +124,10 @@ namespace	cl3
 					*/
 					CL3_CLASS_SYSERR(::ptrace(PTRACE_CONT, pid, NULL, NULL));
 				}
+				else
+				{
+					ls_threads.Append(th_self);
+				}
 			}
 
 			CLASS	TProcess::TProcess	(TProcess&& other) : pid(other.pid)
@@ -110,38 +146,6 @@ namespace	cl3
 			TProcess*	TProcess::Self		()
 			{
 				return &proc_self;
-			}
-
-			/**************************************************************************************/
-
-			static CL3_THREAD IThread* th_self = NULL;
-
-			namespace
-			{
-				struct	TMainThread : IThread
-				{
-					void	ThreadMain	()
-					{
-						CL3_CLASS_LOGIC_ERROR(true);
-					}
-
-					CLASS	TMainThread	()
-					{
-						th_self = this;
-					}
-
-					CLASS	~TMainThread()
-					{
-						th_self = NULL;
-					}
-				};
-
-				static TMainThread th_main;
-			}
-
-			IThread*	IThread::Self	()
-			{
-				return th_self;
 			}
 
 			/**************************************************************************************/

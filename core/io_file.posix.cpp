@@ -531,14 +531,17 @@ namespace	cl3
 					)*/
 			static	void	DeleteThreadDirectoryBrowser
 				(
-					cl3::event::TEvent<const cl3::io::collection::IStaticCollection<cl3::system::task::IThread *const>, cl3::io::collection::TOnChangeData<cl3::system::task::IThread *const> > &,
+					cl3::event::TEvent<const cl3::io::collection::IStaticCollection<cl3::system::task::IThread *const>, const cl3::io::collection::TOnChangeData<cl3::system::task::IThread *const>& > &,
 					const cl3::io::collection::IStaticCollection<cl3::system::task::IThread *const> &,
-					cl3::io::collection::TOnChangeData<cl3::system::task::IThread *const>,
+					const cl3::io::collection::TOnChangeData<cl3::system::task::IThread *const>& data,
 					void *
 				)
 			{
-				delete db_thread;
-				db_thread = NULL;
+				if(data.change == collection::CHANGE_REMOVE)
+				{
+					delete db_thread;
+					db_thread = NULL;
+				}
 			}
 
 			TDirectoryBrowser&	TDirectoryBrowser::ThreadCurrentWorkingDirectory	()

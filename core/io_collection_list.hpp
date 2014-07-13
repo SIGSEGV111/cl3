@@ -204,7 +204,7 @@ namespace	cl3
 						T* arr_items;
 						usys_t n_items_current;
 						usys_t n_items_prealloc;
-						const event::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> > on_change;
+						event::TEvent<const IStaticCollection<const T>, const TOnChangeData<const T>& > on_change;
 						bool guard_resize;
 
 						void	Prealloc	(usys_t n_items_prealloc_min);
@@ -214,7 +214,7 @@ namespace	cl3
 						using stream::IIn<T>::Read;
 
 						//	from IObservable
-						const event::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> >&	OnChange	() const CL3_GETTER;
+						const event::TEvent<const IStaticCollection<const T>, const TOnChangeData<const T>& >&	OnChange	() const CL3_GETTER;
 
 						//	from IStaticCollection
 						system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT;
@@ -578,7 +578,7 @@ namespace	cl3
 
 				//	from IObservable
 				template<class T>
-				const event::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> >&
+				const event::TEvent<const IStaticCollection<const T>, const TOnChangeData<const T>& >&
 						TList<const T>::OnChange	() const
 				{
 					return on_change;
@@ -618,6 +618,9 @@ namespace	cl3
 				template<class T>
 				void	TList<const T>::Clear		()
 				{
+					TOnChangeData<const T> data(CHANGE_REMOVE, this->CreateStaticIterator());
+					this->on_change.Raise(*this, data);
+
 					for(usys_t i = 0; i < n_items_current; i++)
 						arr_items[i].~T();
 					n_items_prealloc += n_items_current;

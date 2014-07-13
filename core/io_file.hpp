@@ -178,11 +178,11 @@ namespace	cl3
 				protected:
 					fd_t fd;
 					int access;
-					const event::TEvent<const collection::IStaticCollection<const byte_t>, collection::TOnChangeData<const byte_t> > on_change;
+					const event::TEvent<const collection::IStaticCollection<const byte_t>, const collection::TOnChangeData<const byte_t>& > on_change;
 
 				public:
 					//	from IObservable
-					inline	const event::TEvent<const collection::IStaticCollection<const byte_t>, collection::TOnChangeData<const byte_t> >&	OnChange	() const CL3_GETTER { return on_change; }
+					inline	const event::TEvent<const collection::IStaticCollection<const byte_t>, const collection::TOnChangeData<const byte_t>& >&	OnChange	() const CL3_GETTER { return on_change; }
 
 					//	from IStaticCollection
 					CL3PUBF	system::memory::TUniquePtr<collection::IStaticIterator<const byte_t> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT;
