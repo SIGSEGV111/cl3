@@ -986,13 +986,29 @@ namespace	cl3
 				template<class T>
 				TList<T>&	TList<T>::operator=	(const IStaticCollection<T>& rhs)
 				{
-					CL3_NOT_IMPLEMENTED;
+					const TList<const T>* list = dynamic_cast<const TList<const T>*>(&rhs);
+					if(list)
+						(*this) = *list;
+					else
+					{
+						Clear();
+						Append(rhs);
+					}
+					return *this;
 				}
 
 				template<class T>
 				TList<T>&	TList<T>::operator=	(IStaticCollection<T>&& rhs)
 				{
-					CL3_NOT_IMPLEMENTED;
+					TList<const T>* list = dynamic_cast<TList<const T>*>(&rhs);
+					if(list)
+						(*this) = util::move(*list);
+					else
+					{
+						Clear();
+						Append(rhs);
+					}
+					return *this;
 				}
 
 				template<class T>

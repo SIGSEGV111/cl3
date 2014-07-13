@@ -42,6 +42,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
+#include <valgrind/valgrind.h>
 
 using namespace cl3::system::types;
 
@@ -66,6 +67,7 @@ namespace	cl3
 	}
 }
 
+static const char chr_pad = 0x01;
 static const usys_t len_progname_want = 64;
 static usys_t len_progname_got = 0;
 
@@ -78,40 +80,43 @@ static void cl3_init(int argc, char* argv[], char* envv[])
 
 	const usys_t len_progname_current = strlen(argv[0]);
 
-	if(len_progname_current < len_progname_want - 1)
+	if(RUNNING_ON_VALGRIND == 0)
 	{
-		puts("*** now performing black magic ... ");
+		if(len_progname_current < len_progname_want - 1)
+		{
+			puts("*** now performing black magic ... ");
 
-		//	enlarge the program-name buffer
-		//	this works by execvpe()'ing ourself with a larger (padded) program-name as argv[0], we will have to remove that padding later again
+			//	enlarge the program-name buffer
+			//	this works by execvpe()'ing ourself with a larger (padded) program-name as argv[0], we will have to remove that padding later again
 
-		//	create a new argv
-		char* argv_new[argc+1];
-		char program_new[len_progname_want];
-		memcpy(argv_new, argv, sizeof(char*) * argc);
-		argv_new[0] = program_new;
-		argv_new[argc] = NULL;
+			//	create a new argv
+			char* argv_new[argc+1];
+			char program_new[len_progname_want];
+			memcpy(argv_new, argv, sizeof(char*) * argc);
+			argv_new[0] = program_new;
+			argv_new[argc] = NULL;
 
-		//	copy program-name, but pad it with 0x01 characters to the desired length
-		::memcpy(argv_new[0], argv[0], len_progname_current);
-		::memset(argv_new[0]+len_progname_current, 1, len_progname_want-len_progname_current-1);
-		argv_new[0][len_progname_want-1] = 0;
+			//	copy program-name, but pad it with chr_pad characters to the desired length
+			::memcpy(argv_new[0], argv[0], len_progname_current);
+			::memset(argv_new[0]+len_progname_current, chr_pad, len_progname_want-len_progname_current-1);
+			argv_new[0][len_progname_want-1] = 0;
 
-		//	execvpe() ourself with a new (padded) program-name
-		::execve(argv[0], argv_new, envv);
+			//	execvpe() ourself with a new (padded) program-name
+			::execve(argv[0], argv_new, envv);
 
-		//	it did not work... to bad. lets continue as if nothing had happend
-		perror("execve");
-		puts("*** black magic has failed, but we survived it!");
-	}
-	else
-	{
-		puts("*** black magic succeeded!");
+			//	it did not work... to bad. lets continue as if nothing had happend
+			perror("execve");
+			puts("*** black magic has failed, but we survived it!");
+		}
+		else
+		{
+			puts("*** black magic succeeded!");
 
-		//	fix the program-name buffer, we have to assume it is as messed up as we wanted it to be when we called execvpe()
-		for(char* p = argv[0]; *p != 0; p++)
-			if(*p == 1)
-				*p = 0;
+			//	fix the program-name buffer, we have to assume it is as messed up as we wanted it to be when we called execvpe()
+			for(char* p = argv[0]; *p != 0; p++)
+				if(*p == chr_pad)
+					*p = 0;
+		}
 	}
 
 	len_progname_got = len_progname_current;
@@ -133,11 +138,12 @@ namespace	cl3
 			void	TProcess::Name		(const TString& new_name)
 			{
 				const TCString cstr_name(new_name, CODEC_CXX_CHAR);
+				const usys_t len_progname_new = cstr_name.Count() - 1;
 
-				CL3_CLASS_ERROR(cstr_name.Count() > len_progname_got, TException, "the new name cannot be longer that the initially reserved amount of space for the program name - cl3 performs black magic to enlarge this buffer; check if it succeeded");
+				CL3_CLASS_ERROR(len_progname_new > len_progname_got, TException, "the new name cannot be longer that the initially reserved amount of space for the program name - cl3 performs black magic to enlarge this buffer; check if it succeeded");
 
-				memset(argv[0] + cstr_name.Count(), 0, len_progname_got - cstr_name.Count());
-				memcpy(argv[0], cstr_name.Chars(), cstr_name.Count());
+				memset(argv[0] + len_progname_new, 0, len_progname_got - len_progname_new);
+				memcpy(argv[0], cstr_name.Chars(), len_progname_new);
 			}
 
 			const io::collection::IDynamicCollection<const io::text::string::TString>&

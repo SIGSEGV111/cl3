@@ -483,10 +483,23 @@ namespace	cl3
 
 			CLASS	TDirectoryBrowser::TDirectoryBrowser	()
 			{
-				CL3_NOT_IMPLEMENTED;
+				#if (CL3_OS_DERIVATIVE == CL3_OS_DERIVATIVE_POSIX_LINUX)
+					const int flags = O_RDONLY | O_CLOEXEC | O_NOCTTY | O_DIRECTORY;
+				#else
+					const int flags = O_RDONLY | O_CLOEXEC | O_NOCTTY;
+				#endif
+
+				CL3_CLASS_SYSERR(this->fd = open(".", flags, 0));
+
+				#if (CL3_OS_DERIVATIVE != CL3_OS_DERIVATIVE_POSIX_LINUX)
+					struct ::stat st;
+					CL3_CLASS_SYSERR(::fstat(this->fd, &st));
+					if(!S_ISDIR(st.st_mode))
+						CL3_CLASS_FAIL(TException, "the specified file-system object is not a directory");
+				#endif
 			}
 
-			CLASS	TDirectoryBrowser::TDirectoryBrowser	(const text::string::TString& path)
+			CLASS	TDirectoryBrowser::TDirectoryBrowser	(const text::string::TString& path) : fd(-1)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
@@ -496,14 +509,15 @@ namespace	cl3
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			CLASS	TDirectoryBrowser::TDirectoryBrowser	(TDirectoryBrowser&&)
+			CLASS	TDirectoryBrowser::TDirectoryBrowser	(TDirectoryBrowser&& other) : fd(other.fd)
 			{
-				CL3_NOT_IMPLEMENTED;
+				other.fd = -1;
 			}
 
 			CLASS	TDirectoryBrowser::~TDirectoryBrowser	()
 			{
-				CL3_NOT_IMPLEMENTED;
+				if(this->fd != -1)
+					CL3_CLASS_SYSERR(::close(this->fd));
 			}
 
 			static CL3_THREAD TDirectoryBrowser* db_thread = NULL;
@@ -524,6 +538,7 @@ namespace	cl3
 				)
 			{
 				delete db_thread;
+				db_thread = NULL;
 			}
 
 			TDirectoryBrowser&	TDirectoryBrowser::ThreadCurrentWorkingDirectory	()

@@ -156,7 +156,7 @@ namespace	cl3
 
 						CLASS	~TBasicList	()
 						{
-							free(arr_items);
+							system::memory::Free(arr_items);
 						}
 				};
 			}

@@ -29,6 +29,7 @@
 #include <cl3/core/system_task.hpp>
 #include <gtest/gtest.h>
 #include <stdlib.h>
+#include <valgrind/valgrind.h>
 
 using namespace ::testing;
 
@@ -125,15 +126,18 @@ namespace
 	TEST(system_task_TProcess, Name)
 	{
 		const TString name_original = TProcess::Self()->Name();
-		const TString name_want = "gtest-system_task_TProcess";
+		const TString name_want = "gtest";
 
 		EXPECT_TRUE(name_original.Find("/exe") != (usys_t)-1);
-		EXPECT_TRUE(system(TCString(TString("pidof ") + name_original + " >/dev/null", CODEC_CXX_CHAR).Chars()) == 0);
+		EXPECT_TRUE(system(TCString(TString("pgrep -f ") + name_original + " >/dev/null", CODEC_CXX_CHAR).Chars()) == 0);
 
 		TProcess::Self()->Name(name_want);
 		EXPECT_TRUE(TProcess::Self()->Name() == name_want);
-		EXPECT_TRUE(system("pidof gtest-system_task_TProcess >/dev/null") == 0);
+
+		if(RUNNING_ON_VALGRIND == 0)
+			EXPECT_TRUE(system("pidof gtest >/dev/null") == 0);
 
 		TProcess::Self()->Name(name_original);
+		EXPECT_TRUE(system(TCString(TString("pgrep -f ") + name_original + " >/dev/null", CODEC_CXX_CHAR).Chars()) == 0);
 	}
 }

@@ -53,11 +53,12 @@ namespace	cl3
 			class	TUniquePtr
 			{
 				private:
-					CLASS	TUniquePtr	(const TUniquePtr&);
+					TUniquePtr&	operator=	(const TUniquePtr&) = delete;
+					CLASS	TUniquePtr	(const TUniquePtr&) = delete;
 					CLASS	TUniquePtr	(T* object) throw() : object(object) {}
 
 				protected:
-					mutable T* object;
+					T* object;
 
 					void	Release	()
 					{
@@ -76,9 +77,9 @@ namespace	cl3
 					}
 
 				public:
-					TUniquePtr&	operator=	(const TUniquePtr& rhs)
+					TUniquePtr&	operator=	(TUniquePtr&& rhs)
 					{
-						Release();
+						this->Release();
 						this->object = rhs.object;
 						rhs.object = NULL;
 						return *this;
@@ -86,24 +87,24 @@ namespace	cl3
 
 					void		Object		(T* new_object) CL3_SETTER
 					{
-						Release();
-						object = new_object;
+						this->Release();
+						this->object = new_object;
 					}
 
-					const T*	Object		() const CL3_GETTER { return object; }
-					T*			Object		() CL3_GETTER { return object; }
+					const T*	Object		() const CL3_GETTER { return this->object; }
+					T*			Object		() CL3_GETTER { return this->object; }
 
-					T*			operator->	() CL3_GETTER { return object; }
-					T&			operator*	() CL3_GETTER { return *object; }
-					const T*	operator->	() const CL3_GETTER { return object; }
-					const T&	operator*	() const CL3_GETTER { return *object; }
+					T*			operator->	() CL3_GETTER { return this->object; }
+					T&			operator*	() CL3_GETTER { return *this->object; }
+					const T*	operator->	() const CL3_GETTER { return this->object; }
+					const T&	operator*	() const CL3_GETTER { return *this->object; }
 
-					T*			Claim	() CL3_GETTER { T* tmp = object; object = NULL; return tmp; }
-					void		Reset	() { object = NULL; }	//	does *NOT* release any memory - just removes control of the object from this class
+					T*			Claim	() CL3_GETTER { T* tmp = this->object; this->object = NULL; return tmp; }
+					void		Reset	() { this->object = NULL; }	//	does *NOT* release any memory - just removes control of the object from this class
 
 					CLASS	TUniquePtr	() throw() : object(NULL) {}
 					CLASS	TUniquePtr	(TUniquePtr&& rhs) throw() : object(rhs.object) { rhs.object = NULL; }
-					CLASS	~TUniquePtr	() { Release(); }
+					CLASS	~TUniquePtr	() { this->Release(); }
 			};
 
 			template<class T> CL3_GETTER static TUniquePtr<T, UPTR_OBJECT> MakeUniquePtr(T* object) { TUniquePtr<T, UPTR_OBJECT> uptr; uptr.Object(object); return uptr; }
