@@ -22,7 +22,7 @@
 #include "system_compiler.hpp"
 #include "system_types.hpp"
 #include "system_task_synchronization.hpp"
-#include "io_collection.hpp"
+#include "io_collection_list.hpp"
 #include "io_stream_fd.hpp"
 #include "io_text_string.hpp"
 #include "system_time.hpp"
@@ -46,7 +46,7 @@ namespace	cl3
 			#if (CL3_OS == CL3_OS_POSIX)
 				typedef int pid_t;
 			#elif (CL3_OS == CL3_OS_WINDOWS)
-				typedef u32_t pid_t;
+				typedef void* pid_t;
 			#else
 				#error "define pid_t for this OS"
 			#endif
@@ -74,7 +74,7 @@ namespace	cl3
 			{
 				public:
 					CL3PUBF	CL3_GETTER	pid_t		ID		() const;
-					CL3PUBF CL3_GETTER	TProcess*	Open	() const;	//	open the process for direct access
+					CL3PUBF CL3_GETTER	TProcess	Open	() const;	//	open the process for direct access
 			};
 
 			class	CL3PUBT	THost
@@ -83,19 +83,34 @@ namespace	cl3
 					CL3PUBF	usys_t	EnumProcesses	(io::collection::IDynamicCollection<TProcessInfo>&) const;	//	enumerates all processes on this host and adds them to the list; returns the number of processes added
 			};
 
-			class	CL3PUBT	TProcess : public TProcessInfo
+			class	CL3PUBT TProcess
 			{
+				protected:
+					pid_t pid;
+					io::collection::list::TList<IThread*> ls_threads;
+
 				public:
-					CL3PUBF	const char*	Name	() const CL3_GETTER;	//	name of the process
-					CL3PUBF	void		Name	(const char* new_name) CL3_SETTER;
-					CL3PUBF	const io::collection::IDynamicCollection<const char*>&	CommandlineArguments	() const CL3_GETTER;	//	commandline arguments (like argv[] in main())
-					CL3PUBF	const io::collection::IDynamicCollection<IThread*>&		Threads	() const CL3_GETTER;	//	list of threads that belong to this process. for the calling threads process all registered threads are listed (even dead ones), but for other processed only those the operating system knows about are listed (usually only those that are alive)
+					CL3PUBF	pid_t	Handle		() const CL3_GETTER;
+					CL3PUBF	io::text::string::TString
+									Name		() const CL3_GETTER;	//	name of the process
+					CL3PUBF	void	Name		(const io::text::string::TString& new_name) CL3_SETTER;
+
+					//	commandline arguments (like argv[] in main())
+					CL3PUBF	const io::collection::IDynamicCollection<const io::text::string::TString>&
+									CommandlineArguments	() const CL3_GETTER;
+
+					CL3PUBF	const io::collection::list::TList<IThread*>&
+									Threads		() const CL3_GETTER;
 
 					CL3PUBF	void	Shutdown	();	//	requests the process to shut down
 					CL3PUBF	void	Suspend		();	//	suspends the execution of the process (suspends all threads)
 					CL3PUBF	void	Resume		();	//	resumes the execution of the process (resumes all threads)
 
 					CL3PUBF	static	TProcess*	Self	() CL3_GETTER;
+
+					CL3PUBF	CLASS	TProcess	(pid_t);
+					CL3PUBF	CLASS	TProcess	(TProcess&&);
+					CL3PUBF	CLASS	~TProcess	();
 			};
 
 			class	CL3PUBT	IThread
@@ -103,10 +118,11 @@ namespace	cl3
 				public:
 					CL3PUBF	static	IThread*	Self	() CL3_GETTER;	//	returns the IThread& for the calling thread
 
-					CL3PUBF	const char*	Name	() const CL3_GETTER;	//	returns the name of the thread
-					CL3PUBF	TProcess&	Process	() CL3_GETTER;	//	returns the process to which the thread belongs
+					CL3PUBF	io::text::string::TString
+										Name	() const CL3_GETTER;	//	returns the name of the thread
+					CL3PUBF	TProcess*	Process	() CL3_GETTER;			//	returns the process to which the thread belongs
 					CL3PUBF	EState		State	() const CL3_GETTER;	//	returns the threads current state
-					CL3PUBF	THost&		Host	() const CL3_GETTER;	//	returns the host machine this thread is executed on (possibly volatile in cluster systems)
+					CL3PUBF	THost*		Host	() const CL3_GETTER;	//	returns the host machine this thread is executed on (possibly volatile in cluster systems)
 					CL3PUBF	io::collection::IDynamicCollection<TCPU*>&	Affinity() CL3_GETTER;	//	returns the threads CPU affinity list
 
 					CL3PUBF	void*	StackStart	() const CL3_GETTER;	//	start address of the execution stack - might be less than end (stack grows down)
@@ -122,7 +138,7 @@ namespace	cl3
 					CL3PUBF	void	Resume		();	//	resumes the execution of a suspended thread, throws if the thread is not suspended or not alive at all
 
 				protected:
-					CL3PUBF	void	Name		(const char* new_name) CL3_SETTER;
+					CL3PUBF	void	Name		(const io::text::string::TString&) CL3_SETTER;
 					virtual	void	ThreadMain	() = 0;
 			};
 

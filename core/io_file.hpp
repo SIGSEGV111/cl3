@@ -52,9 +52,8 @@ namespace	cl3
 
 			enum	ESharing
 			{
-				MAP_SHARING_RW,			//	the mappings are kept coherent at all times
-				MAP_SHARING_COW,		//	create a simple copy-on-write mapping. changes to the original file or mapping might be visible in the copy
-				MAP_SHARING_SNAPSHOT	//	take a snapshot-copy from the original mapping and employ copy-on-write semantics afterwards, changes to the original mapping are not visible in the copy
+				MAP_SHARING_COHERENT,	//	the mappings are kept coherent at all times, they effectivly refer to the same physical pages
+				MAP_SHARING_SNAPSHOT	//	take a snapshot-copy from the original mapping and employ copy-on-write semantics afterwards, changes to the original mapping are not visible in the copy and vice-versa
 			};
 
 			enum	ECreate
@@ -95,8 +94,6 @@ namespace	cl3
 			class	CL3PUBT	TMapping : public virtual collection::array::TArray<byte_t>
 			{
 				friend class TStream;
-				private:
-					CLASS	TMapping	(const TMapping&);
 				protected:
 					TFile* file;
 					uoff_t index;
@@ -111,9 +108,9 @@ namespace	cl3
 
 					CL3PUBF	CLASS	TMapping	(TFile* file, uoff_t index = 0, usys_t count = (usys_t)-1);
 					CL3PUBF	CLASS	TMapping	(TMapping&&);
+					CL3PUBF	CLASS	TMapping	(TMapping&, ESharing);
+					CL3PUBF	CLASS	TMapping	(const TMapping&);
 					CL3PUBF	CLASS	~TMapping	();
-
-					CL3PUBF	static	TMapping	CreateSnapshot	(const TMapping& source);
 			};
 
 			/************************************************************************/
@@ -213,8 +210,8 @@ namespace	cl3
 					CL3PUBF	text::string::TString
 									AbsolutePath		() const;
 					CL3PUBF	void	EnterDirectory		(const text::string::TString& name);	//	use ".." to go to the parent directory
-					CL3PUBF	void	EnumEntries			(collection::IDynamicCollection<TFileInfo>&) const;
-					CL3PUBF	void	EnumEntries			(collection::IDynamicCollection<text::string::TString>&) const;
+					CL3PUBF	usys_t	EnumEntries			(collection::IDynamicCollection<TFileInfo>&) const;
+					CL3PUBF	usys_t	EnumEntries			(collection::IDynamicCollection<text::string::TString>&) const;
 
 					CL3PUBF	CLASS	TDirectoryBrowser	();	//	starts in current working directory
 					CL3PUBF	CLASS	TDirectoryBrowser	(const text::string::TString& path);

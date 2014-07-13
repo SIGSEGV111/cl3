@@ -99,6 +99,11 @@ namespace	cl3
 				other.arr_items = NULL;
 			}
 
+			CLASS	TMapping::TMapping	(TMapping& other, ESharing sharing) : TArray<const byte_t>(NULL,0), TArray<byte_t>(NULL,0), file(other.file), index(other.index)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
 			CLASS	TMapping::TMapping	(const TMapping& other) : TArray<const byte_t>(NULL,0), TArray<byte_t>(NULL,0), file(other.file), index(other.index)
 			{
 				CL3_NOT_IMPLEMENTED;
@@ -466,12 +471,12 @@ namespace	cl3
 				CL3_CLASS_SYSERR(::close(old_fd));
 			}
 
-			void	TDirectoryBrowser::EnumEntries			(collection::IDynamicCollection<TFileInfo>&) const
+			usys_t	TDirectoryBrowser::EnumEntries			(collection::IDynamicCollection<TFileInfo>&) const
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			void	TDirectoryBrowser::EnumEntries			(collection::IDynamicCollection<text::string::TString>&) const
+			usys_t	TDirectoryBrowser::EnumEntries			(collection::IDynamicCollection<text::string::TString>&) const
 			{
 				CL3_NOT_IMPLEMENTED;
 			}

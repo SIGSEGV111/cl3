@@ -28,6 +28,7 @@
 #include <cl3/core/io_text_encoding_utf8.hpp>
 #include <cl3/core/system_task.hpp>
 #include <gtest/gtest.h>
+#include <stdlib.h>
 
 using namespace ::testing;
 
@@ -119,5 +120,20 @@ namespace
 		const TTime t_end = TTime::Now();
 		const TTime t_delta = t_end - t_start;
 		EXPECT_TRUE(t_delta.ConvertToI(TIME_UNIT_MILLISECONDS) < 50);
+	}
+
+	TEST(system_task_TProcess, Name)
+	{
+		const TString name_original = TProcess::Self()->Name();
+		const TString name_want = "gtest-system_task_TProcess";
+
+		EXPECT_TRUE(name_original.Find("/exe") != (usys_t)-1);
+		EXPECT_TRUE(system(TCString(TString("pidof ") + name_original + " >/dev/null", CODEC_CXX_CHAR).Chars()) == 0);
+
+		TProcess::Self()->Name(name_want);
+		EXPECT_TRUE(TProcess::Self()->Name() == name_want);
+		EXPECT_TRUE(system("pidof gtest-system_task_TProcess >/dev/null") == 0);
+
+		TProcess::Self()->Name(name_original);
 	}
 }

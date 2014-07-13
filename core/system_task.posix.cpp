@@ -33,6 +33,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <errno.h>
+#include <sys/ptrace.h>
 
 namespace	cl3
 {
@@ -50,41 +51,66 @@ namespace	cl3
 
 			/**************************************************************************************/
 
-			static TProcess proc_self;
+			static TProcess proc_self(0);
 
-			const char*	TProcess::Name	() const
+			pid_t	TProcess::Handle	() const
+			{
+				return this->pid == 0 ? getpid() : this->pid;
+			}
+
+			const io::collection::IDynamicCollection<const TString>&
+					TProcess::CommandlineArguments	() const
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			void		TProcess::Name	(const char* new_name)
+			const TList<IThread*>&
+					TProcess::Threads	() const
 			{
-				CL3_NOT_IMPLEMENTED;
+				return this->ls_threads;
 			}
 
-			const io::collection::IDynamicCollection<const char*>&	TProcess::CommandlineArguments	() const
+			void	TProcess::Shutdown	()
 			{
-				CL3_NOT_IMPLEMENTED;
+				CL3_CLASS_SYSERR(::kill(this->pid, SIGTERM));
 			}
 
-			const io::collection::IDynamicCollection<IThread*>&		TProcess::Threads	() const
+			void	TProcess::Suspend	()
 			{
-				CL3_NOT_IMPLEMENTED;
+				CL3_CLASS_SYSERR(::kill(this->pid, SIGSTOP));
 			}
 
-			void		TProcess::Shutdown	()
+			void	TProcess::Resume	()
 			{
-				CL3_NOT_IMPLEMENTED;
+				CL3_CLASS_SYSERR(::kill(this->pid, SIGCONT));
 			}
 
-			void		TProcess::Suspend	()
+			CLASS	TProcess::TProcess	(pid_t pid) : pid(pid)
 			{
-				CL3_NOT_IMPLEMENTED;
+				CL3_CLASS_ERROR(pid < 0 || (this != &proc_self && pid == 0), TException, "pid must be > 0");
+				if(pid)
+				{
+					CL3_CLASS_SYSERR(::ptrace(PTRACE_ATTACH, pid, NULL, NULL));
+
+					/*	TODO:
+						- enumerate all threads
+						- set various ptrace flags
+					*/
+					CL3_CLASS_SYSERR(::ptrace(PTRACE_CONT, pid, NULL, NULL));
+				}
 			}
 
-			void		TProcess::Resume	()
+			CLASS	TProcess::TProcess	(TProcess&& other) : pid(other.pid)
 			{
-				CL3_NOT_IMPLEMENTED;
+				other.pid = -1;
+			}
+
+			CLASS	TProcess::~TProcess	()
+			{
+				if(this->pid)
+				{
+					CL3_CLASS_SYSERR(::ptrace(PTRACE_DETACH, this->pid, NULL, NULL));
+				}
 			}
 
 			TProcess*	TProcess::Self		()
@@ -138,7 +164,7 @@ namespace	cl3
 				return this->os.Write(arr_items_write, n_items_write_max, n_items_write_min);
 			}
 
-			void	TProcessRunner::Start		(const io::collection::IStaticCollection<const io::text::string::TString>& args)
+			void	TProcessRunner::Start		(const io::collection::IStaticCollection<const TString>& args)
 			{
 				CL3_CLASS_ERROR(this->pid_child != -1, TException, "process is already/still running and cannot be started a second time in parallel");
 
@@ -274,7 +300,7 @@ namespace	cl3
 					this->is.FD(-1);
 			}
 
-			CLASS	TProcessRunner::TProcessRunner	(const io::text::string::TString& exe) : exe(exe), is(), os(), pid_child(-1)
+			CLASS	TProcessRunner::TProcessRunner	(const TString& exe) : exe(exe), is(), os(), pid_child(-1)
 			{
 				//	nothing else to do
 			}

@@ -147,6 +147,7 @@ namespace	cl3
 						const encoding::ICodec* codec;
 
 					public:
+						using collection::IStaticCollection<byte_t>::Count;
 						const encoding::ICodec*
 										Codec	() const { return this->codec; }
 						const char*		Chars	() const { return (const char*)this->ItemPtr(0); }
