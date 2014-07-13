@@ -198,7 +198,7 @@ namespace	cl3
 				};
 
 				template<class T>
-				class	CL3PUBT	TList<const T> : public virtual IList<const T>, public virtual stream::IIn<T>
+				class	CL3PUBT	TList<const T> : public virtual IList<const T>
 				{
 					protected:
 						T* arr_items;
@@ -211,6 +211,7 @@ namespace	cl3
 
 					public:
 						using array::IArray<const T>::Read;
+						using stream::IIn<T>::Read;
 
 						//	from IObservable
 						const event::TEvent<const IStaticCollection<const T>, TOnChangeData<const T> >&	OnChange	() const CL3_GETTER;
@@ -280,9 +281,7 @@ namespace	cl3
 
 					public:
 						using stream::IOut<T>::Write;
-						using stream::IIn<T>::Read;
 						using array::IArray<T>::Write;
-						using array::IArray<T>::Read;
 						using TList<const T>::OnChange;
 						using TList<const T>::CreateStaticIterator;
 						using TList<const T>::Count;
