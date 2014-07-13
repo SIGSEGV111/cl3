@@ -1023,13 +1023,22 @@ namespace	cl3
 				template<class T>
 				TList<T>&	TList<T>::operator=	(const TList<T>& rhs)
 				{
-					CL3_NOT_IMPLEMENTED;
+					Clear();
+					Append(rhs);
+					return *this;
 				}
 
 				template<class T>
 				TList<T>&	TList<T>::operator=	(TList<T>&& rhs)
 				{
-					CL3_NOT_IMPLEMENTED;
+					Clear();
+					arr_items = rhs.arr_items;
+					n_items_current = rhs.n_items_current;
+					n_items_prealloc = rhs.n_items_prealloc;
+					rhs.arr_items = NULL;
+					rhs.n_items_current = 0;
+					rhs.n_items_prealloc = 0;
+					return *this;
 				}
 
 				template<class T>
