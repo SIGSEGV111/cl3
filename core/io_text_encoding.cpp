@@ -97,6 +97,8 @@ namespace	cl3
 							return "input was unrepresentable in the target encoding";
 						case REASON_INVALID:
 							return "input was invalid";
+						default:
+							CL3_NONCLASS_FAIL(TException, "invalid reason code");
 					}
 				}
 

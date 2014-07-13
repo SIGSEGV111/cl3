@@ -91,13 +91,18 @@ namespace	cl3
 
 				public:
 					CL3PUBF	pid_t	Handle		() const CL3_GETTER;
+
 					CL3PUBF	io::text::string::TString
-									Name		() const CL3_GETTER;	//	name of the process
+									Name		() const CL3_GETTER;	//	the public visible name of the process (usually the name of its executable, or command-line)
 					CL3PUBF	void	Name		(const io::text::string::TString& new_name) CL3_SETTER;
 
 					//	commandline arguments (like argv[] in main())
 					CL3PUBF	const io::collection::IDynamicCollection<const io::text::string::TString>&
 									CommandlineArguments	() const CL3_GETTER;
+
+					//	environment varaibles (like envp[] in main())
+					CL3PUBF	const io::collection::IDynamicCollection<const io::text::string::TString>&
+									Environment	() const CL3_GETTER;
 
 					CL3PUBF	const io::collection::list::TList<IThread*>&
 									Threads		() const CL3_GETTER;

@@ -163,7 +163,7 @@ namespace	cl3
 					{
 						private:
 							template<typename U>
-							static decltype((delete reinterpret_cast<U*>(NULL)), yes()) test(int);
+							static decltype((reinterpret_cast<U*>(NULL)->~U()), yes()) test(int);
 
 							template<typename>
 							static no test(...);

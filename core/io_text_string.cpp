@@ -274,6 +274,8 @@ namespace	cl3
 								if(memcmp(this->ItemPtr(this->Count()-1-i), str_find.ItemPtr(0), str_find.Count() * 4) == 0)
 									return i;
 							return (usys_t)-1;
+						default:
+							CL3_CLASS_FAIL(error::TException, "invalid direction code");
 					}
 				}
 
@@ -407,7 +409,7 @@ namespace	cl3
 					this->Append(str, ustrlen(str, maxlen));
 				}
 
-				CLASS	TString::TString	(const TString& other) : TList<TUTF32>(other)
+				CLASS	TString::TString	(const TString& other) : TList<const TUTF32>(other), TList<TUTF32>(other)
 				{
 					//	nothing else to do
 				}
@@ -444,7 +446,7 @@ namespace	cl3
 					e->Write(&TUTF32::TERMINATOR, 1);
 				}
 
-				CLASS		TCString::TCString	(const TCString& other) : TList<byte_t>(other), codec(other.codec)
+				CLASS		TCString::TCString	(const TCString& other) : TList<const byte_t>(other), TList<byte_t>(other), codec(other.codec)
 				{
 					//	nothing else to do
 				}

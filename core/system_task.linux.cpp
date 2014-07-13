@@ -34,6 +34,7 @@
 
 #include "system_task.hpp"
 #include "io_text_string.hpp"
+#include "io_collection_list.hpp"
 #include "io_text_encoding.hpp"
 #include "util.hpp"
 
@@ -50,8 +51,17 @@ namespace	cl3
 	{
 		namespace	task
 		{
+			using namespace error;
+			using namespace system::memory;
+			using namespace io::text::string;
+			using namespace io::text::encoding;
+			using namespace io::collection::list;
+
 			static char** argv = NULL;
 			static char** envv = NULL;
+
+			static const TList<const TString>* ls_args = NULL;
+			static const TList<const TString>* ls_env = NULL;
 		}
 	}
 }
@@ -115,10 +125,6 @@ namespace	cl3
 	{
 		namespace	task
 		{
-			using namespace error;
-			using namespace io::text::string;
-			using namespace io::text::encoding;
-
 			TString	TProcess::Name		() const
 			{
 				return argv[0];
@@ -132,6 +138,40 @@ namespace	cl3
 
 				memset(argv[0] + cstr_name.Count(), 0, len_progname_got - cstr_name.Count());
 				memcpy(argv[0], cstr_name.Chars(), cstr_name.Count());
+			}
+
+			const io::collection::IDynamicCollection<const io::text::string::TString>&
+					TProcess::CommandlineArguments	() const
+			{
+				if(ls_args == NULL)
+				{
+					TList<TString>* ls = new TList<TString>();
+
+					for(char** p = envv; *p != NULL; p++)
+						ls->Append(*p);
+
+					if(compiler::AtomicSwap(ls_args, (TList<TString>*)NULL, ls) != NULL)
+						delete ls;
+				}
+
+				return *ls_args;
+			}
+
+			const io::collection::IDynamicCollection<const io::text::string::TString>&
+					TProcess::Environment	() const
+			{
+				if(ls_env == NULL)
+				{
+					TUniquePtr<TList<TString> > ls = MakeUniquePtr(new TList<TString>());
+
+					for(char** p = envv; *p != NULL; p++)
+						ls->Append(*p);
+
+					if(compiler::AtomicSwap(ls_env, (TList<TString>*)NULL, ls.Object()) != NULL)
+						ls.Reset();
+				}
+
+				return *ls_env;
 			}
 		}
 	}

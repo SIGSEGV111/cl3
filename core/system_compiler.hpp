@@ -91,7 +91,7 @@ namespace	cl3
 
 				template<class T> inline static T AtomicAdd(T& var, T add) { return __sync_fetch_and_add(&var,add); }
 				template<class T> inline static T AtomicSub(T& var, T sub) { return __sync_fetch_and_sub(&var,sub); }
-				template<class T> inline static T AtomicSwap(T& var, T cmpval, T newval) { return __sync_val_compare_and_swap(&var,cmpval,newval); }
+				template<class T1, class T2, class T3> inline static T1 AtomicSwap(T1& var, T2 cmpval, T3 newval) { return __sync_val_compare_and_swap(&var,cmpval,newval); }
 
 				inline static void CacheSync() { __sync_synchronize(); }
 				#define	CachePrefetch(adr,rw,tloc)	__builtin_prefetch((adr),(rw) == PREFETCH_READ ? 0 : ( (rw) == PREFETCH_WRITE ? 1 : 2 ),(tloc))

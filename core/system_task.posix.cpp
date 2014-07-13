@@ -58,12 +58,6 @@ namespace	cl3
 				return this->pid == 0 ? getpid() : this->pid;
 			}
 
-			const io::collection::IDynamicCollection<const TString>&
-					TProcess::CommandlineArguments	() const
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
 			const TList<IThread*>&
 					TProcess::Threads	() const
 			{

@@ -61,7 +61,7 @@ namespace	cl3
 					TDirectoryBrowser::AbsolutePath			() const
 					{
 						char name_link[32];
-						struct ::stat st = {};
+						struct ::stat st;
 						snprintf(name_link, 32, "/proc/self/fd/%d", this->fd);
 						CL3_CLASS_SYSERR(::lstat(name_link, &st));
 						auto name_target = MakeUniquePtr<UPTR_MALLOC>((char*)Alloc(st.st_size + 1, &TCTTI<char>::rtti));
