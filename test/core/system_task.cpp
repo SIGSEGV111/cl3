@@ -144,7 +144,7 @@ namespace
 
 	TEST(system_task_TProcess, Environment)
 	{
-		const IDynamicCollection<const TString>& ls = TProcess::Self()->Environment();
+		const IStaticCollection<const TString>& ls = TProcess::Self()->Environment();
 		auto it = ls.CreateStaticIterator();
 
 		const TString* cmd = NULL;
@@ -168,7 +168,7 @@ namespace
 
 	TEST(system_task_TProcess, CommandlineArguments)
 	{
-		const IDynamicCollection<const TString>& ls = TProcess::Self()->CommandlineArguments();
+		const IStaticCollection<const TString>& ls = TProcess::Self()->CommandlineArguments();
 		auto it = ls.CreateStaticIterator();
 
 		EXPECT_TRUE(it->MoveFirst());

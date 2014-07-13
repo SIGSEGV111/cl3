@@ -146,7 +146,7 @@ namespace	cl3
 				memcpy(argv[0], cstr_name.Chars(), len_progname_new);
 			}
 
-			const io::collection::IDynamicCollection<const io::text::string::TString>&
+			const io::collection::IStaticCollection<const io::text::string::TString>&
 					TProcess::CommandlineArguments	() const
 			{
 				if(ls_args.Object() == NULL)
@@ -163,7 +163,7 @@ namespace	cl3
 				return *ls_args;
 			}
 
-			const io::collection::IDynamicCollection<const io::text::string::TString>&
+			const io::collection::IStaticCollection<const io::text::string::TString>&
 					TProcess::Environment	() const
 			{
 				if(ls_env.Object() == NULL)

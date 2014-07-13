@@ -97,11 +97,11 @@ namespace	cl3
 					CL3PUBF	void	Name		(const io::text::string::TString& new_name) CL3_SETTER;
 
 					//	commandline arguments (like argv[] in main())
-					CL3PUBF	const io::collection::IDynamicCollection<const io::text::string::TString>&
+					CL3PUBF	const io::collection::IStaticCollection<const io::text::string::TString>&
 									CommandlineArguments	() const CL3_GETTER;
 
 					//	environment varaibles (like envp[] in main())
-					CL3PUBF	const io::collection::IDynamicCollection<const io::text::string::TString>&
+					CL3PUBF	const io::collection::IStaticCollection<const io::text::string::TString>&
 									Environment	() const CL3_GETTER;	//	TODO: use a map (KEY=VALUE) instead of a list
 
 					CL3PUBF	const io::collection::list::TList<IThread*>&
