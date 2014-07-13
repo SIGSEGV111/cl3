@@ -24,4 +24,4 @@ exe: $(OBJS)
 	$(CXX) -L../lib $(CXX_OPT) -rdynamic $(OBJS) -lcl3-core -lstdc++ -lrt -pthread -lgtest -lgmock ../lib/libgtest_main.a ../lib/libgmock_main.a -o $@
 
 run: exe
-	LD_LIBRARY_PATH=$(CURDIR)/../lib valgrind -q --leak-check=full --show-reachable=yes --track-origins=yes --num-callers=30 --trace-children=no --vgdb=yes --vgdb-error=1 --track-fds=yes --log-file=./valgrind.log --error-exitcode=1 ./exe || tail -n60 ./valgrind.log
+	LD_LIBRARY_PATH=$(CURDIR)/../lib valgrind -q --leak-check=full --show-reachable=yes --track-origins=yes --num-callers=30 --trace-children=no --vgdb=yes --vgdb-error=1 --track-fds=yes --log-file=./valgrind.log --error-exitcode=1 ./exe || (tail -n60 ./valgrind.log && false)
