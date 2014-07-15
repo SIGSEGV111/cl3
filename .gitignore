@@ -1,5 +1,6 @@
 gmock-1.7.0*
 gtest-1.7.0*
+cppcheck-1.65
 *.hpp.gch
 *.dcc
 *.dhh

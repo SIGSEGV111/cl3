@@ -23,5 +23,10 @@ exe: $(OBJS)
 	$(MAKE) libcl3-core.so -C ../../core
 	$(CXX) -L../lib $(CXX_OPT) -rdynamic $(OBJS) -lcl3-core -lstdc++ -lrt -pthread -lgtest -lgmock ../lib/libgtest_main.a ../lib/libgmock_main.a -o $@
 
-run: exe
+gtest: exe
 	LD_LIBRARY_PATH=$(CURDIR)/../lib valgrind -q --leak-check=full --show-reachable=yes --track-origins=yes --num-callers=30 --trace-children=no --vgdb=yes --vgdb-error=1 --track-fds=yes --log-file=./valgrind.log --error-exitcode=1 ./exe dummy1 dummy2 dummy3 || (tail -n60 ./valgrind.log && false)
+
+cppcheck:
+	../cppcheck/cppcheck --enable=all --force -I /usr/include -q ../../core/{*.cpp,*.hpp}
+
+run: gtest cppcheck
