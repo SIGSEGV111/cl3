@@ -1,8 +1,10 @@
 .PHONY: core mm prereqs
 
 all: prereqs
-	$(MAKE) run -C core -j
-	$(MAKE) run -C mm -j
+	rm -vf ../{core,mm}/*.gcda
+	$(MAKE) -j -C core run
+	$(MAKE) -j -C mm run
+	$(MAKE) -j -C coverage html-report
 
 prereqs: gtest/lib/.libs/libgtest_main.a gmock/lib/.libs/libgmock_main.a cppcheck/cppcheck
 
@@ -16,11 +18,11 @@ cppcheck/cppcheck:
 	rm -Rf cppcheck-1.65 && tar -xf cppcheck-1.65.tar.bz2 && $(MAKE) -j2 -C cppcheck SRCDIR=build CFGDIR=$(CURDIR)/cppcheck/cfg HAVE_RULES=yes CXX=g++
 
 core:
-	$(MAKE) run -C core -j
+	$(MAKE) -j -C core run
 
 mm:
-	$(MAKE) run -C mm -j
+	$(MAKE) -j -C mm run
 
 clean:
-	$(MAKE) clean -C core -j
-	$(MAKE) clean -C mm -j
+	$(MAKE) -j -C core clean
+	$(MAKE) -j -C mm clean
