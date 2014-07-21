@@ -1,17 +1,27 @@
 .PHONY: clean core mm test
 
-all: core mm
+all: all-release
+
+all-release: core-release mm-release
+all-devel: core-devel mm-devel
 
 clean:
-	$(MAKE) clean -C core -j
-	$(MAKE) clean -C mm -j
-	$(MAKE) clean -C test -j
+	$(MAKE) -j -C core clean
+	$(MAKE) -j -C mm clean
+	$(MAKE) -j -C test clean
 
-core:
-	$(MAKE) -C core -j
+core-release:
+	$(MAKE) -j -C core release
 
-mm: core
-	$(MAKE) -C mm -j
+core-devel:
+	$(MAKE) -j -C core devel
 
-test: core mm
-	$(MAKE) -C test -j
+
+mm-release: core-release
+	$(MAKE) -j -C mm release
+	
+mm-devel: core-devel
+	$(MAKE) -j -C mm devel
+
+test: all-devel
+	$(MAKE) -j -C test

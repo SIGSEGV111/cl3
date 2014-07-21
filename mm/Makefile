@@ -1,16 +1,21 @@
 .PHONY: all clean pch test
 
 CXX?=$(shell which clang)
-CXX_OPT_INT=-fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -fvisibility=hidden -Wno-unused-parameter -DINSIDE_CL3 -I../.. $(CXX_USR_OPT_LIB)
-CXX_OPT_EXT=-fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -fvisibility=hidden -Wno-unused-parameter              -I../.. $(CXX_USR_OPT_LIB)
 OBJS=$(shell ls -1 *.cpp | sed 's/\.cpp/\.o/' -)
 PCHS=$(shell ls -1 *.hpp | sed 's/\.hpp/\.hpp\.gch/' -)
 DHHS=$(shell ls -1 *.hpp | sed 's/\.hpp/\.dhh/' -)
 
-all: libcl3-mm.so libcl3-mm.a $(PCHS)
+CXX_OPT_INT=-fPIC -std=c++11 -O2 -DINSIDE_CL3 -I../.. $(CXX_USR_OPT_LIB)
+CXX_OPT_EXT=-fPIC -std=c++11 -O2 -I../.. $(CXX_USR_OPT_LIB)
+devel: CXX_OPT_INT=  -fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -fvisibility=hidden -Wno-unused-parameter -DINSIDE_CL3 -I../.. --coverage $(CXX_USR_OPT_LIB)
+devel: CXX_OPT_EXT=  -fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -fvisibility=hidden -Wno-unused-parameter              -I../.. --coverage $(CXX_USR_OPT_LIB)
+
+all: release
+
+release devel: libcl3-mm.so libcl3-mm.a $(PCHS)
 
 clean:
-	rm -vf *.so *.a *.o *.dhh *.dcc *.hpp.gch
+	rm -vf *.so *.a *.o *.dhh *.dcc *.hpp.gch *.gcda *.gcno
 
 pch: $(PCHS)
 
