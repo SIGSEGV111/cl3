@@ -80,7 +80,7 @@ static void cl3_init(int argc, char* argv[], char* envv[])
 
 	const usys_t len_progname_current = strlen(argv[0]);
 
-	if(RUNNING_ON_VALGRIND == 0)	// valgrind resets argv[0], thus libcl3 will keep execvpe()'ing until all eternity
+	if(false && RUNNING_ON_VALGRIND == 0)	// valgrind resets argv[0], thus libcl3 will keep execvpe()'ing until all eternity
 	{
 		if(len_progname_current < len_progname_want - 1)
 		{

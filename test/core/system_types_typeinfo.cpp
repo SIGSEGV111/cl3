@@ -59,7 +59,8 @@ namespace
 	struct	TT_public_stdctor
 	{
 		public:
-			TT_public_stdctor() {}
+			static bool ok;
+			TT_public_stdctor() { ok = true; }
 		private:
 			TT_public_stdctor(const TT_public_stdctor&);
 			~TT_public_stdctor();
@@ -68,7 +69,8 @@ namespace
 	struct	TT_public_copyctor
 	{
 		public:
-			TT_public_copyctor(const TT_public_copyctor&) {}
+			static bool ok;
+			TT_public_copyctor(const TT_public_copyctor&) { ok = true; }
 		private:
 			TT_public_copyctor();
 			~TT_public_copyctor();
@@ -77,7 +79,8 @@ namespace
 	struct	TT_public_dtor
 	{
 		public:
-			~TT_public_dtor() {}
+			static bool ok;
+			~TT_public_dtor() { ok = true; }
 		private:
 			TT_public_dtor();
 			TT_public_dtor(const TT_public_dtor&);
@@ -86,11 +89,17 @@ namespace
 	struct	TT_public_nonstdctor
 	{
 		public:
-			TT_public_nonstdctor(int) {}
+			static bool ok;
+			TT_public_nonstdctor(int) { ok = true; }
 		private:
 			TT_public_nonstdctor(const TT_public_stdctor&);
 			~TT_public_nonstdctor();
 	};
+
+	bool TT_public_stdctor::ok = false;
+	bool TT_public_copyctor::ok = false;
+	bool TT_public_dtor::ok = false;
+	bool TT_public_nonstdctor::ok = false;
 
 	//	*************************************************
 
@@ -109,6 +118,13 @@ namespace
 
 		v = TCTTI<TT_public_stdctor>::ctor;
 		EXPECT_TRUE(v != NULL);
+
+		{
+			TT_public_stdctor::ok = false;
+			char buffer[sizeof(TT_public_stdctor)] = {};
+			TCTTI<TT_public_stdctor>::ctor(buffer);
+			EXPECT_TRUE(TT_public_stdctor::ok);
+		}
 
 		v = TCTTI<TT_public_copyctor>::ctor;
 		EXPECT_TRUE(v == NULL);
@@ -141,6 +157,13 @@ namespace
 
 		v = TCTTI<TT_public_dtor>::dtor;
 		EXPECT_TRUE(v != NULL);
+
+		{
+			TT_public_dtor::ok = false;
+			char buffer[sizeof(TT_public_dtor)] = {};
+			TCTTI<TT_public_dtor>::dtor(buffer);
+			EXPECT_TRUE(TT_public_dtor::ok);
+		}
 	}
 
 	TEST(system_types_typeinfo_TCTTI, CopyConstructor)
@@ -161,6 +184,15 @@ namespace
 
 		v = TCTTI<TT_public_copyctor>::copyctor;
 		EXPECT_TRUE(v != NULL);
+
+		{
+			TT_public_copyctor::ok = false;
+			const char buffer1[sizeof(TT_public_copyctor)] = {};
+			char buffer2[sizeof(TT_public_copyctor)] = {};
+			memset(buffer2, 255, sizeof(TT_public_copyctor));
+			TCTTI<TT_public_copyctor>::copyctor(buffer2, buffer1);
+			EXPECT_TRUE(TT_public_copyctor::ok);
+		}
 
 		v = TCTTI<TT_public_dtor>::copyctor;
 		EXPECT_TRUE(v == NULL);

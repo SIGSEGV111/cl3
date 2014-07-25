@@ -8,7 +8,7 @@ OBJS=$(shell ls -1 *.cpp | sed 's/\.cpp/\.o/' -)
 all: run
 
 clean:
-	rm -vf exe *.o *.dhh *.dcc *.hpp.gch
+	rm -vf exe *.o *.dhh *.dcc *.hpp.gch valgrind.log *.tmp
 
 # pull in dependencies
 -include $(OBJS:.o=.dcc)

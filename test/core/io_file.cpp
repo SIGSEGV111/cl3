@@ -98,4 +98,22 @@ namespace
 			stream.Write((const byte_t*)"hello world\n", 12);
 		}
 	}
+
+	TEST(io_file_TFile, tempfile)
+	{
+		TFile tmpfile;
+
+		{
+			TStream stream(&tmpfile);
+			stream.Write((const byte_t*)"hello world\n", 12);
+		}
+
+		{
+			TStream stream(&tmpfile);
+			byte_t buffer[16];
+			stream.Read(buffer, 12);
+			EXPECT_TRUE(memcmp(buffer, "hello world\n", 12) == 0);
+		}
+
+	}
 }

@@ -20,6 +20,7 @@
 #include <cl3/core/system_types.hpp>
 #include <cl3/core/system_types_typeinfo.hpp>
 #include <cl3/core/system_memory.hpp>
+#include <cl3/core/util.hpp>
 #include <gtest/gtest.h>
 
 using namespace ::testing;
@@ -235,5 +236,25 @@ namespace
 		EXPECT_TRUE(op1 == OP_DESTRUCT);
 		EXPECT_TRUE(op2 == OP_DESTRUCT);
 		EXPECT_TRUE(op3 == OP_DESTRUCT);
+	}
+
+	TEST(system_memory_TUniquePtr, move_construct)
+	{
+		TUniquePtr<TTestException> p_te1 = MakeUniquePtr<TTestException>(new TTestException());
+		EXPECT_TRUE(p_te1.Object() != NULL);
+		TUniquePtr<TTestException> p_te2 = cl3::util::move(p_te1);
+		EXPECT_TRUE(p_te1.Object() == NULL);
+		EXPECT_TRUE(p_te2.Object() != NULL);
+	}
+
+	TEST(system_memory_TUniquePtr, move_assign)
+	{
+		TUniquePtr<TTestException> p_te1 = MakeUniquePtr<TTestException>(new TTestException());
+		EXPECT_TRUE(p_te1.Object() != NULL);
+		TUniquePtr<TTestException> p_te2 = MakeUniquePtr<TTestException>(new TTestException());
+		EXPECT_TRUE(p_te2.Object() != NULL);
+		p_te2 = cl3::util::move(p_te1);
+		EXPECT_TRUE(p_te1.Object() == NULL);
+		EXPECT_TRUE(p_te2.Object() != NULL);
 	}
 }

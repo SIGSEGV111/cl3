@@ -35,6 +35,8 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <errno.h>
 
 namespace	cl3
 {
@@ -54,7 +56,18 @@ namespace	cl3
 				const int flags = O_LARGEFILE | O_NOCTTY | O_CLOEXEC | O_TMPFILE | O_RDWR;
 				const TDirectoryBrowser& cwd = TDirectoryBrowser::ThreadCurrentWorkingDirectory();
 
-				CL3_CLASS_SYSERR(this->fd = open(TCString(cwd.AbsolutePath(), CODEC_CXX_CHAR).Chars(), flags, mode));
+				this->fd = open(TCString(cwd.AbsolutePath(), CODEC_CXX_CHAR).Chars(), flags, mode);
+				if(this->fd == -1)
+				{
+					if(errno == EOPNOTSUPP)
+					{
+						TCString tmpfile_name(cwd.AbsolutePath() + L"/.cl3tmp-XXXXXX", CODEC_CXX_CHAR);
+						CL3_CLASS_SYSERR(this->fd = mkostemp((char*)tmpfile_name.Chars(), O_CLOEXEC|O_NOCTTY|O_LARGEFILE|O_RDWR));
+						CL3_CLASS_SYSERR(::unlink(tmpfile_name.Chars()));
+					}
+					else
+						CL3_CLASS_FAIL(TSyscallException, errno);
+				}
 			}
 
 			text::string::TString

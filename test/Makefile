@@ -26,3 +26,4 @@ mm:
 clean:
 	$(MAKE) -j -C core clean
 	$(MAKE) -j -C mm clean
+	$(MAKE) -j -C coverage clean

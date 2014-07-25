@@ -56,7 +56,7 @@ namespace	cl3
 			};
 
 			template<class T, EUnqiuePtrType type = UPTR_OBJECT>
-			class	TUniquePtr
+			class	CL3PUBT	TUniquePtr
 			{
 				private:
 					TUniquePtr&	operator=	(const TUniquePtr&) = delete;

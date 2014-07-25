@@ -2,6 +2,9 @@
 
 all: html-report
 
+clean:
+	rm -Rf libcl3-core libcl3-mm libcl3-core.info libcl3-mm.info
+
 libcl3-core.info: ../core/valgrind.log
 	lcov --directory ../../core --capture --output-file libcl3-core.info >/dev/null
 
