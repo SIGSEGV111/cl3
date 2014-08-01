@@ -32,9 +32,10 @@ namespace	std
 
 void* operator new(size_t sz) { return Alloc(sz, NULL); }
 void* operator new[](size_t sz) { return Alloc(sz, NULL); }
-void operator delete(void* p_mem) throw() { Free(p_mem); }
-void operator delete[](void* p_mem) throw() { Free(p_mem); }
 void* operator new(size_t sz, const std::nothrow_t&) throw() { try { return Alloc(sz, NULL); } catch(...) { return NULL; } }
 void* operator new[](size_t sz, const std::nothrow_t&) throw() { try { return Alloc(sz, NULL); } catch(...) { return NULL; } }
-void operator delete(void* p_mem, const std::nothrow_t&) throw() { Free(p_mem); }
-void operator delete[](void* p_mem, const std::nothrow_t&) throw() { Free(p_mem); }
+
+void  operator delete(void* p_mem) throw() { Free(p_mem); }
+void  operator delete[](void* p_mem) throw() { Free(p_mem); }
+void  operator delete(void* p_mem, const std::nothrow_t&) throw() { Free(p_mem); }
+void  operator delete[](void* p_mem, const std::nothrow_t&) throw() { Free(p_mem); }

@@ -127,12 +127,39 @@ namespace	cl3
 
 				usys_t	ACharDecoder::Write		(const char* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
-					CL3_NOT_IMPLEMENTED;
+					if(this->decoder.Object() == NULL)
+					{
+						system::memory::TUniquePtr<IDecoder> d = CODEC_CXX_CHAR->CreateDecoder();
+						if(this->decoder.AtomicSwap(NULL, d.Object()) == NULL)
+						{
+							d.Reset();
+							this->decoder.Object()->Sink(this);
+						}
+					}
+
+					return this->decoder.Object()->Write((const byte_t*)arr_items_write, n_items_write_max, n_items_write_min);
 				}
 
 				usys_t	AWCharDecoder::Write	(const wchar_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
-					CL3_NOT_IMPLEMENTED;
+					if(CODEC_CXX_WCHAR == CODEC_UTF32)
+					{
+						return this->Write((const TUTF32*)arr_items_write, n_items_write_max, n_items_write_min);
+					}
+					else
+					{
+						if(this->decoder.Object() == NULL)
+						{
+							system::memory::TUniquePtr<IDecoder> d = CODEC_CXX_WCHAR->CreateDecoder();
+							if(this->decoder.AtomicSwap(NULL, d.Object()) == NULL)
+							{
+								d.Reset();
+								this->decoder.Object()->Sink(this);
+							}
+						}
+
+						return this->decoder.Object()->Write((const byte_t*)arr_items_write, n_items_write_max, n_items_write_min);
+					}
 				}
 
 				usys_t	ACharEncoder::Read		(char* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)

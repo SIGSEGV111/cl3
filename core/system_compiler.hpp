@@ -85,7 +85,7 @@ namespace	cl3
 
 				#define CL3_PACK( ... ) __VA_ARGS__ __attribute__((__packed__))
 				#define	CL3_WARN_UNUSED_RESULT	__attribute__((warn_unused_result))
-				#define CL3_UNREACHABLE	__builtin_unreachable()
+				#define CL3_UNREACHABLE	__builtin_unreachable() /* LCOV_EXCL_LINE */
 				#define	CL3_LIKELY(expr)	__builtin_expect((expr), true)
 				#define	CL3_UNLIKELY(expr)	__builtin_expect((expr), false)
 
@@ -235,31 +235,17 @@ namespace	cl3
 	}
 }
 
-//	for compatibility with libstdc++
-#ifndef _NEW
-#define _NEW
-	namespace	std
-	{
-		struct nothrow_t {};
-		extern CL3PUBF const nothrow_t nothrow;
-	}
 
-	CL3PUBF	void* operator new(size_t);
-	CL3PUBF	void* operator new[](size_t);
+#include <new>
 
-	CL3PUBF	void operator delete(void*) throw();
-	CL3PUBF	void operator delete[](void*) throw();
+CL3PUBF	void* operator new(size_t sz);
+CL3PUBF	void* operator new[](size_t sz);
+CL3PUBF	void* operator new(size_t sz, const std::nothrow_t&) throw();
+CL3PUBF	void* operator new[](size_t sz, const std::nothrow_t&) throw();
 
-	inline void* operator new(size_t, void* ptr) { return ptr; }
-	inline void* operator new[](size_t, void* ptr) { return ptr; }
-
-	inline void operator delete(void*, void*) throw() {}
-	inline void operator delete[](void*, void*) throw() {}
-
-	CL3PUBF	void* operator new(size_t, const std::nothrow_t&) throw();
-	CL3PUBF	void* operator new[](size_t, const std::nothrow_t&) throw();
-	CL3PUBF	void operator delete(void*, const std::nothrow_t&) throw();
-	CL3PUBF	void operator delete[](void*, const std::nothrow_t&) throw();
-#endif
+CL3PUBF	void  operator delete(void* p_mem) throw();
+CL3PUBF	void  operator delete[](void* p_mem) throw();
+CL3PUBF	void  operator delete(void* p_mem, const std::nothrow_t&) throw();
+CL3PUBF	void  operator delete[](void* p_mem, const std::nothrow_t&) throw();
 
 #endif

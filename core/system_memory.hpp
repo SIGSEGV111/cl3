@@ -111,9 +111,9 @@ namespace	cl3
 					T*			Claim	() CL3_GETTER { T* tmp = this->object; this->object = NULL; return tmp; }
 					void		Reset	() { this->object = NULL; }	//	does *NOT* release any memory - just removes control of the object from this class
 
-					T*	AtomicSwap	(const T* compare, const T* new_value)
+					T*	AtomicSwap	(const T* compare, T* new_value)
 					{
-						return compiler::AtomicSwap(this->object, compare, new_value);
+						return compiler::AtomicSwap(this->object, (T*)compare, new_value);
 					}
 
 					CLASS	TUniquePtr	() throw() : object(NULL) {}

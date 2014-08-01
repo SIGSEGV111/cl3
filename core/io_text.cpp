@@ -21,6 +21,7 @@
 #endif
 
 #include "io_text.hpp"
+#include "io_text_string.hpp"
 #include "io_text_encoding.hpp"
 #include "error.hpp"
 #include "io_collection_array.hpp"
@@ -159,6 +160,8 @@ namespace	cl3
 
 			//	*** ITextWriter ***
 
+			//	FIXME honor TNumberFormat
+
 			template<bool b_signed, class T>
 			static	void	PrintInteger	(IOut<char>& os, T num)
 			{
@@ -242,9 +245,9 @@ namespace	cl3
 				return *this;
 			}
 
-			ITextWriter&	ITextWriter::operator<<	(const string::TString&)
+			ITextWriter&	ITextWriter::operator<<	(const string::TString& str)
 			{
-				CL3_NOT_IMPLEMENTED;
+				this->Write(str.ItemPtr(0), str.Count());
 				return *this;
 			}
 

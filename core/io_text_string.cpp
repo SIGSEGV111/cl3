@@ -64,13 +64,13 @@ namespace	cl3
 
 				void		TString::Append		(const IStaticCollection<const char>& collection)
 				{
-					/*
-						TUniquePtr<IDecoder> d = CODEC_CXX_CHAR->CreateDecoder();
-						TUniquePtr<collection::IStaticIterator<const char> > it = collection.CreateStaticIterator();
-						d->Sink(this);
-						d->ReadIn(*it.Object());
-					*/
-					CL3_NOT_IMPLEMENTED;
+					TUniquePtr<IDecoder> d = CODEC_CXX_CHAR->CreateDecoder();
+					TUniquePtr<collection::IStaticIterator<const char> > it = collection.CreateStaticIterator();
+					d->Sink(this);
+
+					it->MoveHead();
+					while(it->MoveNext())
+						d->Write((const byte_t*)&it->Item(), sizeof(char));
 				}
 
 				void		TString::Append		(const wchar_t& item_append)
@@ -87,7 +87,24 @@ namespace	cl3
 
 				void		TString::Append		(const IStaticCollection<const wchar_t>& collection)
 				{
-					CL3_NOT_IMPLEMENTED;
+					if(CODEC_CXX_WCHAR == CODEC_UTF32)
+					{
+						TUniquePtr<collection::IStaticIterator<const wchar_t> > it = collection.CreateStaticIterator();
+
+						it->MoveHead();
+						while(it->MoveNext())
+							this->Append((const TUTF32&)it->Item());
+					}
+					else
+					{
+						TUniquePtr<IDecoder> d = CODEC_CXX_WCHAR->CreateDecoder();
+						TUniquePtr<collection::IStaticIterator<const wchar_t> > it = collection.CreateStaticIterator();
+						d->Sink(this);
+
+						it->MoveHead();
+						while(it->MoveNext())
+							d->Write((const byte_t*)&it->Item(), sizeof(wchar_t));
+					}
 				}
 
 				TString&	TString::operator+=	(const char chr_append)
@@ -279,9 +296,8 @@ namespace	cl3
 								if(memcmp(this->ItemPtr(i), str_find.ItemPtr(0), str_find.Count() * 4) == 0)
 									return i;
 							return (usys_t)-1;
-						default:
-							CL3_CLASS_FAIL(error::TException, "invalid direction code");
 					}
+					CL3_UNREACHABLE; //LCOV_EXCL_LINE
 				}
 
 				TString		TString::Left		(usys_t n_chars) const
@@ -365,24 +381,24 @@ namespace	cl3
 					}
 				}
 
-				TString		TString::Lower		() const
+				TString		TString::Lower		() const	//	LCOV_EXCL_LINE
 				{
-					CL3_NOT_IMPLEMENTED;
+					CL3_NOT_IMPLEMENTED;	//	LCOV_EXCL_LINE
 				}
 
-				TString		TString::Upper		() const
+				TString		TString::Upper		() const	//	LCOV_EXCL_LINE
 				{
-					CL3_NOT_IMPLEMENTED;
+					CL3_NOT_IMPLEMENTED;	//	LCOV_EXCL_LINE
 				}
 
-				TString&	TString::ToLower	()
+				TString&	TString::ToLower	()	//	LCOV_EXCL_LINE
 				{
-					CL3_NOT_IMPLEMENTED;
+					CL3_NOT_IMPLEMENTED;	//	LCOV_EXCL_LINE
 				}
 
-				TString&	TString::ToUpper	()
+				TString&	TString::ToUpper	()	//	LCOV_EXCL_LINE
 				{
-					CL3_NOT_IMPLEMENTED;
+					CL3_NOT_IMPLEMENTED;	//	LCOV_EXCL_LINE
 				}
 
 				usys_t	TString::Length		() const
@@ -467,9 +483,18 @@ namespace	cl3
 					//	nothing else to do
 				}
 
-				CLASS		TCString::TCString	(TCString&& other) : TList<byte_t>(other), codec(other.codec)
+				CLASS		TCString::TCString	(TCString&& other) // : TList<byte_t>(other), codec(other.codec)
 				{
 					//	nothing else to do
+
+					//	FIXME BUG WORKAROUND
+					CL3_CLASS_LOGIC_ERROR(this->arr_items != NULL);
+					this->arr_items = other.arr_items;
+					other.arr_items = NULL;
+					this->n_items_current = other.n_items_current;
+					other.n_items_current = 0;
+					this->n_items_prealloc = other.n_items_prealloc;
+					other.n_items_prealloc = 0;
 				}
 
 				TStringUPtr	Stringify	(FPrint print, const void* object)

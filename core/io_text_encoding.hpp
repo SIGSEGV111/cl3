@@ -149,6 +149,9 @@ namespace	cl3
 
 				class	CL3PUBT	ACharDecoder : public virtual stream::IOut<TUTF32>, public virtual stream::IOut<char>
 				{
+					protected:
+						system::memory::TUniquePtr<IDecoder> decoder;
+
 					public:
 						using stream::IOut<TUTF32>::Write;
 
@@ -157,6 +160,9 @@ namespace	cl3
 
 				class	CL3PUBT	AWCharDecoder : public virtual stream::IOut<TUTF32>, public virtual stream::IOut<wchar_t>
 				{
+					protected:
+						system::memory::TUniquePtr<IDecoder> decoder;
+
 					public:
 						using stream::IOut<TUTF32>::Write;
 

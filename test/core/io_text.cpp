@@ -39,6 +39,7 @@ namespace
 	using namespace cl3::io::text::encoding::utf8;
 	using namespace cl3::io::collection::list;
 	using namespace cl3::io::collection;
+	using namespace cl3::system::types::typeinfo;
 
 	TEST(io_text_encoding_utf8, Codec)
 	{
@@ -174,25 +175,38 @@ namespace
 		EXPECT_TRUE(a.Count() == 1);
 		EXPECT_TRUE(a == "ö");
 
-// 		TList<char> lchr;
-// 		lchr.Append('a');
-// 		lchr.Append('z');
-// 		lchr.Append('9');
-//
-// 		a += lchr;
-// 		EXPECT_TRUE(a.Length() == 4);
-// 		EXPECT_TRUE(a.Count() == 4);
-// 		EXPECT_TRUE(a == "öaz9");
-//
-// 		TList<wchar_t> wchr;
-// 		wchr.Append(L'ä');
-// 		wchr.Append(L'§');
-// 		wchr.Append(L'ü');
-//
-// 		a += wchr;
-// 		EXPECT_TRUE(a.Length() == 7);
-// 		EXPECT_TRUE(a.Count() == 7);
-// 		EXPECT_TRUE(a == "öaz9ä§ü");
+		TList<char> lchr;
+		lchr.Append('a');
+		lchr.Append('z');
+		lchr.Append('9');
+
+		a += lchr;
+		EXPECT_TRUE(a.Length() == 4);
+		EXPECT_TRUE(a.Count() == 4);
+		EXPECT_TRUE(a == "öaz9");
+
+		TList<wchar_t> wchr;
+		wchr.Append(L'ä');
+		wchr.Append(L'§');
+		wchr.Append(L'ü');
+
+		a += wchr;
+		EXPECT_TRUE(a.Length() == 7);
+		EXPECT_TRUE(a.Count() == 7);
+		EXPECT_TRUE(a == "öaz9ä§ü");
+
+		CODEC_CXX_WCHAR = CODEC_UTF8;
+
+		wchr.Clear();
+		wchr.Append(0x01010101);
+
+		a = "";
+		a += wchr;
+		EXPECT_TRUE(a.Length() == 4);
+		EXPECT_TRUE(a.Count() == 4);
+		EXPECT_TRUE(a == "\x01\x01\x01\x01");
+
+		CODEC_CXX_WCHAR = CODEC_UTF32;
 	}
 
 	TEST(io_text_string_TString, Compare)
@@ -287,13 +301,20 @@ namespace
 
 	TEST(io_text_string_TString, construct)
 	{
-		TString s = "hello";
-		TString a(cl3::util::move(s));
-		TString b = "world";
-		TString c;
-		EXPECT_TRUE(a == "hello");
-		EXPECT_TRUE(b == "world");
-		EXPECT_TRUE(c == "");
+		{
+			TString s = "hello";
+			TString a(cl3::util::move(s));
+			TString b = "world";
+			TString c;
+			EXPECT_TRUE(a == "hello");
+			EXPECT_TRUE(b == "world");
+			EXPECT_TRUE(c == "");
+		}
+
+		{
+			const TUTF32 s[] = { 'a', 'b', 'c', TUTF32::TERMINATOR, 'd', 'e', 'f' };
+			TString str(s, sizeof(s) / sizeof(TUTF32));
+		}
 	}
 
 	TEST(io_text_string_TString, Pad)
@@ -352,5 +373,48 @@ namespace
 		EXPECT_TRUE(y == "hello world test");
 		EXPECT_TRUE(z == "hello world test");
 		EXPECT_TRUE(x == " test");
+	}
+
+	TEST(io_text_string_TCString, construct)
+	{
+		TCString cstr1(TString("hällö wörld"), CODEC_CXX_CHAR);
+		EXPECT_TRUE(strcmp(cstr1.Chars(), "hällö wörld") == 0);
+		TCString cstr2(cstr1);
+		EXPECT_TRUE(strcmp(cstr2.Chars(), "hällö wörld") == 0);
+		TCString cstr3(cl3::util::move(cstr1));
+		EXPECT_TRUE(strcmp(cstr3.Chars(), "hällö wörld") == 0);
+		EXPECT_TRUE(strcmp(cstr2.Chars(), "hällö wörld") == 0);
+	}
+
+	TEST(io_text_string_TCString, assign)
+	{
+		TCString cstr1(TString("hällö wörld"), CODEC_CXX_CHAR);
+		TCString cstr2(TString("hello world"), CODEC_CXX_CHAR);
+		TCString cstr3(TString("abc abc"), CODEC_CXX_CHAR);
+		EXPECT_TRUE(strcmp(cstr1.Chars(), "hällö wörld") == 0);
+		EXPECT_TRUE(strcmp(cstr2.Chars(), "hello world") == 0);
+		EXPECT_TRUE(strcmp(cstr3.Chars(), "abc abc") == 0);
+		cstr2 = cstr1;
+		EXPECT_TRUE(strcmp(cstr1.Chars(), "hällö wörld") == 0);
+		EXPECT_TRUE(strcmp(cstr2.Chars(), "hällö wörld") == 0);
+		EXPECT_TRUE(strcmp(cstr3.Chars(), "abc abc") == 0);
+		cstr3 = cl3::util::move(cstr1);
+		EXPECT_TRUE(strcmp(cstr2.Chars(), "hällö wörld") == 0);
+		EXPECT_TRUE(strcmp(cstr3.Chars(), "hällö wörld") == 0);
+	}
+
+	TEST(io_text_string, Stringify)
+	{
+		struct T { int x,y,z; } t = {0,0,0};
+		EXPECT_TRUE(*Stringify(TCTTI<T>::print, &t).Object() == "<unprintable>");
+
+		const int i = 1234567;
+		EXPECT_TRUE(*Stringify(TCTTI<int>::print, &i).Object() == "1234567");
+
+		const double f = 1234567.17;
+		EXPECT_TRUE(*Stringify(TCTTI<double>::print, &f).Object() == "1234567.170000");
+
+		const TString s = "hello";
+		EXPECT_TRUE(*Stringify(TCTTI<TString>::print, &s).Object() == "hello");
 	}
 }

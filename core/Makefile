@@ -5,10 +5,11 @@ OBJS=$(shell ls -1 *.cpp | sed 's/\.cpp/\.o/' -)
 PCHS=$(shell ls -1 *.hpp | sed 's/\.hpp/\.hpp\.gch/' -)
 DHHS=$(shell ls -1 *.hpp | sed 's/\.hpp/\.dhh/' -)
 
-CXX_OPT_INT=-fPIC -std=c++11 -O2 -fvisibility=hidden -DINSIDE_CL3 $(CXX_USR_OPT_LIB)
-CXX_OPT_EXT=      -std=c++11 -O2 -fvisibility=hidden $(CXX_USR_OPT_LIB)
-devel: CXX_OPT_INT=  -fPIC -std=c++11 -g -O0 -Wall -Wextra -Werror -fvisibility=hidden -Wno-unused-parameter -DINSIDE_CL3 --coverage $(CXX_USR_OPT_LIB)
-devel: CXX_OPT_EXT=        -std=c++11 -g -O0 -Wall -Wextra -Werror -fvisibility=hidden -Wno-unused-parameter              --coverage $(CXX_USR_OPT_LIB)
+CXX_OPT_COMMON=-fvisibility-inlines-hidden -std=c++11 -fvisibility=hidden -fPIC $(CXX_USR_OPT_LIB)
+CXX_OPT_INT=$(CXX_OPT_COMMON) -march=native -O2 -DINSIDE_CL3
+CXX_OPT_EXT=$(CXX_OPT_COMMON) -march=native -O2
+devel: CXX_OPT_INT=$(CXX_OPT_COMMON) -g -O0 -Wall -Wextra -Werror -Wno-unused-parameter --coverage -DINSIDE_CL3
+devel: CXX_OPT_EXT=$(CXX_OPT_COMMON) -g -O0 -Wall -Wextra -Werror -Wno-unused-parameter --coverage
 
 all: release
 

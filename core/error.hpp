@@ -42,7 +42,7 @@ namespace	cl3
 
 				CL3PUBF	CLASS	TException	(const char* format, ...);	//	printf-syle ctor
 				CL3PUBF	CLASS	TException	(const TException&);
-				CL3PUBF	virtual	~TException	();
+				virtual	CLASS	~TException	();
 				CL3PUBF	void	Set	(const void* object, const char* codefile, const char* function, const char* expression, TException* inner, unsigned codeline);
 		};
 
