@@ -270,6 +270,7 @@ namespace	cl3
 						CLASS		TList		(const T* arr_items, usys_t n_items);
 						CLASS		TList		(const IStaticCollection<const T>&);
 						CLASS		TList		(const TList&);
+						CLASS		TList		(TList&&);
 						virtual		~TList		();
 				};
 
@@ -337,6 +338,7 @@ namespace	cl3
 						CLASS		TList		(const T* arr_items, usys_t n_items);
 						CLASS		TList		(const IStaticCollection<const T>&);
 						CLASS		TList		(const TList&);
+						CLASS		TList		(TList&&);
 						virtual		~TList		();
 				};
 
@@ -957,6 +959,14 @@ namespace	cl3
 				}
 
 				template<class T>
+				CLASS		TList<const T>::TList		(TList&& list) : arr_items(list.arr_items), n_items_current(list.n_items_current), n_items_prealloc(list.n_items_prealloc), on_change(), guard_resize(false)
+				{
+					list.arr_items = NULL;
+					list.n_items_current = 0;
+					list.n_items_prealloc = 0;
+				}
+
+				template<class T>
 				CLASS		TList<const T>::~TList	()
 				{
 					Clear();
@@ -1087,6 +1097,11 @@ namespace	cl3
 
 				template<class T>
 				CLASS		TList<T>::TList		(const TList& other) : TList<const T>(other)
+				{
+				}
+
+				template<class T>
+				CLASS		TList<T>::TList		(TList&& other) : TList<const T>(other)
 				{
 				}
 

@@ -64,10 +64,10 @@ namespace	cl3
 
 						CL3PUBF	void		Append		(const char& item_append);
 						CL3PUBF	void		Append		(const char* arr_items_append, usys_t n_items_append);
-						CL3PUBF	void		Append		(const IStaticCollection<char>& collection);
+						CL3PUBF	void		Append		(const IStaticCollection<const char>& collection);
 						CL3PUBF	void		Append		(const wchar_t& item_append);
 						CL3PUBF	void		Append		(const wchar_t* arr_items_append, usys_t n_items_append);
-						CL3PUBF	void		Append		(const IStaticCollection<wchar_t>& collection);
+						CL3PUBF	void		Append		(const IStaticCollection<const wchar_t>& collection);
 
 						//	append string
 						CL3PUBF	TString&	operator+=	(const char chr_append);
@@ -76,9 +76,9 @@ namespace	cl3
 						CL3PUBF	TString&	operator+=	(const char* str_append);
 						CL3PUBF	TString&	operator+=	(const wchar_t* str_append);
 						CL3PUBF	TString&	operator+=	(const TUTF32* str_append);
-						CL3PUBF	TString&	operator+=	(const collection::IStaticCollection<char>& collection_append);
-						CL3PUBF	TString&	operator+=	(const collection::IStaticCollection<wchar_t>& collection_append);
-						CL3PUBF	TString&	operator+=	(const collection::IStaticCollection<TUTF32>& collection_append);
+						CL3PUBF	TString&	operator+=	(const collection::IStaticCollection<const char>& collection_append);
+						CL3PUBF	TString&	operator+=	(const collection::IStaticCollection<const wchar_t>& collection_append);
+						CL3PUBF	TString&	operator+=	(const collection::IStaticCollection<const TUTF32>& collection_append);
 
 						CL3PUBF	TString		operator+	(const TString& rhs);
 						CL3PUBF	TString		operator+	(TString&& rhs);
@@ -109,7 +109,8 @@ namespace	cl3
 						CL3PUBF	usys_t		Replace		(const TString& str_find, const TString& str_replace, usys_t n_times_max = (usys_t)-1);	//	returns the number of times of which <find> was replaced with <replace>
 
 						//	find substring
-						CL3PUBF	usys_t		Find		(const TString& str_find, usys_t idx_start = 0, collection::EDirection direction = collection::DIRECTION_FORWARD) const CL3_GETTER;
+						CL3PUBF	usys_t		Find		(const TString& str_find) const CL3_GETTER;
+						CL3PUBF	usys_t		Find		(const TString& str_find, usys_t idx_start, collection::EDirection direction) const CL3_GETTER;
 
 						//	return parts of the string
 						CL3PUBF	TString		Left		(usys_t n_chars) const CL3_GETTER;

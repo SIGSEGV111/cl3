@@ -47,7 +47,7 @@ namespace	cl3
 					usys_t count;
 
 					CL3PUBF	CLASS	TIndexOutOfBoundsException	(ssys_t index, usys_t count);
-					CL3PUBF	virtual	CLASS	~TIndexOutOfBoundsException	() {}
+					CL3PUBF	virtual	CLASS	~TIndexOutOfBoundsException	();
 			};
 
 			enum	EDirection

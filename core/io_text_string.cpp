@@ -62,7 +62,7 @@ namespace	cl3
 					d->Write((const byte_t*)arr_items_append, n_items_append);
 				}
 
-				void		TString::Append		(const IStaticCollection<char>& collection)
+				void		TString::Append		(const IStaticCollection<const char>& collection)
 				{
 					/*
 						TUniquePtr<IDecoder> d = CODEC_CXX_CHAR->CreateDecoder();
@@ -85,7 +85,7 @@ namespace	cl3
 					d->Write((const byte_t*)arr_items_append, n_items_append * sizeof(wchar_t));
 				}
 
-				void		TString::Append		(const IStaticCollection<wchar_t>& collection)
+				void		TString::Append		(const IStaticCollection<const wchar_t>& collection)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -126,19 +126,19 @@ namespace	cl3
 					return *this;
 				}
 
-				TString&	TString::operator+=	(const collection::IStaticCollection<char>& collection_append)
+				TString&	TString::operator+=	(const collection::IStaticCollection<const char>& collection_append)
 				{
 					this->Append(collection_append);
 					return *this;
 				}
 
-				TString&	TString::operator+=	(const collection::IStaticCollection<wchar_t>& collection_append)
+				TString&	TString::operator+=	(const collection::IStaticCollection<const wchar_t>& collection_append)
 				{
 					this->Append(collection_append);
 					return *this;
 				}
 
-				TString&	TString::operator+=	(const collection::IStaticCollection<TUTF32>& collection_append)
+				TString&	TString::operator+=	(const collection::IStaticCollection<const TUTF32>& collection_append)
 				{
 					this->Append(collection_append);
 					return *this;
@@ -247,12 +247,17 @@ namespace	cl3
 				{
 					for(usys_t n_times = 0, idx_start = 0; n_times < n_times_max; idx_start += str_find.Count(), n_times++)
 					{
-						idx_start = this->Find(str_find, idx_start);
+						idx_start = this->Find(str_find, idx_start, DIRECTION_FORWARD);
 						if(idx_start == (usys_t)-1)
 							return n_times;
 						this->Replace(idx_start, str_find.Count(), str_replace);
 					}
 					return n_times_max;
+				}
+
+				usys_t		TString::Find		(const TString& str_find) const
+				{
+					return this->Find(str_find, 0, DIRECTION_FORWARD);
 				}
 
 				usys_t		TString::Find		(const TString& str_find, usys_t idx_start, collection::EDirection direction) const
@@ -270,8 +275,8 @@ namespace	cl3
 							return (usys_t)-1;
 
 						case DIRECTION_BACKWARD:
-							for(usys_t i = idx_start; i <= n; i++)
-								if(memcmp(this->ItemPtr(this->Count()-1-i), str_find.ItemPtr(0), str_find.Count() * 4) == 0)
+							for(usys_t i = n; i != (usys_t)-1; i--)
+								if(memcmp(this->ItemPtr(i), str_find.ItemPtr(0), str_find.Count() * 4) == 0)
 									return i;
 							return (usys_t)-1;
 						default:
@@ -385,26 +390,26 @@ namespace	cl3
 					return ustrlen(this->arr_items, this->n_items_current);
 				}
 
-				CLASS	TString::TString	() : TList()
+				CLASS	TString::TString	() : TList<TUTF32>()
 				{
 					//	nothing else to do
 				}
 
-				CLASS	TString::TString	(const char*    str, usys_t maxlen) : TList()
+				CLASS	TString::TString	(const char*    str, usys_t maxlen) : TList<TUTF32>()
 				{
 					TUniquePtr<IDecoder> d = CODEC_CXX_CHAR->CreateDecoder();
 					d->Sink(this);
 					d->Write((const byte_t*)str, strnlen(str, maxlen) * sizeof(char));
 				}
 
-				CLASS	TString::TString	(const wchar_t* str, usys_t maxlen) : TList()
+				CLASS	TString::TString	(const wchar_t* str, usys_t maxlen) : TList<TUTF32>()
 				{
 					TUniquePtr<IDecoder> d = CODEC_CXX_WCHAR->CreateDecoder();
 					d->Sink(this);
 					d->Write((const byte_t*)str, wcsnlen(str, maxlen) * sizeof(wchar_t));
 				}
 
-				CLASS	TString::TString	(const TUTF32*  str, usys_t maxlen) : TList()
+				CLASS	TString::TString	(const TUTF32*  str, usys_t maxlen) : TList<TUTF32>()
 				{
 					this->Append(str, ustrlen(str, maxlen));
 				}
@@ -414,9 +419,20 @@ namespace	cl3
 					//	nothing else to do
 				}
 
-				CLASS	TString::TString	(TString&& other) : TList(other)
+				CLASS	TString::TString	(TString&& other) //: TList<TUTF32>(static_cast<TList<TUTF32>&&>(other))
 				{
 					//	nothing else to do
+
+
+					//	FIXME BUG WORKAROUND:
+					//CL3_CLASS_LOGIC_ERROR(other.arr_items != NULL);
+					CL3_CLASS_LOGIC_ERROR(this->arr_items != NULL);
+					this->arr_items = other.arr_items;
+					other.arr_items = NULL;
+					this->n_items_current = other.n_items_current;
+					other.n_items_current = 0;
+					this->n_items_prealloc = other.n_items_prealloc;
+					other.n_items_prealloc = 0;
 				}
 
 				CLASS	TString::~TString	()
@@ -438,7 +454,7 @@ namespace	cl3
 					return *this;
 				}
 
-				CLASS		TCString::TCString	(const TString& str, const encoding::ICodec* codec) : TList(), codec(codec)
+				CLASS		TCString::TCString	(const TString& str, const encoding::ICodec* codec) : TList<byte_t>(), codec(codec)
 				{
 					TUniquePtr<IEncoder> e = codec->CreateEncoder();
 					e->Sink(this);

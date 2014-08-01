@@ -21,6 +21,7 @@
 #endif
 
 #include "io_text.hpp"
+#include "io_text_encoding.hpp"
 #include "error.hpp"
 #include "io_collection_array.hpp"
 
@@ -57,10 +58,17 @@ namespace	cl3
 
 			CLASS	TUTF32::TUTF32	(wchar_t wchr)
 			{
-				if(wchr < 128)
+				if(encoding::CODEC_CXX_WCHAR == encoding::CODEC_UTF32)
+				{
 					code = wchr;
+				}
 				else
-					CL3_NOT_IMPLEMENTED;
+				{
+					if(wchr < 128)
+						code = wchr;
+					else
+						CL3_NOT_IMPLEMENTED;
+				}
 			}
 
 			//	*** ITextReader ***

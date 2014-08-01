@@ -38,6 +38,7 @@ namespace
 	using namespace cl3::io::text::encoding;
 	using namespace cl3::io::text::encoding::utf8;
 	using namespace cl3::io::collection::list;
+	using namespace cl3::io::collection;
 
 	TEST(io_text_encoding_utf8, Codec)
 	{
@@ -106,19 +107,92 @@ namespace
 		TString a = "hällo wörld";
 		EXPECT_TRUE(a.Length() == 11);
 		EXPECT_TRUE(a.Count() == 11);
+		EXPECT_TRUE(a == "hällo wörld");
 
 		a += "abc\0def";
 		EXPECT_TRUE(a.Length() == 14);
 		EXPECT_TRUE(a.Count() == 14);
+		EXPECT_TRUE(a == "hällo wörldabc");
 
 		a += L"abc\0def";
 		EXPECT_TRUE(a.Length() == 17);
 		EXPECT_TRUE(a.Count() == 17);
+		EXPECT_TRUE(a == "hällo wörldabcabc");
 
 		const TUTF32 s[] = { 'a', 'b', 'c', TUTF32::TERMINATOR, 'd', 'e', 'f' };
 		a += s;
 		EXPECT_TRUE(a.Length() == 20);
 		EXPECT_TRUE(a.Count() == 20);
+		EXPECT_TRUE(a == "hällo wörldabcabcabc");
+
+		a += 'a';
+		EXPECT_TRUE(a.Length() == 21);
+		EXPECT_TRUE(a.Count() == 21);
+		EXPECT_TRUE(a == "hällo wörldabcabcabca");
+
+		a += L'ä';
+		EXPECT_TRUE(a.Length() == 22);
+		EXPECT_TRUE(a.Count() == 22);
+		EXPECT_TRUE(a == "hällo wörldabcabcabcaä");
+
+		a += TUTF32(L'ö');
+		EXPECT_TRUE(a.Length() == 23);
+		EXPECT_TRUE(a.Count() == 23);
+		EXPECT_TRUE(a == "hällo wörldabcabcabcaäö");
+
+		a += TString(L"h°llü");
+		EXPECT_TRUE(a.Length() == 28);
+		EXPECT_TRUE(a.Count() == 28);
+		EXPECT_TRUE(a == "hällo wörldabcabcabcaäöh°llü");
+
+		a.Append(TString(L"hällö"));
+		EXPECT_TRUE(a.Length() == 33);
+		EXPECT_TRUE(a.Count() == 33);
+		EXPECT_TRUE(a == "hällo wörldabcabcabcaäöh°llühällö");
+
+		a.Append("hällö", strlen("hällö"));
+		EXPECT_TRUE(a.Length() == 38);
+		EXPECT_TRUE(a.Count() == 38);
+		EXPECT_TRUE(a == "hällo wörldabcabcabcaäöh°llühällöhällö");
+
+		a.Append('a');
+		EXPECT_TRUE(a.Length() == 39);
+		EXPECT_TRUE(a.Count() == 39);
+		EXPECT_TRUE(a == "hällo wörldabcabcabcaäöh°llühällöhällöa");
+
+		a.Append(s, sizeof(s) / sizeof(TUTF32));
+		EXPECT_TRUE(a.Length() == 42);
+		EXPECT_TRUE(a.Count() == 46);
+
+		a.Append("test\0abc", 8);
+		EXPECT_TRUE(a.Length() == 42);
+		EXPECT_TRUE(a.Count() == 54);
+
+		a = "";
+		a.Append(L'ö');
+		EXPECT_TRUE(a.Length() == 1);
+		EXPECT_TRUE(a.Count() == 1);
+		EXPECT_TRUE(a == "ö");
+
+// 		TList<char> lchr;
+// 		lchr.Append('a');
+// 		lchr.Append('z');
+// 		lchr.Append('9');
+//
+// 		a += lchr;
+// 		EXPECT_TRUE(a.Length() == 4);
+// 		EXPECT_TRUE(a.Count() == 4);
+// 		EXPECT_TRUE(a == "öaz9");
+//
+// 		TList<wchar_t> wchr;
+// 		wchr.Append(L'ä');
+// 		wchr.Append(L'§');
+// 		wchr.Append(L'ü');
+//
+// 		a += wchr;
+// 		EXPECT_TRUE(a.Length() == 7);
+// 		EXPECT_TRUE(a.Count() == 7);
+// 		EXPECT_TRUE(a == "öaz9ä§ü");
 	}
 
 	TEST(io_text_string_TString, Compare)
@@ -149,7 +223,7 @@ namespace
 		EXPECT_TRUE(s == "special-test");
 	}
 
-	TEST(io_text_string_TString, Find)
+	TEST(io_text_string_TString, Find_Forward)
 	{
 		TString s = "hello world foo";
 		EXPECT_TRUE(s.Find("hello") == 0);
@@ -159,6 +233,18 @@ namespace
 		EXPECT_TRUE(s.Find("world foo") == 6);
 		EXPECT_TRUE(s.Find("hello foo") == (usys_t)-1);
 		EXPECT_TRUE(s.Find("hello world foo ") == (usys_t)-1);
+	};
+
+	TEST(io_text_string_TString, Find_Backward)
+	{
+		TString s = "hello world foo";
+		EXPECT_TRUE(s.Find("hello", 0, DIRECTION_BACKWARD) == 0);
+		EXPECT_TRUE(s.Find("world", 0, DIRECTION_BACKWARD) == 6);
+		EXPECT_TRUE(s.Find("foo", 0, DIRECTION_BACKWARD) == 12);
+		EXPECT_TRUE(s.Find("hello world foo", 0, DIRECTION_BACKWARD) == 0);
+		EXPECT_TRUE(s.Find("world foo", 0, DIRECTION_BACKWARD) == 6);
+		EXPECT_TRUE(s.Find("hello foo", 0, DIRECTION_BACKWARD) == (usys_t)-1);
+		EXPECT_TRUE(s.Find("hello world foo ", 0, DIRECTION_BACKWARD) == (usys_t)-1);
 	};
 
 	TEST(io_text_string_TString, Find_and_Replace)
@@ -185,6 +271,29 @@ namespace
 		EXPECT_TRUE(s.Left(15) == "hello world foo");
 		EXPECT_TRUE(s.Right(15) == "hello world foo");
 		EXPECT_TRUE(s.Mid(0, 15) == "hello world foo");
+	}
+
+	TEST(io_text_string_TString, assign)
+	{
+		TString a = "hello";
+		TString b = "world";
+		EXPECT_TRUE(a == "hello");
+		EXPECT_TRUE(b == "world");
+		a = b;
+		EXPECT_TRUE(a == "world");
+		b = TString("foo");
+		EXPECT_TRUE(b == "foo");
+	}
+
+	TEST(io_text_string_TString, construct)
+	{
+		TString s = "hello";
+		TString a(cl3::util::move(s));
+		TString b = "world";
+		TString c;
+		EXPECT_TRUE(a == "hello");
+		EXPECT_TRUE(b == "world");
+		EXPECT_TRUE(c == "");
 	}
 
 	TEST(io_text_string_TString, Pad)
