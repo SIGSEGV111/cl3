@@ -49,6 +49,15 @@ namespace
 		Free(bytes);
 	}
 
+	TEST(system_memory, SizeOf)
+	{
+		byte_t* bytes = (byte_t*)Alloc(128, NULL);
+		EXPECT_TRUE(SizeOf(bytes) >= 128 && SizeOf(bytes) < 128 + 128);
+		bytes = (byte_t*)Realloc(bytes, 256, NULL, false);
+		EXPECT_TRUE(SizeOf(bytes) >= 256 && SizeOf(bytes) < 256 + 128);
+		Free(bytes);
+	}
+
 	TEST(system_memory, Alloc_Realloc_Free_w_allocator_switch)
 	{
 		TFailAllocator fail_allocator;
@@ -107,6 +116,21 @@ namespace
 		delete x;
 		delete y;
 		delete z;
+	}
+
+	TEST(system_memory_TRestrictAllocator, Realloc)
+	{
+		const usys_t sz_limit = 0x10000;
+		TRestrictAllocator ra(CL3_PARAMETER_STACK_VALUE(allocator), sz_limit);
+
+		void* array = ra.Alloc(17);
+		array = ra.Realloc(array, 112, false);
+		array = ra.Realloc(array, 200, false);
+		array = ra.Realloc(array, 120, false);
+
+		EXPECT_THROW(array = ra.Realloc(array, 0x10001, false), TBadAllocException);
+
+		ra.Free(array);
 	}
 
 	TEST(system_memory_TRestrictAllocator, accounting)

@@ -404,16 +404,120 @@ namespace
 				EXPECT_FALSE(t1 == t7);
 			}
 
-			TEST(system_time_TTime, Now)
+			TEST(system_time_TTime, ConvertFrom_Int)
+			{
+				EXPECT_TRUE(TTime::ConvertFrom(TIME_UNIT_MILLISECONDS, (s64_t)123456789)  == TTime(123456,789000000000000000));
+				EXPECT_TRUE(TTime::ConvertFrom(TIME_UNIT_SECONDS, (s64_t)123456789)  == TTime(123456789,0));
+			}
+
+			TEST(system_time_TTime, ConvertFrom_Float)
+			{
+				EXPECT_TRUE(TTime::ConvertFrom(TIME_UNIT_MILLISECONDS, 1000.0)  == TTime(1,0));
+				EXPECT_TRUE(TTime::ConvertFrom(TIME_UNIT_SECONDS,   123456789.500)  == TTime(123456789,500000000000000000));
+			}
+
+			TEST(system_time_TTime, Now_Realtime)
 			{
 				const TTime ts = TTime::Now(TIME_CLOCK_REALTIME);
 				::usleep(10000L);	// sleep 10ms
 				const TTime te = TTime::Now(TIME_CLOCK_REALTIME);
-				EXPECT_TRUE(ts < te);
+				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
 				const TTime td_min(0, 9000000000000000);	//  9ms
 				const TTime td_max(0,50000000000000000);	// 50ms
 				EXPECT_TRUE(td_out > td_min);
+				EXPECT_TRUE(td_out < td_max);
+			}
+
+			TEST(system_time_TTime, Now_Monotonic)
+			{
+				const TTime ts = TTime::Now(TIME_CLOCK_MONOTONIC);
+				::usleep(10000L);	// sleep 10ms
+				const TTime te = TTime::Now(TIME_CLOCK_MONOTONIC);
+				EXPECT_TRUE(ts <= te);
+				const TTime td_out = te - ts;
+				const TTime td_min(0, 9000000000000000);	//  9ms
+				const TTime td_max(0,50000000000000000);	// 50ms
+				EXPECT_TRUE(td_out > td_min);
+				EXPECT_TRUE(td_out < td_max);
+			}
+
+			TEST(system_time_TTime, Now_TAI)
+			{
+				const TTime ts = TTime::Now(TIME_CLOCK_TAI);
+				::usleep(10000L);	// sleep 10ms
+				const TTime te = TTime::Now(TIME_CLOCK_TAI);
+				EXPECT_TRUE(ts <= te);
+				const TTime td_out = te - ts;
+				const TTime td_min(0, 9000000000000000);	//  9ms
+				const TTime td_max(0,50000000000000000);	// 50ms
+				EXPECT_TRUE(td_out > td_min);
+				EXPECT_TRUE(td_out < td_max);
+			}
+
+			TEST(system_time_TTime, Now_CPU_Process)
+			{
+				const TTime ts = TTime::Now(TIME_CLOCK_PROCESS);
+				for(int i = 0; i < 100; i++) ::usleep(100L);
+				const TTime te = TTime::Now(TIME_CLOCK_PROCESS);
+				EXPECT_TRUE(ts <= te);
+				const TTime td_out = te - ts;
+				const TTime td_max(0,50000000000000000);	// 50ms
+				EXPECT_TRUE(td_out < td_max);
+			}
+
+			TEST(system_time_TTime, Now_CPU_Thread)
+			{
+				const TTime ts = TTime::Now(TIME_CLOCK_THREAD);
+				for(int i = 0; i < 100; i++) ::usleep(100L);
+				const TTime te = TTime::Now(TIME_CLOCK_THREAD);
+				EXPECT_TRUE(ts <= te);
+				const TTime td_out = te - ts;
+				const TTime td_max(0,50000000000000000);	// 50ms
+				EXPECT_TRUE(td_out < td_max);
+			}
+
+			TEST(system_time_TTime, Now_CPU_Process_User)
+			{
+				const TTime ts = TTime::Now(TIME_CLOCK_PROCESS_USER);
+				for(int i = 0; i < 100; i++) ::usleep(100L);
+				const TTime te = TTime::Now(TIME_CLOCK_PROCESS_USER);
+				EXPECT_TRUE(ts <= te);
+				const TTime td_out = te - ts;
+				const TTime td_max(0,50000000000000000);	// 50ms
+				EXPECT_TRUE(td_out < td_max);
+			}
+
+			TEST(system_time_TTime, Now_CPU_Process_Sys)
+			{
+				const TTime ts = TTime::Now(TIME_CLOCK_PROCESS_SYS);
+				for(int i = 0; i < 100; i++) ::usleep(100L);
+				const TTime te = TTime::Now(TIME_CLOCK_PROCESS_SYS);
+				EXPECT_TRUE(ts <= te);
+				const TTime td_out = te - ts;
+				const TTime td_max(0,50000000000000000);	// 50ms
+				EXPECT_TRUE(td_out < td_max);
+			}
+
+			TEST(system_time_TTime, Now_CPU_Thread_User)
+			{
+				const TTime ts = TTime::Now(TIME_CLOCK_THREAD_USER);
+				for(int i = 0; i < 100; i++) ::usleep(100L);
+				const TTime te = TTime::Now(TIME_CLOCK_THREAD_USER);
+				EXPECT_TRUE(ts <= te);
+				const TTime td_out = te - ts;
+				const TTime td_max(0,50000000000000000);	// 50ms
+				EXPECT_TRUE(td_out < td_max);
+			}
+
+			TEST(system_time_TTime, Now_CPU_Thread_Sys)
+			{
+				const TTime ts = TTime::Now(TIME_CLOCK_THREAD_SYS);
+				for(int i = 0; i < 100; i++) ::usleep(100L);
+				const TTime te = TTime::Now(TIME_CLOCK_THREAD_SYS);
+				EXPECT_TRUE(ts <= te);
+				const TTime td_out = te - ts;
+				const TTime td_max(0,10000000000000000);	// 50ms
 				EXPECT_TRUE(td_out < td_max);
 			}
 		}

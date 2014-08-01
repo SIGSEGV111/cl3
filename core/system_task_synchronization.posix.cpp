@@ -46,7 +46,11 @@ namespace	cl3
 					if(this->owner == self)
 						this->n_times++;
 					else
+					{
 						CL3_CLASS_PTHREAD_ERROR(pthread_mutex_lock(&this->mtx));
+						this->owner = self;
+						this->n_times = 1;
+					}
 				}
 
 				bool	TMutex::Acquire		(time::TTime timeout)

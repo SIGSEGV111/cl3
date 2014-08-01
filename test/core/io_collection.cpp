@@ -639,4 +639,16 @@ namespace
 		EXPECT_TRUE(list[3] == 5);
 		EXPECT_TRUE(list[4] == 6);
 	}
+
+	TEST(io_colection_list_TList, IndexOutOfBounds_IndexOperator)
+	{
+		TList<int> list;
+
+		EXPECT_THROW(list[0] = 17, TIndexOutOfBoundsException);
+
+		list.Add(8);
+		list.Add(9);
+
+		EXPECT_THROW(list[2] = 17, TIndexOutOfBoundsException);
+	}
 }

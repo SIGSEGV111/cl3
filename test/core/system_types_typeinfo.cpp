@@ -280,4 +280,9 @@ namespace
 
 		EXPECT_TRUE( (*TCTTI< __::TTest<signed short,signed char,17L> >::rtti.Name()) == "__::TTest<s16_t, s8_t, 17>" );
 	}
+
+	TEST(system_types_typeinfo_TRTTI, Hash)
+	{
+		EXPECT_TRUE(TCTTI<int>::rtti.Hash() == 0xda7fa419);
+	}
 }
