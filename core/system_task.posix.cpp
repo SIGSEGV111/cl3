@@ -87,7 +87,7 @@ namespace	cl3
 
 			pid_t	TProcess::Handle	() const
 			{
-				return this->pid == 0 ? getpid() : this->pid;
+				return this->handle == 0 ? getpid() : this->handle;
 			}
 
 			const TList<IThread*>&
@@ -98,48 +98,90 @@ namespace	cl3
 
 			void	TProcess::Shutdown	()
 			{
-				CL3_CLASS_SYSERR(::kill(this->pid, SIGTERM));
+				CL3_CLASS_ERROR(this->handle == -1, TException, "the process was already shut down or did never ran in the first place");
+				CL3_CLASS_SYSERR(::kill(this->handle, SIGTERM));
+			}
+
+			void	TProcess::Kill		()
+			{
+				CL3_CLASS_ERROR(this->handle == -1, TException, "the process was already shut down or did never ran in the first place");
+				CL3_CLASS_SYSERR(::kill(this->handle, SIGKILL));
 			}
 
 			void	TProcess::Suspend	()
 			{
-				CL3_CLASS_SYSERR(::kill(this->pid, SIGSTOP));
+				CL3_CLASS_ERROR(this->handle == -1, TException, "the process was already shut down or did never ran in the first place");
+				CL3_CLASS_SYSERR(::kill(this->handle, SIGSTOP));
 			}
 
 			void	TProcess::Resume	()
 			{
-				CL3_CLASS_SYSERR(::kill(this->pid, SIGCONT));
+				CL3_CLASS_ERROR(this->handle == -1, TException, "the process was already shut down or did never ran in the first place");
+				CL3_CLASS_SYSERR(::kill(this->handle, SIGCONT));
 			}
 
-			CLASS	TProcess::TProcess	(pid_t pid) : pid(pid)
+			int		TProcess::Wait		(time::TTime timeout)
 			{
-				CL3_CLASS_ERROR(pid < 0 || (this != &proc_self && pid == 0), TException, "pid must be > 0");
-				if(pid)
-				{
-					CL3_CLASS_SYSERR(::ptrace(PTRACE_ATTACH, pid, NULL, NULL));
+				CL3_CLASS_ERROR(this->handle == -1, TException, "the process was already shut down or did never ran in the first place");
+				if(timeout != -1) CL3_NOT_IMPLEMENTED;	//	FIXME
 
-					/*	TODO:
-						- enumerate all threads
-						- set various ptrace flags
-					*/
-					CL3_CLASS_SYSERR(::ptrace(PTRACE_CONT, pid, NULL, NULL));
-				}
+				int status_child;
+				CL3_CLASS_SYSERR(waitpid(this->handle, &status_child, 0));
+				this->handle = -1;
+				return status_child;
+			}
+
+			EState	TProcess::State		() const
+			{
+				if(this->handle == -1)
+					return STATE_DEAD;
 				else
 				{
-					ls_threads.Append(th_self);
+					if(::kill(this->handle, 0) == -1)
+					{
+						CL3_CLASS_SYSERR(errno != ESRCH);
+						return STATE_DEAD;
+					}
+					else
+						return STATE_ALIVE_EXECUTING;	//	FIXME
 				}
 			}
 
-			CLASS	TProcess::TProcess	(TProcess&& other) : pid(other.pid)
+			CLASS	TProcess::TProcess	(pid_t pid) : handle(pid)
 			{
-				other.pid = -1;
+				CL3_CLASS_ERROR(pid < -1 || (this != &proc_self && pid == 0), TException, "pid must be > 0");
+
+				if(pid != -1)
+				{
+					if(pid == 0)
+					{
+						//	proc_self
+						CL3_CLASS_LOGIC_ERROR(this != &proc_self);
+						ls_threads.Append(th_self);
+					}
+					else
+					{
+						CL3_CLASS_SYSERR(::ptrace(PTRACE_ATTACH, pid, NULL, NULL));
+
+						/*	TODO:
+							- enumerate all threads
+							- set various ptrace flags
+						*/
+						CL3_CLASS_SYSERR(::ptrace(PTRACE_CONT, pid, NULL, NULL));
+					}
+				}
+			}
+
+			CLASS	TProcess::TProcess	(TProcess&& other) : handle(other.handle)
+			{
+				other.handle = -1;
 			}
 
 			CLASS	TProcess::~TProcess	()
 			{
-				if(this->pid)
+				if(this->handle > 0)
 				{
-					CL3_CLASS_SYSERR(::ptrace(PTRACE_DETACH, this->pid, NULL, NULL));
+					CL3_CLASS_SYSERR(::ptrace(PTRACE_DETACH, this->handle, NULL, NULL));
 				}
 			}
 
@@ -162,14 +204,14 @@ namespace	cl3
 				return this->os.Write(arr_items_write, n_items_write_max, n_items_write_min);
 			}
 
-			void	TProcessRunner::Start		(const io::collection::IStaticCollection<const TString>& args)
+			void	TProcessRunner::Start		(const TString& exe, const io::collection::IStaticCollection<const TString>& args)
 			{
-				CL3_CLASS_ERROR(this->pid_child != -1, TException, "process is already/still running and cannot be started a second time in parallel");
+				CL3_CLASS_ERROR(this->handle != -1, TException, "process is already/still running and cannot be started a second time in parallel");
 
 				int pipe_c2p[2] = {-1,-1};
 				int pipe_p2c[2] = {-1,-1};
 
-				TCString cstr_exe(this->exe, CODEC_CXX_CHAR);
+				TCString cstr_exe(exe, CODEC_CXX_CHAR);
 				TList<char*> ls_cstr_args;
 
 				ls_cstr_args.Append((char*)cstr_exe.Chars());
@@ -177,14 +219,14 @@ namespace	cl3
 					ls_cstr_args.Append((char*)TCString(it->Item(), CODEC_CXX_CHAR).Claim());
 				ls_cstr_args.Append((char*)NULL);
 
-				this->pid_child = -1;
+				this->handle = -1;
 				try
 				{
 					CL3_CLASS_SYSERR(::pipe(pipe_c2p));
 					CL3_CLASS_SYSERR(::pipe(pipe_p2c));
-					CL3_CLASS_SYSERR(this->pid_child = fork());
+					CL3_CLASS_SYSERR(this->handle = fork());
 
-					if(this->pid_child == 0)
+					if(this->handle == 0)
 					{
 						//	this is the child
 						try
@@ -218,72 +260,13 @@ namespace	cl3
 					::close(pipe_c2p[1]);
 					::close(pipe_p2c[0]);
 					::close(pipe_p2c[1]);
-					if(this->pid_child != -1) ::kill(pid_child, SIGTERM);
+					if(this->handle != -1) ::kill(handle, SIGTERM);
 					for(usys_t i = 1; i < ls_cstr_args.Count(); i++)
 						system::memory::Free(ls_cstr_args[i]);
 					throw;
 				}
 				for(usys_t i = 1; i < ls_cstr_args.Count(); i++)
 					system::memory::Free(ls_cstr_args[i]);
-			}
-
-			void	TProcessRunner::Shutdown	()
-			{
-				CL3_CLASS_LOGIC_ERROR(this->pid_child < -1 || this->pid_child == 0);
-				CL3_CLASS_ERROR(this->pid_child == -1, TException, "the process was already shut down or did never ran in the first place");
-
-				this->CloseTX();
-				this->CloseRX();
-
-				//	send the shutdown signal
-				if(this->pid_child > 0)
-					CL3_CLASS_ERROR(::kill(this->pid_child, SIGTERM) == -1 && errno != ESRCH, TSyscallException, errno);
-			}
-
-			void	TProcessRunner::Suspend		()
-			{
-				CL3_CLASS_ERROR(this->pid_child == -1, TException, "the process was already shut down or did never ran in the first place");
-				CL3_CLASS_SYSERR(::kill(this->pid_child, SIGSTOP));
-			}
-
-			void	TProcessRunner::Resume		()
-			{
-				CL3_CLASS_ERROR(this->pid_child == -1, TException, "the process was already shut down or did never ran in the first place");
-				CL3_CLASS_SYSERR(::kill(this->pid_child, SIGCONT));
-			}
-
-			int		TProcessRunner::Wait		(time::TTime timeout)
-			{
-				CL3_CLASS_ERROR(this->pid_child == -1, TException, "the process was already shut down or did never ran in the first place");
-				if(timeout != -1) CL3_NOT_IMPLEMENTED;	//	FIXME
-
-				this->CloseTX();
-				this->CloseRX();
-
-				int status_child;
-				CL3_CLASS_SYSERR(waitpid(this->pid_child, &status_child, 0));
-				this->pid_child = -1;
-				return status_child;
-			}
-
-			void	TProcessRunner::Kill		()
-			{
-				CL3_CLASS_LOGIC_ERROR(this->pid_child < -1 || this->pid_child == 0);
-				CL3_CLASS_ERROR(this->pid_child == -1, TException, "the process was already shut down or did never ran in the first place");
-
-				this->CloseTX();
-				this->CloseRX();
-
-				//	send the kill signal
-				if(this->pid_child > 0)
-					CL3_CLASS_ERROR(::kill(this->pid_child, SIGKILL) == -1 && errno != ESRCH, TSyscallException, errno);
-			}
-
-			EState	TProcessRunner::State		() const
-			{
-				CL3_CLASS_LOGIC_ERROR(this->pid_child < -1 || this->pid_child == 0);
-				if(this->pid_child == -1 || ::kill(this->pid_child, 0) == -1) return STATE_DEAD;
-				else return STATE_ALIVE_EXECUTING;	//	FIXME
 			}
 
 			void	TProcessRunner::CloseTX		()
@@ -298,14 +281,14 @@ namespace	cl3
 					this->is.FD(-1);
 			}
 
-			CLASS	TProcessRunner::TProcessRunner	(const TString& exe) : exe(exe), is(), os(), pid_child(-1)
+			CLASS	TProcessRunner::TProcessRunner	() : TProcess(-1), is(), os()
 			{
 				//	nothing else to do
 			}
 
 			CLASS	TProcessRunner::~TProcessRunner	()
 			{
-				if(this->pid_child != -1)
+				if(this->handle != -1)
 				{
 					this->CloseTX();
 					this->CloseRX();

@@ -45,8 +45,10 @@ namespace	cl3
 
 			#if (CL3_OS == CL3_OS_POSIX)
 				typedef int pid_t;
+				typedef int handle_t;
 			#elif (CL3_OS == CL3_OS_WINDOWS)
-				typedef void* pid_t;
+				typedef int pid_t;
+				typedef void* handle_t;
 			#else
 				#error "define pid_t for this OS"
 			#endif
@@ -74,6 +76,8 @@ namespace	cl3
 			{
 				public:
 					CL3PUBF	CL3_GETTER	pid_t		ID		() const;
+					CL3PUBF	io::text::string::TString
+													Name	() const CL3_GETTER;	//	the public visible name of the process (usually the name of its executable, or command-line)
 					CL3PUBF CL3_GETTER	TProcess	Open	() const;	//	open the process for direct access
 			};
 
@@ -86,15 +90,15 @@ namespace	cl3
 			class	CL3PUBT TProcess
 			{
 				protected:
-					pid_t pid;
+					handle_t handle;
 					io::collection::list::TList<IThread*> ls_threads;
 
 				public:
 					CL3PUBF	pid_t	Handle		() const CL3_GETTER;
 
-					CL3PUBF	io::text::string::TString
-									Name		() const CL3_GETTER;	//	the public visible name of the process (usually the name of its executable, or command-line)
 					CL3PUBF	void	Name		(const io::text::string::TString& new_name) CL3_SETTER;
+					CL3PUBF	io::text::string::TString
+									Name		() const CL3_GETTER;
 
 					//	commandline arguments (like argv[] in main())
 					CL3PUBF	const io::collection::IStaticCollection<const io::text::string::TString>&
@@ -110,6 +114,10 @@ namespace	cl3
 					CL3PUBF	void	Shutdown	();	//	requests the process to shut down
 					CL3PUBF	void	Suspend		();	//	suspends the execution of the process (suspends all threads)
 					CL3PUBF	void	Resume		();	//	resumes the execution of the process (resumes all threads)
+					CL3PUBF	int		Wait		(time::TTime timeout = -1);	//	waits until the process has shut down (this will not send a shutdown request by its own)
+					CL3PUBF	void	Kill		();	//	kills the process, unsaved data might get lost
+
+					CL3PUBF	EState	State		() const CL3_GETTER;	//	returns the process' current state
 
 					CL3PUBF	static	TProcess*	Self	() CL3_GETTER;
 
@@ -118,45 +126,14 @@ namespace	cl3
 					CL3PUBF	CLASS	~TProcess	();
 			};
 
-			class	CL3PUBT	IThread
-			{
-				public:
-					CL3PUBF	static	IThread*	Self	() CL3_GETTER;	//	returns the IThread& for the calling thread
-
-					CL3PUBF	io::text::string::TString
-										Name	() const CL3_GETTER;	//	returns the name of the thread
-					CL3PUBF	TProcess*	Process	() CL3_GETTER;			//	returns the process to which the thread belongs
-					CL3PUBF	EState		State	() const CL3_GETTER;	//	returns the threads current state
-					CL3PUBF	THost*		Host	() const CL3_GETTER;	//	returns the host machine this thread is executed on (possibly volatile in cluster systems)
-					CL3PUBF	io::collection::IDynamicCollection<TCPU*>&	Affinity() CL3_GETTER;	//	returns the threads CPU affinity list
-
-					CL3PUBF	void*	StackStart	() const CL3_GETTER;	//	start address of the execution stack - might be less than end (stack grows down)
-					CL3PUBF	void*	StackEnd	() const CL3_GETTER;	//	end address of the execution stack - might be bigger than start (stack grows up)
-					CL3PUBF	void*	StackCurrent() const CL3_GETTER;	//	current address of the stack pointer (NOTE: obviously highly volatile if the thread is not suspended)
-					CL3PUBF	usys_t	StackSize	() const CL3_GETTER;	//	returns the size in bytes of the stacks size
-					CL3PUBF	usys_t	StackFree	() const CL3_GETTER;	//	returns the size in bytes of free (still unused / available) stack space (computed from Current() and End())
-					CL3PUBF	usys_t	StackUsed	() const CL3_GETTER;	//	returns the size in bytes of used stack space (computed from Current() and Start())
-
-					CL3PUBF	void	Start		(usys_t sz_stack = -1UL);	//	starts the thread if it is not alive yet, throws if it is already alive
-					CL3PUBF	void	Shutdown	();	//	sets the "request shutdown" flag, throws if the thread is not alive
-					CL3PUBF	void	Suspend		();	//	suspends the execution of the thread, throws if the thread is already suspended or not alive at all
-					CL3PUBF	void	Resume		();	//	resumes the execution of a suspended thread, throws if the thread is not suspended or not alive at all
-
-				protected:
-					CL3PUBF	void	Name		(const io::text::string::TString&) CL3_SETTER;
-					virtual	void	ThreadMain	() = 0;
-			};
-
-			class	CL3PUBT	TProcessRunner : public virtual io::stream::IIn<byte_t>, public virtual io::stream::IOut<byte_t>
+			class	CL3PUBT	TProcessRunner : public virtual TProcess, public virtual io::stream::IIn<byte_t>, public virtual io::stream::IOut<byte_t>
 			{
 				private:
 					TProcessRunner(const TProcessRunner&);	//	no copy constructor
 
 				protected:
-					io::text::string::TString exe;
 					io::stream::fd::TFDStream is;
 					io::stream::fd::TFDStream os;
-					pid_t pid_child;
 
 				public:
 					//	from IIn<byte_t>
@@ -168,19 +145,42 @@ namespace	cl3
 					CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
 
 					//	from TProcessRunner
-					CL3PUBF	void	Start		(const io::collection::IStaticCollection<const io::text::string::TString>& args = io::collection::list::TList<io::text::string::TString>());	//	starts the process
-					CL3PUBF	void	Shutdown	();	//	requests the process to shut down
-					CL3PUBF	void	Suspend		();	//	suspends the execution of the process (suspends all threads)
-					CL3PUBF	void	Resume		();	//	resumes the execution of the process (resumes all threads)
-					CL3PUBF	int		Wait		(time::TTime timeout = -1);	//	waits until the process has shut down (this will not send a shutdown request by its own)
-					CL3PUBF	void	Kill		();	//	kills the process, unsaved data might get lost
-					CL3PUBF	EState	State		() const CL3_GETTER;	//	returns the process' current state
+					CL3PUBF	void	Start		(const io::text::string::TString& exe, const io::collection::IStaticCollection<const io::text::string::TString>& args = io::collection::list::TList<io::text::string::TString>());	//	starts the process
 
 					CL3PUBF	void	CloseTX		();
 					CL3PUBF	void	CloseRX		();
 
-					CL3PUBF	CLASS	TProcessRunner	(const io::text::string::TString& exe);
+					CL3PUBF	CLASS	TProcessRunner	();
 					CL3PUBF	CLASS	~TProcessRunner	();
+			};
+
+			class	CL3PUBT	IThread
+			{
+				public:
+					CL3PUBF	static	IThread*	Self	() CL3_GETTER;	//	returns the IThread* for the calling thread
+
+					CL3PUBF	io::text::string::TString
+							Name	() const CL3_GETTER;	//	returns the name of the thread
+					CL3PUBF	TProcess*	Process	() CL3_GETTER;			//	returns the process to which the thread belongs
+					CL3PUBF	EState		State	() const CL3_GETTER;	//	returns the threads current state
+					CL3PUBF	THost*		Host	() const CL3_GETTER;	//	returns the host machine this thread is executed on (possibly volatile in cluster systems)
+					CL3PUBF	io::collection::IDynamicCollection<TCPU*>&	Affinity() CL3_GETTER;	//	returns the threads CPU affinity list
+
+					CL3PUBF	void*	StackStart	() const CL3_GETTER;	//	start address of the execution stack
+					CL3PUBF	void*	StackEnd	() const CL3_GETTER;	//	end address of the execution stack
+					CL3PUBF	void*	StackCurrent() const CL3_GETTER;	//	current address of the stack pointer (NOTE: obviously highly volatile if the thread is not suspended)
+					CL3PUBF	usys_t	StackSize	() const CL3_GETTER;	//	returns the size in bytes of the threads stacks
+					CL3PUBF	usys_t	StackFree	() const CL3_GETTER;	//	returns the size in bytes of free (still unused / available) stack space (computed from StackCurrent() and StackEnd() - NOTE: see StackCurrent)
+					CL3PUBF	usys_t	StackUsed	() const CL3_GETTER;	//	returns the size in bytes of used stack space (computed from Current() and Start())
+
+					CL3PUBF	void	Start		(usys_t sz_stack = -1UL);	//	starts the thread if it is not alive yet, throws if it is already alive
+					CL3PUBF	void	Shutdown	();	//	sets the "request shutdown" flag, throws if the thread is not alive
+					CL3PUBF	void	Suspend		();	//	suspends the execution of the thread, throws if the thread is already suspended or not alive at all
+					CL3PUBF	void	Resume		();	//	resumes the execution of a suspended thread, throws if the thread is not suspended or not alive at all
+
+				protected:
+					CL3PUBF	void	Name		(const io::text::string::TString&) CL3_SETTER;
+					virtual	void	ThreadMain	() = 0;
 			};
 		}
 	}

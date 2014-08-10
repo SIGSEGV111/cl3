@@ -53,9 +53,9 @@ namespace
 		byte_t buffer[32];
 
 		{
-			TProcessRunner runner("cat");
+			TProcessRunner runner;
 
-			runner.Start();
+			runner.Start("cat");
 			runner.Write((const byte_t*)"Hello World\n", 12);
 			runner.CloseTX();
 			runner.Read(buffer, 12);
@@ -72,9 +72,9 @@ namespace
 		args.Append("--fast");
 
 		{
-			TProcessRunner runner("gzip");
+			TProcessRunner runner;
 
-			runner.Start(args);
+			runner.Start("gzip", args);
 			runner.Write((const byte_t*)"Hello World\n", 12);
 			runner.CloseTX();
 			runner.Read(buffer, 32);
@@ -83,9 +83,9 @@ namespace
 
 		{
 			args.Append("--decompress");
-			TProcessRunner runner("gzip");
+			TProcessRunner runner;
 
-			runner.Start(args);
+			runner.Start("gzip", args);
 			runner.Write(buffer, 32);
 			runner.CloseTX();
 			runner.Read(buffer, 12);
@@ -99,10 +99,10 @@ namespace
 	{
 		TList<TString> args;
 		args.Append("0.5");
-		TProcessRunner runner("sleep");
+		TProcessRunner runner;
 
 		const TTime t_start = TTime::Now();
-		runner.Start(args);
+		runner.Start("sleep", args);
 		runner.Wait();
 		const TTime t_end = TTime::Now();
 		const TTime t_delta = t_end - t_start;
@@ -113,10 +113,10 @@ namespace
 	{
 		TList<TString> args;
 		args.Append("0.5");
-		TProcessRunner runner("sleep");
+		TProcessRunner runner;
 
 		const TTime t_start = TTime::Now();
-		runner.Start(args);
+		runner.Start("sleep", args);
 		runner.Kill();
 		runner.Wait();
 		const TTime t_end = TTime::Now();
