@@ -68,6 +68,8 @@ namespace	cl3
 
 				namespace	_
 				{
+					static void* const DUMMY = (void*)0x1;
+
 					template<class T> CL3PUBF void generic_dtor(void* object) { reinterpret_cast<T*>(object)->~T(); }
 					template<class T> CL3PUBF void generic_stdctor(void* object) { new (object) T(); }
 					template<class T> CL3PUBF void generic_copyctor(void* object, const void* ref) { new (object) T(*reinterpret_cast<const T*>(ref)); }
@@ -149,7 +151,7 @@ namespace	cl3
 					{
 						private:
 							template<typename U>
-							static decltype(new U(*reinterpret_cast<const U*>(NULL)), yes()) test(int);
+							static decltype(new U(*reinterpret_cast<const U*>(DUMMY)), yes()) test(int);
 
 							template<typename>
 							static no test(...);
@@ -163,7 +165,7 @@ namespace	cl3
 					{
 						private:
 							template<typename U>
-							static decltype((reinterpret_cast<U*>(NULL)->~U()), yes()) test(int);
+							static decltype((reinterpret_cast<U*>(DUMMY)->~U()), yes()) test(int);
 
 							template<typename>
 							static no test(...);
@@ -177,7 +179,7 @@ namespace	cl3
 					{
 						private:
 							template<typename U>
-							static decltype((reinterpret_cast<const U*>(NULL)->Serialize(*reinterpret_cast<io::serialization::ISerializer*>(NULL))), yes()) test(int);
+							static decltype((reinterpret_cast<const U*>(DUMMY)->Serialize(*reinterpret_cast<io::serialization::ISerializer*>(DUMMY))), yes()) test(int);
 
 							template<typename>
 							static no test(...);
@@ -191,7 +193,7 @@ namespace	cl3
 					{
 						private:
 							template<typename U>
-							static decltype((reinterpret_cast<U*>(NULL)->Deserialize(*reinterpret_cast<io::serialization::IDeserializer*>(NULL))), yes()) test(int);
+							static decltype((reinterpret_cast<U*>(DUMMY)->Deserialize(*reinterpret_cast<io::serialization::IDeserializer*>(DUMMY))), yes()) test(int);
 
 							template<typename>
 							static no test(...);
@@ -205,7 +207,7 @@ namespace	cl3
 					{
 						private:
 							template<typename U>
-							static decltype(U(*reinterpret_cast<io::serialization::IDeserializer*>(NULL)), yes()) test(int);
+							static decltype(U(*reinterpret_cast<io::serialization::IDeserializer*>(DUMMY)), yes()) test(int);
 
 							template<typename>
 							static no test(...);
@@ -219,7 +221,7 @@ namespace	cl3
 					{
 						private:
 							template<typename U>
-							static decltype( ((*reinterpret_cast<io::text::ITextWriter*>(NULL))<<(*reinterpret_cast<const U*>(NULL))), yes()) test(int);
+							static decltype( ((*reinterpret_cast<io::text::ITextWriter*>(DUMMY))<<(*reinterpret_cast<const U*>(DUMMY))), yes()) test(int);
 
 							template<typename>
 							static no test(...);
