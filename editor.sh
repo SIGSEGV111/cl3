@@ -1,3 +1,2 @@
 #!/bin/bash
-edit-source core/ mm/
-edit-source test/core/ test/mm/
+edit-source core/ mm/ test/core/ test/mm/

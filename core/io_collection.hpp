@@ -61,43 +61,43 @@ namespace	cl3
 			struct	CL3PUBT	IMatcher
 			{
 				virtual	bool	Match	(const T& item_match) const = 0;	//	compares "item_match" against the ciriteria and returns true if the item matches, false otherwise
-				virtual	void	Match	(EDirection direction, const T* arr_items_match, bitmask::TBitmask& bm_result) const = 0;	//	compares all items within the array against the criteria and sets the coresponding bits in the bitmask to 1 if the item matches or to 0 if it does not match, the size of the array is taken from the bitmask
-				virtual	usys_t	Match	(EDirection direction, const T* arr_items_match, usys_t n_items_match, list::TList<usys_t>& ls_result, usys_t offset = 0, usys_t n_hits_max = (usys_t)-1) const = 0;	//	adds the indices of the matching items to "ls_result" after adding "offset" to the index, the function retuns the number of items added/matched
+				virtual	void	Match	(EDirection direction, const T* arr_items_match, bitmask::TBitmask& bm_result) const = 0;	//	compares all items within the array against the criteria and sets the coresponding bits in the bitmask to 1 if the item matches or to 0 if it does not match, the size of the array is assumed to be of the same as the bitmask
+				virtual	usys_t	Match	(EDirection direction, const T* arr_items_match, usys_t n_items_match, list::TList<usys_t>& ls_result, usys_t offset = 0, usys_t n_hits_max = (usys_t)-1) const = 0;	//	adds the indices (modified by "offset") of the matching items to "ls_result", the function retuns the number of items added/matched
 			};
 
-			/*template<class T>
-			struct	IComparator : IMatcher<T>
-			{
-				virtual	int		Compare	(const T& item_compare) const = 0;	//	returns 0 if item_compare matches the reference, returns a value < 0 if the item is less then the reference, returns a value > 0 if the item is bigger than the reference
-				virtual	void	Compare	(const T* arr_items_compare, s8* arr_result, usys_t n_items_compare) const = 0;	//	returns 0 if item_compare matches the reference, returns a value < 0 if the item is less then the reference, returns a value > 0 if the item is bigger than the reference
-
-				virtual	bool	operator>	(const T& item_compare) const { return Compare(item_compare) >  0; }
-				virtual	bool	operator<	(const T& item_compare) const { return Compare(item_compare) <  0; }
-				virtual	bool	operator>=	(const T& item_compare) const { return Compare(item_compare) >= 0; }
-				virtual	bool	operator<=	(const T& item_compare) const { return Compare(item_compare) <= 0; }
-				virtual	bool	operator==	(const T& item_compare) const { return Match(item_compare); }
-
-				virtual	bool	Match	(const T& item_match) const { return Compare(item_match) == 0; }
-
-				virtual	void	Match	(const T* arr_items_match, bitmask::TBitmask& bm_result) const
-				{
-					const usys_t n = bm_result.Count();
-					for(usys_t i = 0; i < n; ++i)
-						bm_result.Bit(i, Match(arr_items_match[i]));
-				}
-
-				virtual	usys_t	Match	(const T* arr_items_match, usys_t n_items_match, list::TList<usys_t>& ls_result, usys_t offset = 0) const
-				{
-					usys_t n = 0;
-					for(usys_t i = 0; i < n; i++)
-						if(Match(arr_items_match[i]))
-						{
-							ls_result.Add(i + offset);
-							n++;
-						}
-					return n;
-				}
-			};*/
+// 			template<class T>
+// 			struct	IComparator : IMatcher<T>
+// 			{
+// 				virtual	int		Compare	(const T& item_compare) const = 0;	//	returns 0 if item_compare matches the reference, returns a value < 0 if the item is less then the reference, returns a value > 0 if the item is bigger than the reference
+// 				virtual	void	Compare	(const T* arr_items_compare, s8_t* arr_result, usys_t n_items_compare) const = 0;	//	returns 0 if item_compare matches the reference, returns a value < 0 if the item is less then the reference, returns a value > 0 if the item is bigger than the reference
+//
+// 				virtual	bool	operator>	(const T& item_compare) const { return Compare(item_compare) >  0; }
+// 				virtual	bool	operator<	(const T& item_compare) const { return Compare(item_compare) <  0; }
+// 				virtual	bool	operator>=	(const T& item_compare) const { return Compare(item_compare) >= 0; }
+// 				virtual	bool	operator<=	(const T& item_compare) const { return Compare(item_compare) <= 0; }
+// 				virtual	bool	operator==	(const T& item_compare) const { return Match(item_compare); }
+//
+// 				virtual	bool	Match	(const T& item_match) const { return Compare(item_match) == 0; }
+//
+// 				virtual	void	Match	(const T* arr_items_match, bitmask::TBitmask& bm_result) const
+// 				{
+// 					const usys_t n = bm_result.Count();
+// 					for(usys_t i = 0; i < n; ++i)
+// 						bm_result.Bit(i, Match(arr_items_match[i]));
+// 				}
+//
+// 				virtual	usys_t	Match	(const T* arr_items_match, usys_t n_items_match, list::TList<usys_t>& ls_result, usys_t offset = 0) const
+// 				{
+// 					usys_t n = 0;
+// 					for(usys_t i = 0; i < n; i++)
+// 						if(Match(arr_items_match[i]))
+// 						{
+// 							ls_result.Add(i + offset);
+// 							n++;
+// 						}
+// 					return n;
+// 				}
+// 			};
 
 			template<class T>	struct	IStaticIterator;
 			template<class T>	struct	IDynamicIterator;

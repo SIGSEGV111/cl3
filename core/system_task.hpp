@@ -104,7 +104,7 @@ namespace	cl3
 					CL3PUBF	const io::collection::IStaticCollection<const io::text::string::TString>&
 									CommandlineArguments	() const CL3_GETTER;
 
-					//	environment varaibles (like envp[] in main())
+					//	environment variables (like envp[] in main())
 					CL3PUBF	const io::collection::IStaticCollection<const io::text::string::TString>&
 									Environment	() const CL3_GETTER;	//	TODO: use a map (KEY=VALUE) instead of a list
 
