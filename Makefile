@@ -2,26 +2,33 @@
 
 all: all-release
 
-all-release: core-release mm-release
-all-devel: core-devel mm-devel
+all-release: core-release mm-release db-release
+all-devel: core-devel mm-devel db-devel
 
 clean:
-	$(MAKE) -j -C core clean
-	$(MAKE) -j -C mm clean
-	$(MAKE) -j -C test clean
+	$(MAKE) -j $(PJOBS) -C core clean
+	$(MAKE) -j $(PJOBS) -C mm clean
+	$(MAKE) -j $(PJOBS) -C db clean
+	$(MAKE) -j $(PJOBS) -C test clean
 
 core-release:
-	$(MAKE) -j -C core release
+	$(MAKE) -j $(PJOBS) -C core release
 
 core-devel:
-	$(MAKE) -j -C core devel
+	$(MAKE) -j $(PJOBS) -C core devel
 
 
 mm-release: core-release
-	$(MAKE) -j -C mm release
+	$(MAKE) -j $(PJOBS) -C mm release
 	
 mm-devel: core-devel
-	$(MAKE) -j -C mm devel
+	$(MAKE) -j $(PJOBS) -C mm devel
+
+db-release: core-release
+	$(MAKE) -j $(PJOBS) -C db release
+	
+db-devel: core-devel
+	$(MAKE) -j $(PJOBS) -C db devel
 
 test: all-devel
-	$(MAKE) -j -C test
+	$(MAKE) -j $(PJOBS) -C test

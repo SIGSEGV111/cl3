@@ -32,6 +32,11 @@
 
 namespace	cl3
 {
+	namespace	event
+	{
+		template class TEvent<system::task::synchronization::IMutex, system::task::synchronization::TMutexEvent>;
+	}
+
 	namespace	system
 	{
 		namespace	task
@@ -40,8 +45,18 @@ namespace	cl3
 			{
 				using namespace error;
 
+				CLASS	TMutexEvent::TMutexEvent	(EMutexAction action, EMutexStatus status) : action(action), status(status) {}
+				CLASS	TSignalEvent::TSignalEvent	(ESignalAction action, ESignalStatus status) : action(action), status(status) {}
+
+				const event::TEvent<IMutex, TMutexEvent>&
+						TMutex::OnChange	() const
+				{
+					return this->on_change;
+				}
+
 				void	TMutex::Acquire		()
 				{
+					this->on_change.Raise(this, TMutexEvent(MUTEX_ACTION_ACQUIRE, MUTEX_STATUS_ENTER));
 					IThread* const self = task::IThread::Self();
 					if(this->owner == self)
 						this->n_times++;
@@ -51,14 +66,17 @@ namespace	cl3
 						this->owner = self;
 						this->n_times = 1;
 					}
+					this->on_change.Raise(this, TMutexEvent(MUTEX_ACTION_ACQUIRE, MUTEX_STATUS_SUCCESS));
 				}
 
 				bool	TMutex::Acquire		(time::TTime timeout)
 				{
+					this->on_change.Raise(this, TMutexEvent(MUTEX_ACTION_ACQUIRE, MUTEX_STATUS_ENTER));
 					IThread* const self = task::IThread::Self();
 					if(this->owner == self)
 					{
 						this->n_times++;
+						this->on_change.Raise(this, TMutexEvent(MUTEX_ACTION_ACQUIRE, MUTEX_STATUS_SUCCESS));
 						return true;
 					}
 					else
@@ -70,8 +88,10 @@ namespace	cl3
 							case 0:
 								this->owner = self;
 								this->n_times = 1;
+								this->on_change.Raise(this, TMutexEvent(MUTEX_ACTION_ACQUIRE, MUTEX_STATUS_SUCCESS));
 								return true;
 							case ETIMEDOUT:
+								this->on_change.Raise(this, TMutexEvent(MUTEX_ACTION_ACQUIRE, MUTEX_STATUS_TIMEOUT));
 								return false;
 							default:
 								CL3_CLASS_PTHREAD_ERROR(status);
@@ -83,11 +103,13 @@ namespace	cl3
 				void	TMutex::Release		()
 				{
 					CL3_CLASS_ERROR(this->owner != task::IThread::Self(), TException, "mutex is not owned by the calling thread");
+					this->on_change.Raise(this, TMutexEvent(MUTEX_ACTION_RELEASE, MUTEX_STATUS_ENTER));
 					if(--this->n_times == 0)
 					{
 						this->owner = NULL;
 						CL3_CLASS_PTHREAD_ERROR(pthread_mutex_unlock(&this->mtx));
 					}
+					this->on_change.Raise(this, TMutexEvent(MUTEX_ACTION_RELEASE, MUTEX_STATUS_SUCCESS));
 				}
 
 				bool	TMutex::HasAcquired	() const

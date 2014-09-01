@@ -20,7 +20,7 @@ clean:
 	$(CXX) $(CXX_OPT) -c $< -o $@
 
 exe: $(OBJS)
-	$(MAKE) libcl3-core.so -C ../../core
+	$(MAKE) -j $(PJOBS) libcl3-core.so -C ../../core
 	$(CXX) -L../lib $(CXX_OPT) -rdynamic $(OBJS) -lcl3-core -lstdc++ -lrt -pthread -lgtest -lgmock ../lib/libgtest_main.a ../lib/libgmock_main.a -o $@
 
 gtest: exe

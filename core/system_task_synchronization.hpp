@@ -52,16 +52,47 @@ namespace	cl3
 
 			namespace	synchronization
 			{
-				namespace	_
+				enum	EMutexAction
 				{
-					enum	EMutexEvent
-					{
-						MUTEX_EVENT_ACQUIRING,
-						MUTEX_EVENT_ACQUIRED,
-						MUTEX_EVENT_RELEASING,
-						MUTEX_EVENT_RELEASED
-					};
-				}
+					MUTEX_ACTION_ACQUIRE,
+					MUTEX_ACTION_RELEASE
+				};
+
+				enum	EMutexStatus
+				{
+					MUTEX_STATUS_ENTER,
+					MUTEX_STATUS_SUCCESS,
+					MUTEX_STATUS_TIMEOUT
+				};
+
+				struct	CL3PUBT	TMutexEvent
+				{
+					EMutexAction action;
+					EMutexStatus status;
+
+					CL3PUBF	CLASS	TMutexEvent	(EMutexAction action, EMutexStatus status);
+				};
+
+				enum	ESignalAction
+				{
+					SIGNAL_EVENT_RAISE,
+					SIGNAL_EVENT_WAITFOR
+				};
+
+				enum	ESignalStatus
+				{
+					SIGNAL_STATUS_ENTER,
+					SIGNAL_STATUS_SUCCESS,
+					SIGNAL_STATUS_TIMEOUT
+				};
+
+				struct	CL3PUBT	TSignalEvent
+				{
+					ESignalAction action;
+					ESignalStatus status;
+
+					CL3PUBF	CLASS	TSignalEvent	(ESignalAction action, ESignalStatus status);
+				};
 
 				enum	EAccess
 				{
@@ -75,7 +106,7 @@ namespace	cl3
 					MUTEX_SHARED
 				};
 
-				struct	CL3PUBT	IMutex
+				struct	CL3PUBT	IMutex : public virtual event::IObservable<IMutex, TMutexEvent>
 				{
 					virtual	void	Acquire		() = 0;
 					virtual	bool	Acquire		(time::TTime timeout) CL3_WARN_UNUSED_RESULT = 0;
@@ -84,9 +115,8 @@ namespace	cl3
 					inline	bool	TryAcquire	() CL3_WARN_UNUSED_RESULT { return Acquire(time::TTime(0,0)); }
 				};
 
-				struct	CL3PUBT	ISignal : IMutex
+				struct	CL3PUBT	ISignal : public virtual IMutex, public virtual event::IObservable<ISignal, TSignalEvent>
 				{
-					virtual	fd_t	Handle	() const CL3_GETTER = 0;
 					virtual	void	Raise	() = 0;
 					virtual	void	WaitFor	() = 0;
 					virtual	bool	WaitFor	(time::TTime timeout) CL3_WARN_UNUSED_RESULT = 0;
@@ -95,7 +125,7 @@ namespace	cl3
 					CL3PUBF	static	bool	WaitFor	(const collection::IStaticCollection<ISignal*>& signals, time::TTime timeout) CL3_WARN_UNUSED_RESULT;
 				};
 
-				class	CL3PUBT	TMutex : public IMutex
+				class	CL3PUBT	TMutex : public virtual IMutex
 				{
 					private:
 						CLASS	TMutex	(TMutex&&);
@@ -107,62 +137,41 @@ namespace	cl3
 							CRITICAL_SECTION cs;
 						#endif
 						unsigned n_times;
+						event::TEvent<IMutex, TMutexEvent> on_change;
 
 					public:
-						CL3PUBF	void	Acquire		();
-						CL3PUBF	bool	Acquire		(time::TTime timeout) CL3_WARN_UNUSED_RESULT;
-						CL3PUBF	void	Release		();
-						CL3PUBF	bool	HasAcquired	() const CL3_GETTER;
+						CL3PUBF	const event::TEvent<IMutex, TMutexEvent>&
+										OnChange	() const final override;
+						CL3PUBF	void	Acquire		() final override;
+						CL3PUBF	bool	Acquire		(time::TTime timeout) final override CL3_WARN_UNUSED_RESULT;
+						CL3PUBF	void	Release		() final override;
+						CL3PUBF	bool	HasAcquired	() const final override CL3_GETTER;
 
 						CL3PUBF	CLASS	TMutex	();
 						CL3PUBF	CLASS	~TMutex	();
 				};
 
-				/*class	CL3PUBT	TRWMutex : public IMutex
-				{
-					private:
-						IThread* owner;
-						#if (CL3_OS == CL3_OS_POSIX)
-							pthread_rwlock_t rwl;
-						#elif (CL3_OS == CL3_OS_WINDOWS)
-							CRITICAL_SECTION cs;
-						#endif
-						unsigned n_times;
+// 				class	CL3PUBT	TSignal : public virtual ISignal
+// 				{
+// 				};
 
-						CLASS TRWMutex(const TRWMutex&);
-						TRWMutex& operator=(const TRWMutex&);
-
-					public:
-						CL3PUBF	void	Acquire		(EAccess access);
-						CL3PUBF	bool	Acquire		(time::TTime timeout, EAccess access) CL3_WARN_UNUSED_RESULT;
-						CL3PUBF	void	Release		(EAccess access);
-						CL3PUBF	bool	HasAcquired	(EAccess access) const CL3_GETTER;
-
-						CL3PUBF	CLASS	TRWMutex	();
-						CL3PUBF	CLASS	~TRWMutex	();
-				};*/
-
-				class	CL3PUBT	TSignal : public ISignal
-				{
-				};
-
-				template<class TSender, class TData>
-				class	CL3PUBT	TSignalEventReceiver : public event::TEvent<TSender,TData>::IReceiver, public ISignal
-				{
-					protected:
-						void	OnRaise	(event::TEvent<TSender,TData>& event, TSender& sender, TData data)
-						{
-						}
-
-					public:
-						inline	void	Acquire		(EAccess);
-						inline	bool	Acquire		(time::TTime timeout, EAccess) CL3_WARN_UNUSED_RESULT;
-						inline	void	Release		(EAccess);
-						inline	bool	HasAcquired	(EAccess) const CL3_GETTER;
-						inline	void	Raise		();
-						inline	void	WaitFor		();
-						inline	bool	WaitFor		(time::TTime timeout) CL3_WARN_UNUSED_RESULT;
-				};
+// 				template<class TSender, class TData>
+// 				class	CL3PUBT	TSignalEventReceiver : public event::TEvent<TSender,TData>::IReceiver, public virtual ISignal
+// 				{
+// 					protected:
+// 						void	OnRaise	(event::TEvent<TSender,TData>& event, TSender& sender, TData data)
+// 						{
+// 						}
+//
+// 					public:
+// 						inline	void	Acquire		(EAccess);
+// 						inline	bool	Acquire		(time::TTime timeout, EAccess) CL3_WARN_UNUSED_RESULT;
+// 						inline	void	Release		(EAccess);
+// 						inline	bool	HasAcquired	(EAccess) const CL3_GETTER;
+// 						inline	void	Raise		();
+// 						inline	void	WaitFor		();
+// 						inline	bool	WaitFor		(time::TTime timeout) CL3_WARN_UNUSED_RESULT;
+// 				};
 
 				/*template<ESharing sharing, class T>
 				class	CL3PUBT	TInterlocked;

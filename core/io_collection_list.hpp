@@ -219,47 +219,47 @@ namespace	cl3
 						using stream::IIn<T>::Read;
 
 						//	from IObservable
-						const event::TEvent<const IStaticCollection<const T>, const TOnChangeData<const T>& >&	OnChange	() const CL3_GETTER;
+						const event::TEvent<const IStaticCollection<const T>, const TOnChangeData<const T>& >&	OnChange	() const final override CL3_GETTER;
 
 						//	from IStaticCollection
-						system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT;
-						usys_t	Count		() const CL3_GETTER;
-						bool	CountMin	(usys_t count_min) const CL3_GETTER;
-						bool	CountMax	(usys_t count_max) const CL3_GETTER;
+						system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const final override CL3_WARN_UNUSED_RESULT;
+						usys_t	Count		() const final override CL3_GETTER;
+						bool	CountMin	(usys_t count_min) const final override CL3_GETTER;
+						bool	CountMax	(usys_t count_max) const final override CL3_GETTER;
 
 						//	from IDynamicCollection
-						system::memory::TUniquePtr<IDynamicIterator<const T> >	CreateDynamicIterator	() const CL3_WARN_UNUSED_RESULT;
+						system::memory::TUniquePtr<IDynamicIterator<const T> >	CreateDynamicIterator	() const final override CL3_WARN_UNUSED_RESULT;
 
-						void	Clear	();
-						void	Add		(const T& item_add);
-						void	Add		(const T* arr_items_add, usys_t n_items_add);
-						void	Add		(const IStaticCollection<const T>& collection);
-						bool	Remove	(const T* item_remove);
+						void	Clear	() final override;
+						void	Add		(const T& item_add) final override;
+						void	Add		(const T* arr_items_add, usys_t n_items_add) final override;
+						void	Add		(const IStaticCollection<const T>& collection) final override;
+						bool	Remove	(const T* item_remove) final override;
 
 						//	from IIn<T>
 						usys_t	Read	(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) CL3_WARN_UNUSED_RESULT;
 
 						//	from IList
-						TList<const T>&		operator=	(const IStaticCollection<const T>& rhs);
-						TList<const T>&		operator=	(IStaticCollection<const T>&& rhs);
-						const T&	operator[]	(ssys_t rindex) const CL3_GETTER;
-						const T*	ItemPtr		(ssys_t rindex) const CL3_GETTER;
-						void		Shrink		(usys_t n_items_shrink);
-						void		Grow		(usys_t n_items_grow, const T& item_init);
-						void		Count		(usys_t new_count, const T& item_init = T()) CL3_SETTER;
-						void		Insert		(ssys_t rindex, const T& item_insert);
-						void		Insert		(ssys_t rindex, const T* arr_items_insert, usys_t n_items_insert);
-						void		Insert		(ssys_t rindex, const IStaticCollection<T>& collection);
-						void		Remove		(ssys_t rindex, usys_t n_items_remove);
+						TList<const T>&		operator=	(const IStaticCollection<const T>& rhs) final override;
+						TList<const T>&		operator=	(IStaticCollection<const T>&& rhs) final override;
+						const T&	operator[]	(ssys_t rindex) const final override CL3_GETTER;
+						const T*	ItemPtr		(ssys_t rindex) const final override CL3_GETTER;
+						void		Shrink		(usys_t n_items_shrink) final override;
+						void		Grow		(usys_t n_items_grow, const T& item_init) final override;
+						void		Count		(usys_t new_count, const T& item_init = T()) final override CL3_SETTER;
+						void		Insert		(ssys_t rindex, const T& item_insert) final override;
+						void		Insert		(ssys_t rindex, const T* arr_items_insert, usys_t n_items_insert) final override;
+						void		Insert		(ssys_t rindex, const IStaticCollection<T>& collection) final override;
+						void		Remove		(ssys_t rindex, usys_t n_items_remove) final override;
 
-						void		Append		(const T& item_append);
-						void		Append		(const T* arr_items_append, usys_t n_items_append);
-						void		Append		(const IStaticCollection<const T>& collection);
+						void		Append		(const T& item_append) final override;
+						void		Append		(const T* arr_items_append, usys_t n_items_append) final override;
+						void		Append		(const IStaticCollection<const T>& collection) final override;
 						void		Append		(const TList& list);
 
-						void		Cut			(usys_t n_head, usys_t n_tail);
+						void		Cut			(usys_t n_head, usys_t n_tail) final override;
 
-						usys_t		Find		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) const CL3_WARN_UNUSED_RESULT;
+						usys_t		Find		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) const final override CL3_WARN_UNUSED_RESULT;
 
 						//	from TList
 						TList<const T>&	operator=	(const TList<const T>& rhs);
@@ -309,25 +309,25 @@ namespace	cl3
 						using TList<const T>::Find;
 
 						//	from IStaticCollection
-						system::memory::TUniquePtr<IStaticIterator<T> >		CreateStaticIterator	() CL3_WARN_UNUSED_RESULT;
+						system::memory::TUniquePtr<IStaticIterator<T> >		CreateStaticIterator	() final override CL3_WARN_UNUSED_RESULT;
 
 						//	from IDynamicCollection
-						system::memory::TUniquePtr<IDynamicIterator<T> >	CreateDynamicIterator	() CL3_WARN_UNUSED_RESULT;
+						system::memory::TUniquePtr<IDynamicIterator<T> >	CreateDynamicIterator	() final override CL3_WARN_UNUSED_RESULT;
 
 						//	from IOut<T>
-						usys_t		Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+						usys_t		Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 
 						//	from IArray<T>
 						//	Read is taken from IArray<T> as-is, we only override Write here
-						usys_t		Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+						usys_t		Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 
 						//	from IList
-						TList<T>&	operator=	(const IStaticCollection<T>& rhs);
-						TList<T>&	operator=	(IStaticCollection<T>&& rhs);
-						T&			operator[]	(ssys_t rindex) CL3_GETTER;
+						TList<T>&	operator=	(const IStaticCollection<T>& rhs) final override;
+						TList<T>&	operator=	(IStaticCollection<T>&& rhs) final override;
+						T&			operator[]	(ssys_t rindex) final override CL3_GETTER;
 
-						T*			Claim		();
-						T*			ItemPtr		(ssys_t rindex) CL3_GETTER;
+						T*			Claim		() final override;
+						T*			ItemPtr		(ssys_t rindex) final override CL3_GETTER;
 
 						//	from TList
 						TList<T>&	operator=	(const TList<T>& rhs);

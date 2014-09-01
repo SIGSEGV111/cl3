@@ -1,2 +1,2 @@
 #!/bin/bash
-edit-source core/ mm/ test/core/ test/mm/
+edit-source core/ mm/ db/ test/core/ test/mm/ test/db/

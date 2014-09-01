@@ -14,5 +14,7 @@ valgrind.log
 exe
 test/coverage/libcl3-core
 test/coverage/libcl3-mm
+test/coverage/libcl3-db
 test/coverage/libcl3-core.info
 test/coverage/libcl3-mm.info
+test/coverage/libcl3-db.info

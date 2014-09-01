@@ -517,7 +517,7 @@ namespace
 				const TTime te = TTime::Now(TIME_CLOCK_THREAD_SYS);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
-				const TTime td_max(0,10000000000000000);	// 50ms
+				const TTime td_max(0,50000000000000000);	// 50ms
 				EXPECT_TRUE(td_out < td_max);
 			}
 		}

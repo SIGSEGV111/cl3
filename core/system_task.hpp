@@ -154,9 +154,37 @@ namespace	cl3
 					CL3PUBF	CLASS	~TProcessRunner	();
 			};
 
-			class	CL3PUBT	IThread
+			enum	EThreadAction
 			{
+				THREAD_ACTION_START,
+				THREAD_ACTION_SHUTDOWN,
+				THREAD_ACTION_SUSPEND,
+				THREAD_ACTION_RESUMED,
+				THREAD_ACTION_SLEEP,
+				THREAD_ACTION_YIELD
+			};
+
+			enum	EThreadStatus
+			{
+				THREAD_STATUS_REQUESTED,
+				THREAD_STATUS_BEFORE,
+				THREAD_STATUS_AFTER
+			};
+
+			struct	CL3PUBT	TThreadEvent
+			{
+				EThreadAction action;
+				EThreadStatus status;
+				CL3PUBF	CLASS	TThreadEvent	(EThreadAction action, EThreadStatus status);
+			};
+
+			class	CL3PUBT	IThread : public virtual event::IObservable<IThread, TThreadEvent>
+			{
+				protected:
+					event::TEvent<IThread, TThreadEvent> on_change;
+
 				public:
+					CL3PUBF	const event::TEvent<IThread, TThreadEvent>& OnChange() const CL3_GETTER;
 					CL3PUBF	static	IThread*	Self	() CL3_GETTER;	//	returns the IThread* for the calling thread
 
 					CL3PUBF	io::text::string::TString
@@ -177,6 +205,9 @@ namespace	cl3
 					CL3PUBF	void	Shutdown	();	//	sets the "request shutdown" flag, throws if the thread is not alive
 					CL3PUBF	void	Suspend		();	//	suspends the execution of the thread, throws if the thread is already suspended or not alive at all
 					CL3PUBF	void	Resume		();	//	resumes the execution of a suspended thread, throws if the thread is not suspended or not alive at all
+
+					CL3PUBF	static	void	Sleep	(time::TTime);
+					CL3PUBF	static	void	Yield	();
 
 				protected:
 					CL3PUBF	void	Name		(const io::text::string::TString&) CL3_SETTER;
