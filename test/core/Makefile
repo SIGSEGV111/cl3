@@ -8,7 +8,7 @@ OBJS=$(shell ls -1 *.cpp | sed 's/\.cpp/\.o/' -)
 all: run
 
 clean:
-	rm -vf exe *.o *.dhh *.dcc *.hpp.gch valgrind.log *.tmp
+	rm -f exe *.o *.dhh *.dcc *.hpp.gch valgrind.log *.tmp
 
 # pull in dependencies
 -include $(OBJS:.o=.dcc)
@@ -20,7 +20,7 @@ clean:
 	$(CXX) $(CXX_OPT) -c $< -o $@
 
 exe: $(OBJS)
-	$(MAKE) -j $(PJOBS) libcl3-core.so -C ../../core
+	+$(MAKE) -j libcl3-core.so -C ../../core
 	$(CXX) -L../lib $(CXX_OPT) -rdynamic $(OBJS) -lcl3-core -lstdc++ -lrt -pthread -lgtest -lgmock ../lib/libgtest_main.a ../lib/libgmock_main.a -o $@
 
 gtest: exe

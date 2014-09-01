@@ -16,7 +16,7 @@ all: release
 release devel: libcl3-db.so libcl3-db.a $(PCHS)
 
 clean:
-	rm -vf *.so *.a *.o *.dhh *.dcc *.hpp.gch *.gcda *.gcno
+	rm -f *.so *.a *.o *.dhh *.dcc *.hpp.gch *.gcda *.gcno
 
 pch: $(PCHS)
 
@@ -37,7 +37,7 @@ pch: $(PCHS)
 	$(CXX) $(CXX_OPT_EXT) $< -o $@
 
 libcl3-db.so: $(OBJS)
-	$(MAKE) libcl3-core.so -C ../core
+	+$(MAKE) -j libcl3-core.so -C ../core
 	$(CXX) -Llib -lcl3-core -lstdc++ -lrt -shared -rdynamic $(CXX_OPT_INT) $(OBJS) -o $@
 
 libcl3-db.a: $(OBJS)

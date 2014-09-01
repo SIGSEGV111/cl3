@@ -16,7 +16,7 @@ all: release
 release devel: libcl3-core.so libcl3-core.a $(PCHS)
 
 clean:
-	rm -vf *.so *.a *.o *.dhh *.dcc *.hpp.gch *.gcda *.gcno
+	rm -f *.so *.a *.o *.dhh *.dcc *.hpp.gch *.gcda *.gcno
 
 pch: $(PCHS)
 
