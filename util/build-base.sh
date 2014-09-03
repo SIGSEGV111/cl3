@@ -8,6 +8,8 @@ export PJOBS=$(grep "^processor[[:space:]]]*:[[:space:]]*[0-9]\+$" /proc/cpuinfo
 
 cd "$ROOT_DIR"
 
+export SHELL="$ROOT_DIR/util/clean-term.sh"
+
 mkdir -p gen/{dbg,rel}/{lib,include,bin} tmp/{dbg,rel}
 
 GTEST_V="1.7.0"
