@@ -21,3 +21,5 @@ test/coverage/libcl3-db.info
 test/coverage/libcl3-core.txt
 test/coverage/libcl3-mm.txt
 test/coverage/libcl3-db.txt
+tmp
+gen

@@ -129,7 +129,7 @@ namespace
 		const TString name_original = TProcess::Self()->Name();
 		const TString name_want = "gtest";
 
-		EXPECT_TRUE(name_original.Find("/exe") != (usys_t)-1);
+		EXPECT_TRUE(name_original.Find("/cl3-core-test") != (usys_t)-1);
 		EXPECT_TRUE(system(TCString(TString("pgrep -f ") + name_original + " >/dev/null", CODEC_CXX_CHAR).Chars()) == 0);
 
 		TProcess::Self()->Name(name_want);
@@ -172,7 +172,7 @@ namespace
 		auto it = ls.CreateStaticIterator();
 
 		EXPECT_TRUE(it->MoveFirst());
-		EXPECT_TRUE(it->Item() == "./exe");
+		EXPECT_TRUE(it->Item().Right(14) == "/cl3-core-test");
 		EXPECT_TRUE(it->MoveNext());
 		EXPECT_TRUE(it->Item() == "dummy1");
 		EXPECT_TRUE(it->MoveNext());
