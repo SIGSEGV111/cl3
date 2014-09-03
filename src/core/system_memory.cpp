@@ -123,7 +123,7 @@ namespace	cl3
 				CL3_CLASS_ERROR(sz_bytes_new > sz_mb && sz_current - sz_mb + sz_bytes_new > sz_limit, TBadAllocException, sz_bytes_new - sz_mb);
 				p_mem = allocator->Realloc(p_mem, sz_bytes_new, inplace);
 				sz_current -= sz_mb;
-				sz_current += sz_bytes_new;
+				sz_current += allocator->SizeOf(p_mem);
 				return p_mem;
 			}
 
