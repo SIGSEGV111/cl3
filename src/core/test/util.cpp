@@ -17,6 +17,9 @@
 */
 
 #include <cl3/core/util.hpp>
+#include <cl3/core/io_text_string.hpp>
+#include <cl3/core/ui_console.hpp>
+
 #include <gtest/gtest.h>
 
 using namespace ::testing;
@@ -24,10 +27,17 @@ using namespace ::testing;
 namespace
 {
 	using namespace cl3::util;
+	using namespace cl3::io::text::string;
 
 	TEST(util, Hexdump)
 	{
-		char buffer[] = "Hello World\nabcdefghijklmnopqrstuvwxyz\0\x01\x02";
-		Hexdump(buffer, sizeof(buffer));
+		TString out;
+		char in[] = "Hello World\nabcdefghijklmnopqrstuvwxyz\0\x01\x02";
+
+		char ref[512];
+		snprintf(ref, sizeof(ref), "[0000] %016zx: 48 65 6c 6c 6f 20 57 6f 72 6c 64 0a 61 62 63 64 |Hello World.abcd|\n[0001] %016zx: 65 66 67 68 69 6a 6b 6c 6d 6e 6f 70 71 72 73 74 |efghijklmnopqrst|\n[0002] %016zx: 75 76 77 78 79 7a 00 01 02 00                   |uvwxyz....      |\n", (size_t)in, (size_t)in+16, (size_t)in+32);
+		Hexdump(in, sizeof(in), out);
+
+		EXPECT_TRUE(out == ref);
 	}
 }

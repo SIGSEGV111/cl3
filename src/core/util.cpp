@@ -27,6 +27,7 @@
 #include "system_memory.hpp"
 #include "system_types_typeinfo.hpp"
 #include "error.hpp"
+#include "io_text.hpp"
 
 namespace	cl3
 {
@@ -54,7 +55,7 @@ namespace	cl3
 			return c >= 32 && c < 127;
 		}
 
-		void	Hexdump	(const void* p_mem_, usys_t sz_mem)
+		void	Hexdump	(const void* p_mem_, usys_t sz_mem, io::text::ITextWriter& w)
 		{
 			const char* const p_mem = (const char* const)p_mem_;
 			const usys_t base = (usys_t)p_mem_;
@@ -103,7 +104,7 @@ namespace	cl3
 					}
 				}
 
-				fwrite(line, sizeof(line), 1, stderr);
+				w.Write(line, sizeof(line)-1);
 			}
 		}
 	}
