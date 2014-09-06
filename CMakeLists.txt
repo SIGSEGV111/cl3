@@ -4,6 +4,8 @@ project (CL3)
 
 option (BUILD_TYPE "Sets the Build-Type \"release\" or \"devel\"")
 
+set (ROOT_DIR $ENV{ROOT_DIR})
+
 if (${BUILD_TYPE} STREQUAL "release")
 	set (GEN_DIR "${PROJECT_SOURCE_DIR}/gen/rel")
 else ()

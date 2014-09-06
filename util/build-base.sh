@@ -10,7 +10,7 @@ cd "$ROOT_DIR"
 
 export SHELL="$ROOT_DIR/util/clean-term.sh"
 
-mkdir -p gen/{dbg,rel}/{lib,include,bin} tmp/{dbg,rel}
+mkdir -p gen/{dbg,rel}/{lib,include,bin} tmp/{dbg,rel} gen/dbg/coverage
 
 GTEST_V="1.7.0"
 CPPCHECK_V="1.66"
@@ -30,19 +30,19 @@ if ! test -L "tmp/gtest/build"; then
 	cd "$ROOT_DIR"
 fi
 
-if ! test -L "tmp/cppcheck/build"; then
-	echo -n "building cppcheck ... "
-	rm -rf "tmp/cppcheck"
-	mkdir -p "tmp/cppcheck"
-	cd "tmp/cppcheck"
-	tar -jxf "../../util/cppcheck-$CPPCHECK_V.tar.bz2"
-	cd "cppcheck-$CPPCHECK_V"
-	make -s -j $PJOBS SRCDIR=build CFGDIR="$ROOT_DIR/util/cppcheck-$CPPCHECK_V/cfg" HAVE_RULES=yes CXX="$(which g++)" >/dev/null
-	cd ..
-	ln -nsf "cppcheck-$CPPCHECK_V" build
-	echo "done"
-	cd "$ROOT_DIR"
-fi
+# if ! test -L "tmp/cppcheck/build"; then
+# 	echo -n "building cppcheck ... "
+# 	rm -rf "tmp/cppcheck"
+# 	mkdir -p "tmp/cppcheck"
+# 	cd "tmp/cppcheck"
+# 	tar -jxf "../../util/cppcheck-$CPPCHECK_V.tar.bz2"
+# 	cd "cppcheck-$CPPCHECK_V"
+# 	make -s -j $PJOBS SRCDIR=build CFGDIR="$ROOT_DIR/util/cppcheck-$CPPCHECK_V/cfg" HAVE_RULES=yes CXX="$(which g++)" >/dev/null
+# 	cd ..
+# 	ln -nsf "cppcheck-$CPPCHECK_V" build
+# 	echo "done"
+# 	cd "$ROOT_DIR"
+# fi
 
 for m in dbg rel; do
 	mkdir -p gen/$m/include/cl3
@@ -57,4 +57,8 @@ for m in dbg rel; do
 	for f in tmp/gtest/build/lib/.libs/*; do
 		ln -nfs ../../../"$f" gen/$m/lib/
 	done
+done
+
+for f in core mm db; do
+	ln -nfs ../../../tmp/dbg/src/$f/test/coverage/ gen/dbg/coverage/$f
 done

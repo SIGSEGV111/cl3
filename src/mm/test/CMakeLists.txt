@@ -19,7 +19,15 @@ else ()
 	if (${BUILD_TYPE} STREQUAL "release")
 		add_custom_target (cl3-mm-test-run ALL "${GEN_DIR}/bin/cl3-mm-test")
 	else ()
+		add_custom_target (cl3-mm-coverage-prepare ALL lcov --no-external --base-directory "${ROOT_DIR}/src" --directory "${ROOT_DIR}/tmp/dbg/src/mm/CMakeFiles/cl3-mm.dir" --quiet --zerocounters && lcov --no-external --base-directory "${ROOT_DIR}/src" --directory "${ROOT_DIR}/tmp/dbg/src/mm/CMakeFiles/cl3-mm.dir" --quiet --initial --capture --output-file base.lcov)
+
 		add_custom_target (cl3-mm-test-run ALL LD_LIBRARY_PATH=${GEN_DIR}/lib valgrind -q --leak-check=full --show-reachable=yes --track-origins=yes --num-callers=30 --trace-children=no --vgdb=yes --vgdb-error=1 --track-fds=yes --log-file=./valgrind.log --error-exitcode=1 "${GEN_DIR}/bin/cl3-mm-test" || (tail -n60 ./valgrind.log && false))
+
+		add_custom_target (cl3-mm-coverage ALL lcov --no-external --base-directory "${ROOT_DIR}/src" --directory "${ROOT_DIR}/tmp/dbg/src/mm/CMakeFiles/cl3-mm.dir" --quiet --capture --output-file test.lcov && lcov --quiet --add-tracefile base.lcov --add-tracefile test.lcov --output-file cl3-mm.lcov && genhtml --prefix "${ROOT_DIR}/src" --quiet --output-directory coverage cl3-mm.lcov)
+
+		add_dependencies (cl3-mm-coverage-prepare cl3-mm)
+		add_dependencies (cl3-mm-test-run cl3-mm-coverage-prepare)
+		add_dependencies (cl3-mm-coverage cl3-mm-test-run)
 	endif ()
 endif ()
 
