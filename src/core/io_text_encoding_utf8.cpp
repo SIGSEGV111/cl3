@@ -41,11 +41,15 @@ namespace	cl3
 						//	nothing to do here
 					}
 
-					usys_t			TUTF8Encoder::Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t)
+					usys_t			TUTF8Encoder::Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 					{
+						if(n_items_write_min == (usys_t)-1)
+							n_items_write_min = n_items_write_max;
+
 						CL3_CLASS_ERROR(this->sink == NULL, TException, "Sink() must point to a valid sink");
 						usys_t n_out = 0;
-						for(usys_t i = 0; i < n_items_write_max; i++)
+						usys_t i = 0;
+						for(; i < n_items_write_max; i++)
 						{
 							const u32_t u = arr_items_write[i].code;
 							byte_t arr_out[4];
@@ -91,12 +95,23 @@ namespace	cl3
 								}
 							}
 
-							//	FIXME, use internal buffer, dont force ouput stream unless minimum required
-							this->sink->Write(arr_out, length);
+							if(i < n_items_write_min)
+								this->sink->Write(arr_out, length);
+							else
+							{
+								const usys_t r = this->sink->Write(arr_out, length, 0);
+								if(r < length)
+								{
+									if(r == 0)
+										break;	//	sink full
+									else
+										this->sink->Write(arr_out + r, length - r);	//	if the sink accepted some - but not all - bytes we force the sink to accept the remaining bytes as well - this might prove sub-optimal at some point, and might get changed - do not rely on this behavior
+								}
+							}
 							n_out += length;
 						}
 
-						return n_items_write_max;
+						return i;
 					}
 
 					void			TUTF8Encoder::Sink	(IOut<byte_t>* os)
@@ -117,40 +132,53 @@ namespace	cl3
 						this->state = 0U;
 					}
 
-					usys_t			TUTF8Decoder::Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t)
+					usys_t			TUTF8Decoder::Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 					{
+						if(n_items_write_min == (usys_t)-1)
+							n_items_write_min = n_items_write_max;
+
 						CL3_CLASS_ERROR(this->sink == NULL, TException, "Sink() must point to a valid sink");
 
+						unsigned local_shift = this->shift;
+						u32_t local_state = this->state;
+
 						usys_t n_out = 0;
-						for(usys_t i = 0; i < n_items_write_max; i++)
+						usys_t i = 0;
+						for(; i < n_items_write_max; i++)
 						{
 							const u32_t b = arr_items_write[i];
 
 							gt_again:;
-							if(this->shift == 0)
+							if(local_shift == 0)
 							{
-								if((b & 0xF8) == 0xF0)
+								if((b & 0x80) == 0x00)	//	1-byte-codes
 								{
-									this->shift = 3;
-									this->state = (b & 0x07);
+									local_state = b;
+									if(i < n_items_write_min)
+										this->sink->Write((const TUTF32*)&local_state, 1);
+									else if(this->sink->Write((const TUTF32*)&local_state, 1, 0) == 0)
+										break;
+									n_out++;
 								}
-								else if((b & 0xF0) == 0xE0)
+								else if((b & 0xE0) == 0xC0)	//	2-byte-codes
 								{
-									this->shift = 2;
-									this->state = (b & 0x0F);
+									local_shift = 1;
+									local_state = (b & 0x1F);
 								}
-								else if((b & 0xE0) == 0xC0)
+								else if((b & 0xF0) == 0xE0)	//	3-byte-codes
 								{
-									this->shift = 1;
-									this->state = (b & 0x1F);
+									local_shift = 2;
+									local_state = (b & 0x0F);
 								}
-								else if((b & 0x80) == 0x00)
+								else if((b & 0xF8) == 0xF0)	//	4-byte-codes
 								{
-									this->shift = 0;
-									this->state = b;
+									local_shift = 3;
+									local_state = (b & 0x07);
 								}
 								else	//	errors...
 								{
+									this->shift = local_shift;
+									this->state = local_state;
 									TTranscodeException e(CODEC_UTF8, DIRECTION_DECODE, REASON_INVALID, i, n_out);
 									on_error.Raise(*this, e);
 									switch(e.action)
@@ -167,12 +195,41 @@ namespace	cl3
 							{
 								if((b & 0xC0) == 0x80)
 								{
-									this->shift--;
-									this->state <<= 6;
-									this->state |= (b & 0x3F);
+									if(i < n_items_write_min)
+									{
+										//	normal procedure...
+										local_shift--;
+										local_state <<= 6;
+										local_state |= (b & 0x3F);
+
+										if(local_shift == 0)
+											this->sink->Write((const TUTF32*)&local_state, 1);
+									}
+									else
+									{
+										//	this byte is optional, only process it into the state if the resulting UTF-32 character is accepted by the sink
+										//	make a backup copy of the local_*
+										const unsigned backup_shift = local_shift;
+										const u32_t backup_state = local_state;
+
+										local_shift--;
+										local_state <<= 6;
+										local_state |= (b & 0x3F);
+
+										if(local_shift == 0 && this->sink->Write((const TUTF32*)&local_state, 1, 0) == 0)
+										{
+											//	the sink did not accept the character, load global state from backup and exit
+											this->shift = backup_shift;
+											this->state = backup_state;
+											return i;
+										}
+										//	else	//	the sink accepted the character (or this was not the last character in the sequence), continue normally...
+									}
 								}
 								else	//	errors...
 								{
+									this->shift = local_shift;
+									this->state = local_state;
 									TTranscodeException e(CODEC_UTF8, DIRECTION_DECODE, REASON_INVALID, i, n_out);
 									on_error.Raise(*this, e);
 									switch(e.action)
@@ -186,16 +243,12 @@ namespace	cl3
 									}
 								}
 							}
-
-							if(this->shift == 0)
-							{
-								//	FIXME, as above
-								this->sink->Write((const TUTF32*)&state, 1);
-								n_out++;
-							}
 						}
 
-						return n_items_write_max;
+						this->shift = local_shift;
+						this->state = local_state;
+
+						return i;
 					}
 
 					void			TUTF8Decoder::Sink	(IOut<TUTF32>* os)
@@ -208,7 +261,7 @@ namespace	cl3
 						return sink;
 					}
 
-					CLASS	TUTF8Decoder::TUTF8Decoder	() : sink(NULL), shift(0), state(0U) {}
+					CLASS	TUTF8Decoder::TUTF8Decoder	() : sink(NULL), shift(0U), state(0U) {}
 					CLASS	TUTF8Decoder::~TUTF8Decoder	()
 					{
 						CL3_CLASS_ERROR(this->shift != 0, TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INCOMPLETE, this->shift, 0);

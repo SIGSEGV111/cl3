@@ -56,7 +56,7 @@ namespace	cl3
 					{
 						protected:
 							stream::IOut<TUTF32>* sink;
-							int shift;
+							unsigned shift;
 							u32_t state;
 
 						public:
