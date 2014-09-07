@@ -35,21 +35,26 @@ namespace	cl3
 					{
 						protected:
 							stream::IOut<byte_t>* sink;
+							unsigned shift;
+							byte_t state[4];
 
 						public:
-							//	from IEncoder
-							CL3PUBF	void	Reset	();
+							//	from IXCoder
+							CL3PUBF	const ICodec*	Codec	() const final override CL3_GETTER;
+							CL3PUBF	void			Reset	() final override;
+							CL3PUBF	bool			IsDirty	() const final override CL3_GETTER;
 
 							//	from IOut<TUTF32>
 							using IOut<TUTF32>::Write;
-							CL3PUBF	usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+							CL3PUBF	usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 
 							//	from ISource<byte_t>
-							CL3PUBF	void	Sink	(stream::IOut<byte_t>* os) CL3_SETTER;
-							CL3PUBF	stream::IOut<byte_t>*	Sink	() const CL3_GETTER;
+							CL3PUBF	void	Sink	(stream::IOut<byte_t>* os) final override CL3_SETTER;
+							CL3PUBF	stream::IOut<byte_t>*	Sink	() const final override CL3_GETTER;
 
 							//	from TUTF8Encoder
 							CL3PUBF	CLASS	TUTF8Encoder	();
+							CL3PUBF	CLASS	~TUTF8Encoder	();
 					};
 
 					class	CL3PUBT	TUTF8Decoder : public virtual IDecoder
@@ -60,16 +65,18 @@ namespace	cl3
 							u32_t state;
 
 						public:
-							//	from IDecoder
-							CL3PUBF	void	Reset	();
+							//	from IXCoder
+							CL3PUBF	const ICodec*	Codec	() const final override CL3_GETTER;
+							CL3PUBF	void			Reset	() final override;
+							CL3PUBF	bool			IsDirty	() const final override CL3_GETTER;
 
 							//	from IOut<byte_t>
 							using IOut<byte_t>::Write;
-							CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+							CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 
 							//	from ISource<TUTF32>
-							CL3PUBF	void	Sink	(stream::IOut<TUTF32>* os) CL3_SETTER;
-							CL3PUBF	stream::IOut<TUTF32>*	Sink	() const CL3_GETTER;
+							CL3PUBF	void	Sink	(stream::IOut<TUTF32>* os) final override CL3_SETTER;
+							CL3PUBF	stream::IOut<TUTF32>*	Sink	() const final override CL3_GETTER;
 
 							//	from TUTF8Decoder
 							CL3PUBF	CLASS	TUTF8Decoder	();
@@ -80,9 +87,9 @@ namespace	cl3
 					{
 						public:
 							//	from ICodec
-							CL3PUBF	string::TString	Name	() const;
-							CL3PUBF	system::memory::TUniquePtr<IEncoder>	CreateEncoder	() const;
-							CL3PUBF	system::memory::TUniquePtr<IDecoder>	CreateDecoder	() const;
+							CL3PUBF	string::TString	Name	() const final override CL3_GETTER;
+							CL3PUBF	system::memory::TUniquePtr<IEncoder>	CreateEncoder	() const final override CL3_WARN_UNUSED_RESULT;
+							CL3PUBF	system::memory::TUniquePtr<IDecoder>	CreateDecoder	() const final override CL3_WARN_UNUSED_RESULT;
 							CLASS	TUTF8Codec	() {}
 					};
 

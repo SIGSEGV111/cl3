@@ -72,25 +72,31 @@ namespace	cl3
 					virtual	system::memory::TUniquePtr<IDecoder>	CreateDecoder	() const CL3_WARN_UNUSED_RESULT = 0;
 				};
 
-				class	CL3PUBT	IEncoder : public stream::ISource<byte_t>, public virtual stream::IOut<TUTF32>
+				struct	CL3PUBT	IXCoder
+				{
+					virtual	const ICodec*	Codec	() const CL3_GETTER = 0;
+					virtual	void			Reset	() = 0;
+					virtual	bool			IsDirty	() const CL3_GETTER = 0;
+					virtual	CLASS			~IXCoder() {}
+				};
+
+				class	CL3PUBT	IEncoder : public stream::ISource<byte_t>, public virtual stream::IOut<TUTF32>, public virtual IXCoder
 				{
 					protected:
 						event::TEvent<IEncoder,TTranscodeException> on_error;
 
 					public:
 						inline	const event::TEvent<IEncoder,TTranscodeException>&	OnError	() const { return on_error; }
-						virtual	void	Reset	() = 0;
 						virtual	CLASS	~IEncoder	() {}
 				};
 
-				class	CL3PUBT	IDecoder : public stream::ISource<TUTF32>, public virtual stream::IOut<byte_t>
+				class	CL3PUBT	IDecoder : public stream::ISource<TUTF32>, public virtual stream::IOut<byte_t>, public virtual IXCoder
 				{
 					protected:
 						event::TEvent<IDecoder,TTranscodeException> on_error;
 
 					public:
 						inline	const event::TEvent<IDecoder,TTranscodeException>&	OnError	() const { return on_error; }
-						virtual	void	Reset	() = 0;
 						virtual	CLASS	~IDecoder	() {}
 				};
 

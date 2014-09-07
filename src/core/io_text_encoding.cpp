@@ -38,8 +38,10 @@ namespace	cl3
 				{
 					stream::IOut<byte_t>* sink;
 
-					//	from IEncoder
-					void	Reset	() {}
+					//	from IXCoder
+					const ICodec*	Codec	() const final override CL3_GETTER { return CODEC_UTF32; }
+					void			Reset	() final override {}
+					bool			IsDirty	() const final override CL3_GETTER { return false; }
 
 					//	from IOut<TUTF32>
 					usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
@@ -59,8 +61,10 @@ namespace	cl3
 				{
 					stream::IOut<TUTF32>* sink;
 
-					//	from IDecoder
-					void	Reset	() {}
+					//	from IXCoder
+					const ICodec*	Codec	() const final override CL3_GETTER { return CODEC_UTF32; }
+					void			Reset	() final override {}
+					bool			IsDirty	() const final override CL3_GETTER { return false; }
 
 					//	from IOut<byte_t>
 					usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)

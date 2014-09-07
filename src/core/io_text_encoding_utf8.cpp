@@ -23,6 +23,9 @@
 #include "io_text_encoding_utf8.hpp"
 #include "io_text_string.hpp"
 
+extern "C" void* memcpy(void* dest, const void* src, size_t n) throw();
+extern "C" void* memmove(void* dest, const void* src, size_t n) throw();
+
 namespace	cl3
 {
 	namespace	io
@@ -36,17 +39,39 @@ namespace	cl3
 					using namespace stream;
 					using namespace error;
 
-					void			TUTF8Encoder::Reset	()
-					{
-						//	nothing to do here
-					}
+					/*******************************************************************************/
 
-					usys_t			TUTF8Encoder::Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+					CLASS	TUTF8Encoder::TUTF8Encoder		() : sink(NULL), shift(0U) {}
+					CLASS	TUTF8Encoder::~TUTF8Encoder		()	{ CL3_CLASS_ERROR(this->shift != 0, TTranscodeException, CODEC_UTF8, DIRECTION_ENCODE, REASON_INCOMPLETE, this->shift, 0); }
+
+					void			TUTF8Encoder::Sink		(IOut<byte_t>* os)	{ sink = os; }
+					IOut<byte_t>*	TUTF8Encoder::Sink		() const			{ return sink; }
+
+					const ICodec*	TUTF8Encoder::Codec		() const	{ return CODEC_UTF8; }
+					void			TUTF8Encoder::Reset		()			{ this->shift = 0U; }
+					bool			TUTF8Encoder::IsDirty	() const	{ return this->shift != 0; }
+
+					usys_t			TUTF8Encoder::Write		(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 					{
 						if(n_items_write_min == (usys_t)-1)
 							n_items_write_min = n_items_write_max;
 
 						CL3_CLASS_ERROR(this->sink == NULL, TException, "Sink() must point to a valid sink");
+
+						//	flush global state
+						if(this->shift != 0)
+						{
+							const usys_t r = this->sink->Write(state, this->shift, n_items_write_min > 0 ? this->shift : 0);
+							if(r == 0) return 0;	//	we couldn't even write somthing from the global state, so we don't even need to try to write more from the actual data
+
+							memmove(this->state, this->state + r, this->shift - r);
+							this->shift -= r;
+
+							if(this->shift != 0)	//	we weren't able to completly clear the global state, so we cannot proceed with the actual data (we have to preserve the order, and it is unlikly that the sink will suddenly accept more data)
+								return r;
+						}
+						//	state is cleared, continue with processing actual data...
+
 						usys_t n_out = 0;
 						usys_t i = 0;
 						for(; i < n_items_write_max; i++)
@@ -105,7 +130,11 @@ namespace	cl3
 									if(r == 0)
 										break;	//	sink full
 									else
-										this->sink->Write(arr_out + r, length - r);	//	if the sink accepted some - but not all - bytes we force the sink to accept the remaining bytes as well - this might prove sub-optimal at some point, and might get changed - do not rely on this behavior
+									{
+										//	put the remaining bytes into the global state
+										this->shift = length - r;
+										memcpy(this->state, arr_out + r, length - r);
+									}
 								}
 							}
 							n_out += length;
@@ -114,25 +143,19 @@ namespace	cl3
 						return i;
 					}
 
-					void			TUTF8Encoder::Sink	(IOut<byte_t>* os)
-					{
-						sink = os;
-					}
+					/*******************************************************************************/
 
-					IOut<byte_t>*	TUTF8Encoder::Sink	() const
-					{
-						return sink;
-					}
+					CLASS	TUTF8Decoder::TUTF8Decoder		() : sink(NULL), shift(0U), state(0U) {}
+					CLASS	TUTF8Decoder::~TUTF8Decoder		()	{ CL3_CLASS_ERROR(this->shift != 0, TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INCOMPLETE, this->shift, 0); }
 
-					CLASS	TUTF8Encoder::TUTF8Encoder	() : sink(NULL) {}
+					void			TUTF8Decoder::Sink		(IOut<TUTF32>* os) { sink = os; }
+					IOut<TUTF32>*	TUTF8Decoder::Sink		() const { return sink; }
 
-					void			TUTF8Decoder::Reset	()
-					{
-						this->shift = 0;
-						this->state = 0U;
-					}
+					const ICodec*	TUTF8Decoder::Codec		() const	{ return CODEC_UTF8; }
+					void			TUTF8Decoder::Reset		()			{ this->shift = 0U; }
+					bool			TUTF8Decoder::IsDirty	() const	{ return this->shift != 0; }
 
-					usys_t			TUTF8Decoder::Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+					usys_t			TUTF8Decoder::Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 					{
 						if(n_items_write_min == (usys_t)-1)
 							n_items_write_min = n_items_write_max;
@@ -251,21 +274,7 @@ namespace	cl3
 						return i;
 					}
 
-					void			TUTF8Decoder::Sink	(IOut<TUTF32>* os)
-					{
-						sink = os;
-					}
-
-					IOut<TUTF32>*	TUTF8Decoder::Sink	() const
-					{
-						return sink;
-					}
-
-					CLASS	TUTF8Decoder::TUTF8Decoder	() : sink(NULL), shift(0U), state(0U) {}
-					CLASS	TUTF8Decoder::~TUTF8Decoder	()
-					{
-						CL3_CLASS_ERROR(this->shift != 0, TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INCOMPLETE, this->shift, 0);
-					}
+					/*******************************************************************************/
 
 					string::TString	TUTF8Codec::Name	() const
 					{

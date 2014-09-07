@@ -21,6 +21,7 @@
 #include <cl3/core/system_types_typeinfo.hpp>
 #include <cl3/core/system_memory.hpp>
 #include <cl3/core/io_collection_list.hpp>
+#include <cl3/core/io_collection_array.hpp>
 #include <cl3/core/io_text.hpp>
 #include <cl3/core/io_text_string.hpp>
 #include <cl3/core/io_text_encoding.hpp>
@@ -31,6 +32,8 @@ using namespace ::testing;
 
 namespace
 {
+	using namespace cl3::io::stream;
+	using namespace cl3::io::collection::array;
 	using namespace cl3::system::types;
 	using namespace cl3::system::memory;
 	using namespace cl3::io::text;
@@ -419,4 +422,87 @@ namespace
 		const TString s = "hello";
 		EXPECT_TRUE(*Stringify(TCTTI<TString>::print, &s).Object() == "hello");
 	}
+
+	template<class T>
+	struct	TLimitedBuffer : virtual IOut<T>, virtual IIn<T>
+	{
+		TArray<T> array;
+		usys_t index;
+
+		CLASS	TLimitedBuffer	(usys_t n_items) : array(new T[n_items], n_items), index(0) {}
+		CLASS	~TLimitedBuffer	() { delete[] array.ItemPtr(0); }
+		TLimitedBuffer(const TLimitedBuffer&) = delete;
+		TLimitedBuffer&	operator=(const TLimitedBuffer&) = delete;
+
+		usys_t	Read	(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT
+		{
+			const usys_t r = array.Read(index, arr_items_read, n_items_read_max, n_items_read_min);
+			index += r;
+			return r;
+		}
+
+		usys_t	Write	(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT
+		{
+			const usys_t r = array.Write(index, arr_items_write, n_items_write_max, n_items_write_min);
+			index += r;
+			return r;
+		}
+	};
+
+	TEST(io_text_encoding_utf8, LimitedSink_Encode)
+	{
+		const TString s = "hällä wörld";
+
+		{
+			TLimitedBuffer<byte_t> limited_sink(7);
+			TUTF8Encoder e;
+			e.Sink(&limited_sink);
+
+			EXPECT_TRUE(e.Write(s.ItemPtr(0), 11, 5) == 5);
+		}
+
+		{
+			TLimitedBuffer<byte_t> limited_sink(6);
+			TUTF8Encoder e;
+			e.Sink(&limited_sink);
+
+			EXPECT_TRUE(e.Write(s.ItemPtr(0), 11, 4) == 5);
+
+			EXPECT_TRUE(e.IsDirty());
+			e.Reset();
+		}
+
+		{
+			TUTF8Encoder e;
+			{
+				TLimitedBuffer<byte_t> limited_sink(6);
+				e.Sink(&limited_sink);
+
+				EXPECT_TRUE(e.Write(s.ItemPtr(0), 11, 4) == 5);
+				EXPECT_TRUE(e.IsDirty());
+				EXPECT_TRUE(limited_sink.array[5] == 0xC3);
+			}
+
+			{
+				TLimitedBuffer<byte_t> limited_sink(1);
+				e.Sink(&limited_sink);
+
+				EXPECT_TRUE(e.Write(s.ItemPtr(5), 6, 0) == 0);
+				EXPECT_TRUE(!e.IsDirty());
+				EXPECT_TRUE(limited_sink.array[0] == 0xA4);
+			}
+		}
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
