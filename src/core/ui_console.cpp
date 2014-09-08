@@ -64,9 +64,9 @@ namespace	cl3
 				return this->enc_char->Write(arr_items_write, n_items_write_max, n_items_write_min);
 			}
 
-			CLASS	TConsole::TConsole	(fd_t fd_in, fd_t fd_out) : fds_in(fd_in), fds_out(fd_out), enc_char(CODEC_CXX_CHAR->CreateEncoder()), dec_char(CODEC_CXX_CHAR->CreateDecoder())
+			CLASS	TConsole::TConsole	(fd_t fd_in, fd_t fd_out) : fds_in(fd_in), fds_out(fd_out)
 			{
-				enc_char->Sink(&this->fds_out);
+				//enc_char->Sink(&this->fds_out);
 			}
 
 			IConsole* console = &stdconsole;
