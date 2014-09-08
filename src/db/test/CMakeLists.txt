@@ -21,7 +21,7 @@ else ()
 	else ()
 		add_custom_target (cl3-db-coverage-prepare ALL lcov --no-external --base-directory "${ROOT_DIR}/src" --directory "${ROOT_DIR}/tmp/dbg/src/db/CMakeFiles/cl3-db.dir" --quiet --zerocounters && lcov --no-external --base-directory "${ROOT_DIR}/src" --directory "${ROOT_DIR}/tmp/dbg/src/db/CMakeFiles/cl3-db.dir" --quiet --initial --capture --output-file base.lcov)
 
-		add_custom_target (cl3-db-test-run ALL LD_LIBRARY_PATH=${GEN_DIR}/lib valgrind -q --leak-check=full --show-reachable=yes --track-origins=yes --num-callers=30 --trace-children=no --vgdb=yes --vgdb-error=1 --track-fds=yes --log-file=./valgrind.log --error-exitcode=1 "${GEN_DIR}/bin/cl3-db-test" || (tail -n60 ./valgrind.log && false))
+		add_custom_target (cl3-db-test-run ALL LD_LIBRARY_PATH=${GEN_DIR}/lib valgrind --quiet --leak-check=full --show-reachable=yes --track-origins=yes --num-callers=30 --trace-children=no --track-fds=yes --error-exitcode=1 --log-file=valgrind.log "${GEN_DIR}/bin/cl3-db-test" || (cat valgrind.log; false))
 
 		add_custom_target (cl3-db-coverage ALL lcov --no-external --base-directory "${ROOT_DIR}/src" --directory "${ROOT_DIR}/tmp/dbg/src/db/CMakeFiles/cl3-db.dir" --quiet --capture --output-file test.lcov && lcov --quiet --add-tracefile base.lcov --add-tracefile test.lcov --output-file cl3-db.lcov && genhtml --prefix "${ROOT_DIR}/src" --quiet --output-directory coverage cl3-db.lcov)
 
