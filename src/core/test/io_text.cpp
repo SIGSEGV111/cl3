@@ -493,6 +493,31 @@ namespace
 			}
 		}
 	}
+
+	TEST(io_text_encoding_utf8, LimitedSink_Decode)
+	{
+		const char s[] = "h€llö wörld";
+
+		{
+			TLimitedBuffer<TUTF32> limited_sink(4);
+			TUTF8Decoder d;
+			d.Sink(&limited_sink);
+			EXPECT_TRUE(d.Write((const byte_t*)s, sizeof(s), 6) >= 6);
+			EXPECT_TRUE(d.IsDirty());
+			EXPECT_TRUE(limited_sink.index == 4);
+			d.Reset();
+		}
+
+		{
+			TLimitedBuffer<TUTF32> limited_sink(4);
+			TUTF8Decoder d;
+			d.Sink(&limited_sink);
+			EXPECT_TRUE(d.Write((const byte_t*)s, sizeof(s), 0) >= 6);
+			EXPECT_TRUE(d.IsDirty());
+			EXPECT_TRUE(limited_sink.index == 4);
+			d.Reset();
+		}
+	}
 }
 
 

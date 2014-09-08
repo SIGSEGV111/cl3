@@ -230,23 +230,38 @@ namespace	cl3
 									}
 									else
 									{
-										//	this byte is optional, only process it into the state if the resulting UTF-32 character is accepted by the sink
-										//	make a backup copy of the local_*
-										const unsigned backup_shift = local_shift;
-										const u32_t backup_state = local_state;
-
-										local_shift--;
-										local_state <<= 6;
-										local_state |= (b & 0x3F);
-
-										if(local_shift == 0 && this->sink->Write((const TUTF32*)&local_state, 1, 0) == 0)
+										//	check if last byte of sequence
+										if(local_shift == 1)
 										{
-											//	the sink did not accept the character, load global state from backup and exit
-											this->shift = backup_shift;
-											this->state = backup_state;
-											return i;
+											//	this is the last byte of the sequence
+											//	we already processed n_items_write_min items, so this byte is optional,
+											//	we will only accept it, if we can write the resulting UTF-32 character to the sink
+											//	make a backup copy of the local_*
+											const unsigned backup_shift = local_shift;
+											const u32_t backup_state = local_state;
+
+											//	process the byte as we normally would
+											local_shift--;
+											local_state <<= 6;
+											local_state |= (b & 0x3F);
+
+											//	try to write the UTF-32 character to the sink
+											if(this->sink->Write((const TUTF32*)&local_state, 1, 0) == 0)
+											{
+												//	the sink did not accept the character >= rollback by loading global state from backup and exit
+												this->shift = backup_shift;
+												this->state = backup_state;
+												return i;
+											}
+											//	else	//	the sink accepted the character, continue normally...
 										}
-										//	else	//	the sink accepted the character (or this was not the last character in the sequence), continue normally...
+										else
+										{
+											//	just another follow byte
+											local_shift--;
+											local_state <<= 6;
+											local_state |= (b & 0x3F);
+										}
 									}
 								}
 								else	//	errors...
