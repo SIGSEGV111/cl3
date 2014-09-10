@@ -54,7 +54,7 @@ namespace	cl3
 
 							//	from TUTF8Encoder
 							CL3PUBF	CLASS	TUTF8Encoder	();
-							CL3PUBF	CLASS	~TUTF8Encoder	();
+// 							CL3PUBF	CLASS	~TUTF8Encoder	();
 					};
 
 					class	CL3PUBT	TUTF8Decoder : public virtual IDecoder
@@ -80,7 +80,7 @@ namespace	cl3
 
 							//	from TUTF8Decoder
 							CL3PUBF	CLASS	TUTF8Decoder	();
-							CL3PUBF	CLASS	~TUTF8Decoder	();
+// 							CL3PUBF	CLASS	~TUTF8Decoder	();
 					};
 
 					class	CL3PUBT	TUTF8Codec : public ICodec

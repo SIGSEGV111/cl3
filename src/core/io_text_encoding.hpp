@@ -53,7 +53,7 @@ namespace	cl3
 					ERRORACTION_ABORT		//	throw TTranscodeException
 				};
 
-				struct	CL3PUBT	TTranscodeException : error::TException
+				struct	CL3PUBT	TTranscodeException : virtual error::TException
 				{
 					const ICodec* codec;
 					EDirection direction;
@@ -63,6 +63,7 @@ namespace	cl3
 					EErrorAction action;
 
 					CL3PUBF	CLASS	TTranscodeException	(const ICodec* codec, EDirection direction, EReason reason, usys_t n_input_items_processed, usys_t n_output_items_written);
+					virtual	CLASS	~TTranscodeException();
 				};
 
 				struct	CL3PUBT	ICodec

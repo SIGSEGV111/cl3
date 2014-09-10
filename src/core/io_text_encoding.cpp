@@ -129,6 +129,10 @@ namespace	cl3
 						action(ERRORACTION_ABORT)
 				{}
 
+				CLASS	TTranscodeException::~TTranscodeException	()
+				{
+				}
+
 				usys_t	ACharDecoder::Write		(const char* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
 					if(this->decoder.Object() == NULL)

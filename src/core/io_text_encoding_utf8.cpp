@@ -42,7 +42,7 @@ namespace	cl3
 					/*******************************************************************************/
 
 					CLASS	TUTF8Encoder::TUTF8Encoder		() : sink(NULL), shift(0U) {}
-					CLASS	TUTF8Encoder::~TUTF8Encoder		()	{ CL3_CLASS_ERROR(this->shift != 0, TTranscodeException, CODEC_UTF8, DIRECTION_ENCODE, REASON_INCOMPLETE, this->shift, 0); }
+// 					CLASS	TUTF8Encoder::~TUTF8Encoder		()	{ CL3_CLASS_ERROR(this->shift != 0, TTranscodeException, CODEC_UTF8, DIRECTION_ENCODE, REASON_INCOMPLETE, this->shift, 0); }
 
 					void			TUTF8Encoder::Sink		(IOut<byte_t>* os)	{ sink = os; }
 					IOut<byte_t>*	TUTF8Encoder::Sink		() const			{ return sink; }
@@ -108,14 +108,14 @@ namespace	cl3
 							}
 							else	//	errors...
 							{
-								TTranscodeException e(CODEC_UTF8, DIRECTION_ENCODE, REASON_INVALID, i, n_out);
+								TTranscodeException e(CODEC_UTF8, DIRECTION_ENCODE, REASON_NOT_REPRESENTABLE, i, n_out);
 								on_error.Raise(*this, e);
 								switch(e.action)
 								{
 									case ERRORACTION_CONTINUE:
 										continue;
 									case ERRORACTION_ABORT:
-										CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_ENCODE, REASON_INVALID, i, n_out);
+										CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_ENCODE, REASON_NOT_REPRESENTABLE, i, n_out);
 										break;
 								}
 							}
@@ -146,7 +146,7 @@ namespace	cl3
 					/*******************************************************************************/
 
 					CLASS	TUTF8Decoder::TUTF8Decoder		() : sink(NULL), shift(0U), state(0U) {}
-					CLASS	TUTF8Decoder::~TUTF8Decoder		()	{ CL3_CLASS_ERROR(this->shift != 0, TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INCOMPLETE, this->shift, 0); }
+// 					CLASS	TUTF8Decoder::~TUTF8Decoder		()	{ CL3_CLASS_ERROR(this->shift != 0, TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INCOMPLETE, this->shift, 0); }
 
 					void			TUTF8Decoder::Sink		(IOut<TUTF32>* os) { sink = os; }
 					IOut<TUTF32>*	TUTF8Decoder::Sink		() const { return sink; }
@@ -268,7 +268,7 @@ namespace	cl3
 								{
 									this->shift = local_shift;
 									this->state = local_state;
-									TTranscodeException e(CODEC_UTF8, DIRECTION_DECODE, REASON_INVALID, i, n_out);
+									TTranscodeException e(CODEC_UTF8, DIRECTION_DECODE, REASON_INCOMPLETE, i, n_out);
 									on_error.Raise(*this, e);
 									switch(e.action)
 									{
@@ -276,7 +276,7 @@ namespace	cl3
 											Reset();
 											goto gt_again;
 										case ERRORACTION_ABORT:
-											CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INVALID, i, n_out);
+											CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INCOMPLETE, i, n_out);
 											break;
 									}
 								}

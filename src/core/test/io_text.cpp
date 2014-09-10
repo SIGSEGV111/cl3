@@ -429,8 +429,8 @@ namespace
 		TArray<T> array;
 		usys_t index;
 
-		CLASS	TLimitedBuffer	(usys_t n_items) : array(new T[n_items], n_items), index(0) {}
-		CLASS	~TLimitedBuffer	() { delete[] array.ItemPtr(0); }
+		CLASS	TLimitedBuffer	(usys_t n_items) : array(n_items ? new T[n_items] : NULL, n_items), index(0) {}
+		CLASS	~TLimitedBuffer	() { if(this->array.Count()) delete[] array.ItemPtr(0); }
 		TLimitedBuffer(const TLimitedBuffer&) = delete;
 		TLimitedBuffer&	operator=(const TLimitedBuffer&) = delete;
 
@@ -492,6 +492,17 @@ namespace
 				EXPECT_TRUE(limited_sink.array[0] == 0xA4);
 			}
 		}
+
+		{
+			TLimitedBuffer<byte_t> limited_sink(14);
+			TUTF8Encoder e;
+			e.Sink(&limited_sink);
+
+			EXPECT_TRUE(e.Write(s.ItemPtr(0), s.Count(), (usys_t)-1) == s.Count());
+
+			EXPECT_TRUE(!e.IsDirty());
+			e.Reset();
+		}
 	}
 
 	TEST(io_text_encoding_utf8, LimitedSink_Decode)
@@ -516,6 +527,127 @@ namespace
 			EXPECT_TRUE(d.IsDirty());
 			EXPECT_TRUE(limited_sink.index == 4);
 			d.Reset();
+		}
+
+		{
+			TLimitedBuffer<TUTF32> limited_sink(0);
+			TUTF8Decoder d;
+			d.Sink(&limited_sink);
+			EXPECT_TRUE(d.Write((const byte_t*)s, sizeof(s), 0) == 0);
+			EXPECT_TRUE(!d.IsDirty());
+			EXPECT_TRUE(limited_sink.index == 0);
+			d.Reset();
+		}
+
+		{
+			TLimitedBuffer<TUTF32> limited_sink(11);
+			TUTF8Decoder d;
+			d.Sink(&limited_sink);
+			EXPECT_TRUE(d.Write((const byte_t*)s, sizeof(s)-1, (usys_t)-1) == sizeof(s)-1);	//	-1 skip the \0 at the end
+			EXPECT_TRUE(!d.IsDirty());
+			EXPECT_TRUE(limited_sink.index == 11);
+			d.Reset();
+		}
+	}
+
+	TEST(io_text_encoding_utf8, utility)
+	{
+		TLimitedBuffer<TUTF32> limited_sink_utf32(0);
+		TLimitedBuffer<byte_t> limited_sink_byte(0);
+
+		TUTF8Decoder d;
+		d.Sink(&limited_sink_utf32);
+		EXPECT_TRUE(d.Sink() == &limited_sink_utf32);
+		EXPECT_TRUE(d.Codec() == CODEC_UTF8);
+
+		TUTF8Encoder e;
+		e.Sink(&limited_sink_byte);
+		EXPECT_TRUE(e.Sink() == &limited_sink_byte);
+		EXPECT_TRUE(e.Codec() == CODEC_UTF8);
+
+		EXPECT_TRUE(CODEC_UTF8->Name() == "utf8");
+	}
+
+	TEST(io_text_encoding_utf8, Invalid_Decode)
+	{
+		const char cstr_incomplete_mid[] = "hello world \xE2\x82 foobar!";
+		const char cstr_invalid[] = "hello world \x82\xAC\xE2\x82\xAC foobar!";
+
+		{
+			bool b = false;
+			TString str;
+			TUTF8Decoder d;
+			try
+			{
+				d.Sink(&str);
+				d.Write((const byte_t*)cstr_incomplete_mid, sizeof(cstr_incomplete_mid)-1);
+			}
+			catch(const TTranscodeException& te)
+			{
+				EXPECT_TRUE(te.codec == CODEC_UTF8);
+				EXPECT_TRUE(te.direction == DIRECTION_DECODE);
+				EXPECT_TRUE(te.reason == REASON_INCOMPLETE);
+				EXPECT_TRUE(te.n_input_items_processed == 14);
+				EXPECT_TRUE(te.n_output_items_written == 12);
+				b = true;
+			}
+			catch(...) {}
+			EXPECT_TRUE(b);
+			d.Reset();
+		}
+
+		{
+			bool b = false;
+			TString str;
+			TUTF8Decoder d;
+			try
+			{
+				d.Sink(&str);
+				d.Write((const byte_t*)cstr_invalid, sizeof(cstr_invalid)-1);
+			}
+			catch(const TTranscodeException& te)
+			{
+				EXPECT_TRUE(te.codec == CODEC_UTF8);
+				EXPECT_TRUE(te.direction == DIRECTION_DECODE);
+				EXPECT_TRUE(te.reason == REASON_INVALID);
+				EXPECT_TRUE(te.n_input_items_processed == 12);
+				EXPECT_TRUE(te.n_output_items_written == 12);
+				b = true;
+			}
+			catch(...) {}
+			EXPECT_TRUE(b);
+			d.Reset();
+		}
+	}
+
+	TEST(io_text_encoding_utf8, Invalid_Encode)
+	{
+		TString str_not_representable = "hello world ";
+		str_not_representable.Add(3097152U);
+		str_not_representable += " foobar!";
+
+		{
+			bool b = false;
+			TUTF8Encoder e;
+			TList<byte_t> list;
+			e.Sink(&list);
+
+			try
+			{
+				e.Write(str_not_representable.ItemPtr(0), str_not_representable.Count());
+			}
+			catch(const TTranscodeException& te)
+			{
+				EXPECT_TRUE(te.codec == CODEC_UTF8);
+				EXPECT_TRUE(te.direction == DIRECTION_ENCODE);
+				EXPECT_TRUE(te.reason == REASON_NOT_REPRESENTABLE);
+				EXPECT_TRUE(te.n_input_items_processed == 12);
+				EXPECT_TRUE(te.n_output_items_written == 12);
+				b = true;
+			}
+			catch(...) {}
+			EXPECT_TRUE(b);
+			e.Reset();
 		}
 	}
 }

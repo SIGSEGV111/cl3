@@ -209,18 +209,20 @@ namespace	cl3
 				template<class T>
 				usys_t		IArray<T>::Write	(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
-					T* const arr_items = this->ItemPtr(0);
-					const usys_t n_items = this->Count();
-
 					if(n_items_write_min == (usys_t)-1)
 						n_items_write_min = n_items_write_max;
 
-					CL3_CLASS_ERROR(index + n_items_write_min > n_items, TIndexOutOfBoundsException, index + n_items_write_min, n_items);
-
+					const usys_t n_items = this->Count();
 					const usys_t n_items_write = CL3_MIN(n_items - index, n_items_write_max);
 
-					for(usys_t i = 0; i < n_items_write; i++)
-						arr_items[index + i] = arr_items_write[i];
+					CL3_CLASS_ERROR(index + n_items_write_min > n_items, TIndexOutOfBoundsException, index + n_items_write_min, n_items);
+
+					if(n_items_write > 0)
+					{
+						T* const arr_items = this->ItemPtr(index);
+						for(usys_t i = 0; i < n_items_write; i++)
+							arr_items[i] = arr_items_write[i];
+					}
 
 					return n_items_write;
 				}
