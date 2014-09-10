@@ -12,8 +12,8 @@ else ()
 	set (GEN_DIR "${PROJECT_SOURCE_DIR}/gen/dbg")
 endif ()
 
-set (CXX_OPT_COMMON_LIB "-fvisibility-inlines-hidden -std=c++11 -fvisibility=hidden -fPIC -I${GEN_DIR}/include -L${GEN_DIR}/lib")
-set (CXX_OPT_COMMON_EXE "-fvisibility-inlines-hidden -std=c++11 -fvisibility=hidden -fPIE -I${GEN_DIR}/include -L${GEN_DIR}/lib")
+set (CXX_OPT_COMMON_LIB "-fvisibility-inlines-hidden -std=c++11 -fvisibility=hidden -rdynamic -fPIC -I${GEN_DIR}/include -L${GEN_DIR}/lib")
+set (CXX_OPT_COMMON_EXE "-fvisibility-inlines-hidden -std=c++11 -fvisibility=hidden -rdynamic -fPIE -I${GEN_DIR}/include -L${GEN_DIR}/lib")
 
 if (${BUILD_TYPE} STREQUAL "release")
 	set (CMAKE_CXX_FLAGS_INT_LIB "${CXX_OPT_COMMON_LIB} -march=native -O2 -DINSIDE_CL3")
