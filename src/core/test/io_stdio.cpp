@@ -16,62 +16,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_ui_hpp_
-#define	_include_cl3_core_ui_hpp_
+#include <cl3/core/io_stdio.hpp>
+#include <gtest/gtest.h>
 
-#include "io_text_string.hpp"
+using namespace ::testing;
 
-namespace	cl3
+namespace
 {
-	namespace	ui
+	using namespace cl3::io::stdio;
+
+	TEST(io_stdio, Basics)
 	{
-		typedef	TEvent<IElement, _::TOnClick> TOnClickEvent;
-
-		struct	IElement
-		{
-			virtual const TOnClickEvent&	OnClick	() const CL3_GETTER = 0;
-		};
-
-		struct	ICustomElement : IElement
-		{
-		};
-
-		struct	IContainer : IElement
-		{
-		};
-
-		struct	IButton : IElement
-		{
-		};
-
-		struct	IComboBox : IElement
-		{
-		};
-
-		struct	IListBox : IElement
-		{
-		};
-
-		struct	ICheckBox : IElement
-		{
-		};
-
-		struct	ITextBox : IElement
-		{
-		};
-
-		struct	IMenuBar : IElement
-		{
-		};
-
-		struct	IFrame : IContainer
-		{
-		};
-
-		struct	IWindow : IContainer
-		{
-		};
+		EXPECT_TRUE(cl3::io::stdio::stdin() != NULL);
+		EXPECT_TRUE(cl3::io::stdio::stdout() != NULL);
+		EXPECT_TRUE(cl3::io::stdio::stderr() != NULL);
 	}
 }
-
-#endif

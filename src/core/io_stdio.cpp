@@ -16,62 +16,37 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_ui_hpp_
-#define	_include_cl3_core_ui_hpp_
+#ifndef INSIDE_CL3
+#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#endif
 
-#include "io_text_string.hpp"
+#include "io_stdio.hpp"
+#include "io_stream_fd.hpp"
 
 namespace	cl3
 {
-	namespace	ui
+	namespace	io
 	{
-		typedef	TEvent<IElement, _::TOnClick> TOnClickEvent;
-
-		struct	IElement
+		namespace	stdio
 		{
-			virtual const TOnClickEvent&	OnClick	() const CL3_GETTER = 0;
-		};
+			using namespace stream::fd;
 
-		struct	ICustomElement : IElement
-		{
-		};
+			struct	TStdIOStream : virtual TFDStream
+			{
+				CLASS	TStdIOStream	(int fd) : TFDStream(fd) {}
+				CLASS	~TStdIOStream	()
+				{
+					this->FD(-1);	//	prevent close of stdio
+				}
+			};
 
-		struct	IContainer : IElement
-		{
-		};
+			static TStdIOStream fds_stdin(0);
+			static TStdIOStream fds_stdout(1);
+			static TStdIOStream fds_stderr(2);
 
-		struct	IButton : IElement
-		{
-		};
-
-		struct	IComboBox : IElement
-		{
-		};
-
-		struct	IListBox : IElement
-		{
-		};
-
-		struct	ICheckBox : IElement
-		{
-		};
-
-		struct	ITextBox : IElement
-		{
-		};
-
-		struct	IMenuBar : IElement
-		{
-		};
-
-		struct	IFrame : IContainer
-		{
-		};
-
-		struct	IWindow : IContainer
-		{
-		};
+			CL3_CONTEXT_VARIABLE_IMPL(io::stream::IIn<byte_t>*, stdin, &fds_stdin);
+			CL3_CONTEXT_VARIABLE_IMPL(io::stream::IOut<byte_t>*, stdout, &fds_stdout);
+			CL3_CONTEXT_VARIABLE_IMPL(io::stream::IOut<byte_t>*, stderr, &fds_stderr);
+		}
 	}
 }
-
-#endif

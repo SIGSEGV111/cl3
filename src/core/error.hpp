@@ -21,12 +21,21 @@
 
 #include "system_os.hpp"
 #include "system_compiler.hpp"
+#include "context.hpp"
 
 namespace	cl3
 {
+	namespace	system
+	{
+		namespace	memory
+		{
+			struct	IDynamicAllocator;
+		}
+	}
+
 	namespace	error
 	{
-		class	CL3PUBT	TException
+		class	CL3PUBT	TException : private context::TLocalValueHolder<system::memory::IDynamicAllocator*>
 		{
 			private:
 				TException& operator=(const TException&);	//	not available
@@ -41,7 +50,7 @@ namespace	cl3
 				unsigned codeline;		//	sourcecode line number (from __LINE__ macro)
 
 				CL3PUBF	CLASS	TException	(const char* format, ...);	//	printf-syle ctor
-				CL3PUBF	CLASS	TException	(const TException&);
+				CL3PUBF	CLASS	TException	(TException&&);
 				virtual	CLASS	~TException	();
 				CL3PUBF	void	Set	(const void* object, const char* codefile, const char* function, const char* expression, TException* inner, unsigned codeline);
 		};
@@ -59,7 +68,7 @@ namespace	cl3
 			public:
 				CL3PUBF	CLASS	TSyscallException	();
 				CL3PUBF	CLASS	TSyscallException	(int err_no);
-				CL3PUBF	CLASS	TSyscallException	(const TSyscallException&);
+				CL3PUBF	CLASS	TSyscallException	(TSyscallException&&);
 				CL3PUBF	virtual	~TSyscallException	();
 		};
 
@@ -67,7 +76,7 @@ namespace	cl3
 		{
 			public:
 				CL3PUBF	CLASS	TNotImplementedException	();
-				CL3PUBF	CLASS	TNotImplementedException	(const TNotImplementedException&);
+				CL3PUBF	CLASS	TNotImplementedException	(TNotImplementedException&&);
 				CL3PUBF	virtual	~TNotImplementedException	();
 		};
 
@@ -75,7 +84,7 @@ namespace	cl3
 		{
 			public:
 				CL3PUBF	CLASS	TLogicException	();
-				CL3PUBF	CLASS	TLogicException	(const TLogicException&);
+				CL3PUBF	CLASS	TLogicException	(TLogicException&&);
 				CL3PUBF	virtual	~TLogicException();
 		};
 

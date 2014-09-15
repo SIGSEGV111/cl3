@@ -25,6 +25,8 @@ namespace
 {
 	using namespace cl3::context;
 
+
+
 	namespace	some_namespace
 	{
 		CL3_PARAMETER_STACK_DECL(int, my_int_stack);

@@ -32,7 +32,7 @@ namespace	cl3
 			{
 			}
 
-			CLASS	TIndexOutOfBoundsException::TIndexOutOfBoundsException	(const TIndexOutOfBoundsException& other) : TException(other)
+			CLASS	TIndexOutOfBoundsException::TIndexOutOfBoundsException	(TIndexOutOfBoundsException&& oobe) : TException(static_cast<TException&&>(oobe))
 			{
 			}
 

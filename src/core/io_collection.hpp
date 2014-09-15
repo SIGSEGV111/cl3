@@ -47,7 +47,7 @@ namespace	cl3
 					usys_t count;
 
 					CL3PUBF	CLASS	TIndexOutOfBoundsException	(ssys_t index, usys_t count);
-					CL3PUBF	CLASS	TIndexOutOfBoundsException	(const TIndexOutOfBoundsException&);
+					CL3PUBF	CLASS	TIndexOutOfBoundsException	(TIndexOutOfBoundsException&&);
 					virtual	CLASS	~TIndexOutOfBoundsException	();
 			};
 

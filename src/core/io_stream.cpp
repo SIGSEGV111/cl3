@@ -34,7 +34,7 @@ namespace	cl3
 			{
 			}
 
-			CLASS	TIOException::TIOException	(const TIOException& e) : TException(e)
+			CLASS	TIOException::TIOException	(TIOException&& e) : TException(static_cast<TException&&>(e))
 			{
 			}
 
@@ -50,7 +50,7 @@ namespace	cl3
 			{
 			}
 
-			CLASS	TSourceDryException::TSourceDryException	(const TSourceDryException& e) : TIOException(e)
+			CLASS	TSourceDryException::TSourceDryException	(TSourceDryException&& e) : TIOException(static_cast<TIOException&&>(e))
 			{
 			}
 
@@ -66,7 +66,7 @@ namespace	cl3
 			{
 			}
 
-			CLASS	TSinkFloodedException::TSinkFloodedException	(const TSinkFloodedException& e) : TIOException(e)
+			CLASS	TSinkFloodedException::TSinkFloodedException	(TSinkFloodedException&& e) : TIOException(static_cast<TIOException&&>(e))
 			{
 			}
 

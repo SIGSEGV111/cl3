@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_ui_terminal_hpp_
-#define	_include_cl3_core_ui_terminal_hpp_
+#ifndef	_include_cl3_core_ui_console_hpp_
+#define _include_cl3_core_ui_console_hpp_
 
 #include "system_compiler.hpp"
 #include "system_types.hpp"
@@ -37,36 +37,36 @@ namespace	cl3
 		{
 			using namespace system::types;
 
-			struct	CL3PUBT	IConsole : virtual io::text::ITextStream
-			{
-			};
-
-			class	CL3PUBT	TConsole : public virtual IConsole
-			{
-				CLASS		TConsole	(const TConsole&) = delete;
-				TConsole&	operator=	(const TConsole&) = delete;
-
-				protected:
-					io::stream::fd::TFDStream fds_in;
-					io::stream::fd::TFDStream fds_out;
-
-					system::memory::TUniquePtr<io::text::encoding::IEncoder> enc_char;	//	UTF-32 to char
-					system::memory::TUniquePtr<io::text::encoding::IDecoder> dec_char;	//	char to UTF-32
-
-				public:
-					CL3PUBF	usys_t	Read	(char* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	usys_t	Write	(const char* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
-
-					CL3PUBF	usys_t	Read	(wchar_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	usys_t	Write	(const wchar_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
-
-					CL3PUBF	usys_t	Read	(io::text::TUTF32* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	usys_t	Write	(const io::text::TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
-
-					CL3PUBF	CLASS	TConsole	(fd_t fd_in, fd_t fd_out);
-			};
-
-			CL3PUBV IConsole* console;
+// 			struct	CL3PUBT	IConsole : virtual io::text::ITextStream
+// 			{
+// 			};
+//
+// 			class	CL3PUBT	TConsole : public virtual IConsole
+// 			{
+// 				CLASS		TConsole	(const TConsole&) = delete;
+// 				TConsole&	operator=	(const TConsole&) = delete;
+//
+// 				protected:
+// 					io::stream::fd::TFDStream fds_in;
+// 					io::stream::fd::TFDStream fds_out;
+//
+// 					system::memory::TUniquePtr<io::text::encoding::IEncoder> enc_char;	//	UTF-32 to char
+// 					system::memory::TUniquePtr<io::text::encoding::IDecoder> dec_char;	//	char to UTF-32
+//
+// 				public:
+// 					CL3PUBF	usys_t	Read	(char* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT;
+// 					CL3PUBF	usys_t	Write	(const char* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
+//
+// 					CL3PUBF	usys_t	Read	(wchar_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT;
+// 					CL3PUBF	usys_t	Write	(const wchar_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
+//
+// 					CL3PUBF	usys_t	Read	(io::text::TUTF32* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT;
+// 					CL3PUBF	usys_t	Write	(const io::text::TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
+//
+// 					CL3PUBF	CLASS	TConsole	(fd_t fd_in, fd_t fd_out);
+// 			};
+//
+// 			CL3PUBV IConsole* console;
 		}
 	}
 }

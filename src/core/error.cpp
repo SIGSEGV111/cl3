@@ -33,9 +33,8 @@ namespace	cl3
 	{
 		using namespace system::memory;
 
-		CLASS	TException::TException	(const char* format, ...) : message(NULL), object(NULL), codefile(NULL), function(NULL), expression(NULL), inner(NULL), codeline(0)
+		CLASS	TException::TException	(const char* format, ...) : TLocalValueHolder<IDynamicAllocator*>(allocator_generic, allocator_exception.Value()), message(NULL), object(NULL), codefile(NULL), function(NULL), expression(NULL), inner(NULL), codeline(0)
 		{
-			CL3_PARAMETER_STACK_PUSH(allocator, exception_allocator);
 			if(format)
 			{
 				va_list list;
@@ -52,8 +51,10 @@ namespace	cl3
 			}
 		}
 
-		CLASS	TException::TException	(const TException& e) : message(util::mkstrcpy(e.message, exception_allocator).Claim()), object(e.object), codefile(e.codefile), function(e.function), expression(e.expression), inner(e.inner), codeline(e.codeline)
-		{}
+		CLASS	TException::TException	(TException&& e) : TLocalValueHolder<IDynamicAllocator*>(static_cast<TLocalValueHolder<IDynamicAllocator*>&&>(e)), message(e.message), object(e.object), codefile(e.codefile), function(e.function), expression(e.expression), inner(e.inner), codeline(e.codeline)
+		{
+			e.message = NULL;
+		}
 
 		CLASS	TException::~TException	()
 		{
@@ -74,7 +75,7 @@ namespace	cl3
 		{
 		}
 
-		CLASS	TNotImplementedException::TNotImplementedException	(const TNotImplementedException& nie) : TException(nie)
+		CLASS	TNotImplementedException::TNotImplementedException	(TNotImplementedException&& nie) : TException(static_cast<TException&&>(nie))
 		{
 		}
 
@@ -86,7 +87,7 @@ namespace	cl3
 		{
 		}
 
-		CLASS	TLogicException::TLogicException	(const TLogicException& nie) : TException(nie)
+		CLASS	TLogicException::TLogicException	(TLogicException&& le) : TException(static_cast<TException&&>(le))
 		{
 		}
 

@@ -32,44 +32,44 @@ namespace	cl3
 		{
 			using namespace io::text::encoding;
 
-			TConsole stdconsole(0, 1);
-
-			usys_t	TConsole::Read	(char* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
-			{
-				return this->fds_in.Read((byte_t*)arr_items_read, n_items_read_max, n_items_read_min);
-			}
-
-			usys_t	TConsole::Write	(const char* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
-			{
-				return this->fds_out.Write((const byte_t*)arr_items_write, n_items_write_max, n_items_write_min);
-			}
-
-			usys_t	TConsole::Read	(wchar_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			usys_t	TConsole::Write	(const wchar_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			usys_t	TConsole::Read	(io::text::TUTF32* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			usys_t	TConsole::Write	(const io::text::TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
-			{
-				return this->enc_char->Write(arr_items_write, n_items_write_max, n_items_write_min);
-			}
-
-			CLASS	TConsole::TConsole	(fd_t fd_in, fd_t fd_out) : fds_in(fd_in), fds_out(fd_out)
-			{
-				//enc_char->Sink(&this->fds_out);
-			}
-
-			IConsole* console = &stdconsole;
+// 			TConsole stdconsole(0, 1);
+//
+// 			usys_t	TConsole::Read	(char* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
+// 			{
+// 				return this->fds_in.Read((byte_t*)arr_items_read, n_items_read_max, n_items_read_min);
+// 			}
+//
+// 			usys_t	TConsole::Write	(const char* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+// 			{
+// 				return this->fds_out.Write((const byte_t*)arr_items_write, n_items_write_max, n_items_write_min);
+// 			}
+//
+// 			usys_t	TConsole::Read	(wchar_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
+// 			{
+// 				CL3_NOT_IMPLEMENTED;
+// 			}
+//
+// 			usys_t	TConsole::Write	(const wchar_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+// 			{
+// 				CL3_NOT_IMPLEMENTED;
+// 			}
+//
+// 			usys_t	TConsole::Read	(io::text::TUTF32* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
+// 			{
+// 				CL3_NOT_IMPLEMENTED;
+// 			}
+//
+// 			usys_t	TConsole::Write	(const io::text::TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+// 			{
+// 				return this->enc_char->Write(arr_items_write, n_items_write_max, n_items_write_min);
+// 			}
+//
+// 			CLASS	TConsole::TConsole	(fd_t fd_in, fd_t fd_out) : fds_in(fd_in), fds_out(fd_out)
+// 			{
+// 				//enc_char->Sink(&this->fds_out);
+// 			}
+//
+// 			IConsole* console = &stdconsole;
 		}
 	}
 }

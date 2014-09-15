@@ -16,61 +16,26 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_ui_hpp_
-#define	_include_cl3_core_ui_hpp_
+#ifndef	_include_cl3_core_io_stdio_hpp_
+#define _include_cl3_core_io_stdio_hpp_
 
-#include "io_text_string.hpp"
+#include "system_compiler.hpp"
+#include "system_types.hpp"
+#include "context.hpp"
+#include "io_stream.hpp"
 
 namespace	cl3
 {
-	namespace	ui
+	using namespace system::types;
+
+	namespace	io
 	{
-		typedef	TEvent<IElement, _::TOnClick> TOnClickEvent;
-
-		struct	IElement
+		namespace	stdio
 		{
-			virtual const TOnClickEvent&	OnClick	() const CL3_GETTER = 0;
-		};
-
-		struct	ICustomElement : IElement
-		{
-		};
-
-		struct	IContainer : IElement
-		{
-		};
-
-		struct	IButton : IElement
-		{
-		};
-
-		struct	IComboBox : IElement
-		{
-		};
-
-		struct	IListBox : IElement
-		{
-		};
-
-		struct	ICheckBox : IElement
-		{
-		};
-
-		struct	ITextBox : IElement
-		{
-		};
-
-		struct	IMenuBar : IElement
-		{
-		};
-
-		struct	IFrame : IContainer
-		{
-		};
-
-		struct	IWindow : IContainer
-		{
-		};
+			CL3_CONTEXT_VARIABLE_DECL(io::stream::IIn<byte_t>*, stdin);
+			CL3_CONTEXT_VARIABLE_DECL(io::stream::IOut<byte_t>*, stdout);
+			CL3_CONTEXT_VARIABLE_DECL(io::stream::IOut<byte_t>*, stderr);
+		}
 	}
 }
 

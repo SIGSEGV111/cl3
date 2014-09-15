@@ -33,11 +33,11 @@ namespace	cl3
 			using namespace error;
 
 			CLASS	TDirtyAllocatorException::TDirtyAllocatorException	(usys_t sz_bytes) : TException("destroying non-empty allocator (allocated size: %zd byte_ts)", sz_bytes), sz_bytes(sz_bytes) {}
-			CLASS	TDirtyAllocatorException::TDirtyAllocatorException	(const TDirtyAllocatorException& dae) : TException(dae), sz_bytes(dae.sz_bytes) {}
+			CLASS	TDirtyAllocatorException::TDirtyAllocatorException	(TDirtyAllocatorException&& dae) : TException(static_cast<TException&&>(dae)), sz_bytes(dae.sz_bytes) {}
 			CLASS	TDirtyAllocatorException::~TDirtyAllocatorException	() {}
 
 			CLASS	TBadAllocException::TBadAllocException	(usys_t sz_bytes) : TException("memory allocation failed (size: %zd byte_ts)", sz_bytes), sz_bytes(sz_bytes) {}
-			CLASS	TBadAllocException::TBadAllocException	(const TBadAllocException& bae) : TException(bae), sz_bytes(bae.sz_bytes) {}
+			CLASS	TBadAllocException::TBadAllocException	(TBadAllocException&& bae) : TException(static_cast<TException&&>(bae)), sz_bytes(bae.sz_bytes) {}
 			CLASS	TBadAllocException::~TBadAllocException	() {}
 
 			/*******************************************************/
@@ -156,11 +156,9 @@ namespace	cl3
 
 			/*******************************************************/
 
-			CL3_PARAMETER_STACK_IMPL(IDynamicAllocator*, allocator, NULL);
-
-			static TDefaultAllocator default_allocator;
-			CL3_PARAMETER_STACK_PUSH(allocator, &default_allocator);
-			IDynamicAllocator* exception_allocator = &default_allocator;	//	FIXME: assign a dedicated allocator which keeps a reserve
+			static TDefaultAllocator allocator_default;
+			CL3_CONTEXT_VARIABLE_IMPL(IDynamicAllocator*, allocator_generic, &allocator_default);
+			CL3_CONTEXT_VARIABLE_IMPL(IDynamicAllocator*, allocator_exception, &allocator_default);
 
 			/*******************************************************/
 

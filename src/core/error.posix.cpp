@@ -55,7 +55,7 @@ namespace	cl3
 		{
 		}
 
-		CLASS	TSyscallException::TSyscallException	(const TSyscallException& other) : TException(other), err_no(other.err_no)
+		CLASS	TSyscallException::TSyscallException	(TSyscallException&& other) : TException(static_cast<TException&&>(other)), err_no(other.err_no)
 		{
 			memcpy(message_buffer, other.message_buffer, sizeof(message_buffer));
 		}

@@ -251,7 +251,7 @@ namespace	cl3
 
 				public:
 					CL3PUBF	CLASS	TBadAllocException	(usys_t sz_bytes);
-					CL3PUBF	CLASS	TBadAllocException	(const TBadAllocException&);
+					CL3PUBF	CLASS	TBadAllocException	(TBadAllocException&&);
 					CL3PUBF	virtual	~TBadAllocException	();
 			};
 
@@ -262,7 +262,7 @@ namespace	cl3
 
 				public:
 					CL3PUBF	CLASS	TDirtyAllocatorException	(usys_t sz_bytes);
-					CL3PUBF	CLASS	TDirtyAllocatorException	(const TDirtyAllocatorException&);
+					CL3PUBF	CLASS	TDirtyAllocatorException	(TDirtyAllocatorException&&);
 					CL3PUBF	virtual	~TDirtyAllocatorException	();
 			};
 
@@ -296,8 +296,8 @@ namespace	cl3
 					CL3PUBF	CLASS	~TRestrictAllocator	();
 			};
 
-			CL3_PARAMETER_STACK_DECL(IDynamicAllocator*, allocator);
-			CL3PUBF extern IDynamicAllocator* exception_allocator;
+			CL3_CONTEXT_VARIABLE_DECL(IDynamicAllocator*, allocator_generic);
+			CL3_CONTEXT_VARIABLE_DECL(IDynamicAllocator*, allocator_exception);
 		}
 	}
 }

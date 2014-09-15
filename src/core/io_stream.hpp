@@ -21,7 +21,8 @@
 
 #include "system_compiler.hpp"
 #include "system_types.hpp"
-#include "system_task_synchronization.hpp"
+#include "error.hpp"
+// #include "system_task_synchronization.hpp"
 
 namespace	cl3
 {
@@ -37,38 +38,35 @@ namespace	cl3
 			template<class T>	struct	ISource;
 			template<class T>	struct	ISink;
 
-			class	CL3PUBT	TIOException : public error::TException
+			struct	CL3PUBT	TIOException : error::TException
 			{
-				public:
-					CL3PUBF	CLASS	TIOException	();
-					CL3PUBF	CLASS	TIOException	(const TIOException&);
-					CL3PUBF	CLASS	~TIOException	();
+				CL3PUBF	CLASS	TIOException	();
+				CL3PUBF	CLASS	TIOException	(TIOException&&);
+				CL3PUBF	CLASS	~TIOException	();
 			};
 
-			class	CL3PUBT	TSourceDryException : public TIOException
+			struct	CL3PUBT	TSourceDryException : TIOException
 			{
-				public:
-					uoff_t n_items_requested_read_max;
-					uoff_t n_items_requested_read_min;
-					uoff_t n_items_actually_read;
-					uoff_t n_items_still_available;
+				uoff_t n_items_requested_read_max;
+				uoff_t n_items_requested_read_min;
+				uoff_t n_items_actually_read;
+				uoff_t n_items_still_available;
 
-					CL3PUBF	CLASS	TSourceDryException	(uoff_t n_items_requested_read_max, uoff_t n_items_requested_read_min, uoff_t n_items_actually_read, uoff_t n_items_still_available);
-					CL3PUBF	CLASS	TSourceDryException	(const TSourceDryException&);
-					CL3PUBF	CLASS	~TSourceDryException();
+				CL3PUBF	CLASS	TSourceDryException	(uoff_t n_items_requested_read_max, uoff_t n_items_requested_read_min, uoff_t n_items_actually_read, uoff_t n_items_still_available);
+				CL3PUBF	CLASS	TSourceDryException	(TSourceDryException&&);
+				CL3PUBF	CLASS	~TSourceDryException();
 			};
 
-			class	CL3PUBT	TSinkFloodedException : public TIOException
+			struct	CL3PUBT	TSinkFloodedException : TIOException
 			{
-				public:
-					uoff_t n_items_requested_write_max;
-					uoff_t n_items_requested_write_min;
-					uoff_t n_items_actually_written;
-					uoff_t n_items_still_space;
+				uoff_t n_items_requested_write_max;
+				uoff_t n_items_requested_write_min;
+				uoff_t n_items_actually_written;
+				uoff_t n_items_still_space;
 
-					CL3PUBF	CLASS	TSinkFloodedException	(uoff_t n_items_requested_write_max, uoff_t n_items_requested_write_min, uoff_t n_items_actually_written, uoff_t n_items_still_space);
-					CL3PUBF	CLASS	TSinkFloodedException	(const TSinkFloodedException&);
-					CL3PUBF	CLASS	~TSinkFloodedException	();
+				CL3PUBF	CLASS	TSinkFloodedException	(uoff_t n_items_requested_write_max, uoff_t n_items_requested_write_min, uoff_t n_items_actually_written, uoff_t n_items_still_space);
+				CL3PUBF	CLASS	TSinkFloodedException	(TSinkFloodedException&&);
+				CL3PUBF	CLASS	~TSinkFloodedException	();
 			};
 
 			template<class T>

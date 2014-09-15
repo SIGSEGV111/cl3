@@ -11,4 +11,4 @@ add_library (cl3-db SHARED ${CL3_CORE_SRC})
 add_dependencies (cl3-db_static cl3-core_static)
 add_dependencies (cl3-db cl3-core)
 
-add_subdirectory (test)
+#add_subdirectory (test)
