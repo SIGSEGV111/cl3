@@ -182,7 +182,7 @@ namespace	cl3
 
 				if(sz_bytes)
 				{
-					IDynamicAllocator* const owner = CL3_PARAMETER_STACK_VALUE(allocator);
+					IDynamicAllocator* const owner = allocator_generic();
 					IDynamicAllocator** p_base;
 
 					if(owner)

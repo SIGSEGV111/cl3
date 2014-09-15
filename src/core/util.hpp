@@ -36,11 +36,6 @@ namespace	cl3
 	{
 		CL3PUBF	system::memory::TUniquePtr<char,system::memory::UPTR_ALLOC> mkstrcpy(const char* str, system::memory::IDynamicAllocator* allocator = NULL);
 
-		template<class T> struct remove_ref      { typedef T type; };
-		template<class T> struct remove_ref<T&>  { typedef T type; };
-		template<class T> struct remove_ref<T&&> { typedef T type; };
-		template<class T> constexpr typename remove_ref<T>::type&& move(T&& value) { return static_cast<typename remove_ref<T>::type&&>(value); }
-
 		CL3PUBF	void	Hexdump	(const void* p_mem, system::types::usys_t sz_mem, io::text::ITextWriter&);
 	}
 }

@@ -65,7 +65,7 @@ namespace
 
 		bytes = (byte_t*)Alloc(128, NULL);
 
-		CL3_PARAMETER_STACK_PUSH(allocator, &fail_allocator);
+		CL3_CONTEXT_VARIABLE_PUSH(allocator_generic, &fail_allocator);
 		bytes = (byte_t*)Realloc(bytes, 256, NULL, false);
 		Free(bytes);
 	}
@@ -80,7 +80,7 @@ namespace
 		EXPECT_TRUE(*y == 56);
 		EXPECT_TRUE(*z == 36);
 		IDynamicAllocator** p = reinterpret_cast<IDynamicAllocator**>(x)-1;
-		EXPECT_TRUE(*p == CL3_PARAMETER_STACK_VALUE(allocator));
+		EXPECT_TRUE(*p == allocator_generic());
 		delete x;
 		delete y;
 		delete z;
@@ -89,8 +89,8 @@ namespace
 	TEST(system_memory_TRestrictAllocator, bust_limit)
 	{
 		const usys_t sz_limit = 0x10000;
-		TRestrictAllocator ra(CL3_PARAMETER_STACK_VALUE(allocator), sz_limit);
-		CL3_PARAMETER_STACK_PUSH(allocator, &ra);
+		TRestrictAllocator ra(allocator_generic(), sz_limit);
+		CL3_CONTEXT_VARIABLE_PUSH(allocator_generic, &ra);
 
 		int* x = new int(1);
 		int* y = new int(2);
@@ -121,7 +121,7 @@ namespace
 	TEST(system_memory_TRestrictAllocator, Realloc)
 	{
 		const usys_t sz_limit = 0x10000;
-		TRestrictAllocator ra(CL3_PARAMETER_STACK_VALUE(allocator), sz_limit);
+		TRestrictAllocator ra(allocator_generic(), sz_limit);
 
 		void* array = ra.Alloc(17);
 		array = ra.Realloc(array, 112, false);
@@ -139,10 +139,10 @@ namespace
 		const usys_t sz_limit = 0x10000;
 		usys_t sz_alloc_before = 0;
 
-		TRestrictAllocator ra(CL3_PARAMETER_STACK_VALUE(allocator), sz_limit);
+		TRestrictAllocator ra(allocator_generic(), sz_limit);
 		EXPECT_TRUE(ra.BytesLimit() == sz_limit);
 		EXPECT_TRUE((sz_alloc_before = ra.BytesAllocated()) == 0);
-		CL3_PARAMETER_STACK_PUSH(allocator, &ra);
+		CL3_CONTEXT_VARIABLE_PUSH(allocator_generic, &ra);
 
 		int* x = new int(1);
 		EXPECT_TRUE(ra.BytesAllocated() > sz_alloc_before);
@@ -266,7 +266,7 @@ namespace
 	{
 		TUniquePtr<TTestException> p_te1 = MakeUniquePtr<TTestException>(new TTestException());
 		EXPECT_TRUE(p_te1.Object() != NULL);
-		TUniquePtr<TTestException> p_te2 = cl3::util::move(p_te1);
+		TUniquePtr<TTestException> p_te2 = cl3::system::def::move(p_te1);
 		EXPECT_TRUE(p_te1.Object() == NULL);
 		EXPECT_TRUE(p_te2.Object() != NULL);
 	}
@@ -277,7 +277,7 @@ namespace
 		EXPECT_TRUE(p_te1.Object() != NULL);
 		TUniquePtr<TTestException> p_te2 = MakeUniquePtr<TTestException>(new TTestException());
 		EXPECT_TRUE(p_te2.Object() != NULL);
-		p_te2 = cl3::util::move(p_te1);
+		p_te2 = cl3::system::def::move(p_te1);
 		EXPECT_TRUE(p_te1.Object() == NULL);
 		EXPECT_TRUE(p_te2.Object() != NULL);
 	}

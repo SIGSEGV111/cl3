@@ -39,8 +39,8 @@ namespace	cl3
 		TUniquePtr<char,UPTR_ALLOC> mkstrcpy(const char* str, system::memory::IDynamicAllocator* local_allocator)
 		{
 			if(local_allocator == NULL)
-				local_allocator = CL3_PARAMETER_STACK_VALUE(allocator);
-			CL3_PARAMETER_STACK_PUSH(allocator, local_allocator);
+				local_allocator = allocator_generic();
+			CL3_CONTEXT_VARIABLE_PUSH(allocator_generic, local_allocator);
 
 			usys_t l = ::strlen(str) + 1;
 			auto cpy = MakeUniquePtr<UPTR_ALLOC>((char*)Alloc(l, NULL));

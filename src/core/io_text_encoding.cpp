@@ -129,6 +129,10 @@ namespace	cl3
 						action(ERRORACTION_ABORT)
 				{}
 
+
+				CLASS	TTranscodeException::TTranscodeException	(TTranscodeException&& other) : TException(static_cast<TException&&>(other)), codec(other.codec), direction(other.direction), reason(other.reason), n_input_items_processed(other.n_input_items_processed), n_output_items_written(other.n_output_items_written), action(other.action)
+				{}
+
 				CLASS	TTranscodeException::~TTranscodeException	()
 				{
 				}

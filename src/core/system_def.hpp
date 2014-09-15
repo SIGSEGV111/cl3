@@ -37,6 +37,11 @@ namespace	cl3
 	{
 		namespace	def
 		{
+			template<class T> struct remove_ref      { typedef T type; };
+			template<class T> struct remove_ref<T&>  { typedef T type; };
+			template<class T> struct remove_ref<T&&> { typedef T type; };
+			template<class T> constexpr typename remove_ref<T>::type&& move(T&& value) { return static_cast<typename remove_ref<T>::type&&>(value); }
+
 			template<class T>
 			inline static void swap(T& a, T& b)
 			{

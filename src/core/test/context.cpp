@@ -29,37 +29,37 @@ namespace
 
 	namespace	some_namespace
 	{
-		CL3_PARAMETER_STACK_DECL(int, my_int_stack);
-		CL3_PARAMETER_STACK_IMPL(int, my_int_stack, 10);
+		CL3_CONTEXT_VARIABLE_DECL(int, my_int_stack);
+		CL3_CONTEXT_VARIABLE_IMPL(int, my_int_stack, 10);
 	}
 
 	static void some_function__int()
 	{
-		EXPECT_TRUE(CL3_PARAMETER_STACK_VALUE(some_namespace::my_int_stack) == 17);
-		CL3_PARAMETER_STACK_PUSH(some_namespace::my_int_stack, 0);
-		EXPECT_TRUE(CL3_PARAMETER_STACK_VALUE(some_namespace::my_int_stack) == 0);
+		EXPECT_TRUE(some_namespace::my_int_stack() == 17);
+		CL3_CONTEXT_VARIABLE_PUSH(some_namespace::my_int_stack, 0);
+		EXPECT_TRUE(some_namespace::my_int_stack() == 0);
 	}
 
 	TEST(context, ParameterStack)
 	{
-		EXPECT_TRUE(CL3_PARAMETER_STACK_VALUE(some_namespace::my_int_stack) == 10);
+		EXPECT_TRUE(some_namespace::my_int_stack() == 10);
 
 		{
-			CL3_PARAMETER_STACK_PUSH(some_namespace::my_int_stack, 0);
-			EXPECT_TRUE(CL3_PARAMETER_STACK_VALUE(some_namespace::my_int_stack) == 0);
+			CL3_CONTEXT_VARIABLE_PUSH(some_namespace::my_int_stack, 0);
+			EXPECT_TRUE(some_namespace::my_int_stack() == 0);
 
 			{
-				CL3_PARAMETER_STACK_PUSH(some_namespace::my_int_stack, 17);
-				EXPECT_TRUE(CL3_PARAMETER_STACK_VALUE(some_namespace::my_int_stack) == 17);
+				CL3_CONTEXT_VARIABLE_PUSH(some_namespace::my_int_stack, 17);
+				EXPECT_TRUE(some_namespace::my_int_stack() == 17);
 
 				some_function__int();
 
-				EXPECT_TRUE(CL3_PARAMETER_STACK_VALUE(some_namespace::my_int_stack) == 17);
+				EXPECT_TRUE(some_namespace::my_int_stack() == 17);
 			}
 
-			EXPECT_TRUE(CL3_PARAMETER_STACK_VALUE(some_namespace::my_int_stack) == 0);
+			EXPECT_TRUE(some_namespace::my_int_stack() == 0);
 		}
 
-		EXPECT_TRUE(CL3_PARAMETER_STACK_VALUE(some_namespace::my_int_stack) == 10);
+		EXPECT_TRUE(some_namespace::my_int_stack() == 10);
 	}
 }

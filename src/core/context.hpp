@@ -35,6 +35,7 @@ namespace	cl3
 		template<class T>
 		struct	IContextVariable
 		{
+			typedef T TValue;
 			virtual	T		Value	() const CL3_GETTER = 0;	//	returns CONTEXT_LOCAL is set, otherwise it returns CONTEXT_THREAD if set, otherwise it returns CONTEXT_GLOBAL
 			virtual	T		Value	(EContext) const CL3_GETTER = 0;	//	returns the value for the specified context
 			virtual	void	Value	(EContext, T) CL3_SETTER = 0;	//	sets the value for the specified context
@@ -141,7 +142,11 @@ namespace	cl3
 					this->variable->Value(CONTEXT_LOCAL, old_value);
 			}
 		};
+
+		#define	CL3_CONTEXT_VARIABLE_PUSH(name, new_value)	cl3::context::TLocalValueHolder<typename cl3::system::def::remove_ref<decltype(name)>::type::TValue> CL3_PASTE(__context_variable__, __COUNTER__) ((name), (new_value))
 	}
 }
+
+#include "error.hpp"
 
 #endif

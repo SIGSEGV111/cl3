@@ -63,6 +63,7 @@ namespace	cl3
 					EErrorAction action;
 
 					CL3PUBF	CLASS	TTranscodeException	(const ICodec* codec, EDirection direction, EReason reason, usys_t n_input_items_processed, usys_t n_output_items_written);
+					CL3PUBF	CLASS	TTranscodeException	(TTranscodeException&&);
 					virtual	CLASS	~TTranscodeException();
 				};
 
@@ -84,20 +85,20 @@ namespace	cl3
 				class	CL3PUBT	IEncoder : public stream::ISource<byte_t>, public virtual stream::IOut<TUTF32>, public virtual IXCoder
 				{
 					protected:
-						event::TEvent<IEncoder,TTranscodeException> on_error;
+						event::TEvent<IEncoder,TTranscodeException&> on_error;
 
 					public:
-						inline	const event::TEvent<IEncoder,TTranscodeException>&	OnError	() const { return on_error; }
+						inline	const event::TEvent<IEncoder,TTranscodeException&>&	OnError	() const { return on_error; }
 						virtual	CLASS	~IEncoder	() {}
 				};
 
 				class	CL3PUBT	IDecoder : public stream::ISource<TUTF32>, public virtual stream::IOut<byte_t>, public virtual IXCoder
 				{
 					protected:
-						event::TEvent<IDecoder,TTranscodeException> on_error;
+						event::TEvent<IDecoder,TTranscodeException&> on_error;
 
 					public:
-						inline	const event::TEvent<IDecoder,TTranscodeException>&	OnError	() const { return on_error; }
+						inline	const event::TEvent<IDecoder,TTranscodeException&>&	OnError	() const { return on_error; }
 						virtual	CLASS	~IDecoder	() {}
 				};
 

@@ -21,7 +21,6 @@
 
 #include "io_stream.hpp"
 #include "event.hpp"
-#include "util.hpp"
 
 namespace	cl3
 {
@@ -116,7 +115,7 @@ namespace	cl3
 				EChange change;
 				system::memory::TUniquePtr<IStaticIterator<T> > iterator;
 
-				CLASS	TOnChangeData	(EChange change, system::memory::TUniquePtr<IStaticIterator<T> >&& iterator) : change(change), iterator(util::move(iterator)) {}
+				CLASS	TOnChangeData	(EChange change, system::memory::TUniquePtr<IStaticIterator<T> >&& iterator) : change(change), iterator(system::def::move(iterator)) {}
 			};
 
 			/************************************************************************/

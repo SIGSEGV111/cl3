@@ -306,7 +306,7 @@ namespace
 	{
 		{
 			TString s = "hello";
-			TString a(cl3::util::move(s));
+			TString a(cl3::system::def::move(s));
 			TString b = "world";
 			TString c;
 			EXPECT_TRUE(a == "hello");
@@ -384,7 +384,7 @@ namespace
 		EXPECT_TRUE(strcmp(cstr1.Chars(), "hällö wörld") == 0);
 		TCString cstr2(cstr1);
 		EXPECT_TRUE(strcmp(cstr2.Chars(), "hällö wörld") == 0);
-		TCString cstr3(cl3::util::move(cstr1));
+		TCString cstr3(cl3::system::def::move(cstr1));
 		EXPECT_TRUE(strcmp(cstr3.Chars(), "hällö wörld") == 0);
 		EXPECT_TRUE(strcmp(cstr2.Chars(), "hällö wörld") == 0);
 	}
@@ -401,7 +401,7 @@ namespace
 		EXPECT_TRUE(strcmp(cstr1.Chars(), "hällö wörld") == 0);
 		EXPECT_TRUE(strcmp(cstr2.Chars(), "hällö wörld") == 0);
 		EXPECT_TRUE(strcmp(cstr3.Chars(), "abc abc") == 0);
-		cstr3 = cl3::util::move(cstr1);
+		cstr3 = cl3::system::def::move(cstr1);
 		EXPECT_TRUE(strcmp(cstr2.Chars(), "hällö wörld") == 0);
 		EXPECT_TRUE(strcmp(cstr3.Chars(), "hällö wörld") == 0);
 	}

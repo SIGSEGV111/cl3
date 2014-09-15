@@ -564,7 +564,7 @@ namespace	cl3
 							try
 							{
 								for(n_items_copied = 0; n_items_copied < n_items_current; n_items_copied++)
-									new (arr_items_new + n_items_copied) T(util::move(arr_items[n_items_copied]));
+									new (arr_items_new + n_items_copied) T(system::def::move(arr_items[n_items_copied]));
 							}
 							catch(...)
 							{
@@ -681,7 +681,7 @@ namespace	cl3
 					const usys_t n_items_read = CL3_MIN(n_items_read_max, n_items_current);
 
 					for(usys_t i = 0; i < n_items_read; i++)
-						arr_items_read[i] = util::move(arr_items[i]);
+						arr_items_read[i] = system::def::move(arr_items[i]);
 
 					Remove(0, n_items_read);
 					return n_items_read;
@@ -707,7 +707,7 @@ namespace	cl3
 				{
 					TList<T>* list = dynamic_cast<TList<T>*>(&rhs);
 					if(list)
-						(*this) = util::move(*list);
+						(*this) = system::def::move(*list);
 					else
 					{
 						Clear();
@@ -784,7 +784,7 @@ namespace	cl3
 					{
 						const usys_t idx_from = index + n_items_relocate - i;
 						const usys_t idx_to   = n_items_current + n_items_insert - i;
-						new (arr_items + idx_to) T(util::move(arr_items[idx_from]));
+						new (arr_items + idx_to) T(system::def::move(arr_items[idx_from]));
 					}
 
 					const usys_t n_items_assign = CL3_MIN(n_items_relocate, n_items_insert);
@@ -824,7 +824,7 @@ namespace	cl3
 					const usys_t n_items_after = n_items_current - index - n_items_remove;
 
 					for(usys_t i = 0; i < n_items_after; i++)
-						arr_items[index + i] = util::move(arr_items[index + i + n_items_remove]);
+						arr_items[index + i] = system::def::move(arr_items[index + i + n_items_remove]);
 
 					Shrink(n_items_remove);
 				}
@@ -1020,7 +1020,7 @@ namespace	cl3
 				{
 					TList<const T>* list = dynamic_cast<TList<const T>*>(&rhs);
 					if(list)
-						(*this) = util::move(*list);
+						(*this) = system::def::move(*list);
 					else
 					{
 						Clear();
