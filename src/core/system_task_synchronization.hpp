@@ -113,6 +113,7 @@ namespace	cl3
 					virtual	void	Release		() = 0;
 					virtual	bool	HasAcquired	() const CL3_GETTER = 0;	//	returns wheter or not, the calling thread has acquired this mutex
 					inline	bool	TryAcquire	() CL3_WARN_UNUSED_RESULT { return Acquire(time::TTime(0,0)); }
+					virtual	CLASS	~IMutex		();
 				};
 
 				struct	CL3PUBT	ISignal : public virtual IMutex, public virtual event::IObservable<ISignal, TSignalEvent>
@@ -151,67 +152,23 @@ namespace	cl3
 						CL3PUBF	CLASS	~TMutex	();
 				};
 
-// 				class	CL3PUBT	TSignal : public virtual ISignal
-// 				{
-// 				};
-
-// 				template<class TSender, class TData>
-// 				class	CL3PUBT	TSignalEventReceiver : public event::TEvent<TSender,TData>::IReceiver, public virtual ISignal
-// 				{
-// 					protected:
-// 						void	OnRaise	(event::TEvent<TSender,TData>& event, TSender& sender, TData data)
-// 						{
-// 						}
-//
-// 					public:
-// 						inline	void	Acquire		(EAccess);
-// 						inline	bool	Acquire		(time::TTime timeout, EAccess) CL3_WARN_UNUSED_RESULT;
-// 						inline	void	Release		(EAccess);
-// 						inline	bool	HasAcquired	(EAccess) const CL3_GETTER;
-// 						inline	void	Raise		();
-// 						inline	void	WaitFor		();
-// 						inline	bool	WaitFor		(time::TTime timeout) CL3_WARN_UNUSED_RESULT;
-// 				};
-
-				/*template<ESharing sharing, class T>
-				class	CL3PUBT	TInterlocked;
-
-				template<class T>
-				class	CL3PUBT	TInterlocked<MUTEX_PRIVATE,T> : public TRWMutex
+				class	CL3PUBT	ALockable : public virtual IMutex
 				{
-					protected:
-						T object;
+					private:
+						system::memory::TUniquePtr<IMutex> mutex;
 
 					public:
-						inline	const T&	R	() const CL3_GETTER	{ CL3_CLASS_LOGIC_ERROR(!HasAcquired(MUTEX_ACCESS_READONLY)); return object; }
-						inline	T&			W	() CL3_GETTER		{ CL3_CLASS_LOGIC_ERROR(!HasAcquired(MUTEX_ACCESS_READWRITE)); return object; }
+						CL3PUBF	void	Acquire		() final override;
+						CL3PUBF	bool	Acquire		(time::TTime timeout) final override CL3_WARN_UNUSED_RESULT;
+						CL3PUBF	void	Release		() final override;
+						CL3PUBF	bool	HasAcquired	() const final override CL3_GETTER;
 
-						CLASS	TInterlocked	() : object() {}
-						CLASS	TInterlocked	(const T& object) : object(object) {}
-						CLASS	TInterlocked	(T&& object) : object(object) {}
+					protected:
+						CL3PUBF	CLASS	ALockable	();
+						CL3PUBF	CLASS	ALockable	(system::memory::TUniquePtr<IMutex>&& mutex);
+						CLASS			ALockable	(const ALockable&) = delete;	//	call constructor explicitly in your copy constructor
+						CL3PUBF	CLASS	~ALockable	();
 				};
-
-				template<class T>
-				class	CL3PUBT	TInterlocked<MUTEX_SHARED,T> : public IMutex
-				{
-					protected:
-						TRWMutex* mutex;
-						T object;
-
-					public:
-						//	from IMutex
-						inline	void	Acquire		(EAccess access) { mutex->Acquire(access); }
-						inline	bool	Acquire		(time::TTime timeout, EAccess access) CL3_WARN_UNUSED_RESULT { return mutex->Acquire(timeout, access); }
-						inline	void	Release		(EAccess access) { mutex->Release(access); }
-						inline	bool	HasAcquired	(EAccess access) const CL3_GETTER { return mutex->HasAcquired(access); }
-
-						//	from TInterlocked
-						inline	const T&	R	() const CL3_GETTER	{ CL3_CLASS_LOGIC_ERROR(!mutex->HasAcquired(MUTEX_ACCESS_READONLY)); return object; }
-						inline	T&			W	() CL3_GETTER		{ CL3_CLASS_LOGIC_ERROR(!mutex->HasAcquired(MUTEX_ACCESS_READWRITE)); return object; }
-
-						CLASS	TInterlocked	(TRWMutex* mutex) : mutex(mutex), object() { CL3_CLASS_LOGIC_ERROR(mutex == NULL); }
-						CLASS	TInterlocked	(TRWMutex* mutex, const T& object) : mutex(mutex), object(object) { CL3_CLASS_LOGIC_ERROR(mutex == NULL); }
-				};*/
 
 				class	CL3PUBT	TInterlockedRegion
 				{
@@ -225,7 +182,7 @@ namespace	cl3
 						CLASS	~TInterlockedRegion	() { mutex->Release(); }
 				};
 
-				#define	CL3_CLASS_INTERLOCKED_REGION_BEGIN	{ cl3::system::task::synchronization::TInterlockedRegion __interlocked_region(&this->Mutex());
+				#define	CL3_CLASS_INTERLOCKED_REGION_BEGIN	{ cl3::system::task::synchronization::TInterlockedRegion CL3_PASTE(__interlocked_region__, __COUNTER__)(&this->Mutex());
 				#define	CL3_CLASS_INTERLOCKED_REGION_END	}
 
 				#define	CL3_NONCLASS_INTERLOCKED_REGION_BEGIN(mutex)	{ cl3::system::task::synchronization::TInterlockedRegion __interlocked_region(&(mutex));

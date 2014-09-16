@@ -108,6 +108,11 @@ namespace	cl3
 					const T*	operator->	() const CL3_GETTER { return this->object; }
 					const T&	operator*	() const CL3_GETTER { return *this->object; }
 
+					bool		operator==	(const TUniquePtr& rhs) const CL3_GETTER { return this->object == rhs->object; }
+					bool		operator!=	(const TUniquePtr& rhs) const CL3_GETTER { return this->object != rhs->object; }
+					bool		operator==	(const T* rhs) const CL3_GETTER { return this->object == rhs; }
+					bool		operator!=	(const T* rhs) const CL3_GETTER { return this->object != rhs; }
+
 					T*			Claim	() CL3_GETTER { T* tmp = this->object; this->object = NULL; return tmp; }
 					void		Reset	() { this->object = NULL; }	//	does *NOT* release any memory - just removes control of the object from this class
 
