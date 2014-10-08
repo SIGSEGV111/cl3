@@ -30,13 +30,8 @@ namespace	cl3
 	namespace	event
 	{
 		template<class TSender, class TData> class TEvent;
-
-		template<class TSender, class TData>
-		struct	CL3PUBT	IObservable
-		{
-			typedef TEvent<TSender, TData>	TOnChangeEvent;
-			virtual	const TOnChangeEvent&	OnChange	() const = 0;
-		};
+		class	IObservable;
+		typedef TEvent<IObservable, const char*>	TOnChangeEvent;
 
 		template<class TSender, class TData>
 		class	CL3PUBT	TEvent
@@ -218,6 +213,24 @@ namespace	cl3
 					CL3_CLASS_FAIL(error::TException, "receiver-function not registered (receiver = %p)", func);
 				}
 		};
+
+		class	CL3PUBT	IObservable
+		{
+			private:
+				CLASS	IObservable		(const IObservable&) = delete;
+
+			protected:
+				TOnChangeEvent on_change;
+
+				CL3PUBF	CLASS	IObservable		();
+
+			public:
+				CL3PUBF	virtual	~IObservable	();
+
+				CL3PUBF	const TOnChangeEvent&	OnChange	() const CL3_GETTER;
+		};
+
+		extern template class TEvent<IObservable, const char*>;
 	}
 }
 

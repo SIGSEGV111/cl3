@@ -114,13 +114,8 @@ namespace	cl3
 					protected:
 						byte_t* arr_bits;
 						usys_t n_bits;
-						event::TEvent<const IStaticCollection<const TBoolProxy>, const TOnChangeData<const TBoolProxy>& > on_change;
 
 					public:
-						//	from IObservable
-						inline const event::TEvent<const IStaticCollection<const TBoolProxy>, const TOnChangeData<const TBoolProxy>& >& OnChange() const CL3_GETTER
-						{ return on_change; }
-
 						//	from IStaticCollection
 						inline system::memory::TUniquePtr<IStaticIterator<TBoolProxy> > CreateStaticIterator() CL3_WARN_UNUSED_RESULT
 						{ return system::memory::MakeUniquePtr<IStaticIterator<TBoolProxy> >(new TIterator(this, n_bits > 0 ? 0 : (usys_t)-1)); }

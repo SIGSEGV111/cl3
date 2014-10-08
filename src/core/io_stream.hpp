@@ -22,6 +22,7 @@
 #include "system_compiler.hpp"
 #include "system_types.hpp"
 #include "error.hpp"
+#include "event.hpp"
 // #include "system_task_synchronization.hpp"
 
 namespace	cl3
@@ -100,6 +101,16 @@ namespace	cl3
 			{
 				virtual	void		Source	(IIn<T>* is) CL3_SETTER = 0;
 				virtual	IIn<T>*		Source	() const CL3_GETTER = 0;
+			};
+
+			template<class TIn, class TOut>
+			struct	IPullIOProcessor : virtual IIn<TIn>, virtual ISink<TOut>
+			{
+			};
+
+			template<class TIn, class TOut>
+			struct	IPushIOProcessor : virtual IOut<TOut>, virtual ISource<TIn>
+			{
 			};
 		}
 	}

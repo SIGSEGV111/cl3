@@ -49,6 +49,7 @@ namespace	cl3
 			using namespace text::string;
 			using namespace error;
 			using namespace stream;
+			using namespace io::collection;
 
 			void	TMapping::Remap		(uoff_t new_index, usys_t new_count)
 			{
@@ -104,7 +105,7 @@ namespace	cl3
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			CLASS	TMapping::TMapping	(const TMapping& other) : TArray<const byte_t>(NULL,0), TArray<byte_t>(NULL,0), file(other.file), index(other.index)
+			CLASS	TMapping::TMapping	(const TMapping& other) : event::IObservable(), TArray<const byte_t>(NULL,0), TArray<byte_t>(NULL,0), file(other.file), index(other.index)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
@@ -523,21 +524,15 @@ namespace	cl3
 			static CL3_THREAD TDirectoryBrowser* db_thread = NULL;
 			static bool db_thread_handler_registered = false;
 
-			/*static	void	DeleteThreadDirectoryBrowser
-					(
-						event::TEvent<collection::IStaticCollection<const system::task::IThread*>, collection::TOnChangeData<const system::task::IThread*> >& event,
-						collection::TOnChangeData<const system::task::IThread*> data,
-						const void*
-					)*/
 			static	void	DeleteThreadDirectoryBrowser
 				(
-					cl3::event::TEvent<const cl3::io::collection::IStaticCollection<cl3::system::task::IThread *const>, const cl3::io::collection::TOnChangeData<cl3::system::task::IThread *const>& > &,
-					const cl3::io::collection::IStaticCollection<cl3::system::task::IThread *const> &,
-					const cl3::io::collection::TOnChangeData<cl3::system::task::IThread *const>& data,
+					cl3::event::TEvent<const IDynamicCollection<cl3::system::task::IThread *const>, const TOnActionData<cl3::system::task::IThread *const>&> &,
+					const IDynamicCollection<cl3::system::task::IThread *const> &,
+					const TOnActionData<cl3::system::task::IThread *const>& data,
 					void *
 				)
 			{
-				if(data.change == collection::CHANGE_REMOVE)
+				if(data.action == collection::ACTION_REMOVE)
 				{
 					delete db_thread;
 					db_thread = NULL;
@@ -552,7 +547,7 @@ namespace	cl3
 
 					if(!db_thread_handler_registered)
 					{
-						system::task::TProcess::Self()->Threads().OnChange().Register<void>(&DeleteThreadDirectoryBrowser, NULL);
+						system::task::TProcess::Self()->Threads().OnAction().Register<void>(&DeleteThreadDirectoryBrowser, NULL);
 						db_thread_handler_registered = true;
 					}
 				}

@@ -110,6 +110,8 @@ namespace	cl3
 				using stream::IIn<wchar_t>::Read;
 				using stream::IIn<char>::Read;
 
+				CL3PUBF	ITextReader&	operator>>	(char&);
+				CL3PUBF	ITextReader&	operator>>	(wchar_t&);
 				CL3PUBF	ITextReader&	operator>>	(TUTF32&);
 				CL3PUBF	ITextReader&	operator>>	(s8_t&);
 				CL3PUBF	ITextReader&	operator>>	(u8_t&);
@@ -130,6 +132,8 @@ namespace	cl3
 				using stream::IOut<wchar_t>::Write;
 				using stream::IOut<char>::Write;
 
+				CL3PUBF	ITextWriter&	operator<<	(char);
+				CL3PUBF	ITextWriter&	operator<<	(wchar_t);
 				CL3PUBF	ITextWriter&	operator<<	(TUTF32);
 				CL3PUBF	ITextWriter&	operator<<	(s8_t);
 				CL3PUBF	ITextWriter&	operator<<	(u8_t);

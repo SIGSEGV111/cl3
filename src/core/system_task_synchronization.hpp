@@ -65,12 +65,12 @@ namespace	cl3
 					MUTEX_STATUS_TIMEOUT
 				};
 
-				struct	CL3PUBT	TMutexEvent
+				struct	CL3PUBT	TOnMutexActionData
 				{
 					EMutexAction action;
 					EMutexStatus status;
 
-					CL3PUBF	CLASS	TMutexEvent	(EMutexAction action, EMutexStatus status);
+					CL3PUBF	CLASS	TOnMutexActionData	(EMutexAction action, EMutexStatus status);
 				};
 
 				enum	ESignalAction
@@ -86,12 +86,12 @@ namespace	cl3
 					SIGNAL_STATUS_TIMEOUT
 				};
 
-				struct	CL3PUBT	TSignalEvent
+				struct	CL3PUBT	TOnSignalActionData
 				{
 					ESignalAction action;
 					ESignalStatus status;
 
-					CL3PUBF	CLASS	TSignalEvent	(ESignalAction action, ESignalStatus status);
+					CL3PUBF	CLASS	TOnSignalActionData	(ESignalAction action, ESignalStatus status);
 				};
 
 				enum	EAccess
@@ -106,17 +106,21 @@ namespace	cl3
 					MUTEX_SHARED
 				};
 
-				struct	CL3PUBT	IMutex : public virtual event::IObservable<IMutex, TMutexEvent>
+				class	CL3PUBT	IMutex : public virtual event::IObservable
 				{
-					virtual	void	Acquire		() = 0;
-					virtual	bool	Acquire		(time::TTime timeout) CL3_WARN_UNUSED_RESULT = 0;
-					virtual	void	Release		() = 0;
-					virtual	bool	HasAcquired	() const CL3_GETTER = 0;	//	returns wheter or not, the calling thread has acquired this mutex
-					inline	bool	TryAcquire	() CL3_WARN_UNUSED_RESULT { return Acquire(time::TTime(0,0)); }
-					virtual	CLASS	~IMutex		();
+					protected:
+						event::TEvent<IMutex,TOnMutexActionData> on_mutex_action;
+
+					public:
+						virtual	void	Acquire		() = 0;
+						virtual	bool	Acquire		(time::TTime timeout) CL3_WARN_UNUSED_RESULT = 0;
+						virtual	void	Release		() = 0;
+						virtual	bool	HasAcquired	() const CL3_GETTER = 0;	//	returns wheter or not, the calling thread has acquired this mutex
+						inline	bool	TryAcquire	() CL3_WARN_UNUSED_RESULT { return Acquire(time::TTime(0,0)); }
+						virtual	CLASS	~IMutex		();
 				};
 
-				struct	CL3PUBT	ISignal : public virtual IMutex, public virtual event::IObservable<ISignal, TSignalEvent>
+				struct	CL3PUBT	ISignal : public virtual IMutex, public virtual event::IObservable
 				{
 					virtual	void	Raise	() = 0;
 					virtual	void	WaitFor	() = 0;
@@ -138,11 +142,8 @@ namespace	cl3
 							CRITICAL_SECTION cs;
 						#endif
 						unsigned n_times;
-						event::TEvent<IMutex, TMutexEvent> on_change;
 
 					public:
-						CL3PUBF	const event::TEvent<IMutex, TMutexEvent>&
-										OnChange	() const final override;
 						CL3PUBF	void	Acquire		() final override;
 						CL3PUBF	bool	Acquire		(time::TTime timeout) final override CL3_WARN_UNUSED_RESULT;
 						CL3PUBF	void	Release		() final override;

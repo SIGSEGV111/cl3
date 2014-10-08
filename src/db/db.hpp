@@ -108,10 +108,10 @@ namespace	cl3
 		{
 			protected:
 				const TTableMeta* table_meta;
-				io::collection::array::TArray<TCell> cells;
+				io::collection::array::TArray<TCell*> cells;
 
 			public:
-				inline	const io::collection::array::TArray<const TCell>&	Cells	() const CL3_GETTER { return this->cells; }
+				inline	const io::collection::array::TArray<TCell* const>&	Cells	() const CL3_GETTER { return this->cells; }
 
 				CL3PUBF	CLASS	TRow	(const TTableMeta*, void**);
 				CL3PUBF	CLASS	TRow	(const TRow&);

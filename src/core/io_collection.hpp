@@ -101,21 +101,21 @@ namespace	cl3
 			template<class T>	struct	IStaticIterator;
 			template<class T>	struct	IDynamicIterator;
 			template<class T>	struct	IStaticCollection;
-			template<class T>	struct	IDynamicCollection;
+			template<class T>	class	IDynamicCollection;
 
-			enum	EChange
+			enum	EAction
 			{
-				CHANGE_ADD,
-				CHANGE_REMOVE
+				ACTION_ADD,
+				ACTION_REMOVE
 			};
 
 			template<class T>
-			struct	TOnChangeData
+			struct	TOnActionData
 			{
-				EChange change;
+				EAction action;
 				system::memory::TUniquePtr<IStaticIterator<T> > iterator;
 
-				CLASS	TOnChangeData	(EChange change, system::memory::TUniquePtr<IStaticIterator<T> >&& iterator) : change(change), iterator(system::def::move(iterator)) {}
+				CLASS	TOnActionData	(EAction action, system::memory::TUniquePtr<IStaticIterator<T> >&& iterator) : action(action), iterator(system::def::move(iterator)) {}
 			};
 
 			/************************************************************************/
@@ -164,7 +164,7 @@ namespace	cl3
 			/************************************************************************/
 
 			template<class T>
-			struct	CL3PUBT	IStaticCollection<const T> : virtual event::IObservable< const IStaticCollection<const T>, const TOnChangeData<const T>& >
+			struct	CL3PUBT	IStaticCollection<const T> : virtual event::IObservable
 			{
 				virtual	system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT = 0;
 
@@ -183,24 +183,30 @@ namespace	cl3
 			/************************************************************************/
 
 			template<class T>
-			struct	CL3PUBT	IDynamicCollection<const T> : virtual IStaticCollection<const T>, virtual stream::IIn<T>, virtual stream::IOut<T>
+			class	CL3PUBT	IDynamicCollection<const T> : public virtual IStaticCollection<const T>, public virtual stream::IIn<T>, public virtual stream::IOut<T>, public event::TEvent< IDynamicCollection<const T>, TOnActionData<const T> >
 			{
-				//	IIn removes read items, while IOut adds written items (no strict FIFO requirements!)
+				protected:
+					event::TEvent< const IDynamicCollection<const T>, const TOnActionData<const T>& > on_action;
 
-				virtual	system::memory::TUniquePtr<IDynamicIterator<const T> >	CreateDynamicIterator	() const CL3_WARN_UNUSED_RESULT = 0;
+				public:
+					inline	const event::TEvent< const IDynamicCollection<const T>, const TOnActionData<const T>& >&	OnAction	() const CL3_GETTER { return this->on_action; }
 
-				virtual	void	Clear	() = 0;	//	removes all items from the collection
-				virtual	void	Add		(const T& item_add) = 0;	//	inserts a single item into the collection, it is left to the implementation to determine where the new item is positioned
-				virtual	void	Add		(const T* arr_items_add, usys_t n_items_add) = 0;	//	like above but for multiple items at once
-				virtual	void	Add		(const IStaticCollection<const T>& collection) = 0;	//	inserts another collection into this collection, it is left to the implementation to determine where the new items are positioned
-				virtual	bool	Remove	(const T* item_remove) = 0;	//	removes the specified item from the collection, the pointer is free to point to any valid item - the item needs not to be a member of the collection, if however so, then exactly the specified item is removed, if not, one item which compares equal to the specified item is removed - if multiple items compare equal to the specified item, the implementation is free to choose one among them, if no matching item is found false is returned
+					//	IIn removes read items, while IOut adds written items (no strict FIFO requirements!)
+					virtual	system::memory::TUniquePtr<IDynamicIterator<const T> >	CreateDynamicIterator	() const CL3_WARN_UNUSED_RESULT = 0;
+
+					virtual	void	Clear	() = 0;	//	removes all items from the collection
+					virtual	void	Add		(const T& item_add) = 0;	//	inserts a single item into the collection, it is left to the implementation to determine where the new item is positioned
+					virtual	void	Add		(const T* arr_items_add, usys_t n_items_add) = 0;	//	like above but for multiple items at once
+					virtual	void	Add		(const IStaticCollection<const T>& collection) = 0;	//	inserts another collection into this collection, it is left to the implementation to determine where the new items are positioned
+					virtual	bool	Remove	(const T* item_remove) = 0;	//	removes the specified item from the collection, the pointer is free to point to any valid item - the item needs not to be a member of the collection, if however so, then exactly the specified item is removed, if not, one item which compares equal to the specified item is removed - if multiple items compare equal to the specified item, the implementation is free to choose one among them, if no matching item is found false is returned
 			};
 
 			template<class T>
-			struct	CL3PUBT	IDynamicCollection : virtual IDynamicCollection<const T>, virtual IStaticCollection<T>
+			class	CL3PUBT	IDynamicCollection : public virtual IDynamicCollection<const T>, public virtual IStaticCollection<T>
 			{
-				using IDynamicCollection<const T>::CreateDynamicIterator;
-				virtual	system::memory::TUniquePtr<IDynamicIterator<T> >		CreateDynamicIterator	() CL3_WARN_UNUSED_RESULT = 0;
+				public:
+					using IDynamicCollection<const T>::CreateDynamicIterator;
+					virtual	system::memory::TUniquePtr<IDynamicIterator<T> >		CreateDynamicIterator	() CL3_WARN_UNUSED_RESULT = 0;
 			};
 		}
 	}

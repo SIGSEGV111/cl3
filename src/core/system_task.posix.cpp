@@ -295,13 +295,6 @@ namespace	cl3
 					this->Wait();
 				}
 			}
-
-			/**************************************************************************************/
-
-			const event::TEvent<IThread, TThreadEvent>& IThread::OnChange() const
-			{
-				return this->on_change;
-			}
 		}
 	}
 }

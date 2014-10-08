@@ -125,24 +125,20 @@ namespace	cl3
 					protected:
 						T* arr_items;
 						usys_t n_items;
-						const event::TEvent<const IStaticCollection<const T>, const TOnChangeData<const T>& > on_change;
 
 					public:
-						//	from IObservable
-						const event::TEvent<const IStaticCollection<const T>, const TOnChangeData<const T>& >&	OnChange	() const CL3_GETTER;
-
 						//	from IStaticCollection
-						system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT;
-						usys_t	Count		() const CL3_GETTER;
-						bool	CountMin	(usys_t count_min) const CL3_GETTER;
-						bool	CountMax	(usys_t count_max) const CL3_GETTER;
+						system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const final override CL3_WARN_UNUSED_RESULT;
+						usys_t	Count		() const final override CL3_GETTER;
+						bool	CountMin	(usys_t count_min) const final override CL3_GETTER;
+						bool	CountMax	(usys_t count_max) const final override CL3_GETTER;
 
 						//	from IStaticCollection<const T>
 						TArray&		operator=	(const IStaticCollection<const T>& rhs);
 						TArray&		operator=	(IStaticCollection<const T>&& rhs);
 
-						const T&	operator[]	(ssys_t rindex) const CL3_GETTER;
-						const T*	ItemPtr		(ssys_t rindex) const CL3_GETTER;
+						const T&	operator[]	(ssys_t rindex) const final override CL3_GETTER;
+						const T*	ItemPtr		(ssys_t rindex) const final override CL3_GETTER;
 
 						CLASS		TArray		(const T* arr_items, usys_t n_items);
 				};
@@ -162,13 +158,13 @@ namespace	cl3
 						using TArray<const T>::CreateStaticIterator;
 
 						//	from IStaticCollection<T>
-						system::memory::TUniquePtr<IStaticIterator<T> >		CreateStaticIterator	() CL3_WARN_UNUSED_RESULT;
+						system::memory::TUniquePtr<IStaticIterator<T> >		CreateStaticIterator	() final override CL3_WARN_UNUSED_RESULT;
 
 						TArray&		operator=	(const IStaticCollection<T>& rhs);
 						TArray&		operator=	(IStaticCollection<T>&& rhs);
 
-						T&			operator[]	(ssys_t rindex) CL3_GETTER;
-						T*			ItemPtr		(ssys_t rindex) CL3_GETTER;
+						T&			operator[]	(ssys_t rindex) final override CL3_GETTER;
+						T*			ItemPtr		(ssys_t rindex) final override CL3_GETTER;
 
 						CLASS		TArray		(T* arr_items, usys_t n_items);
 				};
@@ -391,12 +387,6 @@ namespace	cl3
 				}
 
 				/************************************************************************/
-
-				template<class T>
-				const event::TEvent<const IStaticCollection<const T>, const TOnChangeData<const T>& >&	TArray<const T>::OnChange	() const
-				{
-					return this->on_change;
-				}
 
 				template<class T>
 				system::memory::TUniquePtr<IStaticIterator<const T> >	TArray<const T>::CreateStaticIterator	() const

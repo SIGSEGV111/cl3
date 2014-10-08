@@ -67,8 +67,8 @@ namespace	cl3
 	}
 }
 
-static const char chr_pad = 0x01;
-static const usys_t len_progname_want = 64;
+// static const char chr_pad = 0x01;
+// static const usys_t len_progname_want = 64;
 static usys_t len_progname_got = 0;
 
 static void cl3_init(int argc, char* argv[], char* envv[]);

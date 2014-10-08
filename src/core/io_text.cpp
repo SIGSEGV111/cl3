@@ -86,6 +86,16 @@ namespace	cl3
 			{
 			}
 
+			ITextReader&	ITextReader::operator>>	(char& v)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			ITextReader&	ITextReader::operator>>	(wchar_t& v)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
 			ITextReader&	ITextReader::operator>>	(TUTF32& v)
 			{
 				Read(&v, 1);
@@ -165,11 +175,14 @@ namespace	cl3
 			template<bool b_signed, class T>
 			static	void	PrintInteger	(IOut<char>& os, T num)
 			{
-				char buffer[32];
+				char buffer[32] = {};
+				int n;
 				if(b_signed)
-					os.Write(buffer, snprintf(buffer, sizeof(buffer), "%lld", (signed long long)num));
+					n = snprintf(buffer, sizeof(buffer), "%lld", (signed long long)num);
 				else
-					os.Write(buffer, snprintf(buffer, sizeof(buffer), "%llu", (unsigned long long)num));
+					n = snprintf(buffer, sizeof(buffer), "%llu", (unsigned long long)num);
+				CL3_NONCLASS_LOGIC_ERROR(n >= sizeof(buffer));
+				os.Write(buffer, n);
 			}
 
 			template<class T>
@@ -177,6 +190,18 @@ namespace	cl3
 			{
 				char buffer[64];
 				os.Write(buffer, snprintf(buffer, sizeof(buffer), "%f", (double)num));
+			}
+
+			ITextWriter&	ITextWriter::operator<<	(char v)
+			{
+				Write(&v, 1);
+				return *this;
+			}
+
+			ITextWriter&	ITextWriter::operator<<	(wchar_t v)
+			{
+				Write(&v, 1);
+				return *this;
 			}
 
 			ITextWriter&	ITextWriter::operator<<	(TUTF32 v)

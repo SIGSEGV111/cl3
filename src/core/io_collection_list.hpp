@@ -209,7 +209,6 @@ namespace	cl3
 						T* arr_items;
 						usys_t n_items_current;
 						usys_t n_items_prealloc;
-						event::TEvent<const IStaticCollection<const T>, const TOnChangeData<const T>& > on_change;
 						bool guard_resize;
 
 						void	Prealloc	(usys_t n_items_prealloc_min);
@@ -217,9 +216,6 @@ namespace	cl3
 					public:
 						using array::IArray<const T>::Read;
 						using stream::IIn<T>::Read;
-
-						//	from IObservable
-						const event::TEvent<const IStaticCollection<const T>, const TOnChangeData<const T>& >&	OnChange	() const final override CL3_GETTER;
 
 						//	from IStaticCollection
 						system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const final override CL3_WARN_UNUSED_RESULT;
@@ -583,14 +579,6 @@ namespace	cl3
 					}
 				}
 
-				//	from IObservable
-				template<class T>
-				const event::TEvent<const IStaticCollection<const T>, const TOnChangeData<const T>& >&
-						TList<const T>::OnChange	() const
-				{
-					return on_change;
-				}
-
 				template<class T>
 				system::memory::TUniquePtr<IStaticIterator<const T> >
 						TList<const T>::CreateStaticIterator	() const
@@ -625,8 +613,8 @@ namespace	cl3
 				template<class T>
 				void	TList<const T>::Clear		()
 				{
-					TOnChangeData<const T> data(CHANGE_REMOVE, this->CreateStaticIterator());
-					this->on_change.Raise(*this, data);
+					TOnActionData<const T> data(ACTION_REMOVE, this->CreateStaticIterator());
+					this->on_action.Raise(*this, data);
 
 					for(usys_t i = 0; i < n_items_current; i++)
 						arr_items[i].~T();
@@ -919,12 +907,12 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		() : arr_items(NULL), n_items_current(0), n_items_prealloc(0), on_change(), guard_resize(false)
+				CLASS		TList<const T>::TList		() : arr_items(NULL), n_items_current(0), n_items_prealloc(0), guard_resize(false)
 				{
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(T* arr_items, usys_t n_items, bool claim) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), on_change(), guard_resize(false)
+				CLASS		TList<const T>::TList		(T* arr_items, usys_t n_items, bool claim) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), guard_resize(false)
 				{
 					if(claim)
 					{
@@ -939,27 +927,27 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(const T* arr_items, usys_t n_items) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), on_change(), guard_resize(false)
+				CLASS		TList<const T>::TList		(const T* arr_items, usys_t n_items) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), guard_resize(false)
 				{
 					Prealloc(n_items);
 					Append(arr_items, n_items);
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(const IStaticCollection<const T>& collection) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), on_change(), guard_resize(false)
+				CLASS		TList<const T>::TList		(const IStaticCollection<const T>& collection) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), guard_resize(false)
 				{
 					Append(collection);
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(const TList& list) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), on_change(), guard_resize(false)
+				CLASS		TList<const T>::TList		(const TList& list) : event::IObservable(), arr_items(NULL), n_items_current(0), n_items_prealloc(0), guard_resize(false)
 				{
 					Prealloc(list.n_items_current);
 					Append(list.arr_items, list.n_items_current);
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(TList&& list) : arr_items(list.arr_items), n_items_current(list.n_items_current), n_items_prealloc(list.n_items_prealloc), on_change(), guard_resize(false)
+				CLASS		TList<const T>::TList		(TList&& list) : arr_items(list.arr_items), n_items_current(list.n_items_current), n_items_prealloc(list.n_items_prealloc), guard_resize(false)
 				{
 					list.arr_items = NULL;
 					list.n_items_current = 0;
@@ -1096,7 +1084,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TList<T>::TList		(const TList& other) : TList<const T>(other)
+				CLASS		TList<T>::TList		(const TList& other) : event::IObservable(), TList<const T>(other)
 				{
 				}
 

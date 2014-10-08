@@ -178,13 +178,9 @@ namespace	cl3
 				CL3PUBF	CLASS	TThreadEvent	(EThreadAction action, EThreadStatus status);
 			};
 
-			class	CL3PUBT	IThread : public virtual event::IObservable<IThread, TThreadEvent>
+			class	CL3PUBT	IThread : public virtual event::IObservable
 			{
-				protected:
-					event::TEvent<IThread, TThreadEvent> on_change;
-
 				public:
-					CL3PUBF	const event::TEvent<IThread, TThreadEvent>& OnChange() const CL3_GETTER;
 					CL3PUBF	static	IThread*	Self	() CL3_GETTER;	//	returns the IThread* for the calling thread
 
 					CL3PUBF	io::text::string::TString

@@ -30,6 +30,9 @@ namespace	cl3
 		{
 			namespace	synchronization
 			{
+				CLASS	TOnMutexActionData::TOnMutexActionData		(EMutexAction action, EMutexStatus status) : action(action), status(status) {}
+				CLASS	TOnSignalActionData::TOnSignalActionData	(ESignalAction action, ESignalStatus status) : action(action), status(status) {}
+
 				CLASS	IMutex::~IMutex			()
 				{
 				}

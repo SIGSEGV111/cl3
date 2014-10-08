@@ -430,7 +430,7 @@ namespace	cl3
 					this->Append(str, ustrlen(str, maxlen));
 				}
 
-				CLASS	TString::TString	(const TString& other) : TList<const TUTF32>(other), TList<TUTF32>(other)
+				CLASS	TString::TString	(const TString& other) : event::IObservable(), TList<const TUTF32>(other), TList<TUTF32>(other)
 				{
 					//	nothing else to do
 				}
@@ -478,7 +478,7 @@ namespace	cl3
 					e->Write(&TUTF32::TERMINATOR, 1);
 				}
 
-				CLASS		TCString::TCString	(const TCString& other) : TList<const byte_t>(other), TList<byte_t>(other), codec(other.codec)
+				CLASS		TCString::TCString	(const TCString& other) : event::IObservable(), TList<const byte_t>(other), TList<byte_t>(other), codec(other.codec)
 				{
 					//	nothing else to do
 				}

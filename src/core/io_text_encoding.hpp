@@ -125,8 +125,7 @@ namespace	cl3
 					public:
 						using stream::IOut<TUTF32>::Write;
 
-						CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min);
-						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<byte_t>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min);
+						CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override;
 
 						CL3PUBF	CLASS	ADecoder	(const ICodec* codec);
 						CL3PUBF	virtual	~ADecoder	();
@@ -140,8 +139,7 @@ namespace	cl3
 					public:
 						using stream::IOut<byte_t>::Write;
 
-						CL3PUBF	usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min);
-						CL3PUBF	uoff_t	ReadIn	(io::stream::IIn<TUTF32>& is, uoff_t n_items_ri_max, uoff_t n_items_ri_min);
+						CL3PUBF	usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override;
 
 						CL3PUBF	CLASS	AEncoder	(const ICodec* codec);
 						CL3PUBF	virtual	~AEncoder	();
@@ -163,7 +161,7 @@ namespace	cl3
 					public:
 						using stream::IOut<TUTF32>::Write;
 
-						CL3PUBF	usys_t	Write	(const char* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min);
+						CL3PUBF	usys_t	Write	(const char* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override;
 				};
 
 				class	CL3PUBT	AWCharDecoder : public virtual stream::IOut<TUTF32>, public virtual stream::IOut<wchar_t>
@@ -174,7 +172,7 @@ namespace	cl3
 					public:
 						using stream::IOut<TUTF32>::Write;
 
-						CL3PUBF	usys_t	Write	(const wchar_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min);
+						CL3PUBF	usys_t	Write	(const wchar_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override;
 				};
 
 				class	CL3PUBT	ACharEncoder : public virtual stream::IIn<TUTF32>, public virtual stream::IIn<char>
@@ -182,7 +180,7 @@ namespace	cl3
 					public:
 						using stream::IIn<TUTF32>::Read;
 
-						CL3PUBF	usys_t	Read	(char* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min);
+						CL3PUBF	usys_t	Read	(char* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override;
 				};
 
 				class	CL3PUBT	AWCharEncoder : public virtual stream::IIn<TUTF32>, public virtual stream::IIn<wchar_t>
@@ -190,7 +188,7 @@ namespace	cl3
 					public:
 						using stream::IIn<TUTF32>::Read;
 
-						CL3PUBF	usys_t	Read	(wchar_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min);
+						CL3PUBF	usys_t	Read	(wchar_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override;
 				};
 			}
 		}
