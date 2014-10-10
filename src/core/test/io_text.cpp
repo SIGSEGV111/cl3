@@ -430,7 +430,7 @@ namespace
 		usys_t index;
 
 		CLASS	TLimitedBuffer	(usys_t n_items) : array(n_items ? new T[n_items] : NULL, n_items), index(0) {}
-		CLASS	~TLimitedBuffer	() { if(this->array.Count()) delete[] array.ItemPtr(0); }
+		CLASS	~TLimitedBuffer	() {}
 		TLimitedBuffer(const TLimitedBuffer&) = delete;
 		TLimitedBuffer&	operator=(const TLimitedBuffer&) = delete;
 

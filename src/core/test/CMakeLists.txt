@@ -5,7 +5,8 @@ file (GLOB CL3_CORE_SRC
     "*.cpp"
 )
 
-set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_EXE})
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_EXE} -lLLVMAnalysis -lLLVMAsmParser -lLLVMAsmPrinter -lLLVMBitReader -lLLVMBitWriter -lLLVMCodeGen -lLLVMCore -lLLVMDebugInfo -lLLVMExecutionEngine -lLLVMInstCombine -lLLVMInstrumentation -lLLVMInterpreter -lLLVMipa -lLLVMipo -lLLVMIRReader -lLLVMJIT -lLLVMLineEditor -lLLVMLinker -lLLVMLTO -lLLVMMCAnalysis -lLLVMMCDisassembler -lLLVMMCJIT -lLLVMMCParser -lLLVMMC -lLLVMObjCARCOpts -lLLVMObject -lLLVMOption -lLLVMProfileData -lLLVMR600AsmPrinter -lLLVMR600CodeGen -lLLVMR600Desc -lLLVMR600Info -lLLVMRuntimeDyld -lLLVMScalarOpts -lLLVMSelectionDAG -lLLVMSupport -lLLVMTableGen -lLLVMTarget -lLLVMTransformUtils -lLLVMVectorize -lLLVMX86AsmParser -lLLVMX86AsmPrinter -lLLVMX86CodeGen -lLLVMX86Desc -lLLVMX86Disassembler -lLLVMX86Info -lLLVMX86Utils")
+
 add_executable (cl3-core-test ${CL3_CORE_SRC})
 add_dependencies (cl3-core-test cl3-core)
 target_link_libraries (cl3-core-test gtest)

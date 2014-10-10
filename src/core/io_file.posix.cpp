@@ -113,7 +113,10 @@ namespace	cl3
 			CLASS	TMapping::~TMapping	()
 			{
 				if(this->arr_items != NULL && this->arr_items != (byte_t*)-1L)
+				{
 					CL3_CLASS_SYSERR(::munmap(this->arr_items, this->n_items));
+					Claim();
+				}
 			}
 
 			/**********************************************************************/

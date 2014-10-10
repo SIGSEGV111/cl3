@@ -20,6 +20,7 @@
 #define	_include_cl3_core_io_collection_array_hpp_
 
 #include "io_collection.hpp"
+#include "system_types_typeinfo.hpp"
 
 namespace	cl3
 {
@@ -108,6 +109,8 @@ namespace	cl3
 					using array::IArray<const T>::ItemPtr;
 					using array::IArray<const T>::Read;
 
+					virtual	T*			Claim		() = 0;
+
 					virtual	T&			operator[]	(ssys_t index) CL3_GETTER = 0;
 					virtual	T*			ItemPtr		(ssys_t index) CL3_GETTER = 0;
 
@@ -125,6 +128,7 @@ namespace	cl3
 					protected:
 						T* arr_items;
 						usys_t n_items;
+						bool b_claim;
 
 					public:
 						//	from IStaticCollection
@@ -140,7 +144,10 @@ namespace	cl3
 						const T&	operator[]	(ssys_t rindex) const final override CL3_GETTER;
 						const T*	ItemPtr		(ssys_t rindex) const final override CL3_GETTER;
 
-						CLASS		TArray		(const T* arr_items, usys_t n_items);
+						CLASS		TArray		(const T* arr_items, usys_t n_items, bool b_claim = true);
+						CLASS		TArray		(const TArray&);
+						CLASS		TArray		(TArray&&);
+						CLASS		~TArray		();
 				};
 
 				template<class T>
@@ -160,13 +167,18 @@ namespace	cl3
 						//	from IStaticCollection<T>
 						system::memory::TUniquePtr<IStaticIterator<T> >		CreateStaticIterator	() final override CL3_WARN_UNUSED_RESULT;
 
+						T*			Claim		();
+
 						TArray&		operator=	(const IStaticCollection<T>& rhs);
 						TArray&		operator=	(IStaticCollection<T>&& rhs);
 
 						T&			operator[]	(ssys_t rindex) final override CL3_GETTER;
 						T*			ItemPtr		(ssys_t rindex) final override CL3_GETTER;
 
-						CLASS		TArray		(T* arr_items, usys_t n_items);
+						CLASS		TArray		(T* arr_items, usys_t n_items, bool b_claim = true);
+						CLASS		TArray		(const TArray&);
+						CLASS		TArray		(TArray&&);
+						CLASS		~TArray		();
 				};
 
 				/*********************************************************************/
@@ -438,8 +450,6 @@ namespace	cl3
 					return arr_items[index];
 				}
 
-
-
 				template<class T>
 				const T*	TArray<const T>::ItemPtr		(ssys_t rindex) const
 				{
@@ -449,8 +459,33 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TArray<const T>::TArray		(const T* arr_items, usys_t n_items) : arr_items((T*)arr_items), n_items(n_items)
+				CLASS		TArray<const T>::TArray		(const T* arr_items, usys_t n_items, bool b_claim) : arr_items((T*)arr_items), n_items(n_items), b_claim(b_claim)
 				{
+				}
+
+				template<class T>
+				CLASS		TArray<const T>::TArray		(const TArray& other) : event::IObservable(), arr_items((T*)system::memory::Alloc(other.n_items, &system::types::typeinfo::TCTTI<T>::rtti)), n_items(other.n_items)
+				{
+					for(usys_t i = 0; i < n_items; i++)
+						new (arr_items + i) T(other.arr_items[i]);
+				}
+
+				template<class T>
+				CLASS		TArray<const T>::TArray		(TArray&& other) : arr_items(other.arr_items), n_items(other.n_items)
+				{
+					other.arr_items = NULL;
+					other.n_items = 0;
+				}
+
+				template<class T>
+				CLASS		TArray<const T>::~TArray	()
+				{
+					if(b_claim)
+					{
+						for(usys_t i = 0; i < n_items; i++)
+							arr_items[i].~T();
+						system::memory::Free(arr_items);
+					}
 				}
 
 				/************************************************************************/
@@ -459,6 +494,15 @@ namespace	cl3
 				system::memory::TUniquePtr<IStaticIterator<T> >			TArray<T>::CreateStaticIterator	()
 				{
 					return system::memory::MakeUniquePtr<IStaticIterator<T> >(new TIterator<T>(this, n_items > 0 ? 0 : (usys_t)-1));
+				}
+
+				template<class T>
+				T*			TArray<T>::Claim		()
+				{
+					T* arr_items_tmp = arr_items;
+					arr_items = NULL;
+					n_items = 0;
+					return arr_items_tmp;
 				}
 
 				template<class T>
@@ -497,7 +541,22 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TArray<T>::TArray		(T* arr_items, usys_t n_items) : TArray<const T>(arr_items, n_items)
+				CLASS		TArray<T>::TArray		(T* arr_items, usys_t n_items, bool b_claim) : TArray<const T>(arr_items, n_items, b_claim)
+				{
+				}
+
+				template<class T>
+				CLASS		TArray<T>::TArray		(const TArray& other) : event::IObservable(), TArray<const T>(other)
+				{
+				}
+
+				template<class T>
+				CLASS		TArray<T>::TArray		(TArray&& other) : TArray<const T>(other)
+				{
+				}
+
+				template<class T>
+				CLASS		TArray<T>::~TArray		()
 				{
 				}
 			}
