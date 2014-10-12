@@ -31,47 +31,47 @@ namespace	cl3
 		{
 			namespace	jit
 			{
-				class	TModule;
-				class	TFunction;
-				class	TBlock;
-				class	IInstruction;
-				class	ITerminationInstruction;
-				class	TBinaryOpInstruction;
+				class	CL3PUBT	TModule;
+				class	CL3PUBT	TFunction;
+				class	CL3PUBT	TBlock;
+				class	CL3PUBT	IInstruction;
+				class	CL3PUBT	ITerminationInstruction;
+				class	CL3PUBT	TBinaryOpInstruction;
 
 				/*************************************************************************************/
 
 				//	IInstruction & ITerminationInstruction:
-				class	TReturnInstruction;
-				class	TConditionalJumpInstruction;
-				class	TJumpInstruction;
-				class	TSwitchInstruction;
-				class	TIndirectJumpInstruction;
-				class	TUnreachableInstruction;
+				class	CL3PUBT	TReturnInstruction;
+				class	CL3PUBT	TConditionalJumpInstruction;
+				class	CL3PUBT	TJumpInstruction;
+				class	CL3PUBT	TSwitchInstruction;
+				class	CL3PUBT	TIndirectJumpInstruction;
+				class	CL3PUBT	TUnreachableInstruction;
 
 				//	IInstruction:
-				class	TBinaryOpInstruction;
-				class	TShiftInstruction;
-				class	TAllocaInstruction;
-				class	TLoadInstruction;
-				class	TStoreInstruction;
-				class	TCompXInstruction;
-				class	TAtomicRMWInstruction;
-				class	TConvertInstruction;
-				class	TBitCastInstruction;
-				class	TCompareInstruction;
-				class	TSelectInstruction;
-				class	TCallInstruction;
+				class	CL3PUBT	TBinaryOpInstruction;
+				class	CL3PUBT	TShiftInstruction;
+				class	CL3PUBT	TAllocaInstruction;
+				class	CL3PUBT	TLoadInstruction;
+				class	CL3PUBT	TStoreInstruction;
+				class	CL3PUBT	TAtomicSwapInstruction;
+				class	CL3PUBT	TAtomicRMWInstruction;
+				class	CL3PUBT	TConvertInstruction;
+				class	CL3PUBT	TBitCastInstruction;
+				class	CL3PUBT	TCompareInstruction;
+				class	CL3PUBT	TSelectInstruction;
+				class	CL3PUBT	TCallInstruction;
 
 				/*************************************************************************************/
 
-				class	IValue;
-				class	ILiteral;
-				template<class T> class TLiteral;
-				class	IVariable;
-				template<class T> class TTypedVariable;
-				class	TTemporary;
-				class	IProperty;
-				template<class T> class TProperty;
+				class	CL3PUBT	IValue;
+				class	CL3PUBT	ILiteral;
+				template<class T> class CL3PUBT	TLiteral;
+				class	CL3PUBT	IVariable;
+				template<class T> class CL3PUBT	TTypedVariable;
+// 				class	CL3PUBT	TTemporary;
+				class	CL3PUBT	IProperty;
+				template<class T> class CL3PUBT	TProperty;
 
 				/*************************************************************************************/
 
@@ -124,58 +124,6 @@ namespace	cl3
 
 				/*************************************************************************************/
 
-				class	IInstruction
-				{
-					friend class TBinaryOpInstruction;
-					private:
-						CLASS IInstruction(const IInstruction&) = delete;
-						IInstruction& operator=(const IInstruction&) = delete;
-
-						CL3PUBF	CLASS	IInstruction	(TBlock* block);
-
-					protected:
-						TBlock* block;
-
-					public:
-						virtual	CLASS	~IInstruction	();
-						virtual	IInstruction&	CopyTo	(TBlock*) const = 0;
-
-						inline	TBlock&	Block	() const CL3_GETTER { return *this->block; }
-				};
-
-				class	ITerminationInstruction : public IInstruction
-				{
-				};
-
-				class	TBinaryOpInstruction : public IInstruction
-				{
-					friend class TBlock;
-					private:
-						CL3PUBF	CLASS	TBinaryOpInstruction	(TBlock* block, EBinaryOperation op, IValue* lhs, IValue* rhs);
-
-					protected:
-						EBinaryOperation op;
-						IValue* lhs;
-						IValue* rhs;
-
-					public:
-						inline	EBinaryOperation Operation	() const CL3_GETTER { return this->op; }
-						inline	IValue& LHS	() const CL3_GETTER { return *this->lhs; }
-						inline	IValue& RHS	() const CL3_GETTER { return *this->rhs; }
-
-						inline	void	Operation	(EBinaryOperation op) CL3_SETTER { this->op = op; }
-						inline	void	LHS			(IValue& lhs) CL3_SETTER { this->lhs = &lhs; }
-						inline	void	RHS			(IValue& rhs) CL3_SETTER { this->rhs = &rhs; }
-
-						CL3PUBF	TBinaryOpInstruction&	CopyTo	(TBlock*) const;
-				};
-
-				/*************************************************************************************/
-
-
-
-				/*************************************************************************************/
-
 				class	IValue
 				{
 					private:
@@ -185,7 +133,7 @@ namespace	cl3
 					protected:
 						const types::typeinfo::TRTTI* datatype;
 
-						CL3PUBF	CLASS	IValue		(const types::typeinfo::TRTTI*);
+						CL3PUBF	CLASS	IValue		(const types::typeinfo::TRTTI* datatype);
 
 					public:
 						inline	const types::typeinfo::TRTTI*
@@ -193,7 +141,7 @@ namespace	cl3
 						inline	void	Datatype	(const types::typeinfo::TRTTI* datatype) CL3_SETTER { this->datatype = datatype; }
 
 						virtual	IValue&	CopyTo	(TBlock*) const = 0;
-						virtual	CLASS	~IValue	();
+						CL3PUBF	virtual	CLASS	~IValue	();
 				};
 
 				/*************************************************************************************/
@@ -308,22 +256,90 @@ namespace	cl3
 
 				/*************************************************************************************/
 
-				class	TTemporary : public IValue
+// 				class	TTemporary : public IValue
+// 				{
+// 					friend class TFunction;
+// 					private:
+// 						CL3PUBF	CLASS	TTemporary	(TFunction* function, IValue* source);
+//
+// 					protected:
+// 						TFunction* function;
+// 						IValue* source;
+//
+// 					public:
+// 						inline	TFunction&	Function	() const CL3_GETTER { return *this->function; }
+// 						inline	IValue&		Source		() const CL3_GETTER { return *this->source; }
+// 						inline	void		Source		(IValue& source_new) CL3_SETTER { source = &source_new; }
+//
+// 						CL3PUBF	TTemporary&	CopyTo	(TBlock* block_new) const final override;
+// 				};
+
+				/*************************************************************************************/
+
+				class	IInstruction
 				{
-					friend class TFunction;
+					friend class TBinaryOpInstruction;
+					friend class ITerminationInstruction;
 					private:
-						CL3PUBF	CLASS	TTemporary	(TFunction* function, IValue* source);
+						CLASS IInstruction(const IInstruction&) = delete;
+						IInstruction& operator=(const IInstruction&) = delete;
+
+						CL3PUBF	CLASS	IInstruction	(TBlock* block);
 
 					protected:
-						TFunction* function;
-						IValue* source;
+						TBlock* block;
 
 					public:
-						inline	TFunction&	Function	() const CL3_GETTER { return *this->function; }
-						inline	IValue&		Source		() const CL3_GETTER { return *this->source; }
-						inline	void		Source		(IValue& source_new) CL3_SETTER { source = &source_new; }
+						virtual	CLASS	~IInstruction	();
+						virtual	IInstruction&	CopyTo	(TBlock*) const = 0;
 
-						CL3PUBF	TTemporary&	CopyTo	(TBlock* block_new) const final override;
+						inline	TBlock&	Block	() const CL3_GETTER { return *this->block; }
+				};
+
+				class	ITerminationInstruction : public IInstruction
+				{
+					friend class TReturnInstruction;
+					private:
+						inline	CLASS	ITerminationInstruction	(TBlock* block) : IInstruction(block) {}
+				};
+
+				class	TReturnInstruction : public ITerminationInstruction
+				{
+					friend class TBlock;
+					private:
+						inline	CLASS	TReturnInstruction	(TBlock* block, IValue* value = NULL) : ITerminationInstruction(block), value(value) {}
+
+					protected:
+						IValue* value;
+
+					public:
+						inline	IValue*	Value	() const CL3_GETTER { return this->value; }
+						inline	void	Value	(IValue* value_new) CL3_SETTER { this->value = value_new; }
+
+						CL3PUBF	TReturnInstruction&	CopyTo	(TBlock*) const;
+				};
+
+				class	TBinaryOpInstruction : public IInstruction, public IValue
+				{
+					friend class TBlock;
+					private:
+						CL3PUBF	CLASS	TBinaryOpInstruction	(TBlock* block, EBinaryOperation op, IValue* lhs, IValue* rhs);
+
+					protected:
+						EBinaryOperation op;
+						IValue* lhs;
+						IValue* rhs;
+
+					public:
+						inline	EBinaryOperation Operation	() const CL3_GETTER { return this->op; }
+						inline	IValue& LHS	() const CL3_GETTER { return *this->lhs; }
+						inline	IValue& RHS	() const CL3_GETTER { return *this->rhs; }
+
+						inline	void	Operation	(EBinaryOperation op) CL3_SETTER { this->op = op; }
+						inline	void	LHS			(IValue& lhs) CL3_SETTER { this->lhs = &lhs; }
+						inline	void	RHS			(IValue& rhs) CL3_SETTER { this->rhs = &rhs; }
+
+						CL3PUBF	TBinaryOpInstruction&	CopyTo	(TBlock*) const;
 				};
 
 				/*************************************************************************************/
@@ -381,7 +397,7 @@ namespace	cl3
 						CL3PUBF	TAllocaInstruction&		AddAlloca		(const types::typeinfo::TRTTI* datatype, IValue& count);
 						CL3PUBF	TLoadInstruction&		AddLoad			(IValue& pointer);
 						CL3PUBF	TStoreInstruction&		AddStore		(IValue& pointer, IValue& value);
-						CL3PUBF	TCompXInstruction&		AddCompX		(IValue& pointer, IValue& compare, IValue& newv);
+						CL3PUBF	TAtomicSwapInstruction&	AddAtomicSwap	(IValue& pointer, IValue& compare, IValue& newv);
 						CL3PUBF	TAtomicRMWInstruction&	AddAtomicRMW	(EAtomicOperation op, IValue& pointer, IValue& value);
 						CL3PUBF	TConvertInstruction&	AddConvert		(IValue& value, const types::typeinfo::TRTTI* datatype);
 						CL3PUBF	TBitCastInstruction&	AddBitCast		(IValue& value, const types::typeinfo::TRTTI* datatype);
@@ -424,14 +440,14 @@ namespace	cl3
 						TModule* module;
 						const types::typeinfo::TRTTI* return_type;
 						io::collection::list::TList<TParameter*> parameters;
-						io::collection::list::TList<TTemporary*> temporaries;
+// 						io::collection::list::TList<TTemporary*> temporaries;
 						io::collection::list::TList<TBlock*> blocks;
 
 					public:
 						CL3PUBF	CLASS	~TFunction	();
 
 						CL3PUBF	TParameter&	AddParameter	(const types::typeinfo::TRTTI* datatype, IValue* default_value = NULL);
-						CL3PUBF	TTemporary&	AddTemporary	(IValue& source);
+// 						CL3PUBF	TTemporary&	AddTemporary	(IValue& source);
 						CL3PUBF	TBlock&		AddBlock		();
 
 						inline	TModule&	Module			() const CL3_GETTER { return *this->module; }
@@ -457,6 +473,14 @@ namespace	cl3
 						CL3PUBF	TFunction&			AddFunction	(const types::typeinfo::TRTTI* return_type);
 						CL3PUBF	TGenericVariable&	AddVariable	(const types::typeinfo::TRTTI* datatype, const void* value_init);
 						CL3PUBF	TGenericLiteral&	AddLiteral	(const types::typeinfo::TRTTI* datatype, const void* value);
+
+						template<class T>
+						inline	TTypedLiteral<T>&	AddLiteral	(const T& value)
+						{
+							memory::TUniquePtr< TTypedLiteral<T> > p = memory::MakeUniquePtr(new TTypedLiteral<T>(this, value));
+							literals.Add(p.Object());
+							return *p.Claim();
+						}
 				};
 
 				/*************************************************************************************/
@@ -464,13 +488,13 @@ namespace	cl3
 				template<class T>
 				TTypedLiteral<T>&	TTypedLiteral<T>::CopyTo	(TBlock* block_new) const
 				{
-					return  block_new->Function().Module().AddLiteral(datatype, &value);	//	TODO: use template variant of AddLiteral
+					return  block_new->Function().Module().AddLiteral(value);	//	TODO: use template variant of AddLiteral
 				}
 
 				template<class T>
 				TTypedVariable<T>&	TTypedVariable<T>::CopyTo	(TBlock* block_new) const
 				{
-					return  block_new->Function().Module().AddVariable(datatype, &value);	//	TODO: use template variant of AddLiteral
+					return  block_new->Function().Module().AddVariable(value);	//	TODO: use template variant of AddLiteral
 				}
 			}
 		}

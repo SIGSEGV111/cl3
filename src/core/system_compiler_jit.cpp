@@ -24,6 +24,8 @@
 
 extern "C" void* memcpy(void* dest, const void* src, size_t n);
 
+#include <stdio.h>
+
 namespace	cl3
 {
 	namespace	system
@@ -33,6 +35,7 @@ namespace	cl3
 			namespace	jit
 			{
 				using namespace memory;
+				using namespace error;
 
 				template<class TL, class TP>
 				static	TP&	AddToListAndReturnValue	(io::collection::list::TList<TL*>& list, TP* ptr)
@@ -52,8 +55,14 @@ namespace	cl3
 				{
 				}
 
-				CLASS	TBinaryOpInstruction::TBinaryOpInstruction	(TBlock* block, EBinaryOperation op, IValue* lhs, IValue* rhs) : IInstruction(block), op(op), lhs(lhs), rhs(rhs)
+				TReturnInstruction&	TReturnInstruction::CopyTo	(TBlock* block_new) const
 				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS	TBinaryOpInstruction::TBinaryOpInstruction	(TBlock* block, EBinaryOperation op, IValue* lhs, IValue* rhs) : IInstruction(block), IValue(lhs->Datatype()), op(op), lhs(lhs), rhs(rhs)
+				{
+					CL3_CLASS_ERROR(lhs->Datatype() != rhs->Datatype(), TException, "both operants must be of the same datatype");
 				}
 
 				TBinaryOpInstruction&	TBinaryOpInstruction::CopyTo	(TBlock* block_new) const
@@ -110,14 +119,14 @@ namespace	cl3
 
 				/*************************************************************************************/
 
-				CLASS	TTemporary::TTemporary	(TFunction* function, IValue* source) : IValue(source->Datatype()), function(function), source(source)
-				{
-				}
-
-				TTemporary&	TTemporary::CopyTo	(TBlock* block_new) const
-				{
-					return block_new->Function().AddTemporary(source->CopyTo(block_new));
-				}
+// 				CLASS	TTemporary::TTemporary	(TFunction* function, IValue* source) : IValue(source->Datatype()), function(function), source(source)
+// 				{
+// 				}
+//
+// 				TTemporary&	TTemporary::CopyTo	(TBlock* block_new) const
+// 				{
+// 					return block_new->Function().AddTemporary(source->CopyTo(block_new));
+// 				}
 
 				/*************************************************************************************/
 
@@ -161,7 +170,7 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				TCompXInstruction&		TBlock::AddCompX		(IValue& pointer, IValue& compare, IValue& newv)
+				TAtomicSwapInstruction&		TBlock::AddAtomicSwap		(IValue& pointer, IValue& compare, IValue& newv)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -204,12 +213,12 @@ namespace	cl3
 
 				TReturnInstruction&				TBlock::TTermination::SetReturn				()
 				{
-					CL3_NOT_IMPLEMENTED;
+					return AddToListAndReturnValue(block->instructions, new TReturnInstruction(block, NULL));
 				}
 
 				TReturnInstruction&				TBlock::TTermination::SetReturn				(IValue& value)
 				{
-					CL3_NOT_IMPLEMENTED;
+					return AddToListAndReturnValue(block->instructions, new TReturnInstruction(block, &value));
 				}
 
 				TConditionalJumpInstruction&	TBlock::TTermination::SetConditionalJump	(IValue& cond, TBlock& block_true, TBlock& block_false)
@@ -255,11 +264,11 @@ namespace	cl3
 						for(usys_t i = 0; i < n; i++)
 							delete parameters[i];
 					}
-					{
-						const usys_t n = temporaries.Count();
-						for(usys_t i = 0; i < n; i++)
-							delete temporaries[i];
-					}
+// 					{
+// 						const usys_t n = temporaries.Count();
+// 						for(usys_t i = 0; i < n; i++)
+// 							delete temporaries[i];
+// 					}
 					{
 						const usys_t n = blocks.Count();
 						for(usys_t i = 0; i < n; i++)
@@ -273,10 +282,10 @@ namespace	cl3
 					return AddToListAndReturnValue(parameters, new TParameter(this, datatype, default_value));
 				}
 
-				TTemporary&	TFunction::AddTemporary	(IValue& source)
-				{
-					return AddToListAndReturnValue(temporaries, new TTemporary(this, &source));
-				}
+// 				TTemporary&	TFunction::AddTemporary	(IValue& source)
+// 				{
+// 					return AddToListAndReturnValue(temporaries, new TTemporary(this, &source));
+// 				}
 
 				TBlock&		TFunction::AddBlock		()
 				{
