@@ -27,8 +27,18 @@ namespace	cl3
 {
 	namespace	system
 	{
+		namespace	library
+		{
+			class	ILibrary;
+		};
+
 		namespace	compiler
 		{
+			namespace	transcoding
+			{
+				class	ITranscoder;
+			};
+
 			namespace	jit
 			{
 				class	CL3PUBT	TModule;
@@ -481,6 +491,10 @@ namespace	cl3
 							literals.Add(p.Object());
 							return *p.Claim();
 						}
+
+						CL3PUBF	void									Optimize	();
+						CL3PUBF	memory::TUniquePtr<library::ILibrary>	Compile		() const;
+						CL3PUBF	io::text::string::TString				Transcode	(transcoding::ITranscoder&) const;
 				};
 
 				/*************************************************************************************/
