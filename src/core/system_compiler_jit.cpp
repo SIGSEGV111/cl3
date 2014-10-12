@@ -22,6 +22,8 @@
 
 #include "system_compiler_jit.hpp"
 
+extern "C" void* memcpy(void* dest, const void* src, size_t n);
+
 namespace	cl3
 {
 	namespace	system
@@ -30,125 +32,116 @@ namespace	cl3
 		{
 			namespace	jit
 			{
-				/*************************************************************************************/
+				using namespace memory;
 
-				CLASS	IInstruction::~IInstruction	()
+				template<class TL, class TP>
+				static	TP&	AddToListAndReturnValue	(io::collection::list::TList<TL*>& list, TP* ptr)
 				{
-					CL3_NOT_IMPLEMENTED;
+					TUniquePtr<TP> p = MakeUniquePtr(ptr);
+					list.Add(p.Object());
+					return *p.Claim();
 				}
 
 				/*************************************************************************************/
 
-				CLASS	IValue::IValue		(const types::typeinfo::TRTTI*)
+				CLASS	IInstruction::IInstruction	(TBlock* block) : block(block)
 				{
-					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS	IInstruction::~IInstruction	()
+				{
+				}
+
+				CLASS	TBinaryOpInstruction::TBinaryOpInstruction	(TBlock* block, EBinaryOperation op, IValue* lhs, IValue* rhs) : IInstruction(block), op(op), lhs(lhs), rhs(rhs)
+				{
+				}
+
+				TBinaryOpInstruction&	TBinaryOpInstruction::CopyTo	(TBlock* block_new) const
+				{
+					//return block_new->AddBinOp(this->op, this->lhs->CopyTo(block_new), this->rhs->CopyTo(block_new));
+					CL3_NOT_IMPLEMENTED;	//	TODO: requires "module.Lookup(value)"
+				}
+
+				/*************************************************************************************/
+
+				CLASS	IValue::IValue		(const types::typeinfo::TRTTI* datatype) : datatype(datatype)
+				{
 				}
 
 				CLASS	IValue::~IValue		()
 				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				const types::typeinfo::TRTTI*
-						IValue::Datatype	() const
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				void	IValue::Datatype	(const types::typeinfo::TRTTI*)
-				{
-					CL3_NOT_IMPLEMENTED;
 				}
 
 				/*************************************************************************************/
 
-				CLASS	ILiteral::ILiteral	(TModule* module, const types::typeinfo::TRTTI* datatype) : IValue(datatype)
+				CLASS	ILiteral::ILiteral	(TModule* module, const types::typeinfo::TRTTI* datatype) : IValue(datatype), module(module)
 				{
-					CL3_NOT_IMPLEMENTED;
 				}
 
 				CLASS	TGenericLiteral::TGenericLiteral	(TModule* module, const types::typeinfo::TRTTI* datatype, const void* value_init) : ILiteral(module, datatype)
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->value = Alloc(1, datatype);
+					if(value_init)
+						::memcpy(this->value, value_init, datatype->sz_bytes);
+				}
+
+				TGenericLiteral&	TGenericLiteral::CopyTo	(TBlock* block_new) const
+				{
+					return block_new->Function().Module().AddLiteral(datatype, value);
 				}
 
 				/*************************************************************************************/
 
-				CLASS	IVariable::IVariable	(TModule* module, const types::typeinfo::TRTTI* datatype) : IValue(datatype)
+				CLASS	IVariable::IVariable	(TModule* module, const types::typeinfo::TRTTI* datatype) : IValue(datatype), module(module)
 				{
-					CL3_NOT_IMPLEMENTED;
 				}
 
 				CLASS	TGenericVariable::TGenericVariable	(TModule* module, const types::typeinfo::TRTTI* datatype, const void* value_init) : IVariable(module, datatype)
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->value = Alloc(1, datatype);
+					if(value_init)
+						::memcpy(this->value, value_init, datatype->sz_bytes);
+				}
+
+				TGenericVariable&	TGenericVariable::CopyTo	(TBlock* block_new) const
+				{
+					return block_new->Function().Module().AddVariable(datatype, value);
 				}
 
 				/*************************************************************************************/
 
-				CLASS	TTemporary::TTemporary	(TFunction* function, IValue* source) : IValue(source->Datatype())
+				CLASS	TTemporary::TTemporary	(TFunction* function, IValue* source) : IValue(source->Datatype()), function(function), source(source)
 				{
-					CL3_NOT_IMPLEMENTED;
+				}
+
+				TTemporary&	TTemporary::CopyTo	(TBlock* block_new) const
+				{
+					return block_new->Function().AddTemporary(source->CopyTo(block_new));
 				}
 
 				/*************************************************************************************/
 
-				CLASS	TBlock::TBlock	(TFunction* function) : termination(this)
+				CLASS	TBlock::TBlock	(TFunction* function) : function(function), termination(this)
 				{
-					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TBlock::TBlock	(TFunction* function, const TBlock& other) : termination(this)
+				CLASS	TBlock::TBlock	(TFunction* function, const TBlock& other) : function(function), termination(this)
 				{
-					CL3_NOT_IMPLEMENTED;
 				}
 
 				CLASS	TBlock::~TBlock	()
 				{
-					CL3_NOT_IMPLEMENTED;
+					const usys_t n = instructions.Count();
+					for(usys_t i = 0; i < n; i++)
+						delete instructions[i];
 				}
 
-				TAddInstruction&		TBlock::AddAdd			(IValue& op1, IValue& op2)
+				TBinaryOpInstruction&	TBlock::AddBinOp		(EBinaryOperation op, IValue& lhs, IValue& rhs)
 				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				TSubInstruction&		TBlock::AddSub			(IValue& op1, IValue& op2)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				TMulInstruction&		TBlock::AddMul			(IValue& op1, IValue& op2)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				TDivInstruction&		TBlock::AddDiv			(IValue& op1, IValue& op2)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				TModInstruction&		TBlock::AddMod			(IValue& op1, IValue& op2)
-				{
-					CL3_NOT_IMPLEMENTED;
+					return AddToListAndReturnValue(instructions, new TBinaryOpInstruction(this, op, &lhs, &rhs));
 				}
 
 				TShiftInstruction&		TBlock::AddShift		(IValue& value, IValue& times, EDirection direction)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				TAndInstruction&		TBlock::AddAnd			(IValue& op1, IValue& op2)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				TOrInstruction&			TBlock::AddOr			(IValue& op1, IValue& op2)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				TXorInstruction&		TBlock::AddXor			(IValue& op1, IValue& op2)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -246,42 +239,60 @@ namespace	cl3
 
 				/*************************************************************************************/
 
-				CLASS		TFunction::TFunction	(TModule* module) : TBlock(this)
+				CLASS		TFunction::TFunction	(TModule* module, const types::typeinfo::TRTTI* return_type) : TBlock(this), module(module), return_type(return_type)
 				{
-					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS		TFunction::TFunction	(TModule* module, const TFunction& other) : TBlock(this)
+				CLASS		TFunction::TFunction	(TModule* module, const TFunction& other) : TBlock(this), module(module)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
 				CLASS		TFunction::~TFunction	()
 				{
-					CL3_NOT_IMPLEMENTED;
+					{
+						const usys_t n = parameters.Count();
+						for(usys_t i = 0; i < n; i++)
+							delete parameters[i];
+					}
+					{
+						const usys_t n = temporaries.Count();
+						for(usys_t i = 0; i < n; i++)
+							delete temporaries[i];
+					}
+					{
+						const usys_t n = blocks.Count();
+						for(usys_t i = 0; i < n; i++)
+							delete blocks[i];
+					}
 				}
 
 				TFunction::TParameter&
 							TFunction::AddParameter	(const types::typeinfo::TRTTI* datatype, IValue* default_value)
 				{
-					CL3_NOT_IMPLEMENTED;
+					return AddToListAndReturnValue(parameters, new TParameter(this, datatype, default_value));
 				}
 
 				TTemporary&	TFunction::AddTemporary	(IValue& source)
 				{
-					CL3_NOT_IMPLEMENTED;
+					return AddToListAndReturnValue(temporaries, new TTemporary(this, &source));
 				}
 
 				TBlock&		TFunction::AddBlock		()
 				{
-					CL3_NOT_IMPLEMENTED;
+					return AddToListAndReturnValue(blocks, new TBlock(this));
 				}
 
 				/*************************************************************************************/
 
-				CLASS		TFunction::TParameter::TParameter	(TFunction* function, const types::typeinfo::TRTTI* datatype, IValue* default_value) : IValue(datatype)
+				CLASS		TFunction::TParameter::TParameter	(TFunction* function, const types::typeinfo::TRTTI* datatype, IValue* default_value) : IValue(datatype), function(function), default_value(default_value)
 				{
-					CL3_NOT_IMPLEMENTED;
+				}
+
+				TFunction::TParameter&	TFunction::TParameter::CopyTo	(TBlock* block_new) const
+				{
+					//return block_new->Function().AddParameter(datatype, default_value->Lookup
+					CL3_NOT_IMPLEMENTED;	//	TODO: requires "module.Lookup(value)"
 				}
 
 				/*************************************************************************************/
@@ -290,28 +301,43 @@ namespace	cl3
 				{
 				}
 
-				CLASS		TModule::TModule		(const TModule&)
+				CLASS		TModule::TModule		(const TModule& other)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
 				CLASS		TModule::~TModule		()
 				{
+					{
+						const usys_t n = functions.Count();
+						for(usys_t i = 0; i < n; i++)
+							delete functions[i];
+					}
+					{
+						const usys_t n = variables.Count();
+						for(usys_t i = 0; i < n; i++)
+							delete variables[i];
+					}
+					{
+						const usys_t n = literals.Count();
+						for(usys_t i = 0; i < n; i++)
+							delete literals[i];
+					}
 				}
 
-				TFunction&	TModule::AddFunction	(const types::typeinfo::TRTTI* return_type)
+				TFunction&			TModule::AddFunction	(const types::typeinfo::TRTTI* return_type)
 				{
-					CL3_NOT_IMPLEMENTED;
+					return AddToListAndReturnValue(functions, new TFunction(this, return_type));
 				}
 
-				IVariable&	TModule::AddVariable	(const types::typeinfo::TRTTI* datatype, const void* value_init)
+				TGenericVariable&	TModule::AddVariable	(const types::typeinfo::TRTTI* datatype, const void* value_init)
 				{
-					CL3_NOT_IMPLEMENTED;
+					return AddToListAndReturnValue(variables, new TGenericVariable(this, datatype, value_init));
 				}
 
-				ILiteral&	TModule::AddLiteral		(const types::typeinfo::TRTTI* datatype, const void* value)
+				TGenericLiteral&	TModule::AddLiteral		(const types::typeinfo::TRTTI* datatype, const void* value)
 				{
-					CL3_NOT_IMPLEMENTED;
+					return AddToListAndReturnValue(literals, new TGenericLiteral(this, datatype, value));
 				}
 
 				/*************************************************************************************/
