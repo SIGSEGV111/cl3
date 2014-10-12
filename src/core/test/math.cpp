@@ -20,17 +20,17 @@
 #include <cl3/core/io_text_string.hpp>
 #include <gtest/gtest.h>
 
-#include <llvm/IR/Module.h>
-#include <llvm/IR/Constants.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/IRBuilder.h>
-#include <llvm/IR/Verifier.h>
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
-#include <llvm/Support/TargetSelect.h>
+// #include <llvm/IR/Module.h>
+// #include <llvm/IR/Constants.h>
+// #include <llvm/IR/LLVMContext.h>
+// #include <llvm/IR/IRBuilder.h>
+// #include <llvm/ExecutionEngine/ExecutionEngine.h>
+// #include <llvm/Support/TargetSelect.h>
 // #include <llvm/PassManager.h>
-#include <llvm/LinkAllPasses.h>
-#include <llvm/Transforms/IPO/PassManagerBuilder.h>
-#include <llvm/IR/PassManager.h>
+// #include <llvm/PassManagers.h>
+// #include <llvm/LinkAllPasses.h>
+// #include <llvm/Transforms/IPO/PassManagerBuilder.h>
+// #include <llvm/InitializePasses.h>
 
 using namespace ::testing;
 
@@ -40,49 +40,56 @@ namespace
 	using namespace cl3::system::memory;
 	using namespace cl3::io::text::string;
 	using namespace cl3::io::text::encoding;
-	using namespace llvm;
+// 	using namespace llvm;
 	using namespace std;
 
-	TEST(math_formular, llvm)
-	{
-		InitializeNativeTarget();
-		Module* module = new Module("test", getGlobalContext());
-		std::string error_buffer;
-		TUniquePtr<ExecutionEngine> execution_engine = MakeUniquePtr<ExecutionEngine>(EngineBuilder(module).setErrorStr(&error_buffer).setEngineKind(EngineKind::JIT).create());
-		if(execution_engine == NULL)
-		{
-			puts(error_buffer.c_str());
-			return;
-		}
-
-		TUniquePtr<IFormularNode> root = MakeUniquePtr<IFormularNode>(new TOperatorNode(
-				MakeUniquePtr<IFormularNode>(new TLiteralNode(17.4)),
-				MakeUniquePtr<IFormularNode>(new TLiteralNode(10.4)),
-				OPERATION_ADD
-			));
-
-
-// 		module->setDataLayout(execution_engine->getDataLayout());
+// 	TEST(math_formular, llvm)
+// 	{
+// 		InitializeNativeTarget();
+// 		Module* module = new Module("test", getGlobalContext());
+// 		std::string error_buffer;
+// 		TUniquePtr<ExecutionEngine> execution_engine = MakeUniquePtr<ExecutionEngine>(EngineBuilder(module).setErrorStr(&error_buffer).setEngineKind(EngineKind::JIT).create());
+// 		if(execution_engine == NULL)
+// 		{
+// 			puts(error_buffer.c_str());
+// 			return;
+// 		}
 //
-// 		FunctionPassManager fpm;
-// // 		ModulePassManager mpm;
-//
+// 		FunctionPassManager fpm(module);
+// 		PassManager mpm;
 // 		PassManagerBuilder pmb;
-// 		pmb.OptLevel = 3;
+// 		pmb.OptLevel = 2;
 // 		pmb.populateFunctionPassManager(fpm);
-// // 		pmb.populateModulePassManager(mpm);
+// 		pmb.populateModulePassManager(mpm);
 //
-		TUniquePtr<Function> code = root->GenerateCode(*module);
+// 				/*
+// // 		module->setDataLayout(*execution_engine->getDataLayout());
+// // 		fpm.add(new DataLayoutPass());
+// 		fpm.add(createBasicAliasAnalysisPass());
+// 		fpm.add(createInstructionCombiningPass());
+// 		fpm.add(createReassociatePass());
+// 		fpm.add(createGVNPass());
+// 		fpm.add(createCFGSimplificationPass());
+// */
 //
-// 		fpm.run(code.Object());
-// // 		mpm.run(module);
-
-		module->dump();
-
-
-		printf("execution_engine = %p\n", execution_engine.Object());
-		double (*func)() = (double (*)())execution_engine->getPointerToFunction(code.Object());
-		printf("func = %p\n", func);
-		printf("result: %f\n", func());
-	}
+// 		fpm.doInitialization();
+//
+// 		TUniquePtr<IFormularNode> root = MakeUniquePtr<IFormularNode>(new TOperatorNode(
+// 				MakeUniquePtr<IFormularNode>(new TLiteralNode(17.4)),
+// 				MakeUniquePtr<IFormularNode>(new TLiteralNode(10.4)),
+// 				OPERATION_ADD
+// 			));
+//
+// 		Function* code = root->GenerateCode(*module).Claim();
+//
+// 		puts("--- original code ---");
+// 		module->dump();
+// 		fpm.run(*code);
+// 		mpm.run(*module);
+// 		puts("--- optimized code ---");
+// 		module->dump();
+// 		puts("--- EXECUTION ---");
+// 		double (*func)() = (double (*)())execution_engine->getPointerToFunction(code);
+// 		printf("result: %f\n", func());
+// 	}
 }
