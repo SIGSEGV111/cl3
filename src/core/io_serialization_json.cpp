@@ -337,7 +337,7 @@ namespace	cl3
 				void	TJSONArraySerializer::Push		(const ISerializable& value)
 				{
 					BeginNewElement();
-					TJSONSerializer s(this->tw);
+					TJSONSerializer s(this->tw, this->pretty, this->depth);
 					value.Serialize(s);
 				}
 

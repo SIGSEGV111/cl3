@@ -181,7 +181,6 @@ namespace	cl3
 					n = snprintf(buffer, sizeof(buffer), "%lld", (signed long long)num);
 				else
 					n = snprintf(buffer, sizeof(buffer), "%llu", (unsigned long long)num);
-				CL3_NONCLASS_LOGIC_ERROR(n >= sizeof(buffer));
 				os.Write(buffer, n);
 			}
 
