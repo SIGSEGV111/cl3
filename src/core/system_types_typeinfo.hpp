@@ -44,9 +44,13 @@ namespace	cl3
 
 		namespace	serialization
 		{
-			struct	ISerializer;
-			struct	IDeserializer;
-			struct	ISerializable;
+			class	ISerializer;
+			class	IDeserializer;
+			class	ISerializable;
+
+			class	IArraySerializer;
+			class	IArrayDeserializer;
+			class	IArraySerializable;
 		}
 	}
 
@@ -76,7 +80,7 @@ namespace	cl3
 
 					template<class T> CL3PUBF void generic_print(io::text::ITextWriter& w, const void* object) { w<<(*reinterpret_cast<const T*>(object)); }
 
-					template<class T> CL3PUBF void generic_serialize(io::serialization::ISerializer& s, void* object) { reinterpret_cast<const T*>(object)->Serialize(s); }
+					template<class T> CL3PUBF void generic_serialize(io::serialization::ISerializer& s, const void* object) { reinterpret_cast<const T*>(object)->Serialize(s); }
 					template<class T> CL3PUBF void generic_deserctor(io::serialization::IDeserializer& ds, void* object) { new (object) T(ds); }
 					template<class T> CL3PUBF void generic_deserinst(io::serialization::IDeserializer& ds, void* object) { reinterpret_cast<T*>(object)->Deserialize(ds); }
 

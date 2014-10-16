@@ -52,80 +52,80 @@ namespace	cl3
 						(*tw)<<'"'<<name<<"\":";
 				}
 
-				void	TJSONSerializer::Push	(const char* name, u8_t value)
+				void	TJSONSerializer::Push		(const char* name, u8_t value)
 				{
 					BeginNewElement(name);
 					(*tw)<<value;
 				}
 
-				void	TJSONSerializer::Push	(const char* name, s8_t value)
+				void	TJSONSerializer::Push		(const char* name, s8_t value)
 				{
 					BeginNewElement(name);
 					(*tw)<<value;
 				}
 
-				void	TJSONSerializer::Push	(const char* name, u16_t value)
+				void	TJSONSerializer::Push		(const char* name, u16_t value)
 				{
 					BeginNewElement(name);
 					(*tw)<<value;
 				}
 
-				void	TJSONSerializer::Push	(const char* name, s16_t value)
+				void	TJSONSerializer::Push		(const char* name, s16_t value)
 				{
 					BeginNewElement(name);
 					(*tw)<<value;
 				}
 
-				void	TJSONSerializer::Push	(const char* name, u32_t value)
+				void	TJSONSerializer::Push		(const char* name, u32_t value)
 				{
 					BeginNewElement(name);
 					(*tw)<<value;
 				}
 
-				void	TJSONSerializer::Push	(const char* name, s32_t value)
+				void	TJSONSerializer::Push		(const char* name, s32_t value)
 				{
 					BeginNewElement(name);
 					(*tw)<<value;
 				}
 
-				void	TJSONSerializer::Push	(const char* name, u64_t value)
+				void	TJSONSerializer::Push		(const char* name, u64_t value)
 				{
 					BeginNewElement(name);
 					(*tw)<<value;
 				}
 
-				void	TJSONSerializer::Push	(const char* name, s64_t value)
+				void	TJSONSerializer::Push		(const char* name, s64_t value)
 				{
 					BeginNewElement(name);
 					(*tw)<<value;
 				}
 
-				void	TJSONSerializer::Push	(const char* name, f32_t value)
+				void	TJSONSerializer::Push		(const char* name, f32_t value)
 				{
 					BeginNewElement(name);
 					(*tw)<<value;
 				}
 
-				void	TJSONSerializer::Push	(const char* name, f64_t value)
+				void	TJSONSerializer::Push		(const char* name, f64_t value)
 				{
 					BeginNewElement(name);
 					(*tw)<<value;
 				}
 
-				void	TJSONSerializer::Push	(const char* name, const char* value)
+				void	TJSONSerializer::Push		(const char* name, const char* value)
 				{
 					BeginNewElement(name);
 					(*tw)<<'"'<<value<<'"';
 				}
 
-				void	TJSONSerializer::Push	(const char* name, const wchar_t* value)
+				void	TJSONSerializer::Push		(const char* name, const wchar_t* value)
 				{
 					BeginNewElement(name);
 					(*tw)<<'"'<<value<<'"';
 				}
 
 
-				void	TJSONSerializer::Push	(const char* name, const ISerializable& value)
+				void	TJSONSerializer::Push		(const char* name, const ISerializable& value)
 				{
 					BeginNewElement(name);
 					(*tw)<<'{';
@@ -143,12 +143,19 @@ namespace	cl3
 					this->empty_scope = false;
 				}
 
-				CLASS			TJSONSerializer::TJSONSerializer	(ITextWriter* tw, bool pretty) : tw(tw), pretty(pretty), empty_scope(true), depth(1)
+				system::memory::TUniquePtr<IArraySerializer>
+						TJSONSerializer::PushArray	(const char* name)
+				{
+					BeginNewElement(name);
+					return system::memory::MakeUniquePtr<IArraySerializer>(new TJSONArraySerializer(this->tw, this->pretty, this->depth));
+				}
+
+				CLASS	TJSONSerializer::TJSONSerializer	(ITextWriter* tw, bool pretty, usys_t depth) : tw(tw), pretty(pretty), empty_scope(true), depth(depth+1)
 				{
 					(*tw)<<'{';
 				}
 
-				CLASS			TJSONSerializer::~TJSONSerializer	()
+				CLASS	TJSONSerializer::~TJSONSerializer	()
 				{
 					if(this->pretty && !this->empty_scope)
 						(*tw)<<'\n';
@@ -157,80 +164,289 @@ namespace	cl3
 
 				/*************************************************************************************/
 
-				void	TJSONDeserializer::Pop	(const char* name, u8_t& value)
+				void	TJSONDeserializer::Pop		(const char* name, u8_t& value)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				void	TJSONDeserializer::Pop	(const char* name, s8_t& value)
+				void	TJSONDeserializer::Pop		(const char* name, s8_t& value)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				void	TJSONDeserializer::Pop	(const char* name, u16_t& value)
+				void	TJSONDeserializer::Pop		(const char* name, u16_t& value)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				void	TJSONDeserializer::Pop	(const char* name, s16_t& value)
+				void	TJSONDeserializer::Pop		(const char* name, s16_t& value)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				void	TJSONDeserializer::Pop	(const char* name, u32_t& value)
+				void	TJSONDeserializer::Pop		(const char* name, u32_t& value)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				void	TJSONDeserializer::Pop	(const char* name, s32_t& value)
+				void	TJSONDeserializer::Pop		(const char* name, s32_t& value)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				void	TJSONDeserializer::Pop	(const char* name, u64_t& value)
+				void	TJSONDeserializer::Pop		(const char* name, u64_t& value)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				void	TJSONDeserializer::Pop	(const char* name, s64_t& value)
+				void	TJSONDeserializer::Pop		(const char* name, s64_t& value)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				void	TJSONDeserializer::Pop	(const char* name, f32_t& value)
+				void	TJSONDeserializer::Pop		(const char* name, f32_t& value)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				void	TJSONDeserializer::Pop	(const char* name, f64_t& value)
+				void	TJSONDeserializer::Pop		(const char* name, f64_t& value)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				void	TJSONDeserializer::Pop	(const char* name, const char*& value)
+				void	TJSONDeserializer::Pop		(const char* name, const char*& value)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				void	TJSONDeserializer::Pop	(const char* name, const wchar_t*& value)
+				void	TJSONDeserializer::Pop		(const char* name, const wchar_t*& value)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				void	TJSONDeserializer::Pop	(const char* name, ISerializable& value)
+				void	TJSONDeserializer::Pop		(const char* name, ISerializable& value)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS				TJSONDeserializer::TJSONDeserializer	(ITextReader* tr) : tr(tr)
+				system::memory::TUniquePtr<IArrayDeserializer>
+						TJSONDeserializer::PopArray	(const char* name)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS	TJSONDeserializer::TJSONDeserializer	(ITextReader* tr) : tr(tr)
 				{
 				}
 
-				CLASS				TJSONDeserializer::~TJSONDeserializer	()
+				CLASS	TJSONDeserializer::~TJSONDeserializer	()
 				{
 					TUTF32 chr;
 					tr->Read(&chr,1);
 				}
+
+				/*************************************************************************************/
+				/*************************************************************************************/
+				/*************************************************************************************/
+
+				void	TJSONArraySerializer::BeginNewElement	()
+				{
+					if(!this->empty_scope)
+					{
+						if(this->pretty)
+							(*tw)<<", ";
+						else
+							(*tw)<<',';
+					}
+					this->empty_scope = false;
+				}
+
+				void	TJSONArraySerializer::Push		(u8_t value)
+				{
+					BeginNewElement();
+					(*tw)<<value;
+				}
+
+				void	TJSONArraySerializer::Push		(s8_t value)
+				{
+					BeginNewElement();
+					(*tw)<<value;
+				}
+
+				void	TJSONArraySerializer::Push		(u16_t value)
+				{
+					BeginNewElement();
+					(*tw)<<value;
+				}
+
+				void	TJSONArraySerializer::Push		(s16_t value)
+				{
+					BeginNewElement();
+					(*tw)<<value;
+				}
+
+				void	TJSONArraySerializer::Push		(u32_t value)
+				{
+					BeginNewElement();
+					(*tw)<<value;
+				}
+
+				void	TJSONArraySerializer::Push		(s32_t value)
+				{
+					BeginNewElement();
+					(*tw)<<value;
+				}
+
+				void	TJSONArraySerializer::Push		(u64_t value)
+				{
+					BeginNewElement();
+					(*tw)<<value;
+				}
+
+				void	TJSONArraySerializer::Push		(s64_t value)
+				{
+					BeginNewElement();
+					(*tw)<<value;
+				}
+
+				void	TJSONArraySerializer::Push		(f32_t value)
+				{
+					BeginNewElement();
+					(*tw)<<value;
+				}
+
+				void	TJSONArraySerializer::Push		(f64_t value)
+				{
+					BeginNewElement();
+					(*tw)<<value;
+				}
+
+				void	TJSONArraySerializer::Push		(const char* value)
+				{
+					BeginNewElement();
+					(*tw)<<'"'<<value<<'"';
+				}
+
+				void	TJSONArraySerializer::Push		(const wchar_t* value)
+				{
+					BeginNewElement();
+					(*tw)<<'"'<<value<<'"';
+				}
+
+
+				void	TJSONArraySerializer::Push		(const ISerializable& value)
+				{
+					BeginNewElement();
+					TJSONSerializer s(this->tw);
+					value.Serialize(s);
+				}
+
+				system::memory::TUniquePtr<IArraySerializer>
+						TJSONArraySerializer::PushArray	()
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS	TJSONArraySerializer::TJSONArraySerializer	(ITextWriter* tw, bool pretty, usys_t depth) : tw(tw), pretty(pretty), empty_scope(true), depth(depth+1)
+				{
+					if(this->pretty)
+						(*tw)<<"[ ";
+					else
+						(*tw)<<'[';
+				}
+
+				CLASS	TJSONArraySerializer::~TJSONArraySerializer	()
+				{
+					if(this->pretty)
+						(*tw)<<" ]";
+					else
+						(*tw)<<']';
+				}
+
+				/*************************************************************************************/
+
+				void	TJSONArrayDeserializer::Pop		(u8_t& value)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				void	TJSONArrayDeserializer::Pop		(s8_t& value)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				void	TJSONArrayDeserializer::Pop		(u16_t& value)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				void	TJSONArrayDeserializer::Pop		(s16_t& value)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				void	TJSONArrayDeserializer::Pop		(u32_t& value)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				void	TJSONArrayDeserializer::Pop		(s32_t& value)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				void	TJSONArrayDeserializer::Pop		(u64_t& value)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				void	TJSONArrayDeserializer::Pop		(s64_t& value)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				void	TJSONArrayDeserializer::Pop		(f32_t& value)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				void	TJSONArrayDeserializer::Pop		(f64_t& value)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				void	TJSONArrayDeserializer::Pop		(const char*& value)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				void	TJSONArrayDeserializer::Pop		(const wchar_t*& value)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				void	TJSONArrayDeserializer::Pop		(ISerializable& value)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				system::memory::TUniquePtr<IArrayDeserializer>
+						TJSONArrayDeserializer::PopArray	()
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS	TJSONArrayDeserializer::TJSONArrayDeserializer	(ITextReader* tr) : tr(tr)
+				{
+				}
+
+				CLASS	TJSONArrayDeserializer::~TJSONArrayDeserializer	()
+				{
+					TUTF32 chr;
+					tr->Read(&chr,1);
+				}
+
+				/*************************************************************************************/
 			}
 		}
 	}

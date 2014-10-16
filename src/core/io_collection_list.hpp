@@ -24,7 +24,8 @@
 #include "error.hpp"
 #include "system_memory.hpp"
 #include "util.hpp"
-//#include "system_types_typeinfo.hpp"
+#include "io_serialization.hpp"
+#include "system_types_typeinfo.hpp"
 
 namespace	cl3
 {
@@ -267,6 +268,7 @@ namespace	cl3
 						CLASS		TList		(const IStaticCollection<const T>&);
 						CLASS		TList		(const TList&);
 						CLASS		TList		(TList&&);
+						CLASS		TList		(serialization::IDeserializer&);
 						virtual		~TList		();
 				};
 
@@ -336,6 +338,38 @@ namespace	cl3
 						CLASS		TList		(const TList&);
 						CLASS		TList		(TList&&);
 						virtual		~TList		();
+				};
+
+				/**************************************************************/
+
+				template<class T>
+				class	TSerializableList : public TList<T>, public serialization::ISerializable
+				{
+					public:
+						//	from ISerializable
+						void		Serialize	(serialization::ISerializer& s) const final override
+						{
+							s.Push("count", this->n_items_current);
+							system::memory::TUniquePtr<serialization::IArraySerializer> as = s.PushArray("items");
+							for(usys_t i = 0; i < this->n_items_current; i++)
+								as->Push(this->arr_items[i]);
+						}
+
+						void		Deserialize	(serialization::IDeserializer& ds) final override
+						{
+							usys_t n;
+							ds.Pop("count", n);
+
+							this->Clear();
+							this->Prealloc(n);
+
+							system::memory::TUniquePtr<serialization::IArrayDeserializer> ads = ds.PopArray("items");
+							for(usys_t i = 0; i < n; i++)
+								ads->Pop(this->arr_items + i, system::types::typeinfo::TCTTI<T>::rtti);
+
+							this->n_items_current = n;
+							this->n_items_prealloc -= n;
+						}
 				};
 
 				/**************************************************************/

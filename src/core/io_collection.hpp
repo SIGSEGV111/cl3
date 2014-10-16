@@ -164,13 +164,24 @@ namespace	cl3
 			/************************************************************************/
 
 			template<class T>
-			struct	CL3PUBT	IStaticCollection<const T> : virtual event::IObservable
+			struct	CL3PUBT	IStaticCollection<const T> : virtual event::IObservable /*, virtual serialization::ISerializable*/
 			{
 				virtual	system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT = 0;
 
 				virtual	usys_t	Count		() const CL3_GETTER = 0;
 				virtual	bool	CountMin	(usys_t count_min) const CL3_GETTER { return Count() >= count_min; }
 				virtual	bool	CountMax	(usys_t count_max) const CL3_GETTER { return Count() <= count_max; }
+
+// 				//	from ISerializable
+// 				virtual	void	Serialize	(serialization::ISerializer& s) const override
+// 				{
+// 					s.Push("count", this->Count());
+// 					system::memory::TUniquePtr<IStaticIterator<const T> > it = this->CreateStaticIterator();
+// 					system::memory::TUniquePtr<serialization::IArraySerializer> as = s.PushArray("items");
+// 					it->MoveHead();
+// 					while(it->MoveNext())
+// 						as->Push(it->Item());
+// 				}
 			};
 
 			template<class T>
@@ -199,6 +210,25 @@ namespace	cl3
 					virtual	void	Add		(const T* arr_items_add, usys_t n_items_add) = 0;	//	like above but for multiple items at once
 					virtual	void	Add		(const IStaticCollection<const T>& collection) = 0;	//	inserts another collection into this collection, it is left to the implementation to determine where the new items are positioned
 					virtual	bool	Remove	(const T* item_remove) = 0;	//	removes the specified item from the collection, the pointer is free to point to any valid item - the item needs not to be a member of the collection, if however so, then exactly the specified item is removed, if not, one item which compares equal to the specified item is removed - if multiple items compare equal to the specified item, the implementation is free to choose one among them, if no matching item is found false is returned
+
+// 					//	from ISerializable
+// 					virtual	void	Deserialize	(serialization::IDeserializer& ds) override
+// 					{
+// 						this->Clear();
+// 						usys_t n;
+// 						ds.Pop("count", n);
+// 						system::memory::TUniquePtr<serialization::IArrayDeserializer> ads = ds.PopArray("items");
+//
+// 						byte_t buffer[sizeof(T)];
+//
+// 						for(usys_t i = 0; i < n; i++)
+// 						{
+// 							ads->Pop((void*)buffer, system::types::typeinfo::TCTTI<T>::rtti);
+// 							T* object = reinterpret_cast<T*>(buffer);
+// 							this->Add(*object);
+// 							object->~T();
+// 						}
+// 					}
 			};
 
 			template<class T>

@@ -20,6 +20,7 @@
 #include <cl3/core/io_serialization_json.hpp>
 #include <cl3/core/system_memory.hpp>
 #include <cl3/core/io_text_string.hpp>
+#include <cl3/core/io_text_encoding.hpp>
 #include <cl3/core/io_text_terminal.hpp>
 #include <gtest/gtest.h>
 
@@ -31,11 +32,14 @@ namespace
 	using namespace cl3::io::serialization;
 	using namespace cl3::io::serialization::json;
 	using namespace cl3::io::text::string;
+	using namespace cl3::io::text::encoding;
+	using namespace cl3::system::memory;
 
 	struct	TTest : ISerializable
 	{
 		int x,y,z;
 		const char* str;
+		int array_of_ints[4];
 
 		void	Serialize	(ISerializer& s) const final override
 		{
@@ -43,6 +47,12 @@ namespace
 			s.Push("y", y);
 			s.Push("z", z);
 			s.Push("str", str);
+
+			TUniquePtr<IArraySerializer> as = s.PushArray("array_of_ints");
+			as->Push(array_of_ints[0]);
+			as->Push(array_of_ints[1]);
+			as->Push(array_of_ints[2]);
+			as->Push(array_of_ints[3]);
 		}
 
 		void	Deserialize	(IDeserializer& ds) final override
@@ -51,12 +61,24 @@ namespace
 			ds.Pop("y", y);
 			ds.Pop("z", z);
 			ds.Pop("str", str);
+
+			TUniquePtr<IArrayDeserializer> ads = ds.PopArray("array_of_ints");
+			ads->Pop(array_of_ints[0]);
+			ads->Pop(array_of_ints[1]);
+			ads->Pop(array_of_ints[2]);
+			ads->Pop(array_of_ints[3]);
 		}
 
-		CLASS	TTest	() : x(10), y(20), z(30), str("test") {}
+		CLASS	TTest	() : x(10), y(20), z(30), str("test")
+		{
+			array_of_ints[0] = 0;
+			array_of_ints[1] = 1;
+			array_of_ints[2] = 2;
+			array_of_ints[3] = 3;
+		}
 	};
 
-	TEST(io_serialization_json, pretty)
+	TEST(io_serialization_json, Object_pretty)
 	{
 		TString buffer;
 
@@ -66,10 +88,12 @@ namespace
 			s.Push("test", test);
 		}
 
-		EXPECT_TRUE(buffer == "{\n\t\"test\" : {\n\t\t\"x\" : 10,\n\t\t\"y\" : 20,\n\t\t\"z\" : 30,\n\t\t\"str\" : \"test\"\n\t}\n}");
+// 		puts(TCString(buffer, CODEC_CXX_CHAR).Chars());
+
+		EXPECT_TRUE(buffer == "{\n\t\"test\" : {\n\t\t\"x\" : 10,\n\t\t\"y\" : 20,\n\t\t\"z\" : 30,\n\t\t\"str\" : \"test\",\n\t\t\"array_of_ints\" : [ 0, 1, 2, 3 ]\n\t}\n}");
 	}
 
-	TEST(io_serialization_json, ugly)
+	TEST(io_serialization_json, Object_ugly)
 	{
 		TString buffer;
 
@@ -79,6 +103,6 @@ namespace
 			s.Push("test", test);
 		}
 
-		EXPECT_TRUE(buffer == "{\"test\":{\"x\":10,\"y\":20,\"z\":30,\"str\":\"test\"}}");
+		EXPECT_TRUE(buffer == "{\"test\":{\"x\":10,\"y\":20,\"z\":30,\"str\":\"test\",\"array_of_ints\":[0,1,2,3]}}");
 	}
 }
