@@ -21,6 +21,8 @@
 #endif
 
 #include "io_serialization_json.hpp"
+#include "io_text.hpp"
+#include "io_text_string.hpp"
 
 namespace	cl3
 {
@@ -31,6 +33,7 @@ namespace	cl3
 			namespace	json
 			{
 				using namespace io::text;
+				using namespace io::text::string;
 
 				void	TJSONSerializer::BeginNewElement	(const char* name)
 				{
@@ -124,23 +127,17 @@ namespace	cl3
 					(*tw)<<'"'<<value<<'"';
 				}
 
+				void	TJSONSerializer::Push		(const char* name, const TString& value)
+				{
+					BeginNewElement(name);
+					(*tw)<<'"'<<value<<'"';
+				}
 
 				void	TJSONSerializer::Push		(const char* name, const ISerializable& value)
 				{
 					BeginNewElement(name);
-					(*tw)<<'{';
-					this->empty_scope = true;
-					this->depth++;
-					value.Serialize(*this);
-					this->depth--;
-					if(this->pretty && !this->empty_scope)
-					{
-						(*tw)<<'\n';
-						for(usys_t i = 0; i < this->depth; i++)
-							(*tw)<<'\t';
-					}
-					(*tw)<<'}';
-					this->empty_scope = false;
+					TJSONSerializer s(this->tw, this->pretty, this->depth);
+					value.Serialize(s);
 				}
 
 				system::memory::TUniquePtr<IArraySerializer>
@@ -159,6 +156,10 @@ namespace	cl3
 				{
 					if(this->pretty && !this->empty_scope)
 						(*tw)<<'\n';
+
+					if(this->pretty)
+						for(usys_t i = 1; i < this->depth; i++)
+							(*tw)<<'\t';
 					(*tw)<<'}';
 				}
 
@@ -224,7 +225,17 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
+				void	TJSONDeserializer::Pop		(const char* name, TString& value)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
 				void	TJSONDeserializer::Pop		(const char* name, ISerializable& value)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				void	TJSONDeserializer::Pop		(const char* name, void* object, const system::types::typeinfo::TRTTI& rtti)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -333,6 +344,11 @@ namespace	cl3
 					(*tw)<<'"'<<value<<'"';
 				}
 
+				void	TJSONArraySerializer::Push		(const TString& value)
+				{
+					BeginNewElement();
+					(*tw)<<'"'<<value<<'"';
+				}
 
 				void	TJSONArraySerializer::Push		(const ISerializable& value)
 				{
@@ -344,7 +360,8 @@ namespace	cl3
 				system::memory::TUniquePtr<IArraySerializer>
 						TJSONArraySerializer::PushArray	()
 				{
-					CL3_NOT_IMPLEMENTED;
+					BeginNewElement();
+					return system::memory::MakeUniquePtr<IArraySerializer>(new TJSONArraySerializer(this->tw, this->pretty, this->depth));
 				}
 
 				CLASS	TJSONArraySerializer::TJSONArraySerializer	(ITextWriter* tw, bool pretty, usys_t depth) : tw(tw), pretty(pretty), empty_scope(true), depth(depth+1)
@@ -425,6 +442,11 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
+				void	TJSONArrayDeserializer::Pop		(TString& value)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
 				void	TJSONArrayDeserializer::Pop		(ISerializable& value)
 				{
 					CL3_NOT_IMPLEMENTED;
@@ -436,14 +458,17 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
+				void	TJSONArrayDeserializer::Pop		(void* object, const system::types::typeinfo::TRTTI& rtti)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
 				CLASS	TJSONArrayDeserializer::TJSONArrayDeserializer	(ITextReader* tr) : tr(tr)
 				{
 				}
 
 				CLASS	TJSONArrayDeserializer::~TJSONArrayDeserializer	()
 				{
-					TUTF32 chr;
-					tr->Read(&chr,1);
 				}
 
 				/*************************************************************************************/

@@ -18,6 +18,7 @@
 
 #include <cl3/core/io_serialization.hpp>
 #include <cl3/core/io_serialization_json.hpp>
+#include <cl3/core/io_collection_list.hpp>
 #include <cl3/core/system_memory.hpp>
 #include <cl3/core/io_text_string.hpp>
 #include <cl3/core/io_text_encoding.hpp>
@@ -34,6 +35,7 @@ namespace
 	using namespace cl3::io::text::string;
 	using namespace cl3::io::text::encoding;
 	using namespace cl3::system::memory;
+	using namespace cl3::io::collection::list;
 
 	struct	TTest : ISerializable
 	{
@@ -104,5 +106,55 @@ namespace
 		}
 
 		EXPECT_TRUE(buffer == "{\"test\":{\"x\":10,\"y\":20,\"z\":30,\"str\":\"test\",\"array_of_ints\":[0,1,2,3]}}");
+	}
+
+	TEST(io_collection_list, TSerializableList)
+	{
+		{
+			TString buffer;
+			{
+				TJSONSerializer s(&buffer, false);
+				TSerializableList<int> list;
+				list.Add(17);
+				list.Add(0);
+				list.Add(24);
+				list.Add(41);
+				list.Add(-42);
+				list.Add(0x0fffffff);
+				s.Push("list", list);
+			}
+			EXPECT_TRUE(buffer == "{\"list\":{\"count\":6,\"items\":[17,0,24,41,-42,268435455]}}");
+		}
+
+		{
+			const char* string_list_expected = "{\"list\":{\"count\":4,\"items\":[\"hello world\",\"test\",\"foo\",\"bar\"]}}";
+			{
+				TString buffer;
+				{
+					TJSONSerializer s(&buffer, false);
+					TSerializableList<const char*> list;
+					list.Add("hello world");
+					list.Add("test");
+					list.Add("foo");
+					list.Add("bar");
+					s.Push("list", list);
+				}
+				EXPECT_TRUE(buffer == string_list_expected);
+			}
+
+			{
+				TString buffer;
+				{
+					TJSONSerializer s(&buffer, false);
+					TSerializableList<TString> list;
+					list.Add("hello world");
+					list.Add("test");
+					list.Add("foo");
+					list.Add("bar");
+					s.Push("list", list);
+				}
+				EXPECT_TRUE(buffer == string_list_expected);
+			}
+		}
 	}
 }

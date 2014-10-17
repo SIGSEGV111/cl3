@@ -54,6 +54,7 @@ namespace	cl3
 						CL3PUBF	void	Push		(const char*, f64_t) final override;
 						CL3PUBF	void	Push		(const char*, const char*) final override;
 						CL3PUBF	void	Push		(const char*, const wchar_t*) final override;
+						CL3PUBF	void	Push		(const char*, const text::string::TString&) final override;
 						CL3PUBF	void	Push		(const char*, const ISerializable&) final override;
 						CL3PUBF	system::memory::TUniquePtr<IArraySerializer>
 										PushArray	(const char*) final override;
@@ -81,9 +82,11 @@ namespace	cl3
 						CL3PUBF	void	Pop			(const char*, f64_t&) final override;
 						CL3PUBF	void	Pop			(const char*, const char*&) final override;
 						CL3PUBF	void	Pop			(const char*, const wchar_t*&) final override;
+						CL3PUBF	void	Pop			(const char*, text::string::TString&) final override;
 						CL3PUBF	void	Pop			(const char*, ISerializable&) final override;
 						CL3PUBF	system::memory::TUniquePtr<IArrayDeserializer>
 										PopArray	(const char*) final override;
+						CL3PUBF	void	Pop			(const char* name, void* object, const system::types::typeinfo::TRTTI& rtti) final override;
 
 						CL3PUBF	CLASS	TJSONDeserializer	(io::text::ITextReader*);
 						CL3PUBF	CLASS	~TJSONDeserializer	();
@@ -115,6 +118,7 @@ namespace	cl3
 						CL3PUBF	void	Push		(f64_t) final override;
 						CL3PUBF	void	Push		(const char*) final override;
 						CL3PUBF	void	Push		(const wchar_t*) final override;
+						CL3PUBF	void	Push		(const text::string::TString&) final override;
 						CL3PUBF	void	Push		(const ISerializable&) final override;
 						CL3PUBF	system::memory::TUniquePtr<IArraySerializer>
 										PushArray	() final override;
@@ -142,9 +146,11 @@ namespace	cl3
 						CL3PUBF	void	Pop			(f64_t&) final override;
 						CL3PUBF	void	Pop			(const char*&) final override;
 						CL3PUBF	void	Pop			(const wchar_t*&) final override;
+						CL3PUBF	void	Pop			(text::string::TString&) final override;
 						CL3PUBF	void	Pop			(ISerializable&) final override;
 						CL3PUBF	system::memory::TUniquePtr<IArrayDeserializer>
 										PopArray	() final override;
+						CL3PUBF	void	Pop			(void* object, const system::types::typeinfo::TRTTI& rtti) final override;
 
 						CL3PUBF	CLASS	TJSONArrayDeserializer	(io::text::ITextReader*);
 						CL3PUBF	CLASS	~TJSONArrayDeserializer	();

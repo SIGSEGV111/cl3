@@ -59,14 +59,13 @@ namespace	cl3
 				inline	bool	operator==	(TUTF32 rhs) const { return code == rhs.code; }
 				inline	bool	operator!=	(TUTF32 rhs) const { return code != rhs.code; }
 
-				inline	operator u32_t() const { return code; }
-
 				CL3PUBF	CLASS	TUTF32	(char chr);
 				CL3PUBF	CLASS	TUTF32	(wchar_t wchr);
 				inline	CLASS	TUTF32	(u32_t code = 0U) throw() : code(code) {}
 			};
 
 			CL3PUBF extern const collection::IStaticCollection<const TUTF32>* whitespace;
+			CL3PUBF extern const collection::IStaticCollection<const TUTF32>* eos_markers;
 
 			struct	TNumberFormat
 			{
@@ -112,6 +111,8 @@ namespace	cl3
 				using stream::IIn<wchar_t>::Read;
 				using stream::IIn<char>::Read;
 
+				const collection::IStaticCollection<const TUTF32>* eos_markers;
+
 				CL3PUBF	ITextReader&	operator>>	(char&);
 				CL3PUBF	ITextReader&	operator>>	(wchar_t&);
 				CL3PUBF	ITextReader&	operator>>	(TUTF32&);
@@ -126,6 +127,8 @@ namespace	cl3
 				CL3PUBF	ITextReader&	operator>>	(f32_t&);
 				CL3PUBF	ITextReader&	operator>>	(f64_t&);
 				CL3PUBF	ITextReader&	operator>>	(string::TString&);
+
+				CL3PUBF	CLASS	ITextReader	();
 			};
 
 			struct	ITextWriter : public virtual stream::IOut<TUTF32>, public virtual stream::IOut<wchar_t>, public virtual stream::IOut<char>

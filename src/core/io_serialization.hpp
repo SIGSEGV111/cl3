@@ -27,6 +27,14 @@ namespace	cl3
 {
 	namespace	io
 	{
+		namespace	text
+		{
+			namespace	string
+			{
+				class	TString;
+			}
+		}
+
 		namespace	serialization
 		{
 			/*
@@ -101,6 +109,7 @@ namespace	cl3
 					CL3PUBF	virtual	void	Push		(const char* name, f64_t value) = 0;
 					CL3PUBF	virtual	void	Push		(const char* name, const char* value) = 0;
 					CL3PUBF	virtual	void	Push		(const char* name, const wchar_t* value) = 0;
+					CL3PUBF	virtual	void	Push		(const char* name, const text::string::TString& value) = 0;
 					CL3PUBF	virtual	void	Push		(const char* name, const ISerializable& value) = 0;
 					CL3PUBF	virtual	system::memory::TUniquePtr<IArraySerializer>
 											PushArray	(const char* name) = 0;
@@ -123,6 +132,7 @@ namespace	cl3
 					CL3PUBF	virtual	void	Push		(f64_t value) = 0;
 					CL3PUBF	virtual	void	Push		(const char* value) = 0;
 					CL3PUBF	virtual	void	Push		(const wchar_t* value) = 0;
+					CL3PUBF	virtual	void	Push		(const text::string::TString& value) = 0;
 					CL3PUBF	virtual	void	Push		(const ISerializable& value) = 0;
 					CL3PUBF	virtual	system::memory::TUniquePtr<IArraySerializer>
 											PushArray	() = 0;
@@ -145,6 +155,7 @@ namespace	cl3
 					CL3PUBF	virtual	void	Pop			(const char* name, f64_t& value) = 0;
 					CL3PUBF	virtual	void	Pop			(const char* name, const char*& value) = 0;
 					CL3PUBF	virtual	void	Pop			(const char* name, const wchar_t*& value) = 0;
+					CL3PUBF	virtual	void	Pop			(const char* name, text::string::TString& value) = 0;
 					CL3PUBF	virtual	void	Pop			(const char* name, ISerializable& value) = 0;
 					CL3PUBF	virtual	system::memory::TUniquePtr<IArrayDeserializer>
 											PopArray	(const char* name) = 0;
@@ -168,6 +179,7 @@ namespace	cl3
 					CL3PUBF	virtual	void	Pop			(f64_t& value) = 0;
 					CL3PUBF	virtual	void	Pop			(const char*& value) = 0;
 					CL3PUBF	virtual	void	Pop			(const wchar_t*& value) = 0;
+					CL3PUBF	virtual	void	Pop			(text::string::TString& value) = 0;
 					CL3PUBF	virtual	void	Pop			(ISerializable& value) = 0;
 					CL3PUBF	virtual	system::memory::TUniquePtr<IArrayDeserializer>
 											PopArray	() = 0;

@@ -50,6 +50,8 @@ namespace	cl3
 					return maxlen;
 				}
 
+				/*****************************************************************/
+
 				void		TString::Append		(const char& item_append)
 				{
 					this->Append(TUTF32(item_append));

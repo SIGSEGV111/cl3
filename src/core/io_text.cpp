@@ -45,6 +45,10 @@ namespace	cl3
 			static const collection::array::TArray<const TUTF32> COLLECTION_WHITESPACE_DEFAULT(ARR_WHITESPACE_DEFAULT, sizeof(ARR_WHITESPACE_DEFAULT) / sizeof(TUTF32), false);
 			const collection::IStaticCollection<const TUTF32>* whitespace = &COLLECTION_WHITESPACE_DEFAULT;
 
+			static const TUTF32 ARR_EOS_DEFAULT[] = { 0x0020U, 0x0009U, 0x000AU, 0x000CU, 0x000DU, 0x000BU };
+			static const collection::array::TArray<const TUTF32> COLLECTION_EOS_DEFAULT(ARR_EOS_DEFAULT, sizeof(ARR_EOS_DEFAULT) / sizeof(TUTF32), false);
+			const collection::IStaticCollection<const TUTF32>* eos_markers = &COLLECTION_EOS_DEFAULT;
+
 			//	*** TUTF32 ***
 
 			const TUTF32 TUTF32::TERMINATOR((u32_t)0);
@@ -162,10 +166,14 @@ namespace	cl3
 				return *this;
 			}
 
-			ITextReader&	ITextReader::operator>>	(string::TString&)
+			ITextReader&	ITextReader::operator>>	(string::TString& v)
 			{
 				CL3_NOT_IMPLEMENTED;
 				return *this;
+			}
+
+			CLASS			ITextReader::ITextReader() : eos_markers(text::eos_markers)
+			{
 			}
 
 			//	*** ITextWriter ***
