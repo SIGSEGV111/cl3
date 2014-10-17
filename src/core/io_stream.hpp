@@ -78,13 +78,41 @@ namespace	cl3
 			template<class T>
 			struct	IIn : virtual IStream<T>
 			{
+// 				virtual	bool	Left	() const CL3_GETTER = 0;	//	number of items left for reading (-1 if unknown, 0 if the source is completly empty/dry and can never ever provide any more items)
 				virtual	usys_t	Read	(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) CL3_WARN_UNUSED_RESULT = 0;	//	reads at least "n_items_read_min" and at most "n_items_read_max" items from the stream into "arr_items_read", returns the amount of items actually read
 				inline	void	Read	(T* arr_items_read, usys_t n_items_read)			{ CL3_CLASS_LOGIC_ERROR(this->Read(arr_items_read, n_items_read, n_items_read) != n_items_read); }
+
+// 				//	pipe data until either source.IsDry() or sink.IsFlooded()
+// 				virtual	usys_t	WriteOut	(IOut<T>& os) CL3_WARN_UNUSED_RESULT
+// 				{
+// 					const usys_t n_items_buffer = CL3_MAX(1, 1024 / sizeof(T));
+// 					usys_t n_items_wo = 0;
+// 					T buffer[n_items_buffer];
+//
+// 					for(;;)
+// 					{
+// 						const n_items_request = CL3_MIN(this->Left(), os.Space());
+// 						if(n_items_request == 0) break;
+// 						const usys_t n_items_work = this->Read(buffer, n_items_request, 1);
+// 						os.Write(buffer, n_items_work);
+// 						n_items_wo += n_items_work;
+// 					}
+//
+// 					return n_items_wo;
+// 				}
+//
+// 				virtual	usys_t	WriteOut	(IOut<T>& os, usys_t n_items_wo_max, usys_t n_items_wo_min) CL3_WARN_UNUSED_RESULT
+// 				{
+// 					CL3_NOT_IMPLEMENTED;
+// 				}
+
+				inline	void	WriteOut	(IOut<T>& os, usys_t n_items_wo) { CL3_CLASS_LOGIC_ERROR(this->WriteOut(os, n_items_wo, n_items_wo) != n_items_wo); }
 			};
 
 			template<class T>
 			struct	IOut : virtual IStream<T>
 			{
+// 				virtual	usys_t	Space	() const CL3_GETTER = 0;	//	amount of free space (-1 if unknown, 0 if the sink can ever ever accept more items)
 				virtual	usys_t	Write	(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT = 0;
 				inline	void	Write	(const T* arr_items_write, usys_t n_items_write)	{ CL3_CLASS_LOGIC_ERROR(this->Write(arr_items_write, n_items_write, n_items_write) != n_items_write); }
 			};
