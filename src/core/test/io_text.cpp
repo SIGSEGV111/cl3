@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "common.hpp"
 #include <cl3/core/system_compiler.hpp>
 #include <cl3/core/system_types.hpp>
 #include <cl3/core/system_types_typeinfo.hpp>
@@ -32,6 +33,7 @@ using namespace ::testing;
 
 namespace
 {
+	using namespace cl3::unittest_support;
 	using namespace cl3::io::stream;
 	using namespace cl3::io::collection::array;
 	using namespace cl3::system::types;
@@ -277,17 +279,17 @@ namespace
 		EXPECT_TRUE(s == "new world abcdef");
 	}
 
-	TEST(io_text_string_TString, Left_Right_Mid)
+	TEST(io_text_string_TString, Left_Right_Slice)
 	{
 		TString s = "hello world foo";
 
 		EXPECT_TRUE(s.Left(5) == "hello");
 		EXPECT_TRUE(s.Right(3) == "foo");
-		EXPECT_TRUE(s.Mid(6, 5) == "world");
+		EXPECT_TRUE(s.Slice(6, 5) == "world");
 
 		EXPECT_TRUE(s.Left(15) == "hello world foo");
 		EXPECT_TRUE(s.Right(15) == "hello world foo");
-		EXPECT_TRUE(s.Mid(0, 15) == "hello world foo");
+		EXPECT_TRUE(s.Slice(0, 15) == "hello world foo");
 	}
 
 	TEST(io_text_string_TString, assign)
@@ -422,32 +424,6 @@ namespace
 		const TString s = "hello";
 		EXPECT_TRUE(*Stringify(TCTTI<TString>::print, &s).Object() == "hello");
 	}
-
-	template<class T>
-	struct	TLimitedBuffer : virtual IOut<T>, virtual IIn<T>
-	{
-		TArray<T> array;
-		usys_t index;
-
-		CLASS	TLimitedBuffer	(usys_t n_items) : array(n_items ? new T[n_items] : NULL, n_items), index(0) {}
-		CLASS	~TLimitedBuffer	() {}
-		TLimitedBuffer(const TLimitedBuffer&) = delete;
-		TLimitedBuffer&	operator=(const TLimitedBuffer&) = delete;
-
-		usys_t	Read	(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT
-		{
-			const usys_t r = array.Read(index, arr_items_read, n_items_read_max, n_items_read_min);
-			index += r;
-			return r;
-		}
-
-		usys_t	Write	(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT
-		{
-			const usys_t r = array.Write(index, arr_items_write, n_items_write_max, n_items_write_min);
-			index += r;
-			return r;
-		}
-	};
 
 	TEST(io_text_encoding_utf8, LimitedSink_Encode)
 	{

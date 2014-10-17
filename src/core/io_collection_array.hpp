@@ -217,13 +217,16 @@ namespace	cl3
 				template<class T>
 				usys_t		IArray<T>::Write	(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
+					const usys_t n_items = this->Count();
+					const usys_t n_items_space = n_items - index;
+
 					if(n_items_write_min == (usys_t)-1)
 						n_items_write_min = n_items_write_max;
 
-					const usys_t n_items = this->Count();
-					const usys_t n_items_write = CL3_MIN(n_items - index, n_items_write_max);
+					CL3_CLASS_ERROR(index > n_items, TIndexOutOfBoundsException, index, n_items);
+					CL3_CLASS_ERROR(n_items_write_min > n_items_space, stream::TSinkFloodedException, n_items_write_max, n_items_write_min, 0, n_items_space);
 
-					CL3_CLASS_ERROR(index + n_items_write_min > n_items, TIndexOutOfBoundsException, index + n_items_write_min, n_items);
+					const usys_t n_items_write = CL3_MIN(n_items_space, n_items_write_max);
 
 					if(n_items_write > 0)
 					{

@@ -233,8 +233,15 @@ namespace	cl3
 						void	Add		(const IStaticCollection<const T>& collection) final override;
 						bool	Remove	(const T* item_remove) final override;
 
+						//	from IOut<T>
+						usys_t		Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
+
 						//	from IIn<T>
-						usys_t	Read	(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) CL3_WARN_UNUSED_RESULT;
+						using stream::IIn<T>::WriteOut;
+						usys_t		Read		(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT;
+						usys_t		Remaining	() const final override CL3_GETTER;
+						usys_t		WriteOut	(stream::IOut<T>& os) final override CL3_WARN_UNUSED_RESULT;
+						usys_t		WriteOut	(stream::IOut<T>& os, usys_t n_items_wo_max, usys_t n_items_wo_min) final override CL3_WARN_UNUSED_RESULT;
 
 						//	from IList
 						TList<const T>&		operator=	(const IStaticCollection<const T>& rhs) final override;
@@ -311,9 +318,6 @@ namespace	cl3
 
 						//	from IDynamicCollection
 						system::memory::TUniquePtr<IDynamicIterator<T> >	CreateDynamicIterator	() final override CL3_WARN_UNUSED_RESULT;
-
-						//	from IOut<T>
-						usys_t		Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 
 						//	from IArray<T>
 						//	Read is taken from IArray<T> as-is, we only override Write here
@@ -709,6 +713,42 @@ namespace	cl3
 					return n_items_read;
 				}
 
+				template<class T>
+				usys_t	TList<const T>::Remaining	() const
+				{
+					return this->Count();
+				}
+
+				template<class T>
+				usys_t	TList<const T>::WriteOut	(stream::IOut<T>& os)
+				{
+					const usys_t n_items_wo = os.Write(this->arr_items, this->n_items_current, 0);
+					CL3_CLASS_LOGIC_ERROR(n_items_wo > this->n_items_current);
+					this->Cut(n_items_wo, 0);
+					return n_items_wo;
+				}
+
+				template<class T>
+				usys_t	TList<const T>::WriteOut	(stream::IOut<T>& os, usys_t n_items_wo_max, usys_t n_items_wo_min)
+				{
+					CL3_CLASS_ERROR(this->n_items_current < n_items_wo_min, stream::TSourceDryException, n_items_wo_max, n_items_wo_min, 0, this->n_items_current);
+					if(n_items_wo_max > this->n_items_current)
+						n_items_wo_max = this->n_items_current;
+
+					const usys_t n_items_wo = os.Write(this->arr_items, n_items_wo_max, n_items_wo_min);
+					CL3_CLASS_LOGIC_ERROR(n_items_wo < n_items_wo_min || n_items_wo > n_items_wo_max);
+					this->Cut(n_items_wo, 0);
+
+					return n_items_wo;
+				}
+
+				template<class T>
+				usys_t	TList<const T>::Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				{
+					Append(arr_items_write, n_items_write_max);
+					return n_items_write_max;
+				}
+
 				//	from IList
 				template<class T>
 				TList<const T>&	TList<const T>::operator=	(const IStaticCollection<const T>& rhs)
@@ -1008,13 +1048,6 @@ namespace	cl3
 						TList<T>::CreateDynamicIterator	()
 				{
 					return system::memory::MakeUniquePtr<IDynamicIterator<T> >(new TIterator<T>(this, n_items_current > 0 ? 0 : (usys_t)-1));
-				}
-
-				template<class T>
-				usys_t	TList<T>::Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
-				{
-					Append(arr_items_write, n_items_write_max);
-					return n_items_write_max;
 				}
 
 				template<class T>

@@ -131,7 +131,7 @@ namespace	cl3
 				{
 					private:
 						CLASS	TJSONArrayDeserializer	(const TJSONArrayDeserializer&) = delete;
-						io::text::ITextReader* tr;
+// 						io::text::ITextReader* tr;
 
 					public:
 						CL3PUBF	void	Pop			(u8_t&) final override;

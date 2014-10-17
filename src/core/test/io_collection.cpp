@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "common.hpp"
 #include <gtest/gtest.h>
 #include <cl3/core/io_collection.hpp>
 #include <cl3/core/io_collection_bitmask.hpp>
@@ -96,6 +97,7 @@ namespace
 	using namespace cl3::io::collection;
 	using namespace cl3::io::collection::list;
 	using namespace cl3::system::types;
+	using namespace cl3::unittest_support;
 
 	TEST(io_colection_list_TList, Construct)
 	{
@@ -180,7 +182,7 @@ namespace
 		}
 
 		{
-			TList<int> list;
+			TList<const int> list;
 			EXPECT_TRUE(list.Count() == 0);
 		}
 	}
@@ -640,42 +642,127 @@ namespace
 		EXPECT_TRUE(list[4] == 6);
 	}
 
-// 	TEST(io_colection_list_TList, IndexOutOfBounds_IndexOperator)
-// 	{
-// 		TList<int> list;
-//
-// 		bool ok = false;
-//
-// 		try
-// 		{
-// 			list[0] = 17;
-// 		}
-// 		catch(TIndexOutOfBoundsException e)
-// 		{
-// 			ok = true;
-// 		}
-// 		catch(...)
-// 		{
-// 			ok = true;
-// 		}
-// 		EXPECT_TRUE(ok);
-//
-// 		list.Add(8);
-// 		list.Add(9);
-//
-// 		ok = false;
-// 		try
-// 		{
-// 			list[2] = 17;
-// 		}
-// 		catch(TIndexOutOfBoundsException e)
-// 		{
-// 			ok = true;
-// 		}
-// 		catch(...)
-// 		{
-// 			ok = true;
-// 		}
-// 		EXPECT_TRUE(ok);
-// 	}
+	TEST(io_colection_list_TList, IndexOutOfBounds_IndexOperator)
+	{
+		TList<int> list;
+
+		EXPECT_THROW(list[0] = 17, TIndexOutOfBoundsException);
+
+		list.Add(8);
+		list.Add(9);
+
+		EXPECT_THROW(list[2] = 17, TIndexOutOfBoundsException);
+	}
+
+	TEST(io_collection_list, WriteOut_Unlimited)
+	{
+		TList<int> list1;
+		TList<int> list2;
+
+		for(int i = 0; i < 100; i++)
+			list1.Add(i);
+
+		EXPECT_TRUE(list1.WriteOut(list2) == 100);
+	}
+
+	TEST(io_collection_list, WriteOut_Limited)
+	{
+		TList<int> list1;
+		TLimitedBuffer<int> buffer(21);
+
+		for(int i = 0; i < 100; i++)
+			list1.Add(i);
+
+		EXPECT_TRUE(list1.WriteOut(buffer) == 21);
+	}
+
+	TEST(io_collection_list, WriteOut_Parameterized)
+	{
+		{
+			TList<int> list1;
+			TLimitedBuffer<int> buffer(71);
+
+			for(int i = 0; i < 100; i++)
+				list1.Add(i);
+
+			EXPECT_TRUE(list1.WriteOut(buffer, 71, 0) == 71);
+		}
+
+		{
+			TList<int> list1;
+			TLimitedBuffer<int> buffer(71);
+
+			for(int i = 0; i < 100; i++)
+				list1.Add(i);
+
+			EXPECT_TRUE(list1.WriteOut(buffer, 71, 71) == 71);
+		}
+
+		{
+			TList<int> list1;
+			TLimitedBuffer<int> buffer(71);
+
+			for(int i = 0; i < 100; i++)
+				list1.Add(i);
+
+			EXPECT_TRUE(list1.WriteOut(buffer, 120, 0) == 71);
+		}
+
+		{
+			TList<int> list1;
+			TLimitedBuffer<int> buffer(71);
+
+			for(int i = 0; i < 100; i++)
+				list1.Add(i);
+
+			EXPECT_TRUE(list1.WriteOut(buffer, 60, 17) == 60);
+		}
+
+		{
+			TList<int> list1;
+			TLimitedBuffer<int> buffer(71);
+
+			for(int i = 0; i < 100; i++)
+				list1.Add(i);
+
+			EXPECT_TRUE(list1.WriteOut(buffer, 60, 60) == 60);
+		}
+
+		{
+			TList<int> list1;
+			TLimitedBuffer<int> buffer(71);
+
+			for(int i = 0; i < 100; i++)
+				list1.Add(i);
+
+			bool did_throw = false;
+			try
+			{
+				list1.WriteOut(buffer, 72);
+			}
+			catch(const TSinkFloodedException& sfe)
+			{
+				EXPECT_TRUE(sfe.n_items_requested_write_max == 72);
+				EXPECT_TRUE(sfe.n_items_requested_write_min == 72);
+				EXPECT_TRUE(sfe.n_items_actually_written == 0);
+				EXPECT_TRUE(sfe.n_items_still_space == 71);
+				did_throw = true;
+			}
+			EXPECT_TRUE(did_throw);
+		}
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

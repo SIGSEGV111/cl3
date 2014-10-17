@@ -50,7 +50,12 @@ namespace	cl3
 			{
 			}
 
-			CLASS	TSourceDryException::TSourceDryException	(TSourceDryException&& e) : TIOException(static_cast<TIOException&&>(e))
+			CLASS	TSourceDryException::TSourceDryException	(TSourceDryException&& e)
+				: TIOException(static_cast<TIOException&&>(e)),
+					n_items_requested_read_max(e.n_items_requested_read_max),
+					n_items_requested_read_min(e.n_items_requested_read_min),
+					n_items_actually_read(e.n_items_actually_read),
+					n_items_still_available(e.n_items_still_available)
 			{
 			}
 
@@ -66,7 +71,12 @@ namespace	cl3
 			{
 			}
 
-			CLASS	TSinkFloodedException::TSinkFloodedException	(TSinkFloodedException&& e) : TIOException(static_cast<TIOException&&>(e))
+			CLASS	TSinkFloodedException::TSinkFloodedException	(TSinkFloodedException&& e)
+				: TIOException(static_cast<TIOException&&>(e)),
+					n_items_requested_write_max(e.n_items_requested_write_max),
+					n_items_requested_write_min(e.n_items_requested_write_min),
+					n_items_actually_written(e.n_items_actually_written),
+					n_items_still_space(e.n_items_still_space)
 			{
 			}
 

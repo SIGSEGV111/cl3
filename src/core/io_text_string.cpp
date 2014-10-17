@@ -318,7 +318,7 @@ namespace	cl3
 					return r;
 				}
 
-				TString		TString::Mid		(usys_t index, usys_t n_chars) const
+				TString		TString::Slice		(usys_t index, usys_t n_chars) const
 				{
 					CL3_CLASS_ERROR(index + n_chars > this->Count(), collection::TIndexOutOfBoundsException, index + n_chars - 1, this->Count());
 					TString r;

@@ -463,7 +463,7 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TJSONArrayDeserializer::TJSONArrayDeserializer	(ITextReader* tr) : tr(tr)
+				CLASS	TJSONArrayDeserializer::TJSONArrayDeserializer	(ITextReader* tr) /*: tr(tr)*/
 				{
 				}
 

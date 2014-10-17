@@ -115,7 +115,7 @@ namespace	cl3
 						//	return parts of the string
 						CL3PUBF	TString		Left		(usys_t n_chars) const CL3_GETTER;
 						CL3PUBF	TString		Right		(usys_t n_chars) const CL3_GETTER;
-						CL3PUBF	TString		Mid			(usys_t index, usys_t n_chars) const CL3_GETTER;
+						CL3PUBF	TString		Slice		(usys_t index, usys_t n_chars) const CL3_GETTER;
 
 						//	remove/append whitespace (or other characters)
 						CL3PUBF	void		Trim		(const IStaticCollection<const TUTF32>& collection = *whitespace, int position = POSITION_HEAD | POSITION_TAIL);

@@ -46,6 +46,7 @@ namespace	cl3
 						inline TBoolProxy& operator=(bool);
 
 						CLASS	TBoolProxy	(TBitmask* bm, usys_t index) : bm(bm), index(index) {}
+						CLASS	TBoolProxy	() : bm(NULL), index(0) {}
 				};
 
 				struct	CL3PUBT	IBitmask : public IStaticCollection<TBoolProxy>
