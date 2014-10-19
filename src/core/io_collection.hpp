@@ -56,13 +56,17 @@ namespace	cl3
 				DIRECTION_BACKWARD
 			};
 
-			template<class T>
-			struct	CL3PUBT	IMatcher
+			namespace	matcher
 			{
-				virtual	bool	Match	(const T& item_match) const = 0;	//	compares "item_match" against the ciriteria and returns true if the item matches, false otherwise
-				virtual	void	Match	(EDirection direction, const T* arr_items_match, bitmask::TBitmask& bm_result) const = 0;	//	compares all items within the array against the criteria and sets the coresponding bits in the bitmask to 1 if the item matches or to 0 if it does not match, the size of the array is assumed to be of the same as the bitmask
-				virtual	usys_t	Match	(EDirection direction, const T* arr_items_match, usys_t n_items_match, list::TList<usys_t>& ls_result, usys_t offset = 0, usys_t n_hits_max = (usys_t)-1) const = 0;	//	adds the indices (modified by "offset") of the matching items to "ls_result", the function retuns the number of items added/matched
-			};
+				template<class T>
+				struct	CL3PUBT	IMatcher
+				{
+					virtual	bool	Match	(const T& item_match) const CL3_GETTER = 0;	//	compares "item_match" against the ciriteria and returns true if the item matches, false otherwise
+					virtual	void	Match	(EDirection direction, const T* arr_items_match, bitmask::TBitmask& bm_result) const = 0;	//	compares all items within the array against the criteria and sets the coresponding bits in the bitmask to 1 if the item matches or to 0 if it does not match, the size of the array is assumed to be of the same as the bitmask
+					virtual	usys_t	Match	(EDirection direction, const T* arr_items_match, usys_t n_items_match, list::TList<usys_t>& ls_result, usys_t offset = 0, usys_t n_hits_max = (usys_t)-1) const = 0;	//	adds the indices (modified by "offset") of the matching items to "ls_result", the function retuns the number of items added/matched, index is counted as distance from the specified startpoint and is always 0-based
+					virtual	usys_t	MatchFirst	(EDirection direction, const T* arr_items_match, usys_t n_items_match) const CL3_GETTER = 0;	//	returns the index of the first match, index is counted as distance from the specified startpoint and is always 0-based
+				};
+			}
 
 // 			template<class T>
 // 			struct	IComparator : IMatcher<T>
@@ -123,8 +127,8 @@ namespace	cl3
 			template<class T>
 			struct	CL3PUBT	IStaticIterator<const T> : virtual stream::IIn<T>
 			{
-				virtual	bool	FindNext	(const IMatcher<T>& matcher) = 0;	//	forward searches thru the collection for an item that matches starting with the next item, if an item was found the function returns thruw and place sthe iterator on that item, otherwise false is returned and the iterator is places on tail
-				virtual	bool	FindPrev	(const IMatcher<T>& matcher) = 0;	//	backward searches thru the collection for an item that matches starting with the previous item,  if an item was found the function returns thruw and place sthe iterator on that item, otherwise false is returned and the iterator is places on head
+				virtual	bool	FindNext	(const matcher::IMatcher<T>& matcher) = 0;	//	forward searches thru the collection for an item that matches starting with the next item, if an item was found the function returns thruw and place sthe iterator on that item, otherwise false is returned and the iterator is places on tail
+				virtual	bool	FindPrev	(const matcher::IMatcher<T>& matcher) = 0;	//	backward searches thru the collection for an item that matches starting with the previous item,  if an item was found the function returns thruw and place sthe iterator on that item, otherwise false is returned and the iterator is places on head
 				virtual	bool	IsValid		() const CL3_GETTER = 0;	//	returns whether the iterator is placed on a valid item (not on head or tail)
 				virtual	const T&	Item	() const CL3_GETTER = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
 				virtual	void	MoveHead	() = 0;	//	move before the first item
@@ -171,6 +175,8 @@ namespace	cl3
 				virtual	usys_t	Count		() const CL3_GETTER = 0;
 				virtual	bool	CountMin	(usys_t count_min) const CL3_GETTER { return Count() >= count_min; }
 				virtual	bool	CountMax	(usys_t count_max) const CL3_GETTER { return Count() <= count_max; }
+
+				virtual	bool	Contains	(const matcher::IMatcher<T>& m) const CL3_GETTER = 0;
 
 // 				//	from ISerializable
 // 				virtual	void	Serialize	(serialization::ISerializer& s) const override

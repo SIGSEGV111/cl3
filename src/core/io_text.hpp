@@ -112,6 +112,8 @@ namespace	cl3
 				using stream::IIn<char>::Read;
 
 				const collection::IStaticCollection<const TUTF32>* eos_markers;
+				usys_t n_max_strlen;
+				bool discard_eos_marker;
 
 				CL3PUBF	ITextReader&	operator>>	(char&);
 				CL3PUBF	ITextReader&	operator>>	(wchar_t&);

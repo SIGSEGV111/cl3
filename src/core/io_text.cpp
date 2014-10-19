@@ -25,6 +25,7 @@
 #include "io_text_encoding.hpp"
 #include "error.hpp"
 #include "io_collection_array.hpp"
+#include "io_collection_matcher.hpp"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -40,6 +41,7 @@ namespace	cl3
 		namespace	text
 		{
 			using namespace stream;
+			using namespace string;
 
 			static const TUTF32 ARR_WHITESPACE_DEFAULT[] = { 0x0020U, 0x0009U, 0x000AU, 0x000CU, 0x000DU, 0x000BU };
 			static const collection::array::TArray<const TUTF32> COLLECTION_WHITESPACE_DEFAULT(ARR_WHITESPACE_DEFAULT, sizeof(ARR_WHITESPACE_DEFAULT) / sizeof(TUTF32), false);
@@ -83,11 +85,13 @@ namespace	cl3
 			template<bool b_signed, class T>
 			static	void	ParseInteger	(IIn<TUTF32>&, T&)
 			{
+				CL3_NOT_IMPLEMENTED;
 			}
 
 			template<class T>
 			static	void	ParseFloat		(IIn<TUTF32>&, T&)
 			{
+				CL3_NOT_IMPLEMENTED;
 			}
 
 			ITextReader&	ITextReader::operator>>	(char& v)
@@ -169,10 +173,54 @@ namespace	cl3
 			ITextReader&	ITextReader::operator>>	(string::TString& v)
 			{
 				CL3_NOT_IMPLEMENTED;
-				return *this;
+// 				struct	TFlowController : IOut<TUTF32>
+// 				{
+// 					ITextReader* tr;
+// 					TString* string;
+//
+// 					usys_t	Space	() const final override CL3_GETTER
+// 					{
+// 						return tr->n_max_strlen - string->Count();
+// 					}
+//
+// 					usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT
+// 					{
+// 						if(n_items_write_min == (usys_t)-1)
+// 							n_items_write_min = n_items_write_max;
+// 						CL3_CLASS_LOGIC_ERROR(n_items_write_min > n_items_write_max);
+//
+// 						bool discarded_eos = false;
+// 						usys_t n_items_accept = CL3_MIN(n_items_write_max, this->Space());
+// 						for(usys_t i = 0; i < n_items_accept; i++)
+// 						{
+// 							if(tr->eos_markers->Contains(arr_items_write[i]))
+// 							{
+// 								discarded_eos = this->tr->discard_eos_marker;
+// 								n_items_accept = i + (this->tr->discard_eos_marker ? 0 : 1);
+// 								break;
+// 							}
+// 						}
+//
+// 						CL3_CLASS_ERROR(n_items_accept < n_items_write_min, TSinkFloodedException, n_items_write_max, n_items_write_min, 0, n_items_accept);
+//
+// 						this->string->Append(arr_items_write, n_items_accept);
+//
+// 						return n_items_accept + (discarded_eos ? 1 : 0);
+// 					}
+//
+// 					TFlowController(ITextReader* tr, TString* string) : tr(tr), string(string)
+// 					{
+// 						string->Clear();
+// 					}
+// 				}
+// 				flow_controller(this, &v);
+//
+// 				CL3_CLASS_LOGIC_ERROR(this->WriteOut(flow_controller, this->n_max_strlen, 1) > this->n_max_strlen);
+//
+// 				return *this;
 			}
 
-			CLASS			ITextReader::ITextReader() : eos_markers(text::eos_markers)
+			CLASS			ITextReader::ITextReader() : eos_markers(text::eos_markers), n_max_strlen((usys_t)-1), discard_eos_marker(true)
 			{
 			}
 

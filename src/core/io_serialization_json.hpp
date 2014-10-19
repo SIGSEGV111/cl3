@@ -30,6 +30,12 @@ namespace	cl3
 		{
 			namespace	json
 			{
+				struct	TArrayChunk
+				{
+					void* arr_items;
+					usys_t n_items;
+				};
+
 				class	TJSONSerializer : public ISerializer
 				{
 					private:
@@ -56,6 +62,10 @@ namespace	cl3
 						CL3PUBF	void	Push		(const char*, const wchar_t*) final override;
 						CL3PUBF	void	Push		(const char*, const text::string::TString&) final override;
 						CL3PUBF	void	Push		(const char*, const ISerializable&) final override;
+
+
+// 						CL3PUBF	void	Push		(const TArrayChunk* arr_chunks, usys_t n_chunks, const system::types::typeinfo::TRTTI& rtti);
+
 						CL3PUBF	system::memory::TUniquePtr<IArraySerializer>
 										PushArray	(const char*) final override;
 

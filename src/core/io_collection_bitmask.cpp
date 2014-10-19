@@ -35,6 +35,7 @@ namespace	cl3
 			{
 				using namespace system::memory;
 				using namespace system::types;
+				using namespace matcher;
 
 				void		TIterator::CheckIndex	() const
 				{
@@ -153,16 +154,6 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				usys_t		TIterator::Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				usys_t		TIterator::Read		(byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
 				usys_t		TIterator::Index	() const
 				{
 					CheckIndex();
@@ -186,6 +177,11 @@ namespace	cl3
 				{
 					arr_bits = (byte_t*)Realloc(arr_bits, new_count / 8U + (((new_count % 8U) != 0U) ? 1U : 0U), NULL, false);
 					n_bits = new_count;
+				}
+
+				bool		TBitmask::Contains	(const matcher::IMatcher<TBoolProxy>& m) const
+				{
+					CL3_NOT_IMPLEMENTED;
 				}
 
 				void		TBitmask::Bit		(usys_t index, bool value)

@@ -191,7 +191,7 @@ namespace	cl3
 				return this->map[this->index];
 			}
 
-			bool	TStream::FindNext	(const collection::IMatcher<byte_t>& matcher)
+			bool	TStream::FindNext	(const collection::matcher::IMatcher<byte_t>& matcher)
 			{
 				CL3_CLASS_ERROR(!IsValid(), TException, "no current item");
 				collection::list::TList<usys_t> matches;
@@ -205,7 +205,7 @@ namespace	cl3
 					return false;
 			}
 
-			bool	TStream::FindPrev	(const collection::IMatcher<byte_t>& matcher)
+			bool	TStream::FindPrev	(const collection::matcher::IMatcher<byte_t>& matcher)
 			{
 				CL3_CLASS_ERROR(!IsValid(), TException, "no current item");
 				collection::list::TList<usys_t> matches;
@@ -378,6 +378,11 @@ namespace	cl3
 				CL3_CLASS_SYSERR(off_end = lseek64(this->fd, 0, SEEK_END));
 				CL3_CLASS_SYSERR(lseek64(this->fd, off_current, SEEK_SET));
 				*/
+			}
+
+			bool	TFile::Contains	(const collection::matcher::IMatcher<byte_t>& m) const
+			{
+				CL3_NOT_IMPLEMENTED;
 			}
 
 			void	TFile::Count	(uoff_t new_count)

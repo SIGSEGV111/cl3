@@ -37,6 +37,7 @@ namespace	cl3
 
 				class	CL3PUBT	TBoolProxy
 				{
+					friend class TBitmask;
 					protected:
 						TBitmask* bm;
 						mutable usys_t index;
@@ -69,41 +70,35 @@ namespace	cl3
 					public:
 						//	from IStaticIterator<const bool>
 						CL3PUBF	const IStaticCollection<TBoolProxy>&	Collection	() const;
-						CL3PUBF	bool		FindNext	(const IMatcher<TBoolProxy>& matcher);
-						CL3PUBF	bool		FindPrev	(const IMatcher<TBoolProxy>& matcher);
-						CL3PUBF	bool		IsValid		() const CL3_GETTER;
-						CL3PUBF	const TBoolProxy&	Item() const CL3_GETTER;
-						CL3PUBF	void		MoveHead	();
-						CL3PUBF	void		MoveTail	();
-						CL3PUBF	bool		MoveFirst	();
-						CL3PUBF	bool		MoveLast	();
-						CL3PUBF	bool		MoveNext	();
-						CL3PUBF	bool		MovePrev	();
+						CL3PUBF	bool		FindNext	(const matcher::IMatcher<TBoolProxy>& matcher) final override;
+						CL3PUBF	bool		FindPrev	(const matcher::IMatcher<TBoolProxy>& matcher) final override;
+						CL3PUBF	bool		IsValid		() const final override CL3_GETTER;
+						CL3PUBF	const TBoolProxy&	Item() const final override CL3_GETTER;
+						CL3PUBF	void		MoveHead	() final override;
+						CL3PUBF	void		MoveTail	() final override;
+						CL3PUBF	bool		MoveFirst	() final override;
+						CL3PUBF	bool		MoveLast	() final override;
+						CL3PUBF	bool		MoveNext	() final override;
+						CL3PUBF	bool		MovePrev	() final override;
 
 						//	from IStaticIterator<TBoolProxy>
-						CL3PUBF	TBoolProxy&	Item		() CL3_GETTER;
+						CL3PUBF	TBoolProxy&	Item		() final override CL3_GETTER;
 
 						//	from IOut<TBoolProxy>
-						CL3PUBF	usys_t	Write	(const TBoolProxy* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+						CL3PUBF	usys_t	Write	(const TBoolProxy* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 
 						//	from IIn<TBoolProxy>
-						CL3PUBF	usys_t	Read	(TBoolProxy* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+						CL3PUBF	usys_t	Read	(TBoolProxy* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 
 						//	from IOut<bool>
-						CL3PUBF	usys_t	Write	(const bool* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+						CL3PUBF	usys_t	Write	(const bool* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 
 						//	from IIn<bool>
-						CL3PUBF	usys_t	Read	(bool* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-
-						//	from IOut<byte_t>
-						CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-
-						//	from IIn<byte_t>
-						CL3PUBF	usys_t	Read	(byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+						CL3PUBF	usys_t	Read	(bool* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 
 						//	from IIterator
-						CL3PUBF	usys_t	Index	() const CL3_GETTER;
-						CL3PUBF	void	Index	(usys_t new_index) CL3_SETTER;
+						CL3PUBF	usys_t	Index	() const final override CL3_GETTER;
+						CL3PUBF	void	Index	(usys_t new_index) final override CL3_SETTER;
 
 						//	from TIterator
 						inline	CLASS	TIterator	(TBitmask* bm, usys_t index) : TBoolProxy(bm, index) {}
@@ -124,7 +119,8 @@ namespace	cl3
 						inline system::memory::TUniquePtr<IStaticIterator<const TBoolProxy> > CreateStaticIterator() const CL3_WARN_UNUSED_RESULT
 						{ return system::memory::MakeUniquePtr<IStaticIterator<const TBoolProxy> >(new TIterator(const_cast<TBitmask*>(this), n_bits > 0 ? 0 : (usys_t)-1)); }
 
-						CL3PUBF	usys_t	Count	() const CL3_GETTER;
+						CL3PUBF	usys_t	Count		() const final override CL3_GETTER;
+						CL3PUBF	bool	Contains	(const matcher::IMatcher<TBoolProxy>& m) const final override CL3_GETTER;
 
 						//	from IBitmask
 						CL3PUBF	bool	Bit		(usys_t index) CL3_GETTER;
