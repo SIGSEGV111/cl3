@@ -640,6 +640,8 @@ namespace
 
 		src>>line;
 		EXPECT_TRUE(line == "this is a test");
+
+		EXPECT_TRUE(src == "");
 	}
 }
 

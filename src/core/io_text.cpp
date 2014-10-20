@@ -175,106 +175,77 @@ namespace	cl3
 			{
 				v.Clear();
 
-				const IIn<TUTF32>& is = *this;
-				const IArray<const TUTF32>* array = dynamic_cast<const IArray<const TUTF32>*>(this->eos_markers);
-
-				usys_t n_eos_markers;
-				const TUTF32* arr_eos_markers;
-
-				if(array != NULL)
+				struct	TFlowController : IOut<TUTF32>
 				{
-					n_eos_markers = array->Count();
-					arr_eos_markers = array->ItemPtr(0);
-				}
+					ITextReader* tr;
+					TString* string;
 
-				for(usys_t i = 0; i < this->n_max_strlen && is.Remaining() != 0; i++)
-				{
-					TUTF32 chr;
-					this->Read(&chr, 1);
+					const IArray<const TUTF32>* array;
+					usys_t n_eos_markers;
+					const TUTF32* arr_eos_markers;
+					system::memory::TUniquePtr<collection::IStaticIterator<const TUTF32> > it;
 
-					if(this->eos_markers != NULL && this->eos_markers->Count() > 0)
+					usys_t	Space	() const final override CL3_GETTER
 					{
-						bool b_eos = false;
-						if(array != NULL)
-						{
-							for(usys_t i = 0; i < n_eos_markers; i++)
-								if(arr_eos_markers[i] == chr)
-								{
-									b_eos = true;
-									break;
-								}
-						}
-						else
-						{
-							system::memory::TUniquePtr<collection::IStaticIterator<const TUTF32> > it = this->eos_markers->CreateStaticIterator();
-							it->MoveHead();
-							while(it->MoveNext())
-								if(it->Item() == chr)
-								{
-									b_eos = true;
-									break;
-								}
-						}
-
-						if(b_eos)
-						{
-							if(!this->discard_eos_marker)
-								v += chr;
-							return *this;
-						}
+						return tr->n_max_strlen - string->Count();
 					}
 
-					v += chr;
+					usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT
+					{
+						if(n_items_write_min == (usys_t)-1)
+							n_items_write_min = n_items_write_max;
+						CL3_CLASS_LOGIC_ERROR(n_items_write_min > n_items_write_max);
+
+						usys_t i = 0;
+						bool b_eos = false;
+
+						for(; i < n_items_write_max && !b_eos; i++)
+						{
+							if(array != NULL)
+							{
+								for(usys_t j = 0; j < n_eos_markers; j++)
+									if(arr_eos_markers[j] == arr_items_write[i])
+									{
+										b_eos = true;
+										break;
+									}
+							}
+							else
+							{
+								system::memory::TUniquePtr<collection::IStaticIterator<const TUTF32> > it = tr->eos_markers->CreateStaticIterator();
+								it->MoveHead();
+								while(it->MoveNext())
+									if(it->Item() == arr_items_write[i])
+									{
+										b_eos = true;
+										break;
+									}
+							}
+						}
+
+						string->Append(arr_items_write, i - (b_eos && tr->discard_eos_marker ? 1 : 0));
+
+						return i;
+					}
+
+					TFlowController(ITextReader* tr, TString* string) : tr(tr), string(string), array(dynamic_cast<const IArray<const TUTF32>*>(tr->eos_markers))
+					{
+						if(array != NULL)
+						{
+							n_eos_markers = array->Count();
+							arr_eos_markers = array->ItemPtr(0);
+						}
+						else
+							it = tr->eos_markers->CreateStaticIterator();
+					}
 				}
+				flow_controller(this, &v);
+
+				IIn<TUTF32>* is = this;
+				if(is->Remaining() != 0)
+					CL3_CLASS_LOGIC_ERROR(is->WriteOut(flow_controller, this->n_max_strlen, 1) > this->n_max_strlen);
 
 				return *this;
-
-// 				CL3_NOT_IMPLEMENTED;
-// 				struct	TFlowController : IOut<TUTF32>
-// 				{
-// 					ITextReader* tr;
-// 					TString* string;
-//
-// 					usys_t	Space	() const final override CL3_GETTER
-// 					{
-// 						return tr->n_max_strlen - string->Count();
-// 					}
-//
-// 					usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT
-// 					{
-// 						if(n_items_write_min == (usys_t)-1)
-// 							n_items_write_min = n_items_write_max;
-// 						CL3_CLASS_LOGIC_ERROR(n_items_write_min > n_items_write_max);
-//
-// 						bool discarded_eos = false;
-// 						usys_t n_items_accept = CL3_MIN(n_items_write_max, this->Space());
-// 						for(usys_t i = 0; i < n_items_accept; i++)
-// 						{
-// 							if(tr->eos_markers->Contains(arr_items_write[i]))
-// 							{
-// 								discarded_eos = this->tr->discard_eos_marker;
-// 								n_items_accept = i + (this->tr->discard_eos_marker ? 0 : 1);
-// 								break;
-// 							}
-// 						}
-//
-// 						CL3_CLASS_ERROR(n_items_accept < n_items_write_min, TSinkFloodedException, n_items_write_max, n_items_write_min, 0, n_items_accept);
-//
-// 						this->string->Append(arr_items_write, n_items_accept);
-//
-// 						return n_items_accept + (discarded_eos ? 1 : 0);
-// 					}
-//
-// 					TFlowController(ITextReader* tr, TString* string) : tr(tr), string(string)
-// 					{
-// 						string->Clear();
-// 					}
-// 				}
-// 				flow_controller(this, &v);
-//
-// 				CL3_CLASS_LOGIC_ERROR(this->WriteOut(flow_controller, this->n_max_strlen, 1) > this->n_max_strlen);
-//
-// 				return *this;
 			}
 
 			CLASS			ITextReader::ITextReader() : eos_markers(text::eos_markers), n_max_strlen((usys_t)-1), discard_eos_marker(true)
