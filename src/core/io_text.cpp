@@ -42,6 +42,7 @@ namespace	cl3
 		{
 			using namespace stream;
 			using namespace string;
+			using namespace collection::array;
 
 			static const TUTF32 ARR_WHITESPACE_DEFAULT[] = { 0x0020U, 0x0009U, 0x000AU, 0x000CU, 0x000DU, 0x000BU };
 			static const collection::array::TArray<const TUTF32> COLLECTION_WHITESPACE_DEFAULT(ARR_WHITESPACE_DEFAULT, sizeof(ARR_WHITESPACE_DEFAULT) / sizeof(TUTF32), false);
@@ -174,20 +175,46 @@ namespace	cl3
 			{
 				v.Clear();
 
-				TUTF32 chr;
-				collection::matcher::TArrayMatcher<TUTF32> matcher(&chr, 1);
-
 				const IIn<TUTF32>& is = *this;
 
 				for(usys_t i = 0; i < this->n_max_strlen && is.Remaining() != 0; i++)
 				{
+					TUTF32 chr;
 					this->Read(&chr, 1);
 
-					if(this->eos_markers != NULL && this->eos_markers->Contains(matcher))
+					if(this->eos_markers != NULL && this->eos_markers->Count() > 0)
 					{
-						if(!this->discard_eos_marker)
-							v += chr;
-						break;
+						bool b_eos = false;
+						const IArray<const TUTF32>* array = dynamic_cast<const IArray<const TUTF32>*>(this->eos_markers);
+						if(array != NULL)
+						{
+							const usys_t n_eos_markers = array->Count();
+							const TUTF32* const arr_eos_markers = array->ItemPtr(0);
+							for(usys_t i = 0; i < n_eos_markers; i++)
+								if(arr_eos_markers[i] == chr)
+								{
+									b_eos = true;
+									break;
+								}
+						}
+						else
+						{
+							system::memory::TUniquePtr<collection::IStaticIterator<const TUTF32> > it = this->eos_markers->CreateStaticIterator();
+							it->MoveHead();
+							while(it->MoveNext())
+								if(it->Item() == chr)
+								{
+									b_eos = true;
+									break;
+								}
+						}
+
+						if(b_eos)
+						{
+							if(!this->discard_eos_marker)
+								v += chr;
+							return *this;
+						}
 					}
 
 					v += chr;
