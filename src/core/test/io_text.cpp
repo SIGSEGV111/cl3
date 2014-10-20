@@ -626,6 +626,21 @@ namespace
 			e.Reset();
 		}
 	}
+
+	TEST(io_text_ITextReader, readline)
+	{
+		TString src = "hello world\nhello foobar!\nthis is a test";
+		TString line;
+
+		src>>line;
+		EXPECT_TRUE(line == "hello world");
+
+		src>>line;
+		EXPECT_TRUE(line == "hello foobar!");
+
+		src>>line;
+		EXPECT_TRUE(line == "this is a test");
+	}
 }
 
 

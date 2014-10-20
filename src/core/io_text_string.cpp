@@ -476,7 +476,8 @@ namespace	cl3
 				{
 					TUniquePtr<IEncoder> e = codec->CreateEncoder();
 					e->Sink(this);
-					e->Write(str.ItemPtr(0), str.Length());
+					if(str.Count() > 0)
+						e->Write(str.ItemPtr(0), str.Length());
 					e->Write(&TUTF32::TERMINATOR, 1);
 				}
 

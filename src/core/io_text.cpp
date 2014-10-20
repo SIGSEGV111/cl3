@@ -47,7 +47,7 @@ namespace	cl3
 			static const collection::array::TArray<const TUTF32> COLLECTION_WHITESPACE_DEFAULT(ARR_WHITESPACE_DEFAULT, sizeof(ARR_WHITESPACE_DEFAULT) / sizeof(TUTF32), false);
 			const collection::IStaticCollection<const TUTF32>* whitespace = &COLLECTION_WHITESPACE_DEFAULT;
 
-			static const TUTF32 ARR_EOS_DEFAULT[] = { 0x0020U, 0x0009U, 0x000AU, 0x000CU, 0x000DU, 0x000BU };
+			static const TUTF32 ARR_EOS_DEFAULT[] = { 0x000AU };
 			static const collection::array::TArray<const TUTF32> COLLECTION_EOS_DEFAULT(ARR_EOS_DEFAULT, sizeof(ARR_EOS_DEFAULT) / sizeof(TUTF32), false);
 			const collection::IStaticCollection<const TUTF32>* eos_markers = &COLLECTION_EOS_DEFAULT;
 
@@ -172,7 +172,30 @@ namespace	cl3
 
 			ITextReader&	ITextReader::operator>>	(string::TString& v)
 			{
-				CL3_NOT_IMPLEMENTED;
+				v.Clear();
+
+				TUTF32 chr;
+				collection::matcher::TArrayMatcher<TUTF32> matcher(&chr, 1);
+
+				const IIn<TUTF32>& is = *this;
+
+				for(usys_t i = 0; i < this->n_max_strlen && is.Remaining() != 0; i++)
+				{
+					this->Read(&chr, 1);
+
+					if(this->eos_markers != NULL && this->eos_markers->Contains(matcher))
+					{
+						if(!this->discard_eos_marker)
+							v += chr;
+						break;
+					}
+
+					v += chr;
+				}
+
+				return *this;
+
+// 				CL3_NOT_IMPLEMENTED;
 // 				struct	TFlowController : IOut<TUTF32>
 // 				{
 // 					ITextReader* tr;

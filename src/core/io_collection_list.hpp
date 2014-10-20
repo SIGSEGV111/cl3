@@ -646,7 +646,7 @@ namespace	cl3
 				template<class T>
 				bool	TList<const T>::Contains	(const matcher::IMatcher<T>& m) const
 				{
-					return m.MatchFirst(DIRECTION_FORWARD, this->arr_items, this->n_items_current);
+					return m.MatchFirst(DIRECTION_FORWARD, this->arr_items, this->n_items_current) != (usys_t)-1;
 				}
 
 				template<class T>
