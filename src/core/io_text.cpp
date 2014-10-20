@@ -176,6 +176,16 @@ namespace	cl3
 				v.Clear();
 
 				const IIn<TUTF32>& is = *this;
+				const IArray<const TUTF32>* array = dynamic_cast<const IArray<const TUTF32>*>(this->eos_markers);
+
+				usys_t n_eos_markers;
+				const TUTF32* arr_eos_markers;
+
+				if(array != NULL)
+				{
+					n_eos_markers = array->Count();
+					arr_eos_markers = array->ItemPtr(0);
+				}
 
 				for(usys_t i = 0; i < this->n_max_strlen && is.Remaining() != 0; i++)
 				{
@@ -185,11 +195,8 @@ namespace	cl3
 					if(this->eos_markers != NULL && this->eos_markers->Count() > 0)
 					{
 						bool b_eos = false;
-						const IArray<const TUTF32>* array = dynamic_cast<const IArray<const TUTF32>*>(this->eos_markers);
 						if(array != NULL)
 						{
-							const usys_t n_eos_markers = array->Count();
-							const TUTF32* const arr_eos_markers = array->ItemPtr(0);
 							for(usys_t i = 0; i < n_eos_markers; i++)
 								if(arr_eos_markers[i] == chr)
 								{
