@@ -108,7 +108,7 @@ namespace	cl3
 			struct	CL3PUBT	TTextFormat
 			{
 				const collection::IStaticCollection<const TUTF32>* eos_markers;
-				usys_t max_string_length;
+// 				usys_t max_string_length;
 				bool discard_eos_marker;
 
 				CL3PUBF	CLASS	TTextFormat	();

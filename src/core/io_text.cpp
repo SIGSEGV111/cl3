@@ -22,6 +22,7 @@
 
 #include "io_text.hpp"
 #include "io_text_string.hpp"
+#include "io_text_parser.hpp"
 #include "io_text_encoding.hpp"
 #include "error.hpp"
 #include "io_collection_array.hpp"
@@ -79,7 +80,7 @@ namespace	cl3
 				}
 			}
 
-			CLASS	TTextFormat::TTextFormat	() :	eos_markers(text::eos_markers), max_string_length((usys_t)-1), discard_eos_marker(true)
+			CLASS	TTextFormat::TTextFormat	() :	eos_markers(text::eos_markers), /*max_string_length((usys_t)-1),*/ discard_eos_marker(true)
 			{
 			}
 
@@ -177,78 +178,11 @@ namespace	cl3
 
 			ITextReader&	ITextReader::operator>>	(string::TString& v)
 			{
-				v.Clear();
-
-				struct	TFlowController : IOut<TUTF32>
-				{
-					ITextReader* tr;
-					TString* string;
-
-					const IArray<const TUTF32>* array;
-					usys_t n_eos_markers;
-					const TUTF32* arr_eos_markers;
-					system::memory::TUniquePtr<collection::IStaticIterator<const TUTF32> > it;
-
-					usys_t	Space	() const final override CL3_GETTER
-					{
-						return 1;
-					}
-
-					usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT
-					{
-						if(n_items_write_min == (usys_t)-1)
-							n_items_write_min = n_items_write_max;
-						CL3_CLASS_LOGIC_ERROR(n_items_write_min > n_items_write_max);
-
-						usys_t i = 0;
-						bool b_eos = false;
-
-						for(; i < n_items_write_max && !b_eos; i++)
-						{
-							if(array != NULL)
-							{
-								for(usys_t j = 0; j < n_eos_markers; j++)
-									if(arr_eos_markers[j] == arr_items_write[i])
-									{
-										b_eos = true;
-										break;
-									}
-							}
-							else
-							{
-								system::memory::TUniquePtr<collection::IStaticIterator<const TUTF32> > it = tr->text_format.eos_markers->CreateStaticIterator();
-								it->MoveHead();
-								while(it->MoveNext())
-									if(it->Item() == arr_items_write[i])
-									{
-										b_eos = true;
-										break;
-									}
-							}
-						}
-
-						string->Append(arr_items_write, i - (b_eos && tr->text_format.discard_eos_marker ? 1 : 0));
-
-						return i;
-					}
-
-					TFlowController(ITextReader* tr, TString* string) : tr(tr), string(string), array(dynamic_cast<const IArray<const TUTF32>*>(tr->text_format.eos_markers))
-					{
-						if(array != NULL)
-						{
-							n_eos_markers = array->Count();
-							arr_eos_markers = array->ItemPtr(0);
-						}
-						else
-							it = tr->text_format.eos_markers->CreateStaticIterator();
-					}
-				}
-				flow_controller(this, &v);
-
-				IIn<TUTF32>* is = this;
-				if(is->Remaining() != 0)
-					CL3_CLASS_LOGIC_ERROR(is->WriteOut(flow_controller, this->text_format.max_string_length, 1) > this->text_format.max_string_length);
-
+				parser::TTokenizer tokenizer(this, parser::MATCHTYPE_EXCLUDE, this->text_format.eos_markers);
+				tokenizer.Next();
+				v = system::def::move(tokenizer.CurrentToken());
+				if(!this->text_format.discard_eos_marker)
+					v += tokenizer.CurrentTermination();
 				return *this;
 			}
 

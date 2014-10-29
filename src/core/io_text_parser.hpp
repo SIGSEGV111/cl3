@@ -61,6 +61,7 @@ namespace	cl3
 					public:
 						inline	TUTF32					CurrentTermination	() const CL3_GETTER { return this->current_termination; }
 						inline	const string::TString&	CurrentToken		() const CL3_GETTER { return this->current_token; }
+						inline	string::TString&		CurrentToken		() CL3_GETTER { return this->current_token; }
 
 						CL3PUBF	bool	Next		();
 
