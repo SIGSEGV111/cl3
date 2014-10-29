@@ -40,10 +40,12 @@ namespace	cl3
 					{
 						TTokenizer* tokenizer;
 
+						//	LCOV_EXCL_START
 						usys_t	Space	() const final override CL3_GETTER
 						{
 							return 1;
 						}
+						//	LCOV_EXCL_STOP
 
 						bool	Test	(const TUTF32 chr) const CL3_GETTER
 						{
@@ -54,13 +56,13 @@ namespace	cl3
 								case MATCHTYPE_EXCLUDE:
 									return !this->tokenizer->collection->Contains(chr);
 							}
-							CL3_UNREACHABLE;
+							CL3_UNREACHABLE;	//	LCOV_EXCL_LINE
 						}
 
 						usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT
 						{
 							if(n_items_write_min == (usys_t)-1)
-								n_items_write_min = n_items_write_max;
+								n_items_write_min = n_items_write_max;	//	LCOV_EXCL_LINE
 							CL3_CLASS_LOGIC_ERROR(n_items_write_min > n_items_write_max);
 
 							usys_t i = 0;

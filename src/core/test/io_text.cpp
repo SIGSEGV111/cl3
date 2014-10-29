@@ -646,7 +646,7 @@ namespace
 		EXPECT_TRUE(src == "");
 	}
 
-	TEST(io_text_parser_TTokenizer, basics)
+	TEST(io_text_parser_TTokenizer, exclude)
 	{
 		TString str = "hello World foo12 bär\n7\t\t\n999999999999999999\tö ß @";
 		TTokenizer tokenizer(&str, MATCHTYPE_EXCLUDE, whitespace);
@@ -694,6 +694,45 @@ namespace
 		EXPECT_TRUE(tokenizer.Next());
 		EXPECT_TRUE(tokenizer.CurrentTermination() == TUTF32::TERMINATOR);
 		EXPECT_TRUE(tokenizer.CurrentToken()       == "@");
+	}
+
+	TEST(io_text_parser_TTokenizer, include)
+	{
+		TString str = "2014-10-29";
+		TString digits = "0123456789";
+		TTokenizer tokenizer(&str, MATCHTYPE_INCLUDE, &digits);
+
+		EXPECT_TRUE(tokenizer.Next());
+		EXPECT_TRUE(tokenizer.CurrentTermination() == '-');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "2014");
+
+		EXPECT_TRUE(tokenizer.Next());
+		EXPECT_TRUE(tokenizer.CurrentTermination() == '-');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "10");
+
+		EXPECT_TRUE(tokenizer.Next());
+		EXPECT_TRUE(tokenizer.CurrentTermination() == TUTF32::TERMINATOR);
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "29");
+	}
+
+	TEST(io_text_parser_TTokenizer, copy)
+	{
+		TString str = "2014-10-29";
+		TString digits = "0123456789";
+		TTokenizer tokenizer1(&str, MATCHTYPE_INCLUDE, &digits);
+		TTokenizer tokenizer2(tokenizer1);
+
+		EXPECT_TRUE(tokenizer2.Next());
+		EXPECT_TRUE(tokenizer2.CurrentTermination() == '-');
+		EXPECT_TRUE(tokenizer2.CurrentToken()       == "2014");
+
+		EXPECT_TRUE(tokenizer2.Next());
+		EXPECT_TRUE(tokenizer2.CurrentTermination() == '-');
+		EXPECT_TRUE(tokenizer2.CurrentToken()       == "10");
+
+		EXPECT_TRUE(tokenizer2.Next());
+		EXPECT_TRUE(tokenizer2.CurrentTermination() == TUTF32::TERMINATOR);
+		EXPECT_TRUE(tokenizer2.CurrentToken()       == "29");
 	}
 }
 
