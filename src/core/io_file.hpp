@@ -185,6 +185,7 @@ namespace	cl3
 					CL3PUBF	system::memory::TUniquePtr<collection::IStaticIterator<byte_t> >		CreateStaticIterator	() final override CL3_WARN_UNUSED_RESULT;
 					CL3PUBF	usys_t	Count		() const final override CL3_GETTER;
 					CL3PUBF	bool	Contains	(const collection::matcher::IMatcher<byte_t>& m) const final override CL3_GETTER;
+					CL3PUBF	bool	Contains	(const byte_t& item) const final override CL3_GETTER;
 
 					//	from TFile
 					CL3PUBF	void	Count	(uoff_t) CL3_SETTER;

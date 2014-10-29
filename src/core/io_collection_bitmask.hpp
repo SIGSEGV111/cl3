@@ -121,6 +121,8 @@ namespace	cl3
 
 						CL3PUBF	usys_t	Count		() const final override CL3_GETTER;
 						CL3PUBF	bool	Contains	(const matcher::IMatcher<TBoolProxy>& m) const final override CL3_GETTER;
+						CL3PUBF	bool	Contains	(const TBoolProxy& item) const final override CL3_GETTER;
+						CL3PUBF	bool	Contains	(const bool item) const CL3_GETTER;
 
 						//	from IBitmask
 						CL3PUBF	bool	Bit		(usys_t index) CL3_GETTER;

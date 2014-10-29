@@ -385,6 +385,11 @@ namespace	cl3
 				CL3_NOT_IMPLEMENTED;
 			}
 
+			bool	TFile::Contains	(const byte_t& item) const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
 			void	TFile::Count	(uoff_t new_count)
 			{
 				CL3_CLASS_SYSERR(::ftruncate(this->fd, new_count));

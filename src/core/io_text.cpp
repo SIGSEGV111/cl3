@@ -79,18 +79,22 @@ namespace	cl3
 				}
 			}
 
+			CLASS	TTextFormat::TTextFormat	() :	eos_markers(text::eos_markers), max_string_length((usys_t)-1), discard_eos_marker(true)
+			{
+			}
+
 			//	*** ITextReader ***
 
-			static const TUTF32 ARR_NUMBER_CHARACTERS[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '+' };
+// 			static const TUTF32 ARR_NUMBER_CHARACTERS[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '+' };
 
 			template<bool b_signed, class T>
-			static	void	ParseInteger	(IIn<TUTF32>&, T&)
+			static	void	ParseInteger	(IIn<TUTF32>& is, const TNumberFormat& format, T& v)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
 			template<class T>
-			static	void	ParseFloat		(IIn<TUTF32>&, T&)
+			static	void	ParseFloat		(IIn<TUTF32>& is, const TNumberFormat& format, T& v)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
@@ -113,61 +117,61 @@ namespace	cl3
 
 			ITextReader&	ITextReader::operator>>	(s8_t& v)
 			{
-				ParseInteger<true>(*this, v);
+				ParseInteger<true>(*this, this->number_format, v);
 				return *this;
 			}
 
 			ITextReader&	ITextReader::operator>>	(u8_t& v)
 			{
-				ParseInteger<false>(*this, v);
+				ParseInteger<false>(*this, this->number_format, v);
 				return *this;
 			}
 
 			ITextReader&	ITextReader::operator>>	(s16_t& v)
 			{
-				ParseInteger<true>(*this, v);
+				ParseInteger<true>(*this, this->number_format, v);
 				return *this;
 			}
 
 			ITextReader&	ITextReader::operator>>	(u16_t& v)
 			{
-				ParseInteger<false>(*this, v);
+				ParseInteger<false>(*this, this->number_format, v);
 				return *this;
 			}
 
 			ITextReader&	ITextReader::operator>>	(s32_t& v)
 			{
-				ParseInteger<true>(*this, v);
+				ParseInteger<true>(*this, this->number_format, v);
 				return *this;
 			}
 
 			ITextReader&	ITextReader::operator>>	(u32_t& v)
 			{
-				ParseInteger<false>(*this, v);
+				ParseInteger<false>(*this, this->number_format, v);
 				return *this;
 			}
 
 			ITextReader&	ITextReader::operator>>	(s64_t& v)
 			{
-				ParseInteger<true>(*this, v);
+				ParseInteger<true>(*this, this->number_format, v);
 				return *this;
 			}
 
 			ITextReader&	ITextReader::operator>>	(u64_t& v)
 			{
-				ParseInteger<false>(*this, v);
+				ParseInteger<false>(*this, this->number_format, v);
 				return *this;
 			}
 
 			ITextReader&	ITextReader::operator>>	(f32_t& v)
 			{
-				ParseFloat(*this, v);
+				ParseFloat(*this, this->number_format, v);
 				return *this;
 			}
 
 			ITextReader&	ITextReader::operator>>	(f64_t& v)
 			{
-				ParseFloat(*this, v);
+				ParseFloat(*this, this->number_format, v);
 				return *this;
 			}
 
@@ -187,7 +191,7 @@ namespace	cl3
 
 					usys_t	Space	() const final override CL3_GETTER
 					{
-						return tr->n_max_strlen - string->Count();
+						return 1;
 					}
 
 					usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT
@@ -212,7 +216,7 @@ namespace	cl3
 							}
 							else
 							{
-								system::memory::TUniquePtr<collection::IStaticIterator<const TUTF32> > it = tr->eos_markers->CreateStaticIterator();
+								system::memory::TUniquePtr<collection::IStaticIterator<const TUTF32> > it = tr->text_format.eos_markers->CreateStaticIterator();
 								it->MoveHead();
 								while(it->MoveNext())
 									if(it->Item() == arr_items_write[i])
@@ -223,12 +227,12 @@ namespace	cl3
 							}
 						}
 
-						string->Append(arr_items_write, i - (b_eos && tr->discard_eos_marker ? 1 : 0));
+						string->Append(arr_items_write, i - (b_eos && tr->text_format.discard_eos_marker ? 1 : 0));
 
 						return i;
 					}
 
-					TFlowController(ITextReader* tr, TString* string) : tr(tr), string(string), array(dynamic_cast<const IArray<const TUTF32>*>(tr->eos_markers))
+					TFlowController(ITextReader* tr, TString* string) : tr(tr), string(string), array(dynamic_cast<const IArray<const TUTF32>*>(tr->text_format.eos_markers))
 					{
 						if(array != NULL)
 						{
@@ -236,20 +240,16 @@ namespace	cl3
 							arr_eos_markers = array->ItemPtr(0);
 						}
 						else
-							it = tr->eos_markers->CreateStaticIterator();
+							it = tr->text_format.eos_markers->CreateStaticIterator();
 					}
 				}
 				flow_controller(this, &v);
 
 				IIn<TUTF32>* is = this;
 				if(is->Remaining() != 0)
-					CL3_CLASS_LOGIC_ERROR(is->WriteOut(flow_controller, this->n_max_strlen, 1) > this->n_max_strlen);
+					CL3_CLASS_LOGIC_ERROR(is->WriteOut(flow_controller, this->text_format.max_string_length, 1) > this->text_format.max_string_length);
 
 				return *this;
-			}
-
-			CLASS			ITextReader::ITextReader() : eos_markers(text::eos_markers), n_max_strlen((usys_t)-1), discard_eos_marker(true)
-			{
 			}
 
 			//	*** ITextWriter ***

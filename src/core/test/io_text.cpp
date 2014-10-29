@@ -24,6 +24,7 @@
 #include <cl3/core/io_collection_list.hpp>
 #include <cl3/core/io_collection_array.hpp>
 #include <cl3/core/io_text.hpp>
+#include <cl3/core/io_text_parser.hpp>
 #include <cl3/core/io_text_string.hpp>
 #include <cl3/core/io_text_encoding.hpp>
 #include <cl3/core/io_text_encoding_utf8.hpp>
@@ -45,6 +46,7 @@ namespace
 	using namespace cl3::io::collection::list;
 	using namespace cl3::io::collection;
 	using namespace cl3::system::types::typeinfo;
+	using namespace cl3::io::text::parser;
 
 	TEST(io_text_encoding_utf8, Codec)
 	{
@@ -642,6 +644,56 @@ namespace
 		EXPECT_TRUE(line == "this is a test");
 
 		EXPECT_TRUE(src == "");
+	}
+
+	TEST(io_text_parser_TTokenizer, basics)
+	{
+		TString str = "hello World foo12 bär\n7\t\t\n999999999999999999\tö ß @";
+		TTokenizer tokenizer(&str, MATCHTYPE_EXCLUDE, whitespace);
+
+		EXPECT_TRUE(tokenizer.Next());
+		EXPECT_TRUE(tokenizer.CurrentTermination() == ' ');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "hello");
+
+		EXPECT_TRUE(tokenizer.Next());
+		EXPECT_TRUE(tokenizer.CurrentTermination() == ' ');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "World");
+
+		EXPECT_TRUE(tokenizer.Next());
+		EXPECT_TRUE(tokenizer.CurrentTermination() == ' ');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "foo12");
+
+		EXPECT_TRUE(tokenizer.Next());
+		EXPECT_TRUE(tokenizer.CurrentTermination() == '\n');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "bär");
+
+		EXPECT_TRUE(tokenizer.Next());
+		EXPECT_TRUE(tokenizer.CurrentTermination() == '\t');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "7");
+
+		EXPECT_TRUE(tokenizer.Next());
+		EXPECT_TRUE(tokenizer.CurrentTermination() == '\t');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "");
+
+		EXPECT_TRUE(tokenizer.Next());
+		EXPECT_TRUE(tokenizer.CurrentTermination() == '\n');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "");
+
+		EXPECT_TRUE(tokenizer.Next());
+		EXPECT_TRUE(tokenizer.CurrentTermination() == '\t');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "999999999999999999");
+
+		EXPECT_TRUE(tokenizer.Next());
+		EXPECT_TRUE(tokenizer.CurrentTermination() == ' ');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "ö");
+
+		EXPECT_TRUE(tokenizer.Next());
+		EXPECT_TRUE(tokenizer.CurrentTermination() == ' ');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "ß");
+
+		EXPECT_TRUE(tokenizer.Next());
+		EXPECT_TRUE(tokenizer.CurrentTermination() == TUTF32::TERMINATOR);
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "@");
 	}
 }
 

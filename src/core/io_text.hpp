@@ -49,7 +49,7 @@ namespace	cl3
 				class	IDecoder;
 			};
 
-			struct	TUTF32
+			struct	CL3PUBT	TUTF32
 			{
 				CL3PUBF const static TUTF32 TERMINATOR;	//	end-of-string marker (always code-value 0)
 
@@ -65,9 +65,9 @@ namespace	cl3
 			};
 
 			CL3PUBF extern const collection::IStaticCollection<const TUTF32>* whitespace;
-			CL3PUBF extern const collection::IStaticCollection<const TUTF32>* eos_markers;
+			CL3PUBF extern const collection::IStaticCollection<const TUTF32>* eos_markers;	//	end-of-string markers
 
-			struct	TNumberFormat
+			struct	CL3PUBT	TNumberFormat
 			{
 				enum	ESymbolPlacement
 				{
@@ -105,59 +105,86 @@ namespace	cl3
 				CL3PUBF const static TNumberFormat BASE64;	//	standard base64 format (base 64)
 			};
 
-			struct	ITextReader : public virtual stream::IIn<TUTF32>, public virtual stream::IIn<wchar_t>, public virtual stream::IIn<char>
+			struct	CL3PUBT	TTextFormat
 			{
-				using stream::IIn<TUTF32>::Read;
-				using stream::IIn<wchar_t>::Read;
-				using stream::IIn<char>::Read;
-
 				const collection::IStaticCollection<const TUTF32>* eos_markers;
-				usys_t n_max_strlen;
+				usys_t max_string_length;
 				bool discard_eos_marker;
 
-				CL3PUBF	ITextReader&	operator>>	(char&);
-				CL3PUBF	ITextReader&	operator>>	(wchar_t&);
-				CL3PUBF	ITextReader&	operator>>	(TUTF32&);
-				CL3PUBF	ITextReader&	operator>>	(s8_t&);
-				CL3PUBF	ITextReader&	operator>>	(u8_t&);
-				CL3PUBF	ITextReader&	operator>>	(s16_t&);
-				CL3PUBF	ITextReader&	operator>>	(u16_t&);
-				CL3PUBF	ITextReader&	operator>>	(s32_t&);
-				CL3PUBF	ITextReader&	operator>>	(u32_t&);
-				CL3PUBF	ITextReader&	operator>>	(s64_t&);
-				CL3PUBF	ITextReader&	operator>>	(u64_t&);
-				CL3PUBF	ITextReader&	operator>>	(f32_t&);
-				CL3PUBF	ITextReader&	operator>>	(f64_t&);
-				CL3PUBF	ITextReader&	operator>>	(string::TString&);
-
-				CL3PUBF	CLASS	ITextReader	();
+				CL3PUBF	CLASS	TTextFormat	();
 			};
 
-			struct	ITextWriter : public virtual stream::IOut<TUTF32>, public virtual stream::IOut<wchar_t>, public virtual stream::IOut<char>
+			struct	CL3PUBT	TTextIOCommon
 			{
-				using stream::IOut<TUTF32>::Write;
-				using stream::IOut<wchar_t>::Write;
-				using stream::IOut<char>::Write;
-
-				CL3PUBF	ITextWriter&	operator<<	(char);
-				CL3PUBF	ITextWriter&	operator<<	(wchar_t);
-				CL3PUBF	ITextWriter&	operator<<	(TUTF32);
-				CL3PUBF	ITextWriter&	operator<<	(s8_t);
-				CL3PUBF	ITextWriter&	operator<<	(u8_t);
-				CL3PUBF	ITextWriter&	operator<<	(s16_t);
-				CL3PUBF	ITextWriter&	operator<<	(u16_t);
-				CL3PUBF	ITextWriter&	operator<<	(s32_t);
-				CL3PUBF	ITextWriter&	operator<<	(u32_t);
-				CL3PUBF	ITextWriter&	operator<<	(s64_t);
-				CL3PUBF	ITextWriter&	operator<<	(u64_t);
-				CL3PUBF	ITextWriter&	operator<<	(f32_t);
-				CL3PUBF	ITextWriter&	operator<<	(f64_t);
-				CL3PUBF	ITextWriter&	operator<<	(const string::TString&);
-				CL3PUBF	ITextWriter&	operator<<	(const char*);
-				CL3PUBF	ITextWriter&	operator<<	(const wchar_t*);
+				TTextFormat text_format;
+				TNumberFormat number_format;
 			};
 
-			struct	ITextStream : virtual ITextReader, virtual ITextWriter
+			class	CL3PUBT	ITextReader : public virtual TTextIOCommon, public virtual stream::IIn<TUTF32>, public virtual stream::IIn<wchar_t>, public virtual stream::IIn<char>
+			{
+				private:
+					ITextReader& operator=(ITextReader&&) = delete;
+					ITextReader& operator=(const ITextReader&) = delete;
+
+				protected:
+					system::memory::TUniquePtr<encoding::IDecoder> decoder_char;
+					system::memory::TUniquePtr<encoding::IDecoder> decoder_wchar;
+
+				public:
+					using stream::IIn<TUTF32>::Read;
+					using stream::IIn<wchar_t>::Read;
+					using stream::IIn<char>::Read;
+
+					CL3PUBF	ITextReader&	operator>>	(char&);
+					CL3PUBF	ITextReader&	operator>>	(wchar_t&);
+					CL3PUBF	ITextReader&	operator>>	(TUTF32&);
+					CL3PUBF	ITextReader&	operator>>	(s8_t&);
+					CL3PUBF	ITextReader&	operator>>	(u8_t&);
+					CL3PUBF	ITextReader&	operator>>	(s16_t&);
+					CL3PUBF	ITextReader&	operator>>	(u16_t&);
+					CL3PUBF	ITextReader&	operator>>	(s32_t&);
+					CL3PUBF	ITextReader&	operator>>	(u32_t&);
+					CL3PUBF	ITextReader&	operator>>	(s64_t&);
+					CL3PUBF	ITextReader&	operator>>	(u64_t&);
+					CL3PUBF	ITextReader&	operator>>	(f32_t&);
+					CL3PUBF	ITextReader&	operator>>	(f64_t&);
+					CL3PUBF	ITextReader&	operator>>	(string::TString&);
+			};
+
+			class	CL3PUBT	ITextWriter : public virtual TTextIOCommon, public virtual stream::IOut<TUTF32>, public virtual stream::IOut<wchar_t>, public virtual stream::IOut<char>
+			{
+				private:
+					ITextWriter& operator=(ITextWriter&&) = delete;
+					ITextWriter& operator=(const ITextWriter&) = delete;
+
+				protected:
+					system::memory::TUniquePtr<encoding::IEncoder> encoder_char;
+					system::memory::TUniquePtr<encoding::IEncoder> encoder_wchar;
+
+				public:
+					using stream::IOut<TUTF32>::Write;
+					using stream::IOut<wchar_t>::Write;
+					using stream::IOut<char>::Write;
+
+					CL3PUBF	ITextWriter&	operator<<	(char);
+					CL3PUBF	ITextWriter&	operator<<	(wchar_t);
+					CL3PUBF	ITextWriter&	operator<<	(TUTF32);
+					CL3PUBF	ITextWriter&	operator<<	(s8_t);
+					CL3PUBF	ITextWriter&	operator<<	(u8_t);
+					CL3PUBF	ITextWriter&	operator<<	(s16_t);
+					CL3PUBF	ITextWriter&	operator<<	(u16_t);
+					CL3PUBF	ITextWriter&	operator<<	(s32_t);
+					CL3PUBF	ITextWriter&	operator<<	(u32_t);
+					CL3PUBF	ITextWriter&	operator<<	(s64_t);
+					CL3PUBF	ITextWriter&	operator<<	(u64_t);
+					CL3PUBF	ITextWriter&	operator<<	(f32_t);
+					CL3PUBF	ITextWriter&	operator<<	(f64_t);
+					CL3PUBF	ITextWriter&	operator<<	(const string::TString&);
+					CL3PUBF	ITextWriter&	operator<<	(const char*);
+					CL3PUBF	ITextWriter&	operator<<	(const wchar_t*);
+			};
+
+			struct	CL3PUBT	ITextStream : virtual ITextReader, virtual ITextWriter
 			{
 				using ITextReader::operator>>;
 				using ITextWriter::operator<<;

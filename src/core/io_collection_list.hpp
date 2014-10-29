@@ -224,6 +224,7 @@ namespace	cl3
 						bool	CountMin	(usys_t count_min) const final override CL3_GETTER;
 						bool	CountMax	(usys_t count_max) const final override CL3_GETTER;
 						bool	Contains	(const matcher::IMatcher<T>& m) const final override CL3_GETTER;
+						bool	Contains	(const T& item) const final override CL3_GETTER;
 
 						//	from IDynamicCollection
 						system::memory::TUniquePtr<IDynamicIterator<const T> >	CreateDynamicIterator	() const final override CL3_WARN_UNUSED_RESULT;
@@ -647,6 +648,15 @@ namespace	cl3
 				bool	TList<const T>::Contains	(const matcher::IMatcher<T>& m) const
 				{
 					return m.MatchFirst(DIRECTION_FORWARD, this->arr_items, this->n_items_current) != (usys_t)-1;
+				}
+
+				template<class T>
+				bool	TList<const T>::Contains	(const T& item) const
+				{
+					for(usys_t i = 0; i < n_items_current; i++)
+						if(item == arr_items[i])
+							return true;
+					return false;
 				}
 
 				template<class T>

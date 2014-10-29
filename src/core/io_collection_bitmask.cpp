@@ -184,6 +184,16 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
+				bool		TBitmask::Contains	(const TBoolProxy& item) const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				bool		TBitmask::Contains	(const bool item) const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
 				void		TBitmask::Bit		(usys_t index, bool value)
 				{
 					CL3_CLASS_ERROR(index >= n_bits, TIndexOutOfBoundsException, index, n_bits);

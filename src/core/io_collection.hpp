@@ -177,6 +177,7 @@ namespace	cl3
 				virtual	bool	CountMax	(usys_t count_max) const CL3_GETTER { return Count() <= count_max; }
 
 				virtual	bool	Contains	(const matcher::IMatcher<T>& m) const CL3_GETTER = 0;
+				virtual	bool	Contains	(const T& item) const CL3_GETTER = 0;
 
 // 				//	from ISerializable
 // 				virtual	void	Serialize	(serialization::ISerializer& s) const override
