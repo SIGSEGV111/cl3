@@ -66,6 +66,7 @@ namespace	cl3
 
 			CL3PUBF extern const collection::IStaticCollection<const TUTF32>* whitespace;
 			CL3PUBF extern const collection::IStaticCollection<const TUTF32>* eos_markers;	//	end-of-string markers
+			CL3PUBF extern const collection::IStaticCollection<const TUTF32>* newline_markers;	//	newline markers
 
 			struct	CL3PUBT	TNumberFormat
 			{

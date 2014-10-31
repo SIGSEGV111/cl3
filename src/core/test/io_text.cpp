@@ -631,7 +631,7 @@ namespace
 
 	TEST(io_text_ITextReader, readline)
 	{
-		TString src = "hello world\nhello foobar!\nthis is a test";
+		TString src = "hello world\nhello foobar!\nthis is a test\n\n  a\t";
 		TString line;
 
 		src>>line;
@@ -642,6 +642,12 @@ namespace
 
 		src>>line;
 		EXPECT_TRUE(line == "this is a test");
+
+		src>>line;
+		EXPECT_TRUE(line == "");
+
+		src>>line;
+		EXPECT_TRUE(line == "  a\t");
 
 		EXPECT_TRUE(src == "");
 	}
@@ -692,6 +698,50 @@ namespace
 		EXPECT_TRUE(tokenizer.CurrentToken()       == "ß");
 
 		EXPECT_TRUE(tokenizer.Next());
+		EXPECT_TRUE(tokenizer.CurrentTermination() == TUTF32::TERMINATOR);
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "@");
+	}
+
+	TEST(io_text_parser_TTokenizer, exclude_ff)
+	{
+		TString str = "hello World foo12 bär\n7\t\t\n999999999999999999\tö ß @";
+		TTokenizer tokenizer(&str, MATCHTYPE_EXCLUDE, whitespace);
+
+		EXPECT_TRUE(tokenizer.Next(true));
+		EXPECT_TRUE(tokenizer.CurrentTermination() == ' ');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "hello");
+
+		EXPECT_TRUE(tokenizer.Next(true));
+		EXPECT_TRUE(tokenizer.CurrentTermination() == ' ');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "World");
+
+		EXPECT_TRUE(tokenizer.Next(true));
+		EXPECT_TRUE(tokenizer.CurrentTermination() == ' ');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "foo12");
+
+		EXPECT_TRUE(tokenizer.Next(true));
+		EXPECT_TRUE(tokenizer.CurrentTermination() == '\n');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "bär");
+
+		EXPECT_TRUE(tokenizer.Next(true));
+		EXPECT_TRUE(tokenizer.CurrentTermination() == '\t');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "7");
+
+		//	fast-forward will eat multiple whitepaces here
+
+		EXPECT_TRUE(tokenizer.Next(true));
+		EXPECT_TRUE(tokenizer.CurrentTermination() == '\t');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "999999999999999999");
+
+		EXPECT_TRUE(tokenizer.Next(true));
+		EXPECT_TRUE(tokenizer.CurrentTermination() == ' ');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "ö");
+
+		EXPECT_TRUE(tokenizer.Next(true));
+		EXPECT_TRUE(tokenizer.CurrentTermination() == ' ');
+		EXPECT_TRUE(tokenizer.CurrentToken()       == "ß");
+
+		EXPECT_TRUE(tokenizer.Next(true));
 		EXPECT_TRUE(tokenizer.CurrentTermination() == TUTF32::TERMINATOR);
 		EXPECT_TRUE(tokenizer.CurrentToken()       == "@");
 	}

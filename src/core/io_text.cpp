@@ -49,9 +49,11 @@ namespace	cl3
 			static const collection::array::TArray<const TUTF32> COLLECTION_WHITESPACE_DEFAULT(ARR_WHITESPACE_DEFAULT, sizeof(ARR_WHITESPACE_DEFAULT) / sizeof(TUTF32), false);
 			const collection::IStaticCollection<const TUTF32>* whitespace = &COLLECTION_WHITESPACE_DEFAULT;
 
-			static const TUTF32 ARR_EOS_DEFAULT[] = { 0x000AU };
-			static const collection::array::TArray<const TUTF32> COLLECTION_EOS_DEFAULT(ARR_EOS_DEFAULT, sizeof(ARR_EOS_DEFAULT) / sizeof(TUTF32), false);
-			const collection::IStaticCollection<const TUTF32>* eos_markers = &COLLECTION_EOS_DEFAULT;
+			const collection::IStaticCollection<const TUTF32>* eos_markers = &COLLECTION_WHITESPACE_DEFAULT;
+
+			static const TUTF32 ARR_NEWLINE_DEFAULT[] = { 0x000AU };
+			static const collection::array::TArray<const TUTF32> COLLECTION_NEWLINE_DEFAULT(ARR_NEWLINE_DEFAULT, sizeof(ARR_NEWLINE_DEFAULT) / sizeof(TUTF32), false);
+			const collection::IStaticCollection<const TUTF32>* newline_markers = &COLLECTION_NEWLINE_DEFAULT;
 
 			//	*** TUTF32 ***
 
@@ -178,11 +180,12 @@ namespace	cl3
 
 			ITextReader&	ITextReader::operator>>	(string::TString& v)
 			{
-				parser::TTokenizer tokenizer(this, parser::MATCHTYPE_EXCLUDE, this->text_format.eos_markers);
+
+				parser::TTokenizer tokenizer(this, parser::MATCHTYPE_EXCLUDE, newline_markers);
+
 				tokenizer.Next();
 				v = system::def::move(tokenizer.CurrentToken());
-				if(!this->text_format.discard_eos_marker)
-					v += tokenizer.CurrentTermination();
+
 				return *this;
 			}
 

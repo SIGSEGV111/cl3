@@ -31,7 +31,7 @@ namespace	cl3
 				using namespace stream;
 				using namespace error;
 
-				bool	TTokenizer::Next		()
+				bool	TTokenizer::Next		(bool fast_forward)
 				{
 					this->current_termination = TUTF32::TERMINATOR;
 					this->current_token.Clear();
@@ -39,6 +39,7 @@ namespace	cl3
 					struct	TFlowController : IOut<TUTF32>
 					{
 						TTokenizer* tokenizer;
+						bool fast_forward;
 
 						//	LCOV_EXCL_START
 						usys_t	Space	() const final override CL3_GETTER
@@ -65,7 +66,12 @@ namespace	cl3
 								n_items_write_min = n_items_write_max;	//	LCOV_EXCL_LINE
 							CL3_CLASS_LOGIC_ERROR(n_items_write_min > n_items_write_max);
 
-							usys_t i = 0;
+							usys_t j = 0;
+
+							if(this->fast_forward && this->tokenizer->current_token.Count() == 0)
+								for(; j < n_items_write_max && !Test(arr_items_write[j]); j++);
+
+							usys_t i = j;
 
 							for(; i < n_items_write_max; i++)
 								if(!Test(arr_items_write[i]))
@@ -74,7 +80,7 @@ namespace	cl3
 									break;
 								}
 
-							this->tokenizer->current_token.Append(arr_items_write, i);
+							this->tokenizer->current_token.Append(arr_items_write + j, i - j);
 
 							if(this->tokenizer->current_termination != TUTF32::TERMINATOR)
 								i++;	//	we read a end-of-string marker character and we processed it, so add it to the amount of consumed input
@@ -82,11 +88,11 @@ namespace	cl3
 							return i;
 						}
 
-						TFlowController(TTokenizer* tokenizer) : tokenizer(tokenizer)
+						TFlowController(TTokenizer* tokenizer, bool fast_forward) : tokenizer(tokenizer), fast_forward(fast_forward)
 						{
 						}
 					}
-					flow_controller(this);
+					flow_controller(this, fast_forward);
 
 					bool status = false;
 					if(this->is->Remaining() != 0)

@@ -63,7 +63,7 @@ namespace	cl3
 						inline	const string::TString&	CurrentToken		() const CL3_GETTER { return this->current_token; }
 						inline	string::TString&		CurrentToken		() CL3_GETTER { return this->current_token; }
 
-						CL3PUBF	bool	Next		();
+						CL3PUBF	bool	Next		(bool fast_forward = false);
 
 						CL3PUBF	CLASS	TTokenizer	(stream::IIn<TUTF32>*, EMatchType, const collection::IStaticCollection<const TUTF32>*);
 						CL3PUBF	CLASS	TTokenizer	(const TTokenizer&);
