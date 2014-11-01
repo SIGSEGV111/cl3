@@ -19,6 +19,8 @@
 #ifndef	_include_cl3_core_io_collection_list_hpp_
 #define	_include_cl3_core_io_collection_list_hpp_
 
+// #include <stdio.h>
+
 #include "io_collection.hpp"
 #include "io_collection_array.hpp"
 #include "error.hpp"
@@ -203,6 +205,24 @@ namespace	cl3
 						virtual	~TIterator	() {}
 				};
 
+// 				namespace	_
+// 				{
+// 					template<class T, bool is_sortable>
+// 					struct	TSortableImpl;
+//
+// 					template<class T>
+// 					struct	TSortableImpl<T, true>
+// 					{
+// 						static	usys_t	Find	(const T* arr_items, usys_t n_items, EDirection direction, const T& item_find);
+// 					};
+//
+// 					template<class T>
+// 					struct	TSortableImpl<T, false>
+// 					{
+// 						static	usys_t	Find	(const T* arr_items, usys_t n_items, EDirection direction, const T& item_find);
+// 					};
+// 				}
+
 				template<class T>
 				class	CL3PUBT	TList<const T> : public virtual IList<const T>
 				{
@@ -210,7 +230,7 @@ namespace	cl3
 						T* arr_items;
 						usys_t n_items_current;
 						usys_t n_items_prealloc;
-						bool guard_resize;
+						bool is_sorted;
 
 						void	Prealloc	(usys_t n_items_prealloc_min);
 
@@ -265,7 +285,9 @@ namespace	cl3
 
 						void		Cut			(usys_t n_head, usys_t n_tail) final override;
 
-						usys_t		Find		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) const final override CL3_WARN_UNUSED_RESULT;
+						void		Sorted		(bool is_sorted) CL3_SETTER;
+						bool		Sorted		() const CL3_GETTER;
+						usys_t		Find		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) const final override CL3_GETTER;
 
 						//	from TList
 						TList<const T>&	operator=	(const TList<const T>& rhs);
@@ -289,7 +311,7 @@ namespace	cl3
 						using TList<const T>::n_items_current;
 						using TList<const T>::n_items_prealloc;
 						using TList<const T>::on_change;
-						using TList<const T>::guard_resize;
+						using TList<const T>::is_sorted;
 						using TList<const T>::Prealloc;
 
 					public:
@@ -653,10 +675,7 @@ namespace	cl3
 				template<class T>
 				bool	TList<const T>::Contains	(const T& item) const
 				{
-					for(usys_t i = 0; i < n_items_current; i++)
-						if(item == arr_items[i])
-							return true;
-					return false;
+					return this->Find(item) != (usys_t)-1;
 				}
 
 				template<class T>
@@ -955,24 +974,62 @@ namespace	cl3
 				}
 
 				template<class T>
+				void		TList<const T>::Sorted		(bool is_sorted)
+				{
+					this->is_sorted = is_sorted;
+				}
+
+				template<class T>
+				bool		TList<const T>::Sorted		() const
+				{
+					return this->is_sorted;
+				}
+
+				template<class T>
 				usys_t		TList<const T>::Find	(const T& item_find, usys_t idx_start, EDirection dir) const
 				{
+					usys_t low = idx_start;
+					usys_t high = this->n_items_current;
+
+					if(this->is_sorted)
+					{
+						usys_t n = high - low;
+						while(sizeof(T) * n > 32)
+						{
+							const usys_t m = low + n / 2;
+
+							if(item_find > this->arr_items[m])
+								low = m;
+							else if(item_find == this->arr_items[m])
+								switch(dir)
+								{
+									case DIRECTION_FORWARD:
+										n += 2;
+										break;
+									case DIRECTION_BACKWARD:
+										low = m;
+										break;
+								}
+
+							n = (n+1) / 2;
+						}
+						high = low + n;
+					}
+
 					switch(dir)
 					{
 						case DIRECTION_FORWARD:
-							for(usys_t i = idx_start; i < n_items_current; i++)
-								if(item_find == arr_items[i])
-									return i;
-							return (usys_t)-1;
+							for(usys_t i = 0; i < high-low; i++)
+								if(item_find == this->arr_items[low+i])
+									return low+i;
 
 						case DIRECTION_BACKWARD:
-							for(usys_t i = idx_start; i != (usys_t)-1; i--)
-								if(item_find == arr_items[i])
-									return i;
-							return (usys_t)-1;
-						default:
-							CL3_CLASS_FAIL(error::TException, "invalid direction value");
+							for(usys_t i = 0; i < high-low; i++)
+								if(item_find == this->arr_items[high-1-i])
+									return high-1-i;
 					}
+
+					return (usys_t)-1;
 				}
 
 				//	from TList<T>
@@ -998,12 +1055,12 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		() : arr_items(NULL), n_items_current(0), n_items_prealloc(0), guard_resize(false)
+				CLASS		TList<const T>::TList		() : arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(false)
 				{
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(T* arr_items, usys_t n_items, bool claim) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), guard_resize(false)
+				CLASS		TList<const T>::TList		(T* arr_items, usys_t n_items, bool claim) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(false)
 				{
 					if(claim)
 					{
@@ -1018,27 +1075,27 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(const T* arr_items, usys_t n_items) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), guard_resize(false)
+				CLASS		TList<const T>::TList		(const T* arr_items, usys_t n_items) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(false)
 				{
 					Prealloc(n_items);
 					Append(arr_items, n_items);
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(const IStaticCollection<const T>& collection) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), guard_resize(false)
+				CLASS		TList<const T>::TList		(const IStaticCollection<const T>& collection) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(false)
 				{
 					Append(collection);
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(const TList& list) : event::IObservable(), arr_items(NULL), n_items_current(0), n_items_prealloc(0), guard_resize(false)
+				CLASS		TList<const T>::TList		(const TList& list) : event::IObservable(), arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(false)
 				{
 					Prealloc(list.n_items_current);
 					Append(list.arr_items, list.n_items_current);
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(TList&& list) : arr_items(list.arr_items), n_items_current(list.n_items_current), n_items_prealloc(list.n_items_prealloc), guard_resize(false)
+				CLASS		TList<const T>::TList		(TList&& list) : arr_items(list.arr_items), n_items_current(list.n_items_current), n_items_prealloc(list.n_items_prealloc), is_sorted(false)
 				{
 					list.arr_items = NULL;
 					list.n_items_current = 0;

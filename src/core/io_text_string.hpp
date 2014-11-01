@@ -101,8 +101,13 @@ namespace	cl3
 						CL3PUBF	TString&	operator=	(TString&&);
 
 						//	compare
-						CL3PUBF	bool		operator==	(const TString&) const CL3_GETTER;
-						CL3PUBF	bool		operator!=	(const TString&) const CL3_GETTER;
+						inline	bool		operator==	(const TString& rhs) const CL3_GETTER	{ return this->Compare(rhs) == 0; }
+						inline	bool		operator!=	(const TString& rhs) const CL3_GETTER	{ return this->Compare(rhs) != 0; }
+						inline	bool		operator>	(const TString& rhs) const CL3_GETTER	{ return this->Compare(rhs) >  0; }
+						inline	bool		operator>=	(const TString& rhs) const CL3_GETTER	{ return this->Compare(rhs) >= 0; }
+						inline	bool		operator<	(const TString& rhs) const CL3_GETTER	{ return this->Compare(rhs) <  0; }
+						inline	bool		operator<=	(const TString& rhs) const CL3_GETTER	{ return this->Compare(rhs) <= 0; }
+						CL3PUBF	int			Compare		(const TString& other, const TCollationSequence* collation_sequence = default_collation_sequence()) const CL3_GETTER;
 
 						//	replace by index / find & replace
 						CL3PUBF	void		Replace		(usys_t index, usys_t length, const TString& str_replace);

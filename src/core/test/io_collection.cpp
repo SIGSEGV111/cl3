@@ -99,7 +99,7 @@ namespace
 	using namespace cl3::system::types;
 	using namespace cl3::unittest_support;
 
-	TEST(io_colection_list_TList, Construct)
+	TEST(io_collection_list_TList, Construct)
 	{
 		const int arr_ints[] = { 0, 1, 2, 3, 4, 5, 6 };
 		const usys_t n_ints = sizeof(arr_ints) / sizeof(int);	//	must be 7
@@ -187,7 +187,7 @@ namespace
 		}
 	}
 
-	TEST(io_colection_list_TList, Add_Remove_Clear)
+	TEST(io_collection_list_TList, Add_Remove_Clear)
 	{
 		TList<int> list;
 
@@ -282,7 +282,7 @@ namespace
 		EXPECT_TRUE(list.Count() == 0);
 	}
 
-	TEST(io_colection_list_TList, Insert_Remove_Clear)
+	TEST(io_collection_list_TList, Insert_Remove_Clear)
 	{
 		TList<int> list;
 
@@ -346,7 +346,7 @@ namespace
 		list.Clear();
 	}
 
-	TEST(io_colection_list_TList, Copy)
+	TEST(io_collection_list_TList, Copy)
 	{
 		TList<int> source_list;
 
@@ -377,7 +377,7 @@ namespace
 		EXPECT_TRUE(dest_list[9] == 9);
 	}
 
-	TEST(io_colection_list_TList, Assign)
+	TEST(io_collection_list_TList, Assign)
 	{
 		TList<int> source_list;
 
@@ -426,7 +426,7 @@ namespace
 		EXPECT_TRUE(dest_list[9] == 9);
 	}
 
-	TEST(io_colection_list_TList, Grow)
+	TEST(io_collection_list_TList, Grow)
 	{
 		TList<int> list;
 
@@ -460,7 +460,7 @@ namespace
 		EXPECT_TRUE(list[9] == 100);
 	}
 
-	TEST(io_colection_list_TList, Shrink)
+	TEST(io_collection_list_TList, Shrink)
 	{
 		TList<int> list;
 
@@ -487,7 +487,7 @@ namespace
 		EXPECT_TRUE(list[2] == 2);
 	}
 
-	TEST(io_colection_list_TList, ItemPtr)
+	TEST(io_collection_list_TList, ItemPtr)
 	{
 		TList<int> list;
 
@@ -512,7 +512,7 @@ namespace
 		EXPECT_TRUE(list.ItemPtr(4) == base+4);
 	}
 
-	TEST(io_colection_list_TList, fifo)
+	TEST(io_collection_list_TList, fifo)
 	{
 		int buffer[8];
 		const int arr_ints[] = { 0, 1, 2, 3, 4, 5, 6 };
@@ -549,7 +549,7 @@ namespace
 		EXPECT_TRUE(list[1] == 6);
 	}
 
-	TEST(io_colection_list_TList, CountMinMax)
+	TEST(io_collection_list_TList, CountMinMax)
 	{
 		TList<int> list;
 
@@ -570,7 +570,7 @@ namespace
 		EXPECT_TRUE(list.CountMax(11));
 	}
 
-	TEST(io_colection_list_TList, NegativeIndex)
+	TEST(io_collection_list_TList, NegativeIndex)
 	{
 		TList<int> list;
 
@@ -615,7 +615,7 @@ namespace
 		EXPECT_TRUE(list[- 1] ==  9);
 	}
 
-	TEST(io_colection_list_TList, Cut)
+	TEST(io_collection_list_TList, Cut)
 	{
 		TList<int> list;
 
@@ -642,7 +642,7 @@ namespace
 		EXPECT_TRUE(list[4] == 6);
 	}
 
-	TEST(io_colection_list_TList, IndexOutOfBounds_IndexOperator)
+	TEST(io_collection_list_TList, IndexOutOfBounds_IndexOperator)
 	{
 		TList<int> list;
 
@@ -654,7 +654,7 @@ namespace
 		EXPECT_THROW(list[2] = 17, TIndexOutOfBoundsException);
 	}
 
-	TEST(io_collection_list, WriteOut_Unlimited)
+	TEST(io_collection_list_TList, WriteOut_Unlimited)
 	{
 		TList<int> list1;
 		TList<int> list2;
@@ -665,7 +665,7 @@ namespace
 		EXPECT_TRUE(list1.WriteOut(list2) == 100);
 	}
 
-	TEST(io_collection_list, WriteOut_Limited)
+	TEST(io_collection_list_TList, WriteOut_Limited)
 	{
 		TList<int> list1;
 		TLimitedBuffer<int> buffer(21);
@@ -676,7 +676,7 @@ namespace
 		EXPECT_TRUE(list1.WriteOut(buffer) == 21);
 	}
 
-	TEST(io_collection_list, WriteOut_Parameterized)
+	TEST(io_collection_list_TList, WriteOut_Parameterized)
 	{
 		{
 			TList<int> list1;
@@ -749,6 +749,94 @@ namespace
 				did_throw = true;
 			}
 			EXPECT_TRUE(did_throw);
+		}
+	}
+
+	TEST(io_collection_list_TList, Find_sorted)
+	{
+		for(usys_t n = 0; n <= 1000; n += 97)
+		{
+			TList<usys_t> list;
+			for(usys_t i = 0; i < n; i++)
+				list.Add(i);
+
+			list.Sorted(true);
+
+			for(usys_t i = 0; i < n; i++)
+				EXPECT_EQ(i, list.Find(i, 0, DIRECTION_FORWARD));
+
+			for(usys_t i = 0; i < n; i++)
+				EXPECT_EQ(i, list.Find(i, i, DIRECTION_FORWARD));
+
+			for(usys_t i = 0; i < n; i++)
+				EXPECT_EQ(i, list.Find(i, 0, DIRECTION_BACKWARD));
+
+			for(usys_t i = 0; i < n; i++)
+				EXPECT_EQ(i, list.Find(i, i, DIRECTION_BACKWARD));
+		}
+	}
+
+	TEST(io_collection_list_TList, Find_unsorted)
+	{
+		for(usys_t n = 0; n <= 1000; n += 97)
+		{
+			TList<usys_t> list;
+			for(usys_t i = 0; i < n; i++)
+				list.Add(i);
+
+			list.Sorted(false);
+
+			for(usys_t i = 0; i < n; i++)
+				EXPECT_EQ(i, list.Find(i, 0, DIRECTION_FORWARD));
+
+			for(usys_t i = 0; i < n; i++)
+				EXPECT_EQ(i, list.Find(i, i, DIRECTION_FORWARD));
+
+			for(usys_t i = 0; i < n; i++)
+				EXPECT_EQ(i, list.Find(i, 0, DIRECTION_BACKWARD));
+
+			for(usys_t i = 0; i < n; i++)
+				EXPECT_EQ(i, list.Find(i, i, DIRECTION_BACKWARD));
+		}
+	}
+
+	TEST(io_collection_list_TList, Find_first)
+	{
+		for(usys_t n = 0; n <= 1000; n += 97)
+		{
+			TList<usys_t> list;
+			for(usys_t i = 0; i < n; i++)
+				list.Add(i/3);
+
+			list.Sorted(false);
+
+			for(usys_t i = 0; i < n/3; i++)
+				EXPECT_EQ(i*3, list.Find(i, 0, DIRECTION_FORWARD));
+
+			list.Sorted(true);
+
+			for(usys_t i = 0; i < n/3; i++)
+				EXPECT_EQ(i*3, list.Find(i, 0, DIRECTION_FORWARD));
+		}
+	}
+
+	TEST(io_collection_list_TList, Find_last)
+	{
+		for(usys_t n = 0; n <= 1000; n += 97)
+		{
+			TList<usys_t> list;
+			for(usys_t i = 0; i < n; i++)
+				list.Add(i/3);
+
+			list.Sorted(false);
+
+			for(usys_t i = 0; i < n/3; i++)
+				EXPECT_EQ(i*3+2, list.Find(i, 0, DIRECTION_BACKWARD));
+
+			list.Sorted(true);
+
+			for(usys_t i = 0; i < n/3; i++)
+				EXPECT_EQ(i*3+2, list.Find(i, 0, DIRECTION_BACKWARD));
 		}
 	}
 }

@@ -225,7 +225,11 @@ namespace
 		EXPECT_TRUE(s != "aaaaaaaaaaa");
 		EXPECT_TRUE(s != "aaaaaaaaaaaaaaaaaaaaaa");
 		EXPECT_TRUE(s != "hello worlt");
-		EXPECT_TRUE(s != "mello worlt");
+		EXPECT_TRUE(s != "mello world");
+		EXPECT_TRUE(s != "hello world ");
+		EXPECT_TRUE(s != "hello worlda");
+		EXPECT_TRUE(s != "hello world.");
+		EXPECT_TRUE(s != "hello worldZ");
 
 		s = "spe world";
 		EXPECT_TRUE(s != "special world");

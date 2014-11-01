@@ -22,6 +22,7 @@
 #include "system_compiler.hpp"
 #include "system_types.hpp"
 #include "io_stream.hpp"
+#include "context.hpp"
 
 namespace	cl3
 {
@@ -49,6 +50,10 @@ namespace	cl3
 				class	IDecoder;
 			};
 
+			struct	TCollationSequence;
+
+			CL3_CONTEXT_VARIABLE_DECL(const TCollationSequence*, default_collation_sequence);
+
 			struct	CL3PUBT	TUTF32
 			{
 				CL3PUBF const static TUTF32 TERMINATOR;	//	end-of-string marker (always code-value 0)
@@ -58,6 +63,10 @@ namespace	cl3
 				inline	TUTF32&	operator=	(const TUTF32& rhs) { this->code = rhs.code; return *this; }
 				inline	bool	operator==	(TUTF32 rhs) const { return code == rhs.code; }
 				inline	bool	operator!=	(TUTF32 rhs) const { return code != rhs.code; }
+				inline	bool	operator>	(TUTF32 rhs) const { return code >  rhs.code; }
+				inline	bool	operator>=	(TUTF32 rhs) const { return code >= rhs.code; }
+				inline	bool	operator<	(TUTF32 rhs) const { return code <  rhs.code; }
+				inline	bool	operator<=	(TUTF32 rhs) const { return code <= rhs.code; }
 
 				CL3PUBF	CLASS	TUTF32	(char chr);
 				CL3PUBF	CLASS	TUTF32	(wchar_t wchr);

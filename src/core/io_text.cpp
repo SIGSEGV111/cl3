@@ -55,6 +55,8 @@ namespace	cl3
 			static const collection::array::TArray<const TUTF32> COLLECTION_NEWLINE_DEFAULT(ARR_NEWLINE_DEFAULT, sizeof(ARR_NEWLINE_DEFAULT) / sizeof(TUTF32), false);
 			const collection::IStaticCollection<const TUTF32>* newline_markers = &COLLECTION_NEWLINE_DEFAULT;
 
+			CL3_CONTEXT_VARIABLE_IMPL(const TCollationSequence*, default_collation_sequence, NULL);
+
 			//	*** TUTF32 ***
 
 			const TUTF32 TUTF32::TERMINATOR((u32_t)0);

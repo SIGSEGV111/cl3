@@ -233,20 +233,30 @@ namespace	cl3
 					return *this;
 				}
 
-				bool		TString::operator==	(const TString& rhs) const
+				int			TString::Compare	(const TString& other, const TCollationSequence* collation_sequence) const
 				{
-					const usys_t n = this->Count();
-					if(n != rhs.Count())
-						return false;
-					for(usys_t i = 0; i < n; i++)
-						if((*this)[i] != rhs[i])
-							return false;
-					return true;
-				}
+					if(collation_sequence == NULL)
+					{
+						const usys_t n = CL3_MIN(this->n_items_current, other.n_items_current);
 
-				bool		TString::operator!=	(const TString& rhs) const
-				{
-					return !((*this) == rhs);
+						//	compare chararacters
+						for(usys_t i = 0; i < n; i++)
+							if(this->arr_items[i] > other.arr_items[i])
+								return 1;
+							else if(this->arr_items[i] < other.arr_items[i])
+								return -1;
+
+						//	compare length
+						if(this->n_items_current > other.n_items_current)
+							return 1;
+						else if(this->n_items_current < other.n_items_current)
+							return -1;
+
+						//	equal
+						return 0;
+					}
+					else
+						CL3_NOT_IMPLEMENTED;
 				}
 
 				void		TString::Replace	(usys_t index, usys_t length, const TString& str_replace)
