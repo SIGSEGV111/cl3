@@ -38,12 +38,12 @@ namespace	cl3
 
 			/*******************************************************/
 
-			void	cxx_free	(void* p_mem)
+			static	void	cxx_free	(void* p_mem)
 			{
 				::free(p_mem);
 			}
 
-			void*	cxx_malloc	(usys_t sz_bytes)
+			static	void*	cxx_malloc	(usys_t sz_bytes)
 			{
 				//	malloc() will not be called when sz_bytes == 0, so p must be initilized to NULL
 				void* p = NULL;
@@ -51,7 +51,7 @@ namespace	cl3
 				return p;
 			}
 
-			void*	cxx_realloc	(void* p_mem, usys_t sz_bytes)
+			static	void*	cxx_realloc	(void* p_mem, usys_t sz_bytes)
 			{
 				//	realloc() will not be called when sz_bytes == 0, so p must be initilized to NULL
 				void* p = NULL;
@@ -59,7 +59,7 @@ namespace	cl3
 				return p;
 			}
 
-			usys_t	cxx_sizeof	(void* p_mem)
+			static	usys_t	cxx_sizeof	(void* p_mem)
 			{
 				//	FIXME: this is linux specific
 				return ::malloc_usable_size(p_mem);
