@@ -132,8 +132,6 @@ namespace	cl3
 				inline	const TTableMeta&	TableMeta	() const CL3_GETTER { return this->table_meta; }
 
 				CL3PUBF	const TRow&	Item	() const final override CL3_GETTER;
-				CL3PUBF	bool	FindNext	(const io::collection::matcher::IMatcher<TRow>& matcher) final override;
-				CL3PUBF	bool	FindPrev	(const io::collection::matcher::IMatcher<TRow>& matcher) final override;
 				CL3PUBF	bool	IsValid		() const final override CL3_GETTER;
 				CL3PUBF	void	MoveHead	() final override;
 				CL3PUBF	void	MoveTail	() final override;

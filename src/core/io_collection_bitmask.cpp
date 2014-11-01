@@ -35,7 +35,6 @@ namespace	cl3
 			{
 				using namespace system::memory;
 				using namespace system::types;
-				using namespace matcher;
 
 				void		TIterator::CheckIndex	() const
 				{
@@ -46,16 +45,6 @@ namespace	cl3
 				const IStaticCollection<TBoolProxy>&	TIterator::Collection	() const
 				{
 					return *bm;
-				}
-
-				bool		TIterator::FindNext	(const IMatcher<TBoolProxy>& matcher)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				bool		TIterator::FindPrev	(const IMatcher<TBoolProxy>& matcher)
-				{
-					CL3_NOT_IMPLEMENTED;
 				}
 
 				bool		TIterator::IsValid	() const
@@ -177,11 +166,6 @@ namespace	cl3
 				{
 					arr_bits = (byte_t*)Realloc(arr_bits, new_count / 8U + (((new_count % 8U) != 0U) ? 1U : 0U), NULL, false);
 					n_bits = new_count;
-				}
-
-				bool		TBitmask::Contains	(const matcher::IMatcher<TBoolProxy>& m) const
-				{
-					CL3_NOT_IMPLEMENTED;
 				}
 
 				bool		TBitmask::Contains	(const TBoolProxy& item) const

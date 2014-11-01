@@ -133,8 +133,6 @@ namespace	cl3
 					//	from IStaticIterator
 					CL3PUBF	const byte_t&	Item	() const CL3_GETTER;
 					CL3PUBF	byte_t&			Item	() CL3_GETTER;
-					CL3PUBF	bool	FindNext	(const collection::matcher::IMatcher<byte_t>& matcher);
-					CL3PUBF	bool	FindPrev	(const collection::matcher::IMatcher<byte_t>& matcher);
 					CL3PUBF	bool	IsValid		() const CL3_GETTER;
 					CL3PUBF	void	MoveHead	();
 					CL3PUBF	void	MoveTail	();
@@ -184,7 +182,6 @@ namespace	cl3
 					CL3PUBF	system::memory::TUniquePtr<collection::IStaticIterator<const byte_t> >	CreateStaticIterator	() const final override CL3_WARN_UNUSED_RESULT;
 					CL3PUBF	system::memory::TUniquePtr<collection::IStaticIterator<byte_t> >		CreateStaticIterator	() final override CL3_WARN_UNUSED_RESULT;
 					CL3PUBF	usys_t	Count		() const final override CL3_GETTER;
-					CL3PUBF	bool	Contains	(const collection::matcher::IMatcher<byte_t>& m) const final override CL3_GETTER;
 					CL3PUBF	bool	Contains	(const byte_t& item) const final override CL3_GETTER;
 
 					//	from TFile

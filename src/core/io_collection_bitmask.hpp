@@ -70,8 +70,6 @@ namespace	cl3
 					public:
 						//	from IStaticIterator<const bool>
 						CL3PUBF	const IStaticCollection<TBoolProxy>&	Collection	() const;
-						CL3PUBF	bool		FindNext	(const matcher::IMatcher<TBoolProxy>& matcher) final override;
-						CL3PUBF	bool		FindPrev	(const matcher::IMatcher<TBoolProxy>& matcher) final override;
 						CL3PUBF	bool		IsValid		() const final override CL3_GETTER;
 						CL3PUBF	const TBoolProxy&	Item() const final override CL3_GETTER;
 						CL3PUBF	void		MoveHead	() final override;
@@ -120,7 +118,6 @@ namespace	cl3
 						{ return system::memory::MakeUniquePtr<IStaticIterator<const TBoolProxy> >(new TIterator(const_cast<TBitmask*>(this), n_bits > 0 ? 0 : (usys_t)-1)); }
 
 						CL3PUBF	usys_t	Count		() const final override CL3_GETTER;
-						CL3PUBF	bool	Contains	(const matcher::IMatcher<TBoolProxy>& m) const final override CL3_GETTER;
 						CL3PUBF	bool	Contains	(const TBoolProxy& item) const final override CL3_GETTER;
 						CL3PUBF	bool	Contains	(const bool item) const CL3_GETTER;
 

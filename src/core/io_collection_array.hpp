@@ -50,8 +50,6 @@ namespace	cl3
 
 					public:
 						//	from IStaticIterator<const T>
-						bool	FindNext	(const matcher::IMatcher<T>& matcher);
-						bool	FindPrev	(const matcher::IMatcher<T>& matcher);
 						bool	IsValid		() const CL3_GETTER;
 						const T&Item		() const CL3_GETTER;
 						void	MoveHead	();
@@ -136,7 +134,6 @@ namespace	cl3
 						usys_t	Count		() const final override CL3_GETTER;
 						bool	CountMin	(usys_t count_min) const final override CL3_GETTER;
 						bool	CountMax	(usys_t count_max) const final override CL3_GETTER;
-						bool	Contains	(const matcher::IMatcher<T>& m) const final override CL3_GETTER;
 						bool	Contains	(const T& item) const final override CL3_GETTER;
 
 						//	from IStaticCollection<const T>
@@ -259,18 +256,6 @@ namespace	cl3
 				}
 
 				//	from IStaticIterator<const T>
-				template<class T>
-				bool	TIterator<const T>::FindNext	(const matcher::IMatcher<T>& matcher)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				template<class T>
-				bool	TIterator<const T>::FindPrev	(const matcher::IMatcher<T>& matcher)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
 				template<class T>
 				bool	TIterator<const T>::IsValid		() const
 				{
@@ -427,12 +412,6 @@ namespace	cl3
 				bool	TArray<const T>::CountMax	(usys_t count_max) const
 				{
 					return count_max <= n_items;
-				}
-
-				template<class T>
-				bool	TArray<const T>::Contains	(const matcher::IMatcher<T>& m) const
-				{
-					return m.MatchFirst(DIRECTION_FORWARD, this->arr_items, this->n_items) != (usys_t)-1;
 				}
 
 				template<class T>

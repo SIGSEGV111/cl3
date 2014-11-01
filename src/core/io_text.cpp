@@ -26,7 +26,6 @@
 #include "io_text_encoding.hpp"
 #include "error.hpp"
 #include "io_collection_array.hpp"
-#include "io_collection_matcher.hpp"
 
 #include <stdlib.h>
 #include <stdio.h>
