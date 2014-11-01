@@ -47,6 +47,9 @@ namespace
 		bytes = (byte_t*)Realloc(bytes, 256, NULL, false);
 		memset(bytes, 2, 256);
 		Free(bytes);
+
+		EXPECT_TRUE( (bytes = (byte_t*)Realloc(NULL, 42, NULL, false)) != NULL );
+		EXPECT_TRUE( Realloc(bytes, 0, NULL, false) == NULL );
 	}
 
 	TEST(system_memory, SizeOf)
@@ -55,6 +58,7 @@ namespace
 		EXPECT_TRUE(SizeOf(bytes) >= 128 && SizeOf(bytes) < 128 + 128);
 		bytes = (byte_t*)Realloc(bytes, 256, NULL, false);
 		EXPECT_TRUE(SizeOf(bytes) >= 256 && SizeOf(bytes) < 256 + 128);
+		EXPECT_TRUE(SizeOf(NULL) == 0);
 		Free(bytes);
 	}
 
@@ -111,6 +115,8 @@ namespace
 
 		//	this should work (-256 because of alignment and padding which might be required)
 		array = new byte_t[sz_limit-sizeof(int)*3-256];
+
+		EXPECT_TRUE(SizeOf(array) >= sz_limit-sizeof(int)*3-256);
 
 		delete[] array;
 		delete x;

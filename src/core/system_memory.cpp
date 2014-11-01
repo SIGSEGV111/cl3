@@ -32,10 +32,6 @@ namespace	cl3
 		{
 			using namespace error;
 
-			CLASS	TDirtyAllocatorException::TDirtyAllocatorException	(usys_t sz_bytes) : TException("destroying non-empty allocator (allocated size: %zd byte_ts)", sz_bytes), sz_bytes(sz_bytes) {}
-			CLASS	TDirtyAllocatorException::TDirtyAllocatorException	(TDirtyAllocatorException&& dae) : TException(static_cast<TException&&>(dae)), sz_bytes(dae.sz_bytes) {}
-			CLASS	TDirtyAllocatorException::~TDirtyAllocatorException	() {}
-
 			CLASS	TBadAllocException::TBadAllocException	(usys_t sz_bytes) : TException("memory allocation failed (size: %zd byte_ts)", sz_bytes), sz_bytes(sz_bytes) {}
 			CLASS	TBadAllocException::TBadAllocException	(TBadAllocException&& bae) : TException(static_cast<TException&&>(bae)), sz_bytes(bae.sz_bytes) {}
 			CLASS	TBadAllocException::~TBadAllocException	() {}
@@ -91,9 +87,9 @@ namespace	cl3
 				usys_t	SizeOf	(void* p_mem) const
 				{
 					if(p_mem)
-						return ::malloc_usable_size(p_mem);
+						return cxx_sizeof(p_mem);
 					else
-						return 0;
+						return 0;	//	LCOV_EXCL_LINE
 				}
 			};
 
@@ -168,11 +164,7 @@ namespace	cl3
 				{
 					IDynamicAllocator** const p_base = reinterpret_cast<IDynamicAllocator**>(p_mem)-1;
 					IDynamicAllocator* const owner = *p_base;
-
-					if(owner)
-						owner->Free(p_base);
-					else
-						cxx_free(p_base);
+					owner->Free(p_base);
 				}
 			}
 
@@ -185,16 +177,13 @@ namespace	cl3
 					IDynamicAllocator* const owner = allocator_generic();
 					IDynamicAllocator** p_base;
 
-					if(owner)
-						p_base = reinterpret_cast<IDynamicAllocator**>(owner->Alloc(sizeof(IDynamicAllocator*) + sz_bytes));
-					else
-						p_base = reinterpret_cast<IDynamicAllocator**>(cxx_malloc(sizeof(IDynamicAllocator*) + sz_bytes));
+					p_base = reinterpret_cast<IDynamicAllocator**>(owner->Alloc(sizeof(IDynamicAllocator*) + sz_bytes));
 
 					*p_base = owner;
 					return p_base+1;
 				}
 				else
-					return NULL;
+					return NULL;	//	LCOV_EXCL_LINE
 			}
 
 			void*	Realloc	(void* p_mem, usys_t n_items_new, const typeinfo::TRTTI* rtti, bool inplace)
@@ -208,17 +197,7 @@ namespace	cl3
 
 					if(sz_bytes_new)
 					{
-						if(owner)
-							p_base = reinterpret_cast<IDynamicAllocator**>(owner->Realloc(p_base, sizeof(IDynamicAllocator*) + sz_bytes_new, inplace));
-						else
-						{
-							//	FIXME
-							if(inplace)
-								return NULL;
-							else
-								p_base = reinterpret_cast<IDynamicAllocator**>(cxx_realloc(p_base, sizeof(IDynamicAllocator*) + sz_bytes_new));
-						}
-
+						p_base = reinterpret_cast<IDynamicAllocator**>(owner->Realloc(p_base, sizeof(IDynamicAllocator*) + sz_bytes_new, inplace));
 						return p_base+1;
 					}
 					else
@@ -237,10 +216,7 @@ namespace	cl3
 				{
 					IDynamicAllocator** p_base = reinterpret_cast<IDynamicAllocator**>(p_mem)-1;
 					IDynamicAllocator* const owner = *p_base;
-					if(owner)
-						return owner->SizeOf(p_base) - sizeof(IDynamicAllocator*);
-					else
-						return cxx_sizeof(p_base);
+					return owner->SizeOf(p_base) - sizeof(IDynamicAllocator*);
 				}
 				else
 					return 0;

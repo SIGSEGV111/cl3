@@ -260,17 +260,6 @@ namespace	cl3
 					CL3PUBF	virtual	~TBadAllocException	();
 			};
 
-			class	CL3PUBT	TDirtyAllocatorException : public error::TException
-			{
-				protected:
-					usys_t sz_bytes;
-
-				public:
-					CL3PUBF	CLASS	TDirtyAllocatorException	(usys_t sz_bytes);
-					CL3PUBF	CLASS	TDirtyAllocatorException	(TDirtyAllocatorException&&);
-					CL3PUBF	virtual	~TDirtyAllocatorException	();
-			};
-
 			struct	CL3PUBT	IDynamicAllocator
 			{
 				virtual	void*	Alloc	(usys_t sz_bytes) CL3_WARN_UNUSED_RESULT = 0;
