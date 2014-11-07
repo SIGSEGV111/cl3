@@ -664,8 +664,12 @@ namespace	cl3
 				template<class T>
 				void	TList<const T>::Clear		()
 				{
-					TOnActionData<const T> data(ACTION_REMOVE, this->CreateStaticIterator());
-					this->on_action.Raise(*this, data);
+					if(this->on_action.HasReceivers())
+					{
+						TIterator<const T> it(this, 0);
+						TOnActionData<const T> data(ACTION_REMOVE, &it);
+						this->on_action.Raise(*this, data);
+					}
 
 					for(usys_t i = 0; i < n_items_current; i++)
 						arr_items[i].~T();
@@ -1155,6 +1159,9 @@ namespace	cl3
 				template<class T>
 				T*		TList<T>::ItemPtr	(ssys_t rindex)
 				{
+					if(rindex == 0 && n_items_current == 0)
+						return NULL;
+
 					const usys_t index = this->AbsIndex(rindex);
 					CL3_CLASS_ERROR(index >= n_items_current, TIndexOutOfBoundsException, index, n_items_current);
 					return arr_items + index;

@@ -452,6 +452,8 @@ namespace	cl3
 				template<class T>
 				const T*	TArray<const T>::ItemPtr		(ssys_t rindex) const
 				{
+					if(rindex == 0 && n_items == 0)
+						return NULL;
 					const usys_t index = this->AbsIndex(rindex);
 					CL3_CLASS_ERROR(index >= n_items, TIndexOutOfBoundsException, index, n_items);
 					return arr_items + index;

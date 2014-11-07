@@ -424,8 +424,9 @@ namespace
 		const int i = 1234567;
 		EXPECT_TRUE(*Stringify(TCTTI<int>::print, &i).Object() == "1234567");
 
-		const double f = 1234567.17;
-		EXPECT_TRUE(*Stringify(TCTTI<double>::print, &f).Object() == "1234567.170000");
+		const double f = 18.39999961853;
+		TString r = *Stringify(TCTTI<double>::print, &f).Object();
+		EXPECT_TRUE(r == "18.399999618529999878546732361428439617156982421875");
 
 		const TString s = "hello";
 		EXPECT_TRUE(*Stringify(TCTTI<TString>::print, &s).Object() == "hello");
@@ -787,6 +788,93 @@ namespace
 		EXPECT_TRUE(tokenizer2.Next());
 		EXPECT_TRUE(tokenizer2.CurrentTermination() == TUTF32::TERMINATOR);
 		EXPECT_TRUE(tokenizer2.CurrentToken()       == "29");
+	}
+
+	TEST(io_text_ITextWriter, Integers_simple_decimal)
+	{
+		TNumberFormat::default_format = &TNumberFormat::DECIMAL_SIMPLE;
+		{
+			TString buffer;
+			buffer<<0;
+			EXPECT_TRUE(buffer == "0");
+		}
+
+		{
+			TString buffer;
+			buffer<<42;
+			EXPECT_TRUE(buffer == "42");
+		}
+
+		{
+			TString buffer;
+			buffer<<2147483647;
+			EXPECT_TRUE(buffer == "2147483647");
+		}
+
+		{
+			TString buffer;
+			buffer<<-2147483648;
+			EXPECT_TRUE(buffer == "-2147483648");
+		}
+
+		{
+			TString buffer;
+			buffer<<9223372036854775807;
+			EXPECT_TRUE(buffer == "9223372036854775807");
+		}
+
+		{
+			TString buffer;
+			buffer<<-9223372036854775807;
+			EXPECT_TRUE(buffer == "-9223372036854775807");
+		}
+	}
+
+	TEST(io_text_ITextWriter, Integers_hex)
+	{
+		TNumberFormat::default_format = &TNumberFormat::HEX;
+		{
+			TString buffer;
+			buffer<<0;
+			EXPECT_TRUE(buffer == "0");
+		}
+
+		{
+			TString buffer;
+			buffer<<0x42;
+			EXPECT_TRUE(buffer == "42");
+		}
+
+		{
+			TString buffer;
+			buffer<<0x2A;
+			EXPECT_TRUE(buffer == "2A");
+		}
+
+		{
+			TString buffer;
+			buffer<<0x7FFFFFFF;
+			EXPECT_TRUE(buffer == "7FFFFFFF");
+		}
+
+		{
+			TString buffer;
+			buffer<<-0x7FFFFFFF;
+			EXPECT_TRUE(buffer == "-7FFFFFFF");
+		}
+
+		{
+			TString buffer;
+			buffer<<0x7FFFFFFFFFFFFFFF;
+			EXPECT_TRUE(buffer == "7FFFFFFFFFFFFFFF");
+		}
+
+		{
+			TString buffer;
+			buffer<<-0x7FFFFFFFFFFFFFFF;
+			EXPECT_TRUE(buffer == "-7FFFFFFFFFFFFFFF");
+		}
+		TNumberFormat::default_format = &TNumberFormat::DECIMAL_SIMPLE;
 	}
 }
 

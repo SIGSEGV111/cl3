@@ -101,6 +101,8 @@ namespace	cl3
 							delete receivers[i];
 				}
 
+				bool	HasReceivers	() const CL3_GETTER { return receivers.Count() > 0; }
+
 				//	NOTE: receiver which get registered during the execution of an Raise() will *NOT* get called for the current invocation
 				usys_t	Raise		(TSender& sender, TData data)
 				{

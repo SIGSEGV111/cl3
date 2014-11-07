@@ -71,9 +71,9 @@ namespace	cl3
 			struct	TOnActionData
 			{
 				EAction action;
-				system::memory::TUniquePtr<IStaticIterator<T> > iterator;
+				IStaticIterator<T>* iterator;
 
-				CLASS	TOnActionData	(EAction action, system::memory::TUniquePtr<IStaticIterator<T> >&& iterator) : action(action), iterator(system::def::move(iterator)) {}
+				CLASS	TOnActionData	(EAction action, IStaticIterator<T>* iterator) : action(action), iterator(iterator) {}
 			};
 
 			/************************************************************************/

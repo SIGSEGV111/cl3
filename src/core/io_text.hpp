@@ -33,6 +33,11 @@ namespace	cl3
 		namespace	collection
 		{
 			template<class T>	struct	IStaticCollection;
+
+			namespace	array
+			{
+				template<class T>	struct	IArray;
+			}
 		}
 
 		namespace	text
@@ -85,12 +90,20 @@ namespace	cl3
 					SYMBOL_PLACEMENT_AFTER
 				};
 
+				string::TString* prefix_sign;		//	prefix to put in front of the number, even before the positive/negative symbol (can be NULL)
+				string::TString* prefix_digits;		//	prefix to put in front of the number, but after the positive/negative symbol (can be NULL)
+				string::TString* postfix_digits;	//	postfix to put behind the number, but before the positive/negative symbol (can be NULL)
+				string::TString* postfix_sign;		//	postfix to put behind the number, even after the positive/negative symbol (can be NULL)
+
+				//	<prefix_sign><sign-symbol><prefix_digits><digits><postfix_digits><sign-symbol><postfix_sign>
+
 				//	if a specific symbol is set to TUTF32::TERMINATOR, then it will not be displayed
 
-				const collection::IStaticCollection<const TUTF32>* digits;
+				const collection::array::IArray<const TUTF32>* digits;
 
 				TUTF32 positive_mark;	//	the charcater which indicates a positive value (usually not set)
 				TUTF32 negative_mark;	//	the charcater which indicates a negative value (usually '-')
+				TUTF32 zero_mark;		//	the charcater which indicates a zero value (usually not set)
 				TUTF32 decimal_mark;	//	character which separates the integer part from the fractional part (usually ',' in germany and '.' in USA)
 				TUTF32 grouping_mark;	//	character which seperates groups of digits (usually '.' in germany and ',' in USA)
 				TUTF32 integer_padding;		//	character which gets used when padding is required left of the decimal mark (usually ' ')
@@ -99,6 +112,7 @@ namespace	cl3
 
 				ESymbolPlacement positive_mark_placement;	//	specifies where to place the positive mark (usually SYMBOL_PLACEMENT_BEFORE)
 				ESymbolPlacement negative_mark_placement;	//	specifies where to place the negative mark (usually SYMBOL_PLACEMENT_BEFORE)
+				ESymbolPlacement zero_mark_placement;		//	specifies where to place the tero mark (usually SYMBOL_PLACEMENT_BEFORE)
 
 				u16_t grouping_length;	//	length of a group of digits (usually 3 for base 10/decimal formats)
 				u16_t integer_length_min;	//	minimum number of characters before the decimal mark
@@ -111,8 +125,12 @@ namespace	cl3
 				//	some predefined commonly used formats
 				CL3PUBF const static TNumberFormat OCTAL;	//	standard octal format (base 8)
 				CL3PUBF const static TNumberFormat DECIMAL;	//	default values from your current operating system locale (base 10)
+				CL3PUBF const static TNumberFormat DECIMAL_SIMPLE;	//	very simple decimal format
 				CL3PUBF const static TNumberFormat HEX;		//	standard hexadecimal format (base 16)
 				CL3PUBF const static TNumberFormat BASE64;	//	standard base64 format (base 64)
+				CL3PUBF const static TNumberFormat* default_format;
+
+				CL3PUBF	CLASS	TNumberFormat	();
 			};
 
 			struct	CL3PUBT	TTextFormat
@@ -126,8 +144,10 @@ namespace	cl3
 
 			struct	CL3PUBT	TTextIOCommon
 			{
-				TTextFormat text_format;
-				TNumberFormat number_format;
+				const TTextFormat* text_format;
+				const TNumberFormat* number_format;
+
+				CL3PUBF	CLASS	TTextIOCommon	();
 			};
 
 			class	CL3PUBT	ITextReader : public virtual TTextIOCommon, public virtual stream::IIn<TUTF32>, public virtual stream::IIn<wchar_t>, public virtual stream::IIn<char>

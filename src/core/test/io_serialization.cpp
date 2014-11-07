@@ -105,6 +105,8 @@ namespace
 			s.Push("test", test);
 		}
 
+// 		puts(TCString(buffer, CODEC_CXX_CHAR).Chars());
+
 		EXPECT_TRUE(buffer == "{\"test\":{\"x\":10,\"y\":20,\"z\":30,\"str\":\"test\",\"array_of_ints\":[0,1,2,3]}}");
 	}
 

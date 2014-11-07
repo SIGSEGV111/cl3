@@ -75,6 +75,7 @@ namespace	cl3
 
 			#define	CL3_MIN(a,b)	( ((a) < (b)) ? (a) : (b) )
 			#define	CL3_MAX(a,b)	( ((a) > (b)) ? (a) : (b) )
+			#define	CL3_ABS(x)		( ((x) <  0 ) ? (-(x)) : (x) )
 		}
 	}
 }
