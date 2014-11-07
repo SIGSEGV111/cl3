@@ -168,7 +168,7 @@ namespace	cl3
 						CL3PUBF	CLASS	TCString	(TCString&&);
 				};
 
-				CL3PUBF	TStringUPtr	Stringify	(FPrint print, const void* object);
+				CL3PUBF	TString	Stringify	(FPrint print, const void* object);
 			}
 		}
 	}

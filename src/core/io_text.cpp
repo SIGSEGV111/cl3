@@ -71,6 +71,13 @@ namespace	cl3
 
 			const TUTF32 TUTF32::TERMINATOR((u32_t)0);
 
+			usys_t	TUTF32::strlen	(const TUTF32* str)
+			{
+				const TUTF32* p = str;
+				for(; p->code != 0; p++);
+				return p - str;
+			}
+
 			CLASS	TUTF32::TUTF32	(char chr)
 			{
 				if((unsigned char)chr < 128)

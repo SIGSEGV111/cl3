@@ -419,17 +419,16 @@ namespace
 		EXPECT_TRUE(cl3::system::types::typeinfo::_::is_printable<int>::value);
 
 		struct T { int x,y,z; } t = {0,0,0};
-		EXPECT_TRUE(*Stringify(TCTTI<T>::print, &t).Object() == "<unprintable>");
+		EXPECT_TRUE(Stringify(TCTTI<T>::print, &t) == "<unprintable>");
 
 		const int i = 1234567;
-		EXPECT_TRUE(*Stringify(TCTTI<int>::print, &i).Object() == "1234567");
+		EXPECT_TRUE(Stringify(TCTTI<int>::print, &i) == "1234567");
 
 		const double f = 18.39999961853;
-		TString r = *Stringify(TCTTI<double>::print, &f).Object();
-		EXPECT_TRUE(r == "18.399999618529999878546732361428439617156982421875");
+		EXPECT_TRUE(Stringify(TCTTI<double>::print, &f) == "18.399999618529999878546732361428439617156982421875");
 
 		const TString s = "hello";
-		EXPECT_TRUE(*Stringify(TCTTI<TString>::print, &s).Object() == "hello");
+		EXPECT_TRUE(Stringify(TCTTI<TString>::print, &s) == "hello");
 	}
 
 	TEST(io_text_encoding_utf8, LimitedSink_Encode)

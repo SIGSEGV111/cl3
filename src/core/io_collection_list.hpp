@@ -248,7 +248,7 @@ namespace	cl3
 						void	Add		(const T& item_add) final override;
 						void	Add		(const T* arr_items_add, usys_t n_items_add) final override;
 						void	Add		(const IStaticCollection<const T>& collection) final override;
-						bool	Remove	(const T* item_remove) final override;
+						bool	Remove	(const T& item_remove) final override;
 
 						//	from IOut<T>
 						usys_t		Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
@@ -699,14 +699,14 @@ namespace	cl3
 				}
 
 				template<class T>
-				bool	TList<const T>::Remove	(const T* item_remove)
+				bool	TList<const T>::Remove	(const T& item_remove)
 				{
 					usys_t index;
-					if(item_remove >= arr_items && item_remove < arr_items + n_items_current)
-						index = item_remove - arr_items;
+					if(&item_remove >= arr_items && &item_remove < arr_items + n_items_current)
+						index = &item_remove - arr_items;
 					else
 					{
-						index = Find(*item_remove);
+						index = Find(item_remove);
 						if(index == (usys_t)-1)
 							return false;
 					}

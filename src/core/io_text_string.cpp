@@ -510,19 +510,18 @@ namespace	cl3
 					other.n_items_prealloc = 0;
 				}
 
-				TStringUPtr	Stringify	(FPrint print, const void* object)
+				TString	Stringify	(FPrint print, const void* object)
 				{
-					TStringUPtr ret;
 					if(print)
 					{
-						ret = system::memory::MakeUniquePtr(new TString());
-						print(*ret.Object(), object);
+						TString ret;
+						print(ret, object);
+						return ret;
 					}
 					else
 					{
-						ret = system::memory::MakeUniquePtr(new TString(L"<unprintable>"));
+						return "<unprintable>";
 					}
-					return ret;
 				}
 			}
 		}
