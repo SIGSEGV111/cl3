@@ -42,6 +42,12 @@ namespace	cl3
 		template class CL3PUBT TVector<f64_t, 3>;
 		template class CL3PUBT TVector<f64_t, 4>;
 
+		template class CL3PUBT TMatrix<f32_t, 1, 1>;
+		template class CL3PUBT TMatrix<f32_t, 2, 2>;
+		template class CL3PUBT TMatrix<f32_t, 3, 3>;
+		template class CL3PUBT TMatrix<f32_t, 4, 4>;
+
+
 		float		log	(float x, float b)
 		{
 			return ::logf(x) / ::logf(b);

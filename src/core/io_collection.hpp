@@ -185,25 +185,6 @@ namespace	cl3
 					virtual	void	Add		(const typename _::resolve_type<T>::TItem* arr_items_add, usys_t n_items_add) = 0;	//	like above but for multiple items at once
 					virtual	void	Add		(const IStaticCollection<const T>& collection) = 0;	//	inserts another collection into this collection, it is left to the implementation to determine where the new items are positioned
 					virtual	bool	Remove	(const typename _::resolve_type<T>::TKey& item_remove) = 0;	//	removes the specified item from the collection, the reference is free to point to any valid item - the item needs not to be a member of the collection, if however so, then exactly the specified item is removed, if not, one item which compares equal to the specified item is removed - if multiple items compare equal to the specified item, the implementation is free to choose one among them, if no matching item is found false is returned
-
-// 					//	from ISerializable
-// 					virtual	void	Deserialize	(serialization::IDeserializer& ds) override
-// 					{
-// 						this->Clear();
-// 						usys_t n;
-// 						ds.Pop("count", n);
-// 						system::memory::TUniquePtr<serialization::IArrayDeserializer> ads = ds.PopArray("items");
-//
-// 						byte_t buffer[sizeof(T)];
-//
-// 						for(usys_t i = 0; i < n; i++)
-// 						{
-// 							ads->Pop((void*)buffer, system::types::typeinfo::TCTTI<T>::rtti);
-// 							T* object = reinterpret_cast<T*>(buffer);
-// 							this->Add(*object);
-// 							object->~T();
-// 						}
-// 					}
 			};
 
 			template<class T>

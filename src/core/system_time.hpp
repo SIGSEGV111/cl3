@@ -120,6 +120,14 @@ namespace	cl3
 					inline	CLASS	TTime	(struct timespec ts) : sec((s64_t)ts.tv_sec), asec((s64_t)ts.tv_nsec * (s64_t)1000000000LL) {}
 					inline	CLASS	TTime	(struct timeval tv) : sec((s64_t)tv.tv_sec), asec((s64_t)tv.tv_usec * (s64_t)1000000000000LL) {}
 			};
+
+// 			class	CL3PUBT	TTime64
+// 			{
+// 				protected:
+// 					u64_t nsec;	//	range 1970-01-01 to ca. 2500-01-01
+//
+// 				public:
+// 			};
 		}
 	}
 }

@@ -16,28 +16,32 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/util.hpp>
-#include <cl3/core/io_text_string.hpp>
-#include <cl3/mm/ui_console.hpp>
+#ifndef	_include_cl3_core_ui_console_hpp_
+#define _include_cl3_core_ui_console_hpp_
 
-#include <gtest/gtest.h>
+#include <cl3/core/system_compiler.hpp>
+#include <cl3/core/system_types.hpp>
+#include <cl3/core/io_text.hpp>
+#include <cl3/core/io_text_encoding.hpp>
+#include <cl3/core/io_stream_fd.hpp>
+#include <cl3/core/context.hpp>
+#include <cl3/core/system_memory.hpp>
 
-using namespace ::testing;
-
-namespace
+namespace	cl3
 {
-	using namespace cl3::util;
-	using namespace cl3::io::text::string;
+	using namespace system::types;
 
-	TEST(util, Hexdump)
+	namespace	ui
 	{
-		TString out;
-		char in[] = "Hello World\nabcdefghijklmnopqrstuvwxyz\0\x01\x02";
+		namespace	console
+		{
+			using namespace system::types;
 
-		char ref[512];
-		snprintf(ref, sizeof(ref), "[0000] %016zx: 48 65 6c 6c 6f 20 57 6f 72 6c 64 0a 61 62 63 64 |Hello World.abcd|\n[0001] %016zx: 65 66 67 68 69 6a 6b 6c 6d 6e 6f 70 71 72 73 74 |efghijklmnopqrst|\n[0002] %016zx: 75 76 77 78 79 7a 00 01 02 00                   |uvwxyz....      |\n", (size_t)in, (size_t)in+16, (size_t)in+32);
-		Hexdump(in, sizeof(in), out);
-
-		EXPECT_TRUE(out == ref);
+			class	TUI
+			{
+			};
+		}
 	}
 }
+
+#endif
