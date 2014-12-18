@@ -252,4 +252,227 @@ namespace
 			EXPECT_EQ(4, op2[2]);
 		}
 	}
+
+	TEST(math_TVector_3f, add)
+	{
+		TVector<double, 3> op1(1,2,3);
+		TVector<double, 3> op2(1,2,3);
+		TVector<double, 3> out = op1 + op2;
+
+		EXPECT_EQ(2, out[0]);
+		EXPECT_EQ(4, out[1]);
+		EXPECT_EQ(6, out[2]);
+	}
+
+	TEST(math_TVector_3f, sub)
+	{
+		TVector<double, 3> op1(1,2,3);
+		TVector<double, 3> op2(1,2,3);
+		TVector<double, 3> out = op1 - op2;
+
+		EXPECT_EQ(0, out[0]);
+		EXPECT_EQ(0, out[1]);
+		EXPECT_EQ(0, out[2]);
+	}
+
+	TEST(math_TVector_3f, mul)
+	{
+		TVector<double, 3> op1(1,2,3);
+		TVector<double, 3> op2(1,2,3);
+		TVector<double, 3> out = op1 * op2;
+
+		EXPECT_EQ(1, out[0]);
+		EXPECT_EQ(4, out[1]);
+		EXPECT_EQ(9, out[2]);
+	}
+
+	TEST(math_TVector_3f, div)
+	{
+		TVector<double, 3> op1(1,2,3);
+		TVector<double, 3> op2(1,2,3);
+		TVector<double, 3> out = op1 / op2;
+
+		EXPECT_EQ(1, out[0]);
+		EXPECT_EQ(1, out[1]);
+		EXPECT_EQ(1, out[2]);
+	}
+
+	TEST(math_TVector_3f, assign)
+	{
+		TVector<double, 3> op1(1,2,3);
+		TVector<double, 3> op2(2,4,6);
+		op2 = op1;
+
+		EXPECT_EQ(1, op2[0]);
+		EXPECT_EQ(2, op2[1]);
+		EXPECT_EQ(3, op2[2]);
+	}
+
+	TEST(math_TVector_3f, equal)
+	{
+		{
+			TVector<double, 3> op1(1,2,3);
+			TVector<double, 3> op2(1,2,3);
+			EXPECT_TRUE(op2 == op1);
+			EXPECT_FALSE(op2 != op1);
+		}
+
+		{
+			TVector<double, 3> op1(1,2,3);
+			TVector<double, 3> op2(2,2,3);
+			EXPECT_TRUE(op2 != op1);
+			EXPECT_FALSE(op2 == op1);
+		}
+
+		{
+			TVector<double, 3> op1(1,2,4);
+			TVector<double, 3> op2(2,2,3);
+			EXPECT_TRUE(op2 != op1);
+			EXPECT_FALSE(op2 == op1);
+		}
+
+		{
+			TVector<double, 3> op1(1,5,4);
+			TVector<double, 3> op2(2,2,3);
+			EXPECT_TRUE(op2 != op1);
+			EXPECT_FALSE(op2 == op1);
+		}
+	}
+
+	TEST(math_TVector_3f, Square)
+	{
+		{
+			TVector<double, 3> op1(1,1,1);
+			EXPECT_EQ(3, op1.Square());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,2);
+			EXPECT_EQ(12, op1.Square());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,-2);
+			EXPECT_EQ(12, op1.Square());
+		}
+	}
+
+	TEST(math_TVector_3f, Volume)
+	{
+		{
+			TVector<double, 3> op1(1,1,1);
+			EXPECT_EQ(1, op1.Volume());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,2);
+			EXPECT_EQ(8, op1.Volume());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,-2);
+			EXPECT_EQ(-8, op1.Volume());
+		}
+	}
+
+	TEST(math_TVector_3f, Length)
+	{
+		{
+			TVector<double, 3> op1(1,1,1);
+			EXPECT_EQ(sqrt(3), op1.Length());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,2);
+			EXPECT_EQ(sqrt(12), op1.Length());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,-2);
+			EXPECT_EQ(sqrt(12), op1.Length());
+		}
+	}
+
+	TEST(math_TVector_3f, Max)
+	{
+		{
+			TVector<double, 3> op1(1,1,1);
+			EXPECT_EQ(1, op1.Max());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,2);
+			EXPECT_EQ(2, op1.Max());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,-2);
+			EXPECT_EQ(2, op1.Max());
+		}
+
+		{
+			TVector<double, 3> op1(17,4,13);
+			EXPECT_EQ(17, op1.Max());
+		}
+
+		{
+			TVector<double, 3> op1(17,4,18);
+			EXPECT_EQ(18, op1.Max());
+		}
+	}
+
+	TEST(math_TVector_3f, Min)
+	{
+		{
+			TVector<double, 3> op1(1,1,1);
+			EXPECT_EQ(1, op1.Min());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,2);
+			EXPECT_EQ(2, op1.Min());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,-2);
+			EXPECT_EQ(-2, op1.Min());
+		}
+
+		{
+			TVector<double, 3> op1(17,4,13);
+			EXPECT_EQ(4, op1.Min());
+		}
+
+		{
+			TVector<double, 3> op1(4,17,18);
+			EXPECT_EQ(4, op1.Min());
+		}
+	}
+
+	TEST(math_TVector_3f, Abs)
+	{
+		{
+			TVector<double, 3> op1(-1,-1,1);
+			TVector<double, 3> op2 = op1.Abs();
+			EXPECT_EQ(1, op2[0]);
+			EXPECT_EQ(1, op2[1]);
+			EXPECT_EQ(1, op2[2]);
+		}
+
+		{
+			TVector<double, 3> op1(-1,-17,4);
+			TVector<double, 3> op2 = op1.Abs();
+			EXPECT_EQ(1, op2[0]);
+			EXPECT_EQ(17, op2[1]);
+			EXPECT_EQ(4, op2[2]);
+		}
+
+		{
+			TVector<double, 3> op1(-1,-17,-4);
+			TVector<double, 3> op2 = op1.Abs();
+			EXPECT_EQ(1, op2[0]);
+			EXPECT_EQ(17, op2[1]);
+			EXPECT_EQ(4, op2[2]);
+		}
+	}
 }
