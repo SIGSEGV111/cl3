@@ -283,6 +283,7 @@ namespace
 
 	TEST(system_types_typeinfo_TRTTI, Hash)
 	{
-		EXPECT_TRUE(TCTTI<int>::rtti.Hash() == 0xda7fa419);
+		//printf("hash = %08x\n", TCTTI<int>::rtti.Hash());
+		EXPECT_TRUE(TCTTI<int>::rtti.Hash() == 0xe333d759);
 	}
 }

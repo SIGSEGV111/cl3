@@ -24,6 +24,7 @@
 #include "system_types_typeinfo.hpp"
 #include "util.hpp"
 #include "io_text_string.hpp"
+#include "io_text_encoding_utf8.hpp"
 #include <string.h>
 
 namespace	cl3
@@ -58,8 +59,8 @@ namespace	cl3
 
 				u32_t TRTTI::Hash() const
 				{
-					TStringUPtr name(Name());
-					return JenkinsHash(reinterpret_cast<const u8_t*>(name->ItemPtr(0)), name->Count() * 4);
+					const TCString name(*Name().Object(), io::text::encoding::utf8::CODEC_UTF8);
+					return JenkinsHash(reinterpret_cast<const u8_t*>(name.Chars()), name.Count());
 				}
 
 
