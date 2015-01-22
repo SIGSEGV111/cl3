@@ -41,6 +41,7 @@ namespace	cl3
 				using namespace collection::list;
 				using namespace system::memory;
 				using namespace encoding;
+				using namespace error;
 
 				static	usys_t	ustrlen	(const TUTF32* str, usys_t maxlen)
 				{
@@ -425,6 +426,7 @@ namespace	cl3
 
 				CLASS	TString::TString	(const char*    str, usys_t maxlen) : TList<TUTF32>()
 				{
+					CL3_CLASS_ERROR(str == NULL, TException, "invalid source string pointer");
 					TUniquePtr<IDecoder> d = CODEC_CXX_CHAR->CreateDecoder();
 					d->Sink(this);
 					d->Write((const byte_t*)str, strnlen(str, maxlen) * sizeof(char));
@@ -432,6 +434,7 @@ namespace	cl3
 
 				CLASS	TString::TString	(const wchar_t* str, usys_t maxlen) : TList<TUTF32>()
 				{
+					CL3_CLASS_ERROR(str == NULL, TException, "invalid source string pointer");
 					TUniquePtr<IDecoder> d = CODEC_CXX_WCHAR->CreateDecoder();
 					d->Sink(this);
 					d->Write((const byte_t*)str, wcsnlen(str, maxlen) * sizeof(wchar_t));
@@ -439,6 +442,7 @@ namespace	cl3
 
 				CLASS	TString::TString	(const TUTF32*  str, usys_t maxlen) : TList<TUTF32>()
 				{
+					CL3_CLASS_ERROR(str == NULL, TException, "invalid source string pointer");
 					this->Append(str, ustrlen(str, maxlen));
 				}
 

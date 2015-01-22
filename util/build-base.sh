@@ -22,7 +22,7 @@ if ! test -L "tmp/gtest/build"; then
 	cd "tmp/gtest"
 	unzip "../../util/gtest-$GTEST_V.zip" >/dev/null
 	cd "gtest-$GTEST_V"
-	CXXFLAGS="-march=native -fno-lto" ./configure >/dev/null
+	CXXFLAGS="-fno-lto" ./configure >/dev/null
 	make -s -j $PJOBS >/dev/null
 	cd ..
 	ln -nsf "gtest-$GTEST_V" build

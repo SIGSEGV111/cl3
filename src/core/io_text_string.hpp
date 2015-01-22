@@ -27,14 +27,6 @@ namespace	cl3
 {
 	namespace	io
 	{
-		namespace	collection
-		{
-			namespace	list
-			{
-				template class CL3PUBF TList<io::text::TUTF32>;
-			}
-		}
-
 		namespace	text
 		{
 			namespace	string

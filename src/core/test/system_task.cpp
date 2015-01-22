@@ -29,7 +29,7 @@
 #include <cl3/core/system_task.hpp>
 #include <gtest/gtest.h>
 #include <stdlib.h>
-#include <valgrind/valgrind.h>
+//#include <valgrind/valgrind.h>
 
 using namespace ::testing;
 
@@ -135,8 +135,8 @@ namespace
 		TProcess::Self()->Name(name_want);
 		EXPECT_TRUE(TProcess::Self()->Name() == name_want);
 
-		if(RUNNING_ON_VALGRIND == 0)
-			EXPECT_TRUE(system("pidof gtest >/dev/null") == 0);
+		//if(RUNNING_ON_VALGRIND == 0)
+		//	EXPECT_TRUE(system("pidof gtest >/dev/null") == 0);
 
 		TProcess::Self()->Name(name_original);
 		EXPECT_TRUE(system(TCString(TString("pgrep -f ") + name_original + " >/dev/null", CODEC_CXX_CHAR).Chars()) == 0);
@@ -147,21 +147,17 @@ namespace
 		const IStaticCollection<const TString>& ls = TProcess::Self()->Environment();
 		auto it = ls.CreateStaticIterator();
 
-		const TString* cmd = NULL;
 		const TString* pwd = NULL;
 		const TString* user = NULL;
 
 		for(it->MoveFirst(); it->IsValid(); it->MoveNext())
 		{
-			if(it->Item().Left(2) == "_=")
-				cmd = &it->Item();
 			if(it->Item().Left(4) == "PWD=")
 				pwd = &it->Item();
 			if(it->Item().Left(5) == "USER=")
 				user = &it->Item();
 		}
 
-		EXPECT_TRUE(cmd != NULL);
 		EXPECT_TRUE(pwd != NULL);
 		EXPECT_TRUE(user != NULL);
 	}

@@ -86,12 +86,12 @@ namespace	cl3
 					{"signed int", "s32_t"},
 					{"int", "s32_t"},
 
-					{"unsigned long long", sizeof(long long) == 4 ? "u32_t" : sizeof(long) == 8 ? "u64_t" : NULL },
-					{"signed long long", sizeof(long long) == 4 ? "s32_t" : sizeof(long) == 8 ? "s64_t" : NULL },
-					{"long long", sizeof(long long) == 4 ? "s32_t" : sizeof(long) == 8 ? "s64_t" : NULL },
+					{"unsigned long long", sizeof(unsigned long long) == 4 ? "u32_t" : sizeof(unsigned long long) == 8 ? "u64_t" : NULL },
+					{"signed long long", sizeof(signed long long) == 4 ? "s32_t" : sizeof(signed long long) == 8 ? "s64_t" : NULL },
+					{"long long", sizeof(long long) == 4 ? "s32_t" : sizeof(long long) == 8 ? "s64_t" : NULL },
 
-					{"unsigned long", sizeof(long) == 4 ? "u32_t" : sizeof(long) == 8 ? "u64_t" : NULL },
-					{"signed long", sizeof(long) == 4 ? "s32_t" : sizeof(long) == 8 ? "s64_t" : NULL },
+					{"unsigned long", sizeof(unsigned long) == 4 ? "u32_t" : sizeof(unsigned long) == 8 ? "u64_t" : NULL },
+					{"signed long", sizeof(signed long) == 4 ? "s32_t" : sizeof(signed long) == 8 ? "s64_t" : NULL },
 					{"long", sizeof(long) == 4 ? "s32_t" : sizeof(long) == 8 ? "s64_t" : NULL },
 
 					{"unsigned __int8", "u8_t"},

@@ -35,7 +35,13 @@ namespace
 		char in[] = "Hello World\nabcdefghijklmnopqrstuvwxyz\0\x01\x02";
 
 		char ref[512];
-		snprintf(ref, sizeof(ref), "[0000] %016zx: 48 65 6c 6c 6f 20 57 6f 72 6c 64 0a 61 62 63 64 |Hello World.abcd|\n[0001] %016zx: 65 66 67 68 69 6a 6b 6c 6d 6e 6f 70 71 72 73 74 |efghijklmnopqrst|\n[0002] %016zx: 75 76 77 78 79 7a 00 01 02 00                   |uvwxyz....      |\n", (size_t)in, (size_t)in+16, (size_t)in+32);
+
+		if(sizeof(void*) == 8)
+			snprintf(ref, sizeof(ref), "[0000] %016zx: 48 65 6c 6c 6f 20 57 6f 72 6c 64 0a 61 62 63 64 |Hello World.abcd|\n[0001] %016zx: 65 66 67 68 69 6a 6b 6c 6d 6e 6f 70 71 72 73 74 |efghijklmnopqrst|\n[0002] %016zx: 75 76 77 78 79 7a 00 01 02 00                   |uvwxyz....      |\n", (size_t)in, (size_t)in+16, (size_t)in+32);
+		else if(sizeof(void*) == 4)
+			snprintf(ref, sizeof(ref), "[0000]         %08zx: 48 65 6c 6c 6f 20 57 6f 72 6c 64 0a 61 62 63 64 |Hello World.abcd|\n[0001]         %08zx: 65 66 67 68 69 6a 6b 6c 6d 6e 6f 70 71 72 73 74 |efghijklmnopqrst|\n[0002]         %08zx: 75 76 77 78 79 7a 00 01 02 00                   |uvwxyz....      |\n", (size_t)in, (size_t)in+16, (size_t)in+32);
+		else
+			throw;
 		Hexdump(in, sizeof(in), out);
 
 		EXPECT_TRUE(out == ref);

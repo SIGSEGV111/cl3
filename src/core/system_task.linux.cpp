@@ -42,7 +42,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
-#include <valgrind/valgrind.h>
+
+//#include <valgrind/valgrind.h>
 
 using namespace cl3::system::types;
 
