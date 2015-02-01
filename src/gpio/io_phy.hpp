@@ -20,6 +20,7 @@
 #define	_include_cl3_gpio_io_phy_hpp_
 
 #include <cl3/core/event.hpp>
+#include <cl3/core/system_types.hpp>
 #include <cl3/core/io_stream.hpp>
 #include <cl3/core/io_collection.hpp>
 #include <cl3/core/io_text_string.hpp>
@@ -30,15 +31,35 @@ namespace	cl3
 	{
 		namespace	phy
 		{
+			using namespace system::types;
+
 			namespace	gpio
 			{
 				struct	IPin;
 				struct	IGPIOController;
 
+				//	NOTE: not all controller support all modes on all pins, but they should tell you when you try set the mode on the pin (with a throw())
 				enum	EPinMode
 				{
-					PINMODE_INPUT,
-					PINMODE_OUTPUT
+					PINMODE_GPIO_INPUT,
+					PINMODE_GPIO_OUTPUT,
+					PINMODE_SPI_MASTER_CLOCK,	//	act as SPI master on this pin, and use it to output the clock signal
+					PINMODE_SPI_MASTER_MOSI,	//	act as SPI master on this pin, and use it to send data to the slave
+					PINMODE_SPI_MASTER_MISO,	//	act as SPI master on this pin, and use it to receive data from the slave
+					PINMODE_SPI_SLAVE_CLOCK,	//	act as SPI slave on this pin, and use it to receive the clock signal
+					PINMODE_SPI_SLAVE_MOSI,		//	act as SPI slave on this pin, and use it to receive data from the master
+					PINMODE_SPI_SLAVE_MISO,		//	act as SPI slave on this pin, and use it to send data to the master
+					PINMODE_I2C_CLOCK,
+					PINMODE_I2C_DATA,
+					PINMODE_PWM,
+					PINMODE_UART_TX,
+					PINMODE_UART_RX,
+					PINMODE_UART_CTS,
+					PINMODE_UART_RTS,
+					PINMODE_PCM_CLOCK,
+					PINMODE_PCM_FS,
+					PINMODE_PCM_DIN,
+					PINMODE_PCM_DOUT
 				};
 
 				enum	EPull
@@ -52,6 +73,7 @@ namespace	cl3
 
 				struct	CL3PUBT	IPin
 				{
+					virtual	u32_t			ID			() const CL3_GETTER = 0;
 					virtual	IGPIOController*Controller	() const CL3_GETTER = 0;
 					virtual	EPinMode		Mode		() const CL3_GETTER = 0;
 					virtual	void			Mode		(EPinMode) CL3_SETTER = 0;
@@ -111,7 +133,7 @@ namespace	cl3
 
 					struct	ISPIDevice : IDevice
 					{
-						virtual	usys_t	ID				() const CL3_GETTER = 0;
+						virtual	u32_t	ID				() const CL3_GETTER = 0;
 						virtual	ISPIBusController*
 										BusController	() const CL3_GETTER = 0;
 						virtual	void	Transfer		(byte_t* buffer, usys_t sz_buffer) = 0;
@@ -129,6 +151,7 @@ namespace	cl3
 										I2CDevices		() const CL3_GETTER = 0;
 						virtual	const collection::IStaticCollection<II2CDevice* const>&
 										I2CDevices		() CL3_GETTER = 0;
+						virtual	void	Scan			() = 0;
 					};
 
 					struct	II2CDevice : IDevice
@@ -161,142 +184,6 @@ namespace	cl3
 					};
 				}
 			}
-
-			class	CL3PUBT	TBCM2835 : public virtual gpio::IGPIOController, public virtual bus::spi::ISPIBusController, public virtual bus::i2c::II2CBusController
-			{
-				private:
-					CLASS TBCM2835(const TBCM2835&) = delete;
-					TBCM2835& operator=(const TBCM2835&) = delete;
-
-				public:
-					CL3PUBF	CLASS	TBCM2835	();
-					CL3PUBF	CLASS	~TBCM2835	();
-
-					//	from IGPIOController
-					CL3PUBF	const collection::IStaticCollection<const gpio::IPin* const>&
-									Pins			() const final override CL3_GETTER;
-					CL3PUBF	const collection::IStaticCollection<gpio::IPin* const>&
-									Pins			() final override CL3_GETTER;
-
-					//	from IBusController
-					CL3PUBF	u32_t	BaudrateMin		() const final override CL3_GETTER;
-					CL3PUBF	u32_t	BaudrateMax		() const final override CL3_GETTER;
-					CL3PUBF	const collection::IStaticCollection<const bus::IDevice* const>&
-									Devices			() const final override CL3_GETTER;
-					CL3PUBF	const collection::IStaticCollection<bus::IDevice* const>&
-									Devices			() final override CL3_GETTER;
-
-					//	from ISPIBusController
-					CL3PUBF	const collection::IStaticCollection<const bus::spi::ISPIDevice* const>&
-									SPIDevices		() const final override CL3_GETTER;
-					CL3PUBF	const collection::IStaticCollection<bus::spi::ISPIDevice* const>&
-									SPIDevices		() final override CL3_GETTER;
-
-					//	from II2CBusController
-					CL3PUBF	const collection::IStaticCollection<const bus::i2c::II2CDevice* const>&
-									I2CDevices		() const final override CL3_GETTER;
-					CL3PUBF	const collection::IStaticCollection<bus::i2c::II2CDevice* const>&
-									I2CDevices		() final override CL3_GETTER;
-			};
-
-	// 		class	CL3PUBT	TBCM2835
-	// 		{
-	// 			private:
-	// 				CLASS TBCM2835(const TBCM2835&) = delete;
-	//
-	// 			protected:
-	// 				class 	CL3PUBT	TPin : public gpio::IPin
-	// 				{
-	// 					private:
-	// 						TBCM2835* controller;
-	// 						CLASS TPin(TBCM2835* controller);
-	//
-	// 					public:
-	// 						CL3PUBF	gpio::IGPIOController*	Controller	() const final override CL3_GETTER;
-	// 						CL3PUBF	EPinMode			Mode		() const final override CL3_GETTER;
-	// 						CL3PUBF	void				Mode		(EPinMode) final override CL3_SETTER;
-	// 						CL3PUBF	bool				State		() const final override CL3_GETTER;
-	// 						CL3PUBF	void				State		(bool) final override CL3_SETTER;
-	// 						CL3PUBF	const TOnEdgeEvent&	OnEdge		() const final override CL3_GETTER;
-	// 				};
-	//
-	// 				class	CL3PUBT	TSPIDevice : public bus::spi::ISPIDevice
-	// 				{
-	// 					private:
-	// 						TBCM2835* controller;
-	// 						CLASS TPin(TBCM2835* controller);
-	//
-	// 					public:
-	// 						CL3PUBF	TBCM2835* BusController() const final override CL3_GETTER;
-	// 						CL3PUBF	u32_t	Baudrate	() const final override CL3_GETTER;
-	// 						CL3PUBF	void	Baudrate	(u32_t) final override CL3_SETTER;
-	//
-	// 						CL3PUBF	usys_t	Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT;
-	// 						CL3PUBF	usys_t	Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
-	// 						CL3PUBF	void	Transfer	(byte_t* buffer, usys_t sz_buffer) final override;
-	// 				};
-	//
-	// 				class	CL3PUBT	TI2CDevice : public bus::i2c::II2CDevice
-	// 				{
-	// 					private:
-	// 						TBCM2835* controller;
-	// 						CLASS TPin(TBCM2835* controller);
-	//
-	// 					public:
-	// 						CL3PUBF	TBCM2835* BusController() const final override CL3_GETTER;
-	// 						CL3PUBF	u32_t	Baudrate	() const final override CL3_GETTER;
-	// 						CL3PUBF	void	Baudrate	(u32_t) final override CL3_SETTER;
-	//
-	// 						CL3PUBF	usys_t	Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT;
-	// 						CL3PUBF	usys_t	Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
-	// 				};
-	//
-	// 			public:
-	// 				class	CL3PUBT	TGPIOController : public gpio::IGPIOController
-	// 				{
-	// 					protected:
-	// 						CLASS	TGPIOController	();
-	// 					public:
-	// 						CL3PUBF	const io::collection::IStaticCollection<IPin* const>&	Pins	() const final override CL3_GETTER;
-	// 				};
-	//
-	// 				class	CL3PUBT	TSPIBusController : public bus::spi::ISPIBusController
-	// 				{
-	// 					protected:
-	// 						CLASS	TSPIBusController();
-	// 					public:
-	// 						CL3PUBF	u32_t	BaudrateMin	() const CL3_GETTER;
-	// 						CL3PUBF	u32_t	BaudrateMax	() const CL3_GETTER;
-	// 						CL3PUBF	const collection::IStaticCollection<IDevice* const>&
-	// 										Devices		() const CL3_GETTER;
-	// 				};
-	//
-	// 				class	CL3PUBT	TI2CBusController : public bus::i2c::II2CBusController
-	// 				{
-	// 					protected:
-	// 						CLASS	TI2CBusController();
-	// 					public:
-	// 						CL3PUBF	u32_t	BaudrateMin	() const CL3_GETTER;
-	// 						CL3PUBF	u32_t	BaudrateMax	() const CL3_GETTER;
-	// 						CL3PUBF	const collection::IStaticCollection<const IDevice* const>&
-	// 										Devices		() const CL3_GETTER;
-	// 						CL3PUBF	const collection::IStaticCollection<IDevice* const>&
-	// 										Devices		() CL3_GETTER;
-	// 				};
-	//
-	// 			protected:
-	// 				TGPIOController gpio;
-	// 				TSPIBusController spibus;
-	// 				TI2CBusController i2cbus;
-	//
-	// 			public:
-	// 				inline	TGPIOController&	GPIO	() { return gpio; }
-	// 				inline	TSPIBusController&	SPI		() { return spibus; }
-	// 				inline	TI2CBusController&	I2C		() { return i2cbus; }
-	//
-	// 				CL3PUBF	CLASS	TBCM2835	();
-	// 				CL3PUBF	CLASS	~TBCM2835	();
-	// 		};
 		}
 	}
 }
