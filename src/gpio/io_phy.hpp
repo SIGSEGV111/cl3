@@ -35,7 +35,7 @@ namespace	cl3
 
 			namespace	gpio
 			{
-				struct	IPin;
+				struct	IGPIOPin;
 				struct	IGPIOController;
 
 				//	NOTE: not all controller support all modes on all pins, but they should tell you when you try set the mode on the pin (with a throw())
@@ -59,7 +59,13 @@ namespace	cl3
 					PINMODE_PCM_CLOCK,
 					PINMODE_PCM_FS,
 					PINMODE_PCM_DIN,
-					PINMODE_PCM_DOUT
+					PINMODE_PCM_DOUT,
+					PINMODE_JTAG_RESET,
+					PINMODE_JTAG_RTCK,
+					PINMODE_JTAG_TDO,
+					PINMODE_JTAG_TCK,
+					PINMODE_JTAG_TDI,
+					PINMODE_JTAG_TMS
 				};
 
 				enum	EPull
@@ -69,9 +75,9 @@ namespace	cl3
 					PULL_HIGH
 				};
 
-				typedef	event::TEvent<IPin, bool>	TOnEdgeEvent;
+				typedef	event::TEvent<IGPIOPin, bool>	TOnEdgeEvent;
 
-				struct	CL3PUBT	IPin
+				struct	CL3PUBT	IGPIOPin
 				{
 					virtual	u32_t			ID			() const CL3_GETTER = 0;
 					virtual	IGPIOController*Controller	() const CL3_GETTER = 0;
@@ -86,8 +92,8 @@ namespace	cl3
 
 				struct	CL3PUBT	IGPIOController
 				{
-					virtual	const collection::IStaticCollection<const IPin* const>&	Pins	() const CL3_GETTER = 0;
-					virtual	const collection::IStaticCollection<IPin* const>&		Pins	() CL3_GETTER = 0;
+					virtual	const collection::IStaticCollection<const IGPIOPin* const>&	Pins	() const CL3_GETTER = 0;
+					virtual	const collection::IStaticCollection<IGPIOPin* const>&		Pins	() CL3_GETTER = 0;
 				};
 			}
 
@@ -125,10 +131,9 @@ namespace	cl3
 
 					struct	ISPIBusController : virtual IBusController
 					{
-						virtual	const collection::IStaticCollection<const ISPIDevice* const>&
-										SPIDevices		() const CL3_GETTER = 0;
 						virtual	const collection::IStaticCollection<ISPIDevice* const>&
 										SPIDevices		() CL3_GETTER = 0;
+						virtual	ISPIDevice*	ByID		(u32_t id) CL3_GETTER = 0;
 					};
 
 					struct	ISPIDevice : IDevice
@@ -147,10 +152,9 @@ namespace	cl3
 
 					struct	II2CBusController : virtual IBusController
 					{
-						virtual	const collection::IStaticCollection<const II2CDevice* const>&
-										I2CDevices		() const CL3_GETTER = 0;
 						virtual	const collection::IStaticCollection<II2CDevice* const>&
 										I2CDevices		() CL3_GETTER = 0;
+						virtual	II2CDevice* ByAddress	(u8_t address) CL3_GETTER = 0;
 						virtual	void	Scan			() = 0;
 					};
 

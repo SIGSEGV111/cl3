@@ -1,3 +1,4 @@
+#include "config.hpp"
 #ifdef CL3_WITH_BCM2835
 
 // bcm2835.h

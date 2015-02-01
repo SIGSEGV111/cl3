@@ -8,7 +8,11 @@
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    but WITHOUT ANY WARRANTY
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+ without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
@@ -16,15 +20,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "config.hpp"
 #ifdef CL3_WITH_BCM2835
 
-#ifndef INSIDE_CL3
-#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
-#endif
-
-#include "io_phy_bcm2835.hpp"
-#include <cl3/core/error.hpp>
 #include "bcm2835.h"
+#include "io_phy_bcm2835.hpp"
 
 namespace	cl3
 {
@@ -32,229 +32,240 @@ namespace	cl3
 	{
 		namespace	phy
 		{
-			using namespace error;
+			/*************************************************************************/
 
-			/*****************************************************************************/
-
-			struct 	TGPIOPin : public gpio::IPin
-			{
-				TBCM2835* controller;
-				u32_t id;
-
-				CLASS	TGPIOPin	(TBCM2835* controller, u32_t id) : controller(controller), id(id) {}
-
-				u32_t	ID			() const final override
-				{
-					return this->id;
-				}
-
-				TBCM2835* Controller() const final override
-				{
-					return this->controller;
-				}
-
-				gpio::EPinMode
-						Mode		() const final override
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				void	Mode		(gpio::EPinMode new_pinmode) final override
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				gpio::EPull Pull	() const final override
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				void	Pull		(gpio::EPull new_pull) final override
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				bool	State		() const final override
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				void	State		(bool new_state) final override
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				const gpio::TOnEdgeEvent&
-						OnEdge		() const final override
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-			};
-
-			struct	TSPIDevice : public bus::spi::ISPIDevice
-			{
-				TBCM2835* controller;
-				gpio::IPin* pin_cs;
-				u32_t id;
-
-				CLASS	TSPIDevice	(TBCM2835* controller, gpio::IPin* pin_cs, u32_t id) : controller(controller), pin_cs(pin_cs), id(id) {}
-
-				u32_t	ID			() const final override
-				{
-					return this->id;
-				}
-
-				TBCM2835* BusController() const final override
-				{
-					return this->controller;
-				}
-
-				u32_t	Baudrate	() const final override
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				void	Baudrate	(u32_t new_baudrate) final override
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				usys_t	Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				usys_t	Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				void	Transfer	(byte_t* buffer, usys_t sz_buffer) final override
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-			};
-
-			struct	TI2CDevice : public bus::i2c::II2CDevice
-			{
-				TBCM2835* controller;
-				u8_t address;
-
-				CLASS	TI2CDevice	(TBCM2835* controller, u8_t address) : controller(controller), address(address) {}
-
-				u8_t	Address		() const final override
-				{
-					return this->address;
-				}
-
-				TBCM2835* BusController() const final override
-				{
-					return this->controller;
-				}
-
-				u32_t	Baudrate	() const final override
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				void	Baudrate	(u32_t new_baudrate) final override
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				usys_t	Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				usys_t	Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-			};
-
-			/*****************************************************************************/
-
-			//	from TBCM2835
-			CLASS	TBCM2835::TBCM2835		(const collection::IStaticCollection<u32_t>& spi_cs_pins, bool debug)
-			{
-				CL3_CLASS_ERROR(bcm2835_init() != 1, TException, "failed to initialize bcm2835 library");
-				bcm2835_set_debug(debug ? 1 : 0);
-
-				// add all available GPIO pins
-				for(u32_t i = 0; i < 54; i++)
-					gpio_pins.Append(new TGPIOPin(this, i));
-
-				// add one SPI device for each chip-select GPIO-pin provided by the user, and configure that pin as output
-				auto it = spi_cs_pins.CreateStaticIterator();
-				it->MoveHead();
-				for(u32_t i = 0; it->MoveNext(); i++)
-				{
-					gpio_pins[i]->Pull(gpio::PULL_DISABLED);
-					gpio_pins[i]->Mode(gpio::PINMODE_GPIO_OUTPUT);
-					spi_devices.Add(new TSPIDevice(this, gpio_pins[i], i));
-				}
-
-				// scan i2c bus for devices
-				Scan();
-
-				// add spi- and i2c-devices to the master list of devices
-				for(usys_t i = 0; i < spi_devices.Count(); i++)
-					devices.Add(spi_devices[0]);
-
-				for(usys_t i = 0; i < i2c_devices.Count(); i++)
-					devices.Add(i2c_devices[0]);
-			}
-
-			CLASS	TBCM2835::~TBCM2835		()
-			{
-				CL3_CLASS_ERROR(bcm2835_close() != 1, TException, "failed to shutdown bcm2835 library");
-			}
-
-			//	from IGPIOController
-			const collection::list::TList<gpio::IPin* const>&
-					TBCM2835::Pins			()
-			{
-				return this->gpio_pins;
-			}
-
-			//	from IBusController
-			u32_t	TBCM2835::BaudrateMin	() const
-			{
-				return 3815;
-			}
-
-			u32_t	TBCM2835::BaudrateMax	() const
-			{
-				return 125000000;
-			}
-
-			const collection::list::TList<bus::IDevice* const>&
-					TBCM2835::Devices		()
-			{
-				return this->devices;
-			}
-
-			//	from ISPIBusController
-			const collection::list::TList<bus::spi::ISPIDevice* const>&
-					TBCM2835::SPIDevices	()
-			{
-				return this->spi_devices;
-			}
-
-			//	from II2CBusController
-			const collection::list::TList<bus::i2c::II2CDevice* const>&
-					TBCM2835::I2CDevices	()
-			{
-				return this->i2c_devices;
-			}
-
-			void	TBCM2835::Scan			()
+			CLASS		TBCM2835::TPin::TPin	(TBCM2835* controller, u32_t id)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			/*****************************************************************************/
+			u32_t		TBCM2835::TPin::ID		() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			TBCM2835*	TBCM2835::TPin::Controller() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			gpio::EPinMode TBCM2835::TPin::Mode	() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			void		TBCM2835::TPin::Mode	(gpio::EPinMode new_pinmode)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			gpio::EPull TBCM2835::TPin::Pull	() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			void		TBCM2835::TPin::Pull	(gpio::EPull new_pull)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			bool		TBCM2835::TPin::State	() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			void		TBCM2835::TPin::State	(bool new_state)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			const gpio::TOnEdgeEvent&
+						TBCM2835::TPin::OnEdge	() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			/*************************************************************************/
+
+			CLASS		TBCM2835::TSPIBus::TDevice::TDevice		(TSPIBus* bus, TPin* pin_cs, u32_t id)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			u32_t		TBCM2835::TSPIBus::TDevice::ID			() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			TBCM2835::TSPIBus* TBCM2835::TSPIBus::TDevice::BusController() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			u32_t		TBCM2835::TSPIBus::TDevice::Baudrate	() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			void		TBCM2835::TSPIBus::TDevice::Baudrate	(u32_t new_baudrate)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			usys_t		TBCM2835::TSPIBus::TDevice::Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			usys_t		TBCM2835::TSPIBus::TDevice::Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			void		TBCM2835::TSPIBus::TDevice::Transfer	(byte_t* buffer, usys_t sz_buffer)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			/*************************************************************************/
+
+			CLASS		TBCM2835::TSPIBus::TSPIBus		(TBCM2835* bcm2835, const collection::IStaticCollection<u32_t>& pins_chipselect, u32_t pin_clock, u32_t pin_mosi, u32_t pin_miso)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TBCM2835::TSPIBus::~TSPIBus		()
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			u32_t		TBCM2835::TSPIBus::BaudrateMin	() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			u32_t		TBCM2835::TSPIBus::BaudrateMax	() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			const collection::list::TList<bus::IDevice* const>&
+						TBCM2835::TSPIBus::Devices		()
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			TBCM2835::TSPIBus::TDevice* TBCM2835::TSPIBus::ByID(u32_t id)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			const collection::list::TList<bus::spi::ISPIDevice* const>&
+						TBCM2835::TSPIBus::SPIDevices	()
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			/*************************************************************************/
+
+			CLASS		TBCM2835::TI2CBus::TDevice::TDevice		(TI2CBus* bus, u8_t address)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			u8_t		TBCM2835::TI2CBus::TDevice::Address		() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			TBCM2835::TI2CBus*	TBCM2835::TI2CBus::TDevice::BusController	() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			u32_t		TBCM2835::TI2CBus::TDevice::Baudrate	() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			void		TBCM2835::TI2CBus::TDevice::Baudrate	(u32_t new_baudrate)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			usys_t		TBCM2835::TI2CBus::TDevice::Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			usys_t		TBCM2835::TI2CBus::TDevice::Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			/*************************************************************************/
+
+			CLASS		TBCM2835::TI2CBus::TI2CBus		(TBCM2835* bcm2835, u32_t pin_clock, u32_t pin_data)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TBCM2835::TI2CBus::~TI2CBus		()
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			u32_t		TBCM2835::TI2CBus::BaudrateMin	() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			u32_t		TBCM2835::TI2CBus::BaudrateMax	() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			const collection::list::TList<bus::IDevice* const>&
+						TBCM2835::TI2CBus::Devices		()
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			TBCM2835::TI2CBus::TDevice* TBCM2835::TI2CBus::ByAddress(u8_t id)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			const collection::list::TList<bus::i2c::II2CDevice* const>&
+						TBCM2835::TI2CBus::I2CDevices	()
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			void		TBCM2835::TI2CBus::Scan			()
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			/*************************************************************************/
+
+			CLASS		TBCM2835::TBCM2835	(bool debug)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TBCM2835::~TBCM2835	()
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			const collection::list::TList<gpio::IGPIOPin* const>&
+						TBCM2835::Pins		()
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			/*************************************************************************/
 		}
 	}
 }
