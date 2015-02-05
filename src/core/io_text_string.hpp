@@ -54,11 +54,18 @@ namespace	cl3
 						using collection::list::TList<TUTF32>::Append;
 						using collection::list::TList<TUTF32>::Find;
 
+						CL3PUBF	void		Prepend		(const char& item_append);
+						CL3PUBF	void		Prepend		(const char* arr_items_append, usys_t n_items_append = (usys_t)-1);
+						CL3PUBF	void		Prepend		(const IStaticCollection<const char>& collection);
+						CL3PUBF	void		Prepend		(const wchar_t& item_append);
+						CL3PUBF	void		Prepend		(const wchar_t* arr_items_append, usys_t n_items_append = (usys_t)-1);
+						CL3PUBF	void		Prepend		(const IStaticCollection<const wchar_t>& collection);
+
 						CL3PUBF	void		Append		(const char& item_append);
-						CL3PUBF	void		Append		(const char* arr_items_append, usys_t n_items_append);
+						CL3PUBF	void		Append		(const char* arr_items_append, usys_t n_items_append = (usys_t)-1);
 						CL3PUBF	void		Append		(const IStaticCollection<const char>& collection);
 						CL3PUBF	void		Append		(const wchar_t& item_append);
-						CL3PUBF	void		Append		(const wchar_t* arr_items_append, usys_t n_items_append);
+						CL3PUBF	void		Append		(const wchar_t* arr_items_append, usys_t n_items_append = (usys_t)-1);
 						CL3PUBF	void		Append		(const IStaticCollection<const wchar_t>& collection);
 
 						//	append string
@@ -112,7 +119,7 @@ namespace	cl3
 						//	return parts of the string
 						CL3PUBF	TString		Left		(usys_t n_chars) const CL3_GETTER;
 						CL3PUBF	TString		Right		(usys_t n_chars) const CL3_GETTER;
-						CL3PUBF	TString		Slice		(usys_t index, usys_t n_chars) const CL3_GETTER;
+						CL3PUBF	TString		Slice		(usys_t index, usys_t n_chars = (usys_t)-1) const CL3_GETTER;
 
 						//	remove/append whitespace (or other characters)
 						CL3PUBF	void		Trim		(const IStaticCollection<const TUTF32>& collection = *whitespace, int position = POSITION_HEAD | POSITION_TAIL);
@@ -139,7 +146,7 @@ namespace	cl3
 						CL3PUBF	virtual	~TString();
 				};
 
-				class	CL3PUBT	TCString : protected virtual collection::list::TList<byte_t>, public virtual collection::IStaticCollection<byte_t>
+				class	CL3PUBT	TCString : public virtual collection::list::TList<byte_t>
 				{
 					protected:
 						const encoding::ICodec* codec;
@@ -155,6 +162,7 @@ namespace	cl3
 
 						using collection::list::TList<byte_t>::Claim;
 
+						CL3PUBF	CLASS	TCString	(const encoding::ICodec*);
 						CL3PUBF	CLASS	TCString	(const TString&, const encoding::ICodec*);
 						CL3PUBF	CLASS	TCString	(const TCString&);
 						CL3PUBF	CLASS	TCString	(TCString&&);
