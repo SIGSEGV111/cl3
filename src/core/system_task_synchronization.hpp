@@ -140,6 +140,8 @@ namespace	cl3
 							pthread_mutex_t mtx;
 						#elif (CL3_OS == CL3_OS_WINDOWS)
 							CRITICAL_SECTION cs;
+						#else
+							#error "unsupported platform"
 						#endif
 						unsigned n_times;
 
