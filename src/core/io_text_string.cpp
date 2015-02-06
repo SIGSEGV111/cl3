@@ -41,6 +41,7 @@ namespace	cl3
 				using namespace collection::list;
 				using namespace system::memory;
 				using namespace encoding;
+				using namespace error;
 
 				static	usys_t	ustrlen	(const TUTF32* str, usys_t maxlen)
 				{
@@ -52,6 +53,42 @@ namespace	cl3
 
 				/*****************************************************************/
 
+				void		TString::Prepend		(const char& item_prepend)
+				{
+					this->Insert(0, TUTF32(item_prepend));
+				}
+
+				void		TString::Prepend		(const char* arr_items_prepend, usys_t n_items_prepend)
+				{
+					if(n_items_prepend == (usys_t)-1)
+						n_items_prepend = strlen(arr_items_prepend);
+					TString tmp;
+					TUniquePtr<IDecoder> d = CODEC_CXX_CHAR->CreateDecoder();
+					d->Sink(&tmp);
+					d->Write((const byte_t*)arr_items_prepend, n_items_prepend);
+					this->Insert(0, tmp);
+				}
+
+				void		TString::Prepend		(const IStaticCollection<const char>& collection)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				void		TString::Prepend		(const wchar_t& item_prepend)
+				{
+					this->Insert(0, TUTF32(item_prepend));
+				}
+
+				void		TString::Prepend		(const wchar_t* arr_items_prepend, usys_t n_items_prepend)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				void		TString::Prepend		(const IStaticCollection<const wchar_t>& collection)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
 				void		TString::Append		(const char& item_append)
 				{
 					this->Append(TUTF32(item_append));
@@ -59,6 +96,8 @@ namespace	cl3
 
 				void		TString::Append		(const char* arr_items_append, usys_t n_items_append)
 				{
+					if(n_items_append == (usys_t)-1)
+						n_items_append = strlen(arr_items_append);
 					TUniquePtr<IDecoder> d = CODEC_CXX_CHAR->CreateDecoder();
 					d->Sink(this);
 					d->Write((const byte_t*)arr_items_append, n_items_append);
@@ -82,6 +121,8 @@ namespace	cl3
 
 				void		TString::Append		(const wchar_t* arr_items_append, usys_t n_items_append)
 				{
+					if(n_items_append == (usys_t)-1)
+						n_items_append = wcslen(arr_items_append);
 					TUniquePtr<IDecoder> d = CODEC_CXX_WCHAR->CreateDecoder();
 					d->Sink(this);
 					d->Write((const byte_t*)arr_items_append, n_items_append * sizeof(wchar_t));
@@ -274,7 +315,7 @@ namespace	cl3
 
 				usys_t		TString::Replace	(const TString& str_find, const TString& str_replace, usys_t n_times_max)
 				{
-					for(usys_t n_times = 0, idx_start = 0; n_times < n_times_max; idx_start += str_find.Count(), n_times++)
+					for(usys_t n_times = 0, idx_start = 0; n_times < n_times_max && idx_start < this->Count(); idx_start += str_find.Count(), n_times++)
 					{
 						idx_start = this->Find(str_find, idx_start, DIRECTION_FORWARD);
 						if(idx_start == (usys_t)-1)
@@ -294,6 +335,11 @@ namespace	cl3
 					if(this->Count() < str_find.Count())
 						return (usys_t)-1;
 
+					if(idx_start == (usys_t)-1)
+						idx_start = this->Count()-1;
+
+					CL3_CLASS_ERROR(idx_start >= this->Count(), TIndexOutOfBoundsException, idx_start, this->Count());
+
 					const usys_t n = this->Count() - str_find.Count();
 					switch(direction)
 					{
@@ -304,7 +350,7 @@ namespace	cl3
 							return (usys_t)-1;
 
 						case DIRECTION_BACKWARD:
-							for(usys_t i = n; i != (usys_t)-1; i--)
+							for(usys_t i = idx_start; i != (usys_t)-1 ; i--)
 								if(memcmp(this->ItemPtr(i), str_find.ItemPtr(0), str_find.Count() * 4) == 0)
 									return i;
 							return (usys_t)-1;
@@ -314,7 +360,8 @@ namespace	cl3
 
 				TString		TString::Left		(usys_t n_chars) const
 				{
-					CL3_CLASS_ERROR(n_chars > this->Count(), collection::TIndexOutOfBoundsException, n_chars-1, this->Count());
+					if(n_chars > this->Count())
+						n_chars = this->Count();
 					TString r;
 					r.Append(this->ItemPtr(0), n_chars);
 					return r;
@@ -322,7 +369,8 @@ namespace	cl3
 
 				TString		TString::Right		(usys_t n_chars) const
 				{
-					CL3_CLASS_ERROR(n_chars > this->Count(), collection::TIndexOutOfBoundsException, n_chars-1, this->Count());
+					if(n_chars > this->Count())
+						n_chars = this->Count();
 					TString r;
 					r.Append(this->ItemPtr(this->Count() - n_chars), n_chars);
 					return r;
@@ -330,6 +378,8 @@ namespace	cl3
 
 				TString		TString::Slice		(usys_t index, usys_t n_chars) const
 				{
+					if(n_chars == (usys_t)-1)
+						n_chars = this->Count() - index;
 					CL3_CLASS_ERROR(index + n_chars > this->Count(), collection::TIndexOutOfBoundsException, index + n_chars - 1, this->Count());
 					TString r;
 					r.Append(this->ItemPtr(index), n_chars);
@@ -425,6 +475,7 @@ namespace	cl3
 
 				CLASS	TString::TString	(const char*    str, usys_t maxlen) : TList<TUTF32>()
 				{
+					CL3_CLASS_ERROR(str == NULL, TException, "invalid source string pointer");
 					TUniquePtr<IDecoder> d = CODEC_CXX_CHAR->CreateDecoder();
 					d->Sink(this);
 					d->Write((const byte_t*)str, strnlen(str, maxlen) * sizeof(char));
@@ -432,6 +483,7 @@ namespace	cl3
 
 				CLASS	TString::TString	(const wchar_t* str, usys_t maxlen) : TList<TUTF32>()
 				{
+					CL3_CLASS_ERROR(str == NULL, TException, "invalid source string pointer");
 					TUniquePtr<IDecoder> d = CODEC_CXX_WCHAR->CreateDecoder();
 					d->Sink(this);
 					d->Write((const byte_t*)str, wcsnlen(str, maxlen) * sizeof(wchar_t));
@@ -439,6 +491,7 @@ namespace	cl3
 
 				CLASS	TString::TString	(const TUTF32*  str, usys_t maxlen) : TList<TUTF32>()
 				{
+					CL3_CLASS_ERROR(str == NULL, TException, "invalid source string pointer");
 					this->Append(str, ustrlen(str, maxlen));
 				}
 
@@ -480,6 +533,10 @@ namespace	cl3
 					static_cast<TList<byte_t>&>(*this) = rhs;
 					this->codec = rhs.codec;
 					return *this;
+				}
+
+				CLASS		TCString::TCString	(const encoding::ICodec* codec) : TList<byte_t>(), codec(codec)
+				{
 				}
 
 				CLASS		TCString::TCString	(const TString& str, const encoding::ICodec* codec) : TList<byte_t>(), codec(codec)

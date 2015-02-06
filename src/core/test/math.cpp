@@ -16,80 +16,463 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/math_formular.hpp>
+#include <cl3/core/math.hpp>
 #include <cl3/core/io_text_string.hpp>
 #include <gtest/gtest.h>
-
-// #include <llvm/IR/Module.h>
-// #include <llvm/IR/Constants.h>
-// #include <llvm/IR/LLVMContext.h>
-// #include <llvm/IR/IRBuilder.h>
-// #include <llvm/ExecutionEngine/ExecutionEngine.h>
-// #include <llvm/Support/TargetSelect.h>
-// #include <llvm/PassManager.h>
-// #include <llvm/PassManagers.h>
-// #include <llvm/LinkAllPasses.h>
-// #include <llvm/Transforms/IPO/PassManagerBuilder.h>
-// #include <llvm/InitializePasses.h>
 
 using namespace ::testing;
 
 namespace
 {
-	using namespace cl3::math::formular;
+	using namespace cl3::math;
 	using namespace cl3::system::memory;
 	using namespace cl3::io::text::string;
 	using namespace cl3::io::text::encoding;
-// 	using namespace llvm;
 	using namespace std;
 
-// 	TEST(math_formular, llvm)
-// 	{
-// 		InitializeNativeTarget();
-// 		Module* module = new Module("test", getGlobalContext());
-// 		std::string error_buffer;
-// 		TUniquePtr<ExecutionEngine> execution_engine = MakeUniquePtr<ExecutionEngine>(EngineBuilder(module).setErrorStr(&error_buffer).setEngineKind(EngineKind::JIT).create());
-// 		if(execution_engine == NULL)
-// 		{
-// 			puts(error_buffer.c_str());
-// 			return;
-// 		}
-//
-// 		FunctionPassManager fpm(module);
-// 		PassManager mpm;
-// 		PassManagerBuilder pmb;
-// 		pmb.OptLevel = 2;
-// 		pmb.populateFunctionPassManager(fpm);
-// 		pmb.populateModulePassManager(mpm);
-//
-// 				/*
-// // 		module->setDataLayout(*execution_engine->getDataLayout());
-// // 		fpm.add(new DataLayoutPass());
-// 		fpm.add(createBasicAliasAnalysisPass());
-// 		fpm.add(createInstructionCombiningPass());
-// 		fpm.add(createReassociatePass());
-// 		fpm.add(createGVNPass());
-// 		fpm.add(createCFGSimplificationPass());
-// */
-//
-// 		fpm.doInitialization();
-//
-// 		TUniquePtr<IFormularNode> root = MakeUniquePtr<IFormularNode>(new TOperatorNode(
-// 				MakeUniquePtr<IFormularNode>(new TLiteralNode(17.4)),
-// 				MakeUniquePtr<IFormularNode>(new TLiteralNode(10.4)),
-// 				OPERATION_ADD
-// 			));
-//
-// 		Function* code = root->GenerateCode(*module).Claim();
-//
-// 		puts("--- original code ---");
-// 		module->dump();
-// 		fpm.run(*code);
-// 		mpm.run(*module);
-// 		puts("--- optimized code ---");
-// 		module->dump();
-// 		puts("--- EXECUTION ---");
-// 		double (*func)() = (double (*)())execution_engine->getPointerToFunction(code);
-// 		printf("result: %f\n", func());
-// 	}
+	TEST(math_TVector_3i, add)
+	{
+		TVector<int, 3> op1(1,2,3);
+		TVector<int, 3> op2(1,2,3);
+		TVector<int, 3> out = op1 + op2;
+
+		EXPECT_EQ(2, out[0]);
+		EXPECT_EQ(4, out[1]);
+		EXPECT_EQ(6, out[2]);
+	}
+
+	TEST(math_TVector_3i, sub)
+	{
+		TVector<int, 3> op1(1,2,3);
+		TVector<int, 3> op2(1,2,3);
+		TVector<int, 3> out = op1 - op2;
+
+		EXPECT_EQ(0, out[0]);
+		EXPECT_EQ(0, out[1]);
+		EXPECT_EQ(0, out[2]);
+	}
+
+	TEST(math_TVector_3i, mul)
+	{
+		TVector<int, 3> op1(1,2,3);
+		TVector<int, 3> op2(1,2,3);
+		TVector<int, 3> out = op1 * op2;
+
+		EXPECT_EQ(1, out[0]);
+		EXPECT_EQ(4, out[1]);
+		EXPECT_EQ(9, out[2]);
+	}
+
+	TEST(math_TVector_3i, div)
+	{
+		TVector<int, 3> op1(1,2,3);
+		TVector<int, 3> op2(1,2,3);
+		TVector<int, 3> out = op1 / op2;
+
+		EXPECT_EQ(1, out[0]);
+		EXPECT_EQ(1, out[1]);
+		EXPECT_EQ(1, out[2]);
+	}
+
+	TEST(math_TVector_3i, assign)
+	{
+		TVector<int, 3> op1(1,2,3);
+		TVector<int, 3> op2(2,4,6);
+		op2 = op1;
+
+		EXPECT_EQ(1, op2[0]);
+		EXPECT_EQ(2, op2[1]);
+		EXPECT_EQ(3, op2[2]);
+	}
+
+	TEST(math_TVector_3i, equal)
+	{
+		{
+			TVector<int, 3> op1(1,2,3);
+			TVector<int, 3> op2(1,2,3);
+			EXPECT_TRUE(op2 == op1);
+			EXPECT_FALSE(op2 != op1);
+		}
+
+		{
+			TVector<int, 3> op1(1,2,3);
+			TVector<int, 3> op2(2,2,3);
+			EXPECT_TRUE(op2 != op1);
+			EXPECT_FALSE(op2 == op1);
+		}
+
+		{
+			TVector<int, 3> op1(1,2,4);
+			TVector<int, 3> op2(2,2,3);
+			EXPECT_TRUE(op2 != op1);
+			EXPECT_FALSE(op2 == op1);
+		}
+
+		{
+			TVector<int, 3> op1(1,5,4);
+			TVector<int, 3> op2(2,2,3);
+			EXPECT_TRUE(op2 != op1);
+			EXPECT_FALSE(op2 == op1);
+		}
+	}
+
+	TEST(math_TVector_3i, Square)
+	{
+		{
+			TVector<int, 3> op1(1,1,1);
+			EXPECT_EQ(3, op1.Square());
+		}
+
+		{
+			TVector<int, 3> op1(2,2,2);
+			EXPECT_EQ(12, op1.Square());
+		}
+
+		{
+			TVector<int, 3> op1(2,2,-2);
+			EXPECT_EQ(12, op1.Square());
+		}
+	}
+
+	TEST(math_TVector_3i, Volume)
+	{
+		{
+			TVector<int, 3> op1(1,1,1);
+			EXPECT_EQ(1, op1.Volume());
+		}
+
+		{
+			TVector<int, 3> op1(2,2,2);
+			EXPECT_EQ(8, op1.Volume());
+		}
+
+		{
+			TVector<int, 3> op1(2,2,-2);
+			EXPECT_EQ(-8, op1.Volume());
+		}
+	}
+
+	TEST(math_TVector_3i, Length)
+	{
+		{
+			TVector<int, 3> op1(1,1,1);
+			EXPECT_EQ(1, op1.Length());
+		}
+
+		{
+			TVector<int, 3> op1(2,2,2);
+			EXPECT_EQ(3, op1.Length());
+		}
+
+		{
+			TVector<int, 3> op1(2,2,-2);
+			EXPECT_EQ(3, op1.Length());
+		}
+	}
+
+	TEST(math_TVector_3i, Max)
+	{
+		{
+			TVector<int, 3> op1(1,1,1);
+			EXPECT_EQ(1, op1.Max());
+		}
+
+		{
+			TVector<int, 3> op1(2,2,2);
+			EXPECT_EQ(2, op1.Max());
+		}
+
+		{
+			TVector<int, 3> op1(2,2,-2);
+			EXPECT_EQ(2, op1.Max());
+		}
+
+		{
+			TVector<int, 3> op1(17,4,13);
+			EXPECT_EQ(17, op1.Max());
+		}
+
+		{
+			TVector<int, 3> op1(17,4,18);
+			EXPECT_EQ(18, op1.Max());
+		}
+	}
+
+	TEST(math_TVector_3i, Min)
+	{
+		{
+			TVector<int, 3> op1(1,1,1);
+			EXPECT_EQ(1, op1.Min());
+		}
+
+		{
+			TVector<int, 3> op1(2,2,2);
+			EXPECT_EQ(2, op1.Min());
+		}
+
+		{
+			TVector<int, 3> op1(2,2,-2);
+			EXPECT_EQ(-2, op1.Min());
+		}
+
+		{
+			TVector<int, 3> op1(17,4,13);
+			EXPECT_EQ(4, op1.Min());
+		}
+
+		{
+			TVector<int, 3> op1(4,17,18);
+			EXPECT_EQ(4, op1.Min());
+		}
+	}
+
+	TEST(math_TVector_3i, Abs)
+	{
+		{
+			TVector<int, 3> op1(-1,-1,1);
+			TVector<int, 3> op2 = op1.Abs();
+			EXPECT_EQ(1, op2[0]);
+			EXPECT_EQ(1, op2[1]);
+			EXPECT_EQ(1, op2[2]);
+		}
+
+		{
+			TVector<int, 3> op1(-1,-17,4);
+			TVector<int, 3> op2 = op1.Abs();
+			EXPECT_EQ(1, op2[0]);
+			EXPECT_EQ(17, op2[1]);
+			EXPECT_EQ(4, op2[2]);
+		}
+
+		{
+			TVector<int, 3> op1(-1,-17,-4);
+			TVector<int, 3> op2 = op1.Abs();
+			EXPECT_EQ(1, op2[0]);
+			EXPECT_EQ(17, op2[1]);
+			EXPECT_EQ(4, op2[2]);
+		}
+	}
+
+	TEST(math_TVector_3f, add)
+	{
+		TVector<double, 3> op1(1,2,3);
+		TVector<double, 3> op2(1,2,3);
+		TVector<double, 3> out = op1 + op2;
+
+		EXPECT_EQ(2, out[0]);
+		EXPECT_EQ(4, out[1]);
+		EXPECT_EQ(6, out[2]);
+	}
+
+	TEST(math_TVector_3f, sub)
+	{
+		TVector<double, 3> op1(1,2,3);
+		TVector<double, 3> op2(1,2,3);
+		TVector<double, 3> out = op1 - op2;
+
+		EXPECT_EQ(0, out[0]);
+		EXPECT_EQ(0, out[1]);
+		EXPECT_EQ(0, out[2]);
+	}
+
+	TEST(math_TVector_3f, mul)
+	{
+		TVector<double, 3> op1(1,2,3);
+		TVector<double, 3> op2(1,2,3);
+		TVector<double, 3> out = op1 * op2;
+
+		EXPECT_EQ(1, out[0]);
+		EXPECT_EQ(4, out[1]);
+		EXPECT_EQ(9, out[2]);
+	}
+
+	TEST(math_TVector_3f, div)
+	{
+		TVector<double, 3> op1(1,2,3);
+		TVector<double, 3> op2(1,2,3);
+		TVector<double, 3> out = op1 / op2;
+
+		EXPECT_EQ(1, out[0]);
+		EXPECT_EQ(1, out[1]);
+		EXPECT_EQ(1, out[2]);
+	}
+
+	TEST(math_TVector_3f, assign)
+	{
+		TVector<double, 3> op1(1,2,3);
+		TVector<double, 3> op2(2,4,6);
+		op2 = op1;
+
+		EXPECT_EQ(1, op2[0]);
+		EXPECT_EQ(2, op2[1]);
+		EXPECT_EQ(3, op2[2]);
+	}
+
+	TEST(math_TVector_3f, equal)
+	{
+		{
+			TVector<double, 3> op1(1,2,3);
+			TVector<double, 3> op2(1,2,3);
+			EXPECT_TRUE(op2 == op1);
+			EXPECT_FALSE(op2 != op1);
+		}
+
+		{
+			TVector<double, 3> op1(1,2,3);
+			TVector<double, 3> op2(2,2,3);
+			EXPECT_TRUE(op2 != op1);
+			EXPECT_FALSE(op2 == op1);
+		}
+
+		{
+			TVector<double, 3> op1(1,2,4);
+			TVector<double, 3> op2(2,2,3);
+			EXPECT_TRUE(op2 != op1);
+			EXPECT_FALSE(op2 == op1);
+		}
+
+		{
+			TVector<double, 3> op1(1,5,4);
+			TVector<double, 3> op2(2,2,3);
+			EXPECT_TRUE(op2 != op1);
+			EXPECT_FALSE(op2 == op1);
+		}
+	}
+
+	TEST(math_TVector_3f, Square)
+	{
+		{
+			TVector<double, 3> op1(1,1,1);
+			EXPECT_EQ(3, op1.Square());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,2);
+			EXPECT_EQ(12, op1.Square());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,-2);
+			EXPECT_EQ(12, op1.Square());
+		}
+	}
+
+	TEST(math_TVector_3f, Volume)
+	{
+		{
+			TVector<double, 3> op1(1,1,1);
+			EXPECT_EQ(1, op1.Volume());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,2);
+			EXPECT_EQ(8, op1.Volume());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,-2);
+			EXPECT_EQ(-8, op1.Volume());
+		}
+	}
+
+	TEST(math_TVector_3f, Length)
+	{
+		{
+			TVector<double, 3> op1(1,1,1);
+			EXPECT_EQ(sqrt(3), op1.Length());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,2);
+			EXPECT_EQ(sqrt(12), op1.Length());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,-2);
+			EXPECT_EQ(sqrt(12), op1.Length());
+		}
+	}
+
+	TEST(math_TVector_3f, Max)
+	{
+		{
+			TVector<double, 3> op1(1,1,1);
+			EXPECT_EQ(1, op1.Max());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,2);
+			EXPECT_EQ(2, op1.Max());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,-2);
+			EXPECT_EQ(2, op1.Max());
+		}
+
+		{
+			TVector<double, 3> op1(17,4,13);
+			EXPECT_EQ(17, op1.Max());
+		}
+
+		{
+			TVector<double, 3> op1(17,4,18);
+			EXPECT_EQ(18, op1.Max());
+		}
+	}
+
+	TEST(math_TVector_3f, Min)
+	{
+		{
+			TVector<double, 3> op1(1,1,1);
+			EXPECT_EQ(1, op1.Min());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,2);
+			EXPECT_EQ(2, op1.Min());
+		}
+
+		{
+			TVector<double, 3> op1(2,2,-2);
+			EXPECT_EQ(-2, op1.Min());
+		}
+
+		{
+			TVector<double, 3> op1(17,4,13);
+			EXPECT_EQ(4, op1.Min());
+		}
+
+		{
+			TVector<double, 3> op1(4,17,18);
+			EXPECT_EQ(4, op1.Min());
+		}
+	}
+
+	TEST(math_TVector_3f, Abs)
+	{
+		{
+			TVector<double, 3> op1(-1,-1,1);
+			TVector<double, 3> op2 = op1.Abs();
+			EXPECT_EQ(1, op2[0]);
+			EXPECT_EQ(1, op2[1]);
+			EXPECT_EQ(1, op2[2]);
+		}
+
+		{
+			TVector<double, 3> op1(-1,-17,4);
+			TVector<double, 3> op2 = op1.Abs();
+			EXPECT_EQ(1, op2[0]);
+			EXPECT_EQ(17, op2[1]);
+			EXPECT_EQ(4, op2[2]);
+		}
+
+		{
+			TVector<double, 3> op1(-1,-17,-4);
+			TVector<double, 3> op2 = op1.Abs();
+			EXPECT_EQ(1, op2[0]);
+			EXPECT_EQ(17, op2[1]);
+			EXPECT_EQ(4, op2[2]);
+		}
+	}
 }

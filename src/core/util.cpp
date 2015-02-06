@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdint.h>
 #include "util.hpp"
 #include "system_memory.hpp"
 #include "system_types_typeinfo.hpp"
@@ -69,14 +70,21 @@ namespace	cl3
 				line[3] = '0' + ((i/16)%100)/10;
 				line[4] = '0' + ((i/16)%10);
 
-				line[ 7] = hex[((base+i) >> 60) & 0x0f];
-				line[ 8] = hex[((base+i) >> 56) & 0x0f];
-				line[ 9] = hex[((base+i) >> 52) & 0x0f];
-				line[10] = hex[((base+i) >> 48) & 0x0f];
-				line[11] = hex[((base+i) >> 44) & 0x0f];
-				line[12] = hex[((base+i) >> 40) & 0x0f];
-				line[13] = hex[((base+i) >> 36) & 0x0f];
-				line[14] = hex[((base+i) >> 32) & 0x0f];
+				//TODO: fix this properly
+
+				#if(UINTPTR_MAX > UINT32_MAX)
+				{
+					line[ 7] = hex[((base+i) >> 60) & 0x0f];
+					line[ 8] = hex[((base+i) >> 56) & 0x0f];
+					line[ 9] = hex[((base+i) >> 52) & 0x0f];
+					line[10] = hex[((base+i) >> 48) & 0x0f];
+					line[11] = hex[((base+i) >> 44) & 0x0f];
+					line[12] = hex[((base+i) >> 40) & 0x0f];
+					line[13] = hex[((base+i) >> 36) & 0x0f];
+					line[14] = hex[((base+i) >> 32) & 0x0f];
+				}
+				#endif
+
 				line[15] = hex[((base+i) >> 28) & 0x0f];
 				line[16] = hex[((base+i) >> 24) & 0x0f];
 				line[17] = hex[((base+i) >> 20) & 0x0f];

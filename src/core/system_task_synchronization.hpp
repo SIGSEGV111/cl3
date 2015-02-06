@@ -140,6 +140,8 @@ namespace	cl3
 							pthread_mutex_t mtx;
 						#elif (CL3_OS == CL3_OS_WINDOWS)
 							CRITICAL_SECTION cs;
+						#else
+							#error "unsupported platform"
 						#endif
 						unsigned n_times;
 
@@ -149,7 +151,7 @@ namespace	cl3
 						CL3PUBF	void	Release		() final override;
 						CL3PUBF	bool	HasAcquired	() const final override CL3_GETTER;
 
-						CL3PUBF	CLASS	TMutex	();
+						CL3PUBF	CLASS	TMutex	(bool init_acquired = true);
 						CL3PUBF	CLASS	~TMutex	();
 				};
 

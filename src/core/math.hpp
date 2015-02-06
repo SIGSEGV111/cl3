@@ -399,10 +399,7 @@ namespace	cl3
 
 				inline	T			Length		() const
 				{
-					T s = (T)0;
-					for(unsigned int i = 0; i < nR; i++)
-						s += v[i] * v[i];
-					return sqrt(s);
+					return sqrt(this->Square());
 				}
 
 				inline	bool		IsAnyBigger	(const TVector& vOp) const

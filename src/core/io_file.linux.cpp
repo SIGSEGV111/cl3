@@ -59,9 +59,9 @@ namespace	cl3
 				this->fd = open(TCString(cwd.AbsolutePath(), CODEC_CXX_CHAR).Chars(), flags, mode);
 				if(this->fd == -1)
 				{
-					if(errno == EOPNOTSUPP)
+					if(errno == EOPNOTSUPP || errno == EINVAL)
 					{
-						TCString tmpfile_name(cwd.AbsolutePath() + L"/.cl3tmp-XXXXXX", CODEC_CXX_CHAR);
+						const TCString tmpfile_name(cwd.AbsolutePath() + L"/.cl3tmp-XXXXXX", CODEC_CXX_CHAR);
 						CL3_CLASS_SYSERR(this->fd = mkostemp((char*)tmpfile_name.Chars(), O_CLOEXEC|O_NOCTTY|O_LARGEFILE|O_RDWR));
 						CL3_CLASS_SYSERR(::unlink(tmpfile_name.Chars()));
 					}

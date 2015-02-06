@@ -111,15 +111,15 @@ namespace
 			TEST(system_time_TTime, ConvertTo_timespec)
 			{
 				{
-					const TTime t1(8589934592LL, 654743500000000LL);
+					const TTime t1(85899345LL, 654743500000000LL);
 					const timespec ts_out = t1;
-					const timespec ts_exp = { 8589934592LL, 654743LL };
+					const timespec ts_exp = { 85899345L, 654743L };
 					EXPECT_TRUE(ts_out == ts_exp);
 				}
 				{
-					const TTime t1(-8589934592LL, -654743500000000LL);
+					const TTime t1(-85899345LL, -654743500000000LL);
 					const timespec ts_out = t1;
-					const timespec ts_exp = { -8589934592LL, -654743LL };
+					const timespec ts_exp = { -85899345L, -654743L };
 					EXPECT_TRUE(ts_out == ts_exp);
 				}
 			}
@@ -127,15 +127,15 @@ namespace
 			TEST(system_time_TTime, ConvertTo_timeval)
 			{
 				{
-					const TTime t1(8589934592LL, 654743500000000000LL);
+					const TTime t1(85899345LL, 654743500000000000LL);
 					const timeval tv_out = t1;
-					const timeval tv_exp = { 8589934592LL, 654743LL };
+					const timeval tv_exp = { 85899345L, 654743LL };
 					EXPECT_TRUE(tv_out == tv_exp);
 				}
 				{
-					const TTime t1(-8589934592LL, -654743500000000000LL);
+					const TTime t1(-85899345LL, -654743500000000000LL);
 					const timeval tv_out = t1;
-					const timeval tv_exp = { -8589934592LL, -654743LL };
+					const timeval tv_exp = { -85899345L, -654743LL };
 					EXPECT_TRUE(tv_out == tv_exp);
 				}
 			}
@@ -175,13 +175,13 @@ namespace
 			TEST(system_time_TTime, Roundtrip_timespec)
 			{
 				{
-					const TTime t1(8589934592LL,1000000000LL);
+					const TTime t1(2147483647LL,1000000000LL);
 					const timespec ts = t1;
 					const TTime t2 = ts;
 					EXPECT_TRUE(t1 == t2);
 				}
 				{
-					const TTime t1(-8589934592LL,-1000000000LL);
+					const TTime t1(-2147483647LL,-1000000000LL);
 					const timespec ts = t1;
 					const TTime t2 = ts;
 					EXPECT_TRUE(t1 == t2);
@@ -191,13 +191,13 @@ namespace
 			TEST(system_time_TTime, Roundtrip_timeval)
 			{
 				{
-					const TTime t1(8589934592LL, 45678000000000000LL);
+					const TTime t1(2147483647LL, 1000000000000LL);
 					const timeval tv = t1;
 					const TTime t2 = tv;
 					EXPECT_TRUE(t1 == t2);
 				}
 				{
-					const TTime t1(-8589934592LL, -45678000000000000LL);
+					const TTime t1(-2147483647LL, -1000000000000LL);
 					const timeval tv = t1;
 					const TTime t2 = tv;
 					EXPECT_TRUE(t1 == t2);
