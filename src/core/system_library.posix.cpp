@@ -25,6 +25,7 @@
 
 #include "system_library.hpp"
 #include "io_text_encoding.hpp"
+#include "error.hpp"
 #include <dlfcn.h>
 
 namespace	cl3
@@ -37,8 +38,11 @@ namespace	cl3
 			using namespace io::collection::list;
 			using namespace io::text::string;
 			using namespace io::text::encoding;
+			using namespace error;
 
 			TList<TString> library_search_path;
+
+			//	NOTE: the error detection via dlerror() is not 100% thread safe... hope it never becomes a problem
 
 			CLASS	TLibrary::TLibrary		(const TString& libname)
 			{
@@ -56,28 +60,32 @@ namespace	cl3
 				else
 					cstr = TCString(libname, CODEC_CXX_CHAR);
 
-				int flags = RTLD_LAZY|RTLD_GLOBAL;
+				int flags = RTLD_LAZY|RTLD_LOCAL;
 
 				#if (CL3_OS_DERIVATIVE == CL3_OS_DERIVATIVE_POSIX_LINUX)
 					flags |= RTLD_DEEPBIND;
 				#endif
 
-				this->handle = dlopen(cstr.Chars(), flags);
+				CL3_CLASS_ERROR( (this->handle = dlopen(cstr.Chars(), flags)) == NULL, TException, "dlerror() = %s", dlerror() );
 			}
 
 			CLASS	TLibrary::~TLibrary		()
 			{
-				CL3_NOT_IMPLEMENTED;
+				CL3_CLASS_ERROR(dlclose(this->handle) != 0, TException, dlerror());
 			}
 
 			void*	TLibrary::ResolveSymbol	(const io::text::string::TString& name)
 			{
-				CL3_NOT_IMPLEMENTED;
+				return this->ResolveSymbol(TCString(name, CODEC_CXX_CHAR).Chars());
 			}
 
 			void*	TLibrary::ResolveSymbol	(const char* name)
 			{
-				CL3_NOT_IMPLEMENTED;
+				dlerror();	//	clear error status
+				void* const addr = dlsym(this->handle, name);
+				const char* const err = dlerror();
+				CL3_CLASS_ERROR(addr == NULL && err != NULL, TException, err);
+				return addr;
 			}
 		}
 	}
