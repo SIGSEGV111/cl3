@@ -151,7 +151,7 @@ namespace	cl3
 						CL3PUBF	void	Release		() final override;
 						CL3PUBF	bool	HasAcquired	() const final override CL3_GETTER;
 
-						CL3PUBF	CLASS	TMutex	();
+						CL3PUBF	CLASS	TMutex	(bool init_acquired = true);
 						CL3PUBF	CLASS	~TMutex	();
 				};
 

@@ -108,7 +108,7 @@ namespace	cl3
 					return this->owner == task::IThread::Self();
 				}
 
-				CLASS	TMutex::TMutex	()
+				CLASS	TMutex::TMutex	(bool init_acquired)
 				{
 					CL3_CLASS_LOGIC_ERROR(task::IThread::Self() == NULL);
 					this->owner = task::IThread::Self();
@@ -119,7 +119,8 @@ namespace	cl3
 					CL3_CLASS_PTHREAD_ERROR(pthread_mutexattr_setrobust(&attr, PTHREAD_MUTEX_ROBUST));
 					CL3_CLASS_PTHREAD_ERROR(pthread_mutex_init(&this->mtx, &attr));
 					CL3_CLASS_PTHREAD_ERROR(pthread_mutexattr_destroy(&attr));
-					CL3_CLASS_PTHREAD_ERROR(pthread_mutex_lock(&this->mtx));
+					if(init_acquired)
+						CL3_CLASS_PTHREAD_ERROR(pthread_mutex_lock(&this->mtx));
 				}
 
 				CLASS	TMutex::~TMutex	()
