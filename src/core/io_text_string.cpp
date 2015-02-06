@@ -55,12 +55,18 @@ namespace	cl3
 
 				void		TString::Prepend		(const char& item_prepend)
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->Insert(0, TUTF32(item_prepend));
 				}
 
 				void		TString::Prepend		(const char* arr_items_prepend, usys_t n_items_prepend)
 				{
-					CL3_NOT_IMPLEMENTED;
+					if(n_items_prepend == (usys_t)-1)
+						n_items_prepend = strlen(arr_items_prepend);
+					TString tmp;
+					TUniquePtr<IDecoder> d = CODEC_CXX_CHAR->CreateDecoder();
+					d->Sink(&tmp);
+					d->Write((const byte_t*)arr_items_prepend, n_items_prepend);
+					this->Insert(0, tmp);
 				}
 
 				void		TString::Prepend		(const IStaticCollection<const char>& collection)
@@ -70,7 +76,7 @@ namespace	cl3
 
 				void		TString::Prepend		(const wchar_t& item_prepend)
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->Insert(0, TUTF32(item_prepend));
 				}
 
 				void		TString::Prepend		(const wchar_t* arr_items_prepend, usys_t n_items_prepend)
@@ -354,7 +360,8 @@ namespace	cl3
 
 				TString		TString::Left		(usys_t n_chars) const
 				{
-					CL3_CLASS_ERROR(n_chars > this->Count(), collection::TIndexOutOfBoundsException, n_chars-1, this->Count());
+					if(n_chars > this->Count())
+						n_chars = this->Count();
 					TString r;
 					r.Append(this->ItemPtr(0), n_chars);
 					return r;
@@ -362,7 +369,8 @@ namespace	cl3
 
 				TString		TString::Right		(usys_t n_chars) const
 				{
-					CL3_CLASS_ERROR(n_chars > this->Count(), collection::TIndexOutOfBoundsException, n_chars-1, this->Count());
+					if(n_chars > this->Count())
+						n_chars = this->Count();
 					TString r;
 					r.Append(this->ItemPtr(this->Count() - n_chars), n_chars);
 					return r;
