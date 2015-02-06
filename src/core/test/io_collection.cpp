@@ -377,6 +377,17 @@ namespace
 		EXPECT_TRUE(dest_list[9] == 9);
 	}
 
+	TEST(io_collection_list_TList, Prepend)
+	{
+		TList<int> list;
+
+		for(int i = 0; i < 100; i++)
+			list.Prepend(i);
+
+		for(int i = 0; i < 100; i++)
+			EXPECT_EQ(99-i, list[i]);
+	}
+
 	TEST(io_collection_list_TList, Assign)
 	{
 		TList<int> source_list;
