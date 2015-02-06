@@ -82,9 +82,13 @@ namespace	cl3
 
 					virtual	void	Insert		(ssys_t rindex, const T& item_insert) = 0;	//	inserts a new item at index "index" which will get copy-constructed from "item_insert"
 					virtual	void	Insert		(ssys_t rindex, const T* arr_items_insert, usys_t n_items_insert) = 0;	//	inserts "n_items_insert" new item at index "index" which will get copy-constructed from the items in "arr_items_insert"
-					virtual	void	Insert		(ssys_t rindex, const IStaticCollection<T>& collection) = 0;	//	as above but draws the new items from another collection
+					virtual	void	Insert		(ssys_t rindex, const IStaticCollection<const T>& collection) = 0;	//	as above but draws the new items from another collection
 
 					virtual	void	Remove		(ssys_t rindex, usys_t n_items_remove) = 0;	//	removes "n_items_remove" items from the list starting at index "index"
+
+					virtual	void	Prepend		(const T& item_prepend) = 0;
+					virtual	void	Prepend		(const T* arr_items_prepend, usys_t n_items_prepend) = 0;
+					virtual	void	Prepend		(const IStaticCollection<const T>& collection) = 0;
 
 					virtual	void	Append		(const T& item_append) = 0;
 					virtual	void	Append		(const T* arr_items_append, usys_t n_items_append) = 0;
@@ -270,8 +274,13 @@ namespace	cl3
 						void		Count		(usys_t new_count, const T& item_init = T()) final override CL3_SETTER;
 						void		Insert		(ssys_t rindex, const T& item_insert) final override;
 						void		Insert		(ssys_t rindex, const T* arr_items_insert, usys_t n_items_insert) final override;
-						void		Insert		(ssys_t rindex, const IStaticCollection<T>& collection) final override;
+						void		Insert		(ssys_t rindex, const IStaticCollection<const T>& collection) final override;
 						void		Remove		(ssys_t rindex, usys_t n_items_remove) final override;
+
+						void		Prepend		(const T& item_prepend) final override;
+						void		Prepend		(const T* arr_items_prepend, usys_t n_items_prepend) final override;
+						void		Prepend		(const IStaticCollection<const T>& collection) final override;
+						void		Prepend		(const TList& list);
 
 						void		Append		(const T& item_append) final override;
 						void		Append		(const T* arr_items_append, usys_t n_items_append) final override;
@@ -878,7 +887,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				void		TList<const T>::Insert	(ssys_t rindex, const IStaticCollection<T>& collection)
+				void		TList<const T>::Insert	(ssys_t rindex, const IStaticCollection<const T>& collection)
 				{
 					const TList<const T>* list = dynamic_cast<const TList<const T>*>(&collection);
 					if(list)
@@ -906,6 +915,30 @@ namespace	cl3
 						arr_items[index + i] = system::def::move(arr_items[index + i + n_items_remove]);
 
 					Shrink(n_items_remove);
+				}
+
+				template<class T>
+				void		TList<const T>::Prepend	(const T& item_prepend)
+				{
+					Prepend(&item_prepend, 1);
+				}
+
+				template<class T>
+				void		TList<const T>::Prepend	(const T* arr_items_prepend, usys_t n_items_prepend)
+				{
+					this->Insert(0, arr_items_prepend, n_items_prepend);
+				}
+
+				template<class T>
+				void		TList<const T>::Prepend	(const IStaticCollection<const T>& collection)
+				{
+					this->Insert(0, collection);
+				}
+
+				template<class T>
+				void		TList<const T>::Prepend	(const TList& list)
+				{
+					Prepend(list.arr_items, list.n_items_current);
 				}
 
 				template<class T>
