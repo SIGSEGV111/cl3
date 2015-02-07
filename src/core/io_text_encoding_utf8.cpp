@@ -117,7 +117,10 @@ namespace	cl3
 									case ERRORACTION_ABORT:
 										CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_ENCODE, REASON_NOT_REPRESENTABLE, i, n_out);
 										break;
+									default:
+										CL3_CLASS_LOGIC_ERROR(true);
 								}
+								CL3_UNREACHABLE;
 							}
 
 							if(i < n_items_write_min)
