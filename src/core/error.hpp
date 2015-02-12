@@ -138,6 +138,16 @@ namespace	cl3
 				} \
 			} while(false)
 
+			#define	CL3_CLASS_ERROR_NOARGS(expression, TExceptionClass) do \
+			{ \
+				if(CL3_UNLIKELY( (expression) )) \
+				{ \
+					TExceptionClass exception; \
+					exception.Set(this, __FILE__, __PRETTY_FUNCTION__, #expression, NULL, __LINE__); \
+					throw exception; \
+				} \
+			} while(false)
+
 			//	this macro forwards the error - use is if you catch an exception and want to pass if downstream as inner exception
 			#define	CL3_NONCLASS_FORWARD_ERROR(inner, TExceptionClass, ...) do \
 			{ \

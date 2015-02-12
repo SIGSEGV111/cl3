@@ -28,6 +28,36 @@ namespace	cl3
 	{
 		namespace	phy
 		{
+			namespace	gpio
+			{
+				CLASS	IGPIOPin::~IGPIOPin	()
+				{
+				}
+			}
+
+			namespace	bus
+			{
+				namespace	spi
+				{
+					CLASS	ISPIDevice::~ISPIDevice	()
+					{
+					}
+				}
+
+				namespace	i2c
+				{
+					CLASS	II2CDevice::~II2CDevice	()
+					{
+					}
+				}
+
+				namespace	_1wire
+				{
+					CLASS	I1wireDevice::~I1wireDevice	()
+					{
+					}
+				}
+			}
 		}
 	}
 }

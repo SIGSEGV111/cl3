@@ -41,14 +41,17 @@ namespace	cl3
 				//	NOTE: not all controller support all modes on all pins, but they should tell you when you try set the mode on the pin (with a throw())
 				enum	EPinMode
 				{
+					PINMODE_UNDEFINED,			//	unknown or undefined function - do not use, do not touch, or else bad things can happen!
 					PINMODE_GPIO_INPUT,
 					PINMODE_GPIO_OUTPUT,
+					PINMODE_GPIO_CLOCK,			//	general purpose clock
 					PINMODE_SPI_MASTER_CLOCK,	//	act as SPI master on this pin, and use it to output the clock signal
 					PINMODE_SPI_MASTER_MOSI,	//	act as SPI master on this pin, and use it to send data to the slave
 					PINMODE_SPI_MASTER_MISO,	//	act as SPI master on this pin, and use it to receive data from the slave
 					PINMODE_SPI_SLAVE_CLOCK,	//	act as SPI slave on this pin, and use it to receive the clock signal
 					PINMODE_SPI_SLAVE_MOSI,		//	act as SPI slave on this pin, and use it to receive data from the master
 					PINMODE_SPI_SLAVE_MISO,		//	act as SPI slave on this pin, and use it to send data to the master
+					PINMODE_SPI_SLAVE_SELECT,	//	act as SPI slave on this pin, and use it as chip-select input
 					PINMODE_I2C_CLOCK,
 					PINMODE_I2C_DATA,
 					PINMODE_PWM,
@@ -71,8 +74,8 @@ namespace	cl3
 				enum	EPull
 				{
 					PULL_DISABLED,
-					PULL_LOW,
-					PULL_HIGH
+					PULL_DOWN,
+					PULL_UP
 				};
 
 				typedef	event::TEvent<IGPIOPin, bool>	TOnEdgeEvent;
@@ -88,12 +91,14 @@ namespace	cl3
 					virtual	bool			State		() const CL3_GETTER = 0;
 					virtual	void			State		(bool) CL3_SETTER = 0;
 					virtual	const TOnEdgeEvent&	OnEdge	() const CL3_GETTER = 0;
+					virtual	CL3PUBF	CLASS	~IGPIOPin	();
 				};
 
 				struct	CL3PUBT	IGPIOController
 				{
-					virtual	const collection::IStaticCollection<const IGPIOPin* const>&	Pins	() const CL3_GETTER = 0;
-					virtual	const collection::IStaticCollection<IGPIOPin* const>&		Pins	() CL3_GETTER = 0;
+					virtual	const collection::IStaticCollection<IGPIOPin* const>&
+										Pins	() CL3_GETTER = 0;
+					virtual	IGPIOPin*	ByID	(u32_t id) CL3_GETTER = 0;
 				};
 			}
 
@@ -112,6 +117,7 @@ namespace	cl3
 									BusController	() const CL3_GETTER = 0;
 					virtual	u32_t	Baudrate		() const CL3_GETTER = 0;
 					virtual	void	Baudrate		(u32_t) CL3_SETTER = 0;
+					virtual	CL3PUBF CLASS ~IDevice	();
 				};
 
 				struct	IBusController
@@ -142,6 +148,7 @@ namespace	cl3
 						virtual	ISPIBusController*
 										BusController	() const CL3_GETTER = 0;
 						virtual	void	Transfer		(byte_t* buffer, usys_t sz_buffer) = 0;
+						virtual	CL3PUBF CLASS ~ISPIDevice();
 					};
 				}
 
@@ -163,6 +170,7 @@ namespace	cl3
 						virtual	u8_t	Address			() const CL3_GETTER = 0;
 						virtual	II2CBusController*
 										BusController	() const CL3_GETTER = 0;
+						virtual	CL3PUBF CLASS ~II2CDevice();
 					};
 				}
 
@@ -181,6 +189,7 @@ namespace	cl3
 
 					struct	I1wireDevice : IDevice
 					{
+						virtual	CL3PUBF CLASS ~I1wireDevice();
 					};
 
 					class	CL3PUBT	TSoft1wire : public virtual I1wireBusController

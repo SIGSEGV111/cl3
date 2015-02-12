@@ -33,21 +33,25 @@ namespace	cl3
 		{
 			class	CL3PUBT	TBCM2835 : public gpio::IGPIOController
 			{
+				public:
+					class	TPin;
+
 				private:
 					CLASS TBCM2835(const TBCM2835&) = delete;
 					TBCM2835& operator=(const TBCM2835&) = delete;
 
 				protected:
-					collection::list::TList<gpio::IGPIOPin*> gpio_pins;
+					collection::list::TList<TPin*> gpio_pins;
 
 				public:
 					class	CL3PUBT	TPin : public gpio::IGPIOPin
 					{
+						friend class TBCM2835;
 						protected:
-							TBCM2835* controller;
+							TBCM2835* bcm2835;
 							u32_t id;
 
-							CLASS	TPin	(TBCM2835* controller, u32_t id);
+							CLASS	TPin	(TBCM2835* bcm2835, u32_t id);
 
 						public:
 							CL3PUBF	u32_t		ID			() const final override;
@@ -64,6 +68,7 @@ namespace	cl3
 
 					class	CL3PUBT	TSPIBus : public bus::spi::ISPIBusController
 					{
+						friend class TBCM2835;
 						private:
 							CLASS TSPIBus(const TSPIBus&) = delete;
 							TSPIBus& operator=(const TSPIBus&) = delete;
@@ -73,12 +78,12 @@ namespace	cl3
 							TPin* pin_clock;
 							TPin* pin_mosi;
 							TPin* pin_miso;
-							collection::list::TList<TPin*> pins_cs;
 							collection::list::TList<bus::spi::ISPIDevice*> spi_devices;
 
 						public:
 							class	CL3PUBT	TDevice : public bus::spi::ISPIDevice
 							{
+								friend class TSPIBus;
 								private:
 									CLASS TDevice(const TDevice&) = delete;
 									TDevice& operator=(const TDevice&) = delete;
@@ -87,6 +92,7 @@ namespace	cl3
 									TSPIBus* bus;
 									TPin* pin_cs;
 									u32_t id;
+									u32_t baudrate;
 
 									CLASS	TDevice	(TSPIBus* bus, TPin* pin_cs, u32_t id);
 
@@ -118,6 +124,7 @@ namespace	cl3
 
 					class	CL3PUBT	TI2CBus : public bus::i2c::II2CBusController
 					{
+						friend class TBCM2835;
 						private:
 							CLASS TI2CBus(const TI2CBus&) = delete;
 							TI2CBus& operator=(const TI2CBus&) = delete;
@@ -125,14 +132,13 @@ namespace	cl3
 						protected:
 							TBCM2835* bcm2835;
 							TPin* pin_clock;
-							TPin* pin_mosi;
-							TPin* pin_miso;
-							collection::list::TList<TPin*> pins_cs;
+							TPin* pin_data;
 							collection::list::TList<bus::i2c::II2CDevice*> i2c_devices;
 
 						public:
 							class	CL3PUBT	TDevice : public bus::i2c::II2CDevice
 							{
+								friend class TI2CBus;
 								private:
 									CLASS TDevice(const TDevice&) = delete;
 									TDevice& operator=(const TDevice&) = delete;
@@ -170,12 +176,13 @@ namespace	cl3
 					};
 
 					//	from TBCM2835
-					CL3PUBF	CLASS	TBCM2835		(bool debug = false);
-					CL3PUBF	CLASS	~TBCM2835		();
+					CL3PUBF	CLASS	TBCM2835	(bool debug = false);
+					CL3PUBF	CLASS	~TBCM2835	();
 
 					//	from IGPIOController
 					CL3PUBF	const collection::list::TList<gpio::IGPIOPin* const>&
-									Pins			() final override CL3_GETTER;
+									Pins		() final override CL3_GETTER;
+					CL3PUBF	TPin*	ByID		(u32_t id) CL3_GETTER;
 			};
 		}
 	}
