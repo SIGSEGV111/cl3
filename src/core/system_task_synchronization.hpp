@@ -116,7 +116,7 @@ namespace	cl3
 						virtual	bool	Acquire		(time::TTime timeout) CL3_WARN_UNUSED_RESULT = 0;
 						virtual	void	Release		() = 0;
 						virtual	bool	HasAcquired	() const CL3_GETTER = 0;	//	returns wheter or not, the calling thread has acquired this mutex
-						inline	bool	TryAcquire	() CL3_WARN_UNUSED_RESULT { return Acquire(time::TTime(0,0)); }
+						inline	bool	TryAcquire	() CL3_WARN_UNUSED_RESULT { return Acquire(0); }
 						virtual	CLASS	~IMutex		();
 				};
 
@@ -126,7 +126,7 @@ namespace	cl3
 					virtual	void	WaitFor	() = 0;
 					virtual	bool	WaitFor	(time::TTime timeout) CL3_WARN_UNUSED_RESULT = 0;
 
-					inline	static	void	WaitFor	(const collection::IStaticCollection<ISignal*>& signals) { CL3_NONCLASS_LOGIC_ERROR(!ISignal::WaitFor(signals, time::TTime(-1,0))); }
+					inline	static	void	WaitFor	(const collection::IStaticCollection<ISignal*>& signals) { CL3_NONCLASS_LOGIC_ERROR(!ISignal::WaitFor(signals, -1)); }
 					CL3PUBF	static	bool	WaitFor	(const collection::IStaticCollection<ISignal*>& signals, time::TTime timeout) CL3_WARN_UNUSED_RESULT;
 				};
 

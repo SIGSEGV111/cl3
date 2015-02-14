@@ -92,6 +92,11 @@ namespace	cl3
 					CL3PUBF	TTime	operator+	(const TTime op) const;
 					CL3PUBF	TTime	operator-	(const TTime op) const;
 
+					CL3PUBF	TTime&	operator*=	(const double f);
+					CL3PUBF	TTime&	operator/=	(const double f);
+					CL3PUBF	TTime	operator*	(const double f) const;
+					CL3PUBF	TTime	operator/	(const double f) const;
+
 					CL3PUBF	bool	operator>	(const TTime op) const;
 					CL3PUBF	bool	operator<	(const TTime op) const;
 					CL3PUBF	bool	operator>=	(const TTime op) const;
@@ -113,12 +118,15 @@ namespace	cl3
 					CL3PUBF	operator timeval			() const;
 
 					inline	CLASS	TTime	() : sec(0), asec(0) {}
-					CL3PUBF	CLASS	TTime	(double Seconds);
+					CL3PUBF	CLASS	TTime	(double seconds);
 					CL3PUBF	CLASS	TTime	(s64_t seconds, s64_t attoseconds);
+					CL3PUBF	CLASS	TTime	(int seconds, int attoseconds);
+					CL3PUBF	CLASS	TTime	(long long seconds, long long attoseconds);
+					CL3PUBF	CLASS	TTime	(double seconds, double attoseconds);
 					inline	CLASS	TTime	(s32_t seconds) : sec(seconds), asec(0) {}
 					inline	CLASS	TTime	(s64_t seconds) : sec(seconds), asec(0) {}
-					inline	CLASS	TTime	(struct timespec ts) : sec((s64_t)ts.tv_sec), asec((s64_t)ts.tv_nsec * (s64_t)1000000000LL) {}
-					inline	CLASS	TTime	(struct timeval tv) : sec((s64_t)tv.tv_sec), asec((s64_t)tv.tv_usec * (s64_t)1000000000000LL) {}
+					CL3PUBF	CLASS	TTime	(struct timespec ts);
+					CL3PUBF	CLASS	TTime	(struct timeval tv);
 			};
 
 // 			class	CL3PUBT	TTime64

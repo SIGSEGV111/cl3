@@ -70,12 +70,12 @@ namespace
 			{
 				{
 					const TTime t1 = TTime::UnixTime((s64_t)8589934592LL);
-					const TTime t2(8589934592LL,0);
+					const TTime t2(8589934592LL,0LL);
 					EXPECT_TRUE(t1 == t2);
 				}
 				{
 					const TTime t1 = TTime::UnixTime((s64_t)-8589934592LL);
-					const TTime t2(-8589934592LL,0);
+					const TTime t2(-8589934592LL,0LL);
 					EXPECT_TRUE(t1 == t2);
 				}
 			}
@@ -207,13 +207,13 @@ namespace
 			TEST(system_time_TTime, Roundtrip_sint64)
 			{
 				{
-					const TTime t1(8589934592LL,0);
+					const TTime t1(8589934592LL,0LL);
 					const s64_t tt = t1.UnixTimeI();;
 					const TTime t2 = tt;
 					EXPECT_TRUE(t1 == t2);
 				}
 				{
-					const TTime t1(-8589934592LL,0);
+					const TTime t1(-8589934592LL,0LL);
 					const s64_t tt = t1.UnixTimeI();;
 					const TTime t2 = tt;
 					EXPECT_TRUE(t1 == t2);
@@ -237,13 +237,13 @@ namespace
 			TEST(system_time_TTime, Overflow)
 			{
 				{
-					const TTime t1(0,1000000000000000000ULL);
+					const TTime t1(0LL,1000000000000000000ULL);
 					const TTime t2(1,0);
 					EXPECT_TRUE(t1 == t2);
 				}
 				{
-					const TTime t1(0,9223372036854775807ULL);
-					const TTime t2(9, 223372036854775807ULL);
+					const TTime t1(0LL,9223372036854775807ULL);
+					const TTime t2(9LL, 223372036854775807ULL);
 					EXPECT_TRUE(t1 == t2);
 				}
 			}
@@ -268,14 +268,14 @@ namespace
 			{
 				{
 					const TTime t1(1,1);
-					const TTime t2(2,999999999999999999ULL);
+					const TTime t2(2LL,999999999999999999ULL);
 					const TTime tr(4,0);
 					EXPECT_TRUE(tr == t1 + t2);
 				}
 				{
 					const TTime t1(2, 0);
 					const TTime t2(0,-3);
-					const TTime tr(1,1000000000000000000ULL-3ULL);
+					const TTime tr(1LL,1000000000000000000ULL-3ULL);
 					EXPECT_TRUE(tr == t1 + t2);
 				}
 			}
@@ -283,7 +283,7 @@ namespace
 			TEST(system_time_TTime, ConvertToI)
 			{
 				{
-					const TTime t1(1,123456789123456789LL);
+					const TTime t1(1LL,123456789123456789LL);
 					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_ATTOSECONDS)  == 1123456789123456789LL);
 					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_FEMTOSECONDS) == 1123456789123456LL);
 					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_PICOSECONDS)  == 1123456789123LL);
@@ -301,7 +301,7 @@ namespace
 					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_DAYS)    == 1);
 				}
 				{
-					const TTime t1(-1,-123456789123456789LL);
+					const TTime t1(-1LL,-123456789123456789LL);
 					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_ATTOSECONDS)  == -1123456789123456789LL);
 					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_FEMTOSECONDS) == -1123456789123456LL);
 					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_PICOSECONDS)  == -1123456789123LL);
@@ -323,7 +323,7 @@ namespace
 			TEST(system_time_TTime, ConvertToF)
 			{
 				{
-					const TTime t1(1,123456789123456789LL);
+					const TTime t1(1LL,123456789123456789LL);
 					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_ATTOSECONDS)  == 1123456789123456789.0);
 					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_FEMTOSECONDS) == 1123456789123456.7890);
 					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_PICOSECONDS)  == 1123456789123.4567890);
@@ -341,7 +341,7 @@ namespace
 					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_DAYS)    == 1.0793663194444444444444444444444444444);
 				}
 				{
-					const TTime t1(-1,-123456789123456789LL);
+					const TTime t1(-1LL,-123456789123456789LL);
 					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_ATTOSECONDS)  == -1123456789123456789.0);
 					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_FEMTOSECONDS) == -1123456789123456.789);
 					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_PICOSECONDS)  == -1123456789123.456789);
@@ -406,14 +406,35 @@ namespace
 
 			TEST(system_time_TTime, ConvertFrom_Int)
 			{
-				EXPECT_TRUE(TTime::ConvertFrom(TIME_UNIT_MILLISECONDS, (s64_t)123456789)  == TTime(123456,789000000000000000));
-				EXPECT_TRUE(TTime::ConvertFrom(TIME_UNIT_SECONDS, (s64_t)123456789)  == TTime(123456789,0));
+				EXPECT_TRUE(TTime::ConvertFrom(TIME_UNIT_MILLISECONDS, (s64_t)123456789)  == TTime(123456LL,789000000000000000LL));
+				EXPECT_TRUE(TTime::ConvertFrom(TIME_UNIT_SECONDS, (s64_t)123456789)  == TTime(123456789LL,0LL));
 			}
 
 			TEST(system_time_TTime, ConvertFrom_Float)
 			{
 				EXPECT_TRUE(TTime::ConvertFrom(TIME_UNIT_MILLISECONDS, 1000.0)  == TTime(1,0));
-				EXPECT_TRUE(TTime::ConvertFrom(TIME_UNIT_SECONDS,   123456789.500)  == TTime(123456789,500000000000000000));
+				EXPECT_TRUE(TTime::ConvertFrom(TIME_UNIT_SECONDS,   123456789.500)  == TTime(123456789LL,500000000000000000LL));
+			}
+
+			TEST(system_time_TTime, MulDiv)
+			{
+				{
+					TTime t1(11, 0);
+					t1 *= 3;
+					EXPECT_TRUE(t1.Seconds() == 33 && t1.Attoseconds() == 0);
+				}
+
+				{
+					TTime t1(10, 0);
+					t1 *= 3.5;
+					EXPECT_TRUE(t1.Seconds() == 35 && t1.Attoseconds() == 0);
+				}
+
+				{
+					TTime t1(10LL, 500000000000000000LL);
+					t1 *= 3.5;
+					EXPECT_TRUE(t1.Seconds() == 36 && t1.Attoseconds() == 750000000000000000LL);
+				}
 			}
 
 			TEST(system_time_TTime, Now_Realtime)
@@ -423,8 +444,8 @@ namespace
 				const TTime te = TTime::Now(TIME_CLOCK_REALTIME);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
-				const TTime td_min(0, 9000000000000000);	//  9ms
-				const TTime td_max(0,50000000000000000);	// 50ms
+				const TTime td_min(0LL, 9000000000000000LL);	//  9ms
+				const TTime td_max(0LL,50000000000000000LL);	// 50ms
 				EXPECT_TRUE(td_out > td_min);
 				EXPECT_TRUE(td_out < td_max);
 			}
@@ -436,8 +457,8 @@ namespace
 				const TTime te = TTime::Now(TIME_CLOCK_MONOTONIC);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
-				const TTime td_min(0, 9000000000000000);	//  9ms
-				const TTime td_max(0,50000000000000000);	// 50ms
+				const TTime td_min(0LL, 9000000000000000LL);	//  9ms
+				const TTime td_max(0LL,50000000000000000LL);	// 50ms
 				EXPECT_TRUE(td_out > td_min);
 				EXPECT_TRUE(td_out < td_max);
 			}
@@ -449,8 +470,8 @@ namespace
 				const TTime te = TTime::Now(TIME_CLOCK_TAI);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
-				const TTime td_min(0, 9000000000000000);	//  9ms
-				const TTime td_max(0,50000000000000000);	// 50ms
+				const TTime td_min(0LL, 9000000000000000LL);	//  9ms
+				const TTime td_max(0LL,50000000000000000LL);	// 50ms
 				EXPECT_TRUE(td_out > td_min);
 				EXPECT_TRUE(td_out < td_max);
 			}
@@ -462,7 +483,7 @@ namespace
 				const TTime te = TTime::Now(TIME_CLOCK_PROCESS);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
-				const TTime td_max(0,50000000000000000);	// 50ms
+				const TTime td_max(0LL,50000000000000000LL);	// 50ms
 				EXPECT_TRUE(td_out < td_max);
 			}
 
@@ -473,7 +494,7 @@ namespace
 				const TTime te = TTime::Now(TIME_CLOCK_THREAD);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
-				const TTime td_max(0,50000000000000000);	// 50ms
+				const TTime td_max(0LL,50000000000000000LL);	// 50ms
 				EXPECT_TRUE(td_out < td_max);
 			}
 
@@ -484,7 +505,7 @@ namespace
 				const TTime te = TTime::Now(TIME_CLOCK_PROCESS_USER);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
-				const TTime td_max(0,50000000000000000);	// 50ms
+				const TTime td_max(0LL,50000000000000000LL);	// 50ms
 				EXPECT_TRUE(td_out < td_max);
 			}
 
@@ -495,7 +516,7 @@ namespace
 				const TTime te = TTime::Now(TIME_CLOCK_PROCESS_SYS);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
-				const TTime td_max(0,50000000000000000);	// 50ms
+				const TTime td_max(0LL,50000000000000000LL);	// 50ms
 				EXPECT_TRUE(td_out < td_max);
 			}
 
@@ -506,7 +527,7 @@ namespace
 				const TTime te = TTime::Now(TIME_CLOCK_THREAD_USER);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
-				const TTime td_max(0,50000000000000000);	// 50ms
+				const TTime td_max(0LL,50000000000000000LL);	// 50ms
 				EXPECT_TRUE(td_out < td_max);
 			}
 
@@ -517,7 +538,7 @@ namespace
 				const TTime te = TTime::Now(TIME_CLOCK_THREAD_SYS);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
-				const TTime td_max(0,50000000000000000);	// 50ms
+				const TTime td_max(0LL,50000000000000000LL);	// 50ms
 				EXPECT_TRUE(td_out < td_max);
 			}
 		}
