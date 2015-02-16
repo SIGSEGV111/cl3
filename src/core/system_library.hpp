@@ -56,11 +56,17 @@ namespace	cl3
 					CL3PUBF	void*	ResolveSymbol	(const io::text::string::TString& name) CL3_WARN_UNUSED_RESULT;
 					CL3PUBF	void*	ResolveSymbol	(const char* name) CL3_WARN_UNUSED_RESULT;
 
-// 					template<class TSymbol>
-// 					void	ResolveSymbol	(io::text::string::TString name, TSymbol*& variable)
-// 					{
-// 						variable = reinterpret_cast<TSymbol*>(ResolveSymbol(system::types::typeinfo::DecorateName<TSymbol>(name)));
-// 					}
+					template<class T>
+					void	LoadSymbol	(const io::text::string::TString& name, T*& variable)
+					{
+						variable = reinterpret_cast<T*>(this->ResolveSymbol(name));
+					}
+
+					template<class T>
+					void	LoadSymbol	(const char* name, T*& variable)
+					{
+						variable = reinterpret_cast<T*>(this->ResolveSymbol(name));
+					}
 			};
 		}
 	}

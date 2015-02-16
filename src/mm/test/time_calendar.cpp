@@ -130,7 +130,7 @@ namespace
 
 	TEST(system_time_calendar_TJulianDate, D_1971_02_05__07_17_19__123456)
 	{
-		TJulianDate date( TTime((365LL + 35LL) * 24LL * 3600LL + 7LL * 3600LL + 17LL * 60LL + 19LL, 123456) );
+		TJulianDate date( TTime((365LL + 35LL) * 24LL * 3600LL + 7LL * 3600LL + 17LL * 60LL + 19LL, 123456LL) );
 
 		//EXPECT_TRUE( (TTime)date == TTime(0, 0) );
 
@@ -148,7 +148,7 @@ namespace
 
 	TEST(system_time_calendar_TJulianDate, D_1973_02_04__07_17_19__123456)
 	{
-		TJulianDate date( TTime((3*365LL + 35LL) * 24LL * 3600LL + 7LL * 3600LL + 17LL * 60LL + 19LL, 123456) );
+		TJulianDate date( TTime((3*365LL + 35LL) * 24LL * 3600LL + 7LL * 3600LL + 17LL * 60LL + 19LL, 123456LL) );
 
 		//EXPECT_TRUE( (TTime)date == TTime(0, 0) );
 
@@ -166,7 +166,7 @@ namespace
 
 	TEST(system_time_calendar_TJulianDate, D_0001_01_01__18_00_00)
 	{
-		TJulianDate date( TTime(-62136914400,0) );
+		TJulianDate date( TTime(-62136914400LL,0LL) );
 
 		//EXPECT_TRUE( (TTime)date == TTime(0, 0) );
 

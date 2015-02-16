@@ -85,6 +85,26 @@ namespace cl3
 				return TTime(*this) -= op;
 			}
 
+			TTime&	TTime::operator*=	(const double f)
+			{
+				return (*this = TTime((double)this->sec * f, (double)this->asec * f));
+			}
+
+			TTime&	TTime::operator/=	(const double f)
+			{
+				return (*this = TTime((double)this->sec / f, (double)this->asec / f));
+			}
+
+			TTime	TTime::operator*	(const double f) const
+			{
+				return TTime((double)this->sec * f, (double)this->asec * f);
+			}
+
+			TTime	TTime::operator/	(const double f) const
+			{
+				return TTime((double)this->sec / f, (double)this->asec / f);
+			}
+
 			bool	TTime::operator>	(const TTime op) const
 			{
 				if(sec > op.sec)
@@ -188,7 +208,7 @@ namespace cl3
 					return TTime(sec, value * mul);
 				}
 				else
-					return TTime(value * cunit, 0LL);
+					return TTime(value * cunit, (s64_t)0);
 			}
 
 			TTime	TTime::ConvertFrom	(EUnit cunit, double value)
@@ -242,7 +262,7 @@ namespace cl3
 
 			TTime	TTime::UnixTime		(s64_t unixtime)
 			{
-				return TTime(unixtime, 0);
+				return TTime(unixtime, (s64_t)0);
 			}
 
 			TTime::operator timespec	() const
@@ -264,7 +284,35 @@ namespace cl3
 				asec = (s64_t)(Seconds * 1000000000000000000.0);
 			}
 
-			CLASS	TTime::TTime		(s64_t Seconds, s64_t Attoseconds) : sec(Seconds), asec(Attoseconds)
+// 			CLASS	TTime::TTime		(s64_t seconds, s64_t attoseconds) : sec(seconds), asec(attoseconds)
+// 			{
+// 				Normalize();
+// 			}
+
+			CLASS	TTime::TTime		(int seconds, int attoseconds) : sec(seconds), asec(attoseconds)
+			{
+				Normalize();
+			}
+
+			CLASS	TTime::TTime		(long long seconds, long long attoseconds) : sec(seconds), asec(attoseconds)
+			{
+				Normalize();
+			}
+
+			CLASS	TTime::TTime		(double seconds, double attoseconds) : sec((s64_t)seconds), asec((s64_t)attoseconds)
+			{
+				seconds -= sec;
+				attoseconds -= asec;
+				asec += seconds * 1000000000000000000.0;
+				Normalize();
+			}
+
+			CLASS	TTime::TTime		(struct timespec ts) : sec((s64_t)ts.tv_sec), asec((s64_t)ts.tv_nsec * (s64_t)1000000000LL)
+			{
+				Normalize();
+			}
+
+			CLASS	TTime::TTime		(struct timeval tv) : sec((s64_t)tv.tv_sec), asec((s64_t)tv.tv_usec * (s64_t)1000000000000LL)
 			{
 				Normalize();
 			}

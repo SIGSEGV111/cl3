@@ -2,6 +2,8 @@
 
 set -e
 
+export cl3_libs="core mm db gpio"
+
 D=$(dirname "$0")
 export ROOT_DIR="$(bash -c "cd \"$D\""' && echo "$PWD"')"
 export PJOBS=$(grep "^processor[[:space:]]]*:[[:space:]]*[0-9]\+$" /proc/cpuinfo | wc -l)
@@ -46,7 +48,7 @@ fi
 
 for m in dbg rel; do
 	mkdir -p gen/$m/include/cl3
-	for f in core mm db; do
+	for f in $cl3_libs; do
 		ln -nfs ../../../tmp/$m/src/$f/libcl3-${f}.so gen/$m/lib/
 		ln -nfs ../../../tmp/$m/src/$f/libcl3-${f}_static.a  gen/$m/lib/
 		ln -nfs ../../../../src/$f gen/$m/include/cl3/$f
@@ -59,6 +61,6 @@ for m in dbg rel; do
 	done
 done
 
-for f in core mm db; do
+for f in $cl3_libs; do
 	ln -nfs ../../../tmp/dbg/src/$f/test/coverage/ gen/dbg/coverage/$f
 done

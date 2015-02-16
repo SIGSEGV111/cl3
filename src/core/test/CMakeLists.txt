@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 file (GLOB CL3_CORE_SRC
-    "*.h"
+    "*.hpp"
     "*.cpp"
 )
 
@@ -11,6 +11,8 @@ set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_EXE})
 
 add_executable (cl3-core-test ${CL3_CORE_SRC})
 add_dependencies (cl3-core-test cl3-core)
+add_dependencies (cl3-core-test cl3-mm)
+add_dependencies (cl3-core-test cl3-db)
 target_link_libraries (cl3-core-test gtest)
 target_link_libraries (cl3-core-test gtest_main)
 target_link_libraries (cl3-core-test cl3-core)

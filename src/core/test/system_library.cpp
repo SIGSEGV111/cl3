@@ -53,4 +53,19 @@ namespace
 			#error "unsupported platform"
 		#endif
 	}
+
+	TEST(system_library_TLibrary, LoadSymbol)
+	{
+		#if	(CL3_OS == CL3_OS_POSIX)
+			TLibrary lib("rt");
+			int (*aio_suspend)(const struct aiocb * const aiocb_list[], int nitems, const struct timespec *timeout);
+			lib.LoadSymbol("aio_suspend", aio_suspend);
+			EXPECT_TRUE(aio_suspend != NULL);
+		#elif (CL3_OS == CL3_OS_WINDOWS)
+			TLibrary lib("gdi32");
+			throw; //	TODO
+		#else
+			#error "unsupported platform"
+		#endif
+	}
 }

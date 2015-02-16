@@ -126,6 +126,7 @@ namespace	cl3
 			template<class T>
 			struct	IOut : virtual IStream<T>
 			{
+				virtual	void	Flush		() {}	//	flush buffers, and recursively call Flush() on all downstream sinks
 				virtual	usys_t	Space		() const CL3_GETTER { return (usys_t)-1; }	//	return the amount of items which at least still can be written to the sink (-1 if infinite, 0 if the sink can ever ever accept more items)
 				virtual	usys_t	Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT = 0;
 				inline	void	Write		(const T* arr_items_write, usys_t n_items_write)	{ CL3_CLASS_LOGIC_ERROR(this->Write(arr_items_write, n_items_write, n_items_write) != n_items_write); }
