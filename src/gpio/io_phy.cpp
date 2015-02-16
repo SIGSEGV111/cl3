@@ -30,7 +30,7 @@ namespace	cl3
 		{
 			namespace	gpio
 			{
-				CLASS	IGPIOPin::~IGPIOPin	()
+				CLASS	IPin::~IPin	()
 				{
 				}
 			}
@@ -39,21 +39,14 @@ namespace	cl3
 			{
 				namespace	spi
 				{
-					CLASS	ISPIDevice::~ISPIDevice	()
+					CLASS	IDevice::~IDevice	()
 					{
 					}
 				}
 
 				namespace	i2c
 				{
-					CLASS	II2CDevice::~II2CDevice	()
-					{
-					}
-				}
-
-				namespace	_1wire
-				{
-					CLASS	I1wireDevice::~I1wireDevice	()
+					CLASS	IDevice::~IDevice	()
 					{
 					}
 				}

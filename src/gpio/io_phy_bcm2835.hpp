@@ -22,6 +22,7 @@
 #include "config.hpp"
 #ifdef CL3_WITH_BCM2835
 
+#include <pthread.h>
 #include "io_phy.hpp"
 #include <cl3/core/io_collection_list.hpp>
 
@@ -31,159 +32,131 @@ namespace	cl3
 	{
 		namespace	phy
 		{
-			class	CL3PUBT	TBCM2835 : public gpio::IGPIOController
+			namespace	bcm2835
 			{
-				public:
-					class	TPin;
+				class	TPin;
+				class	TGPIO;
+				class	TSPIDevice;
+				class	TSPIBus;
 
-				private:
-					CLASS TBCM2835(const TBCM2835&) = delete;
-					TBCM2835& operator=(const TBCM2835&) = delete;
+				class	CL3PUBT	TPin : public gpio::IPin
+				{
+					friend class TGPIO;
+					private:
+						CLASS TPin(const TPin&) = delete;
+						TPin& operator=(const TPin&) = delete;
 
-				protected:
-					collection::list::TList<TPin*> gpio_pins;
+					protected:
+						TGPIO* gpio;
+						u32_t index;
+						gpio::EMode mode;
+						bool b_level_last;
+						gpio::TOnEdgeEvent on_edge;
+						gpio::TOnIdleEvent on_idle;
+						system::time::TTime dt_idletimeout;
 
-				public:
-					class	CL3PUBT	TPin : public gpio::IGPIOPin
-					{
-						friend class TBCM2835;
-						protected:
-							TBCM2835* bcm2835;
-							u32_t id;
+						CLASS	TPin	(TGPIO*, u32_t index);
 
-							CLASS	TPin	(TBCM2835* bcm2835, u32_t id);
+					public:
+						CL3PUBF	int			Function	() const CL3_GETTER;
+						CL3PUBF	void		Function	(int) CL3_SETTER;
 
-						public:
-							CL3PUBF	u32_t		ID			() const final override;
-							CL3PUBF	TBCM2835*	Controller	() const final override;
-							CL3PUBF	gpio::EPinMode Mode		() const final override;
-							CL3PUBF	void		Mode		(gpio::EPinMode new_pinmode) final override;
-							CL3PUBF	gpio::EPull Pull		() const final override;
-							CL3PUBF	void		Pull		(gpio::EPull new_pull) final override;
-							CL3PUBF	bool		State		() const final override;
-							CL3PUBF	void		State		(bool new_state) final override;
-							CL3PUBF	const gpio::TOnEdgeEvent&
-												OnEdge		() const final override;
-					};
+						//	from IPin
+						CL3PUBF	const gpio::TOnEdgeEvent&	OnEdge	() const final override CL3_GETTER;
+						CL3PUBF	const gpio::TOnIdleEvent&	OnIdle	() const final override CL3_GETTER;
 
-					class	CL3PUBT	TSPIBus : public bus::spi::ISPIBusController
-					{
-						friend class TBCM2835;
-						private:
-							CLASS TSPIBus(const TSPIBus&) = delete;
-							TSPIBus& operator=(const TSPIBus&) = delete;
+						CL3PUBF	void				IdleTimeout	(system::time::TTime) final override CL3_SETTER;
+						CL3PUBF	system::time::TTime	IdleTimeout	() const final override CL3_GETTER;
 
-						protected:
-							TBCM2835* bcm2835;
-							TPin* pin_clock;
-							TPin* pin_mosi;
-							TPin* pin_miso;
-							collection::list::TList<bus::spi::ISPIDevice*> spi_devices;
+						CL3PUBF gpio::EMode	Mode		() const final override CL3_GETTER;
+						CL3PUBF void		Mode		(gpio::EMode) final override CL3_SETTER;
+						CL3PUBF	gpio::EPull Pull		() const final override CL3_GETTER;
+						CL3PUBF	void		Pull		(gpio::EPull new_pull) final override CL3_SETTER;
+						CL3PUBF	bool		Level		() const final override;
+						CL3PUBF	void		Level		(bool new_level) final override;
+				};
 
-						public:
-							class	CL3PUBT	TDevice : public bus::spi::ISPIDevice
-							{
-								friend class TSPIBus;
-								private:
-									CLASS TDevice(const TDevice&) = delete;
-									TDevice& operator=(const TDevice&) = delete;
+				class	CL3PUBT	TGPIO : public gpio::IGPIO
+				{
+					friend class TPin;
+					private:
+						CLASS TGPIO(const TGPIO&) = delete;
+						TGPIO& operator=(const TGPIO&) = delete;
 
-								protected:
-									TSPIBus* bus;
-									TPin* pin_cs;
-									u32_t id;
-									u32_t baudrate;
+					protected:
+						pthread_t th_irq;
+						collection::list::TList<gpio::IPin* const> pins;
 
-									CLASS	TDevice	(TSPIBus* bus, TPin* pin_cs, u32_t id);
+						static void* ThreadMain(void*);
 
-								public:
-									CL3PUBF	u32_t	ID			() const final override;
-									CL3PUBF	TSPIBus*BusController() const final override;
-									CL3PUBF	u32_t	Baudrate	() const final override;
-									CL3PUBF	void	Baudrate	(u32_t new_baudrate) final override;
-									CL3PUBF	usys_t	Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override;
-									CL3PUBF	usys_t	Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override;
-									CL3PUBF	void	Transfer	(byte_t* buffer, usys_t sz_buffer) final override;
-							};
+					public:
+						CL3PUBF	CLASS	TGPIO	(bool debug = false);
+						CL3PUBF	CLASS	~TGPIO	();
+						CL3PUBF const collection::list::TList<gpio::IPin* const>&
+										Pins	() final override CL3_GETTER;
 
-							//	from TSPIBus
-							CL3PUBF	CLASS		TSPIBus			(TBCM2835* bcm2835, const collection::IStaticCollection<u32_t>& pins_chipselect, u32_t pin_clock, u32_t pin_mosi, u32_t pin_miso);
-							CL3PUBF	CLASS		~TSPIBus		();
+						CL3PUBF	static	u64_t	Tick	();	//	incremented every microsecond
+				};
 
-							//	from IBusController
-							CL3PUBF	u32_t		BaudrateMin		() const final override CL3_GETTER;
-							CL3PUBF	u32_t		BaudrateMax		() const final override CL3_GETTER;
-							CL3PUBF	const collection::list::TList<bus::IDevice* const>&
-												Devices			() final override CL3_GETTER;
-							CL3PUBF	TDevice*	ByID			(u32_t id) CL3_GETTER;
+				class	CL3PUBT	TSPIDevice : public bus::spi::IDevice
+				{
+					friend class TSPIBus;
+					private:
+						CLASS TSPIDevice(const TSPIDevice&) = delete;
+						TSPIDevice& operator=(const TSPIDevice&) = delete;
 
-							//	from ISPIBusController
-							CL3PUBF	const collection::list::TList<bus::spi::ISPIDevice* const>&
-												SPIDevices		() final override CL3_GETTER;
-					};
+					protected:
+						struct	TBusLock
+						{
+							TSPIDevice* device;
 
-					class	CL3PUBT	TI2CBus : public bus::i2c::II2CBusController
-					{
-						friend class TBCM2835;
-						private:
-							CLASS TI2CBus(const TI2CBus&) = delete;
-							TI2CBus& operator=(const TI2CBus&) = delete;
+							CLASS	TBusLock	(const TBusLock&) = delete;
+							CLASS	TBusLock	(TSPIDevice* device);
+							CLASS	~TBusLock	();
+						};
 
-						protected:
-							TBCM2835* bcm2835;
-							TPin* pin_clock;
-							TPin* pin_data;
-							collection::list::TList<bus::i2c::II2CDevice*> i2c_devices;
+						TSPIBus* bus;
+						gpio::IPin* pin_cs;
+						unsigned divider;
 
-						public:
-							class	CL3PUBT	TDevice : public bus::i2c::II2CDevice
-							{
-								friend class TI2CBus;
-								private:
-									CLASS TDevice(const TDevice&) = delete;
-									TDevice& operator=(const TDevice&) = delete;
+						CL3PUBF CLASS	TSPIDevice	(TSPIBus*, gpio::IPin*);
 
-								protected:
-									TI2CBus* bus;
-									u8_t address;
+					public:
+						CL3PUBF CLASS	~TSPIDevice	();
 
-									CLASS	TDevice	(TI2CBus* bus, u8_t address);
+						//	from IDevice
+						CL3PUBF u32_t	Baudrate	() const final override CL3_GETTER;
+						CL3PUBF void	Baudrate	(u32_t new_baudrate) final override CL3_SETTER;
+						CL3PUBF void	Transfer	(byte_t* buffer, usys_t sz_buffer) final override;
 
-								public:
-									CL3PUBF	u8_t	Address		() const final override;
-									CL3PUBF	TI2CBus*BusController() const final override;
-									CL3PUBF	u32_t	Baudrate	() const final override;
-									CL3PUBF	void	Baudrate	(u32_t new_baudrate) final override;
-									CL3PUBF	usys_t	Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override;
-									CL3PUBF	usys_t	Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override;
-							};
+						//	from IIn
+						CL3PUBF usys_t	Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT;
 
-							//	from TI2CBus
-							CL3PUBF	CLASS		TI2CBus			(TBCM2835* bcm2835, u32_t pin_clock, u32_t pin_data);
-							CL3PUBF	CLASS		~TI2CBus		();
+						//	from IOut
+						CL3PUBF usys_t	Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
+				};
 
-							//	from IBusController
-							CL3PUBF	u32_t		BaudrateMin		() const final override CL3_GETTER;
-							CL3PUBF	u32_t		BaudrateMax		() const final override CL3_GETTER;
-							CL3PUBF	const collection::list::TList<bus::IDevice* const>&
-												Devices			() final override CL3_GETTER;
-							CL3PUBF	TDevice*	ByAddress		(u8_t id) CL3_GETTER;
+				class	CL3PUBT	TSPIBus : public bus::spi::IBus
+				{
+					private:
+						CLASS TSPIBus(const TSPIBus&) = delete;
+						TSPIBus& operator=(const TSPIBus&) = delete;
 
-							//	from II2CBusController
-							CL3PUBF	const collection::list::TList<bus::i2c::II2CDevice* const>&
-												I2CDevices		() final override CL3_GETTER;
-							CL3PUBF	void		Scan			();
-					};
+					protected:
+						collection::list::TList<bus::spi::IDevice* const> devices;
+						unsigned idx_bus;
 
-					//	from TBCM2835
-					CL3PUBF	CLASS	TBCM2835	(bool debug = false);
-					CL3PUBF	CLASS	~TBCM2835	();
+					public:
+						CL3PUBF	CLASS	TSPIBus		(unsigned idx_bus, const collection::IStaticCollection<gpio::IPin*>& pins_chipselect);
+						CL3PUBF	CLASS	~TSPIBus	();
 
-					//	from IGPIOController
-					CL3PUBF	const collection::list::TList<gpio::IGPIOPin* const>&
-									Pins		() final override CL3_GETTER;
-					CL3PUBF	TPin*	ByID		(u32_t id) CL3_GETTER;
-			};
+						//	from IBus
+						CL3PUBF u32_t	BaudrateMin	() const final override CL3_GETTER;
+						CL3PUBF u32_t	BaudrateMax	() const final override CL3_GETTER;
+						CL3PUBF const collection::list::TList<bus::spi::IDevice* const>&
+										Devices		() CL3_GETTER;
+				};
+			}
 		}
 	}
 }

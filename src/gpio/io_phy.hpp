@@ -21,9 +21,9 @@
 
 #include <cl3/core/event.hpp>
 #include <cl3/core/system_types.hpp>
+#include <cl3/core/system_time.hpp>
 #include <cl3/core/io_stream.hpp>
 #include <cl3/core/io_collection.hpp>
-#include <cl3/core/io_text_string.hpp>
 
 namespace	cl3
 {
@@ -35,41 +35,8 @@ namespace	cl3
 
 			namespace	gpio
 			{
-				struct	IGPIOPin;
-				struct	IGPIOController;
-
-				//	NOTE: not all controller support all modes on all pins, but they should tell you when you try set the mode on the pin (with a throw())
-				enum	EPinMode
-				{
-					PINMODE_UNDEFINED,			//	unknown or undefined function - do not use, do not touch, or else bad things can happen!
-					PINMODE_GPIO_INPUT,
-					PINMODE_GPIO_OUTPUT,
-					PINMODE_GPIO_CLOCK,			//	general purpose clock
-					PINMODE_SPI_MASTER_CLOCK,	//	act as SPI master on this pin, and use it to output the clock signal
-					PINMODE_SPI_MASTER_MOSI,	//	act as SPI master on this pin, and use it to send data to the slave
-					PINMODE_SPI_MASTER_MISO,	//	act as SPI master on this pin, and use it to receive data from the slave
-					PINMODE_SPI_SLAVE_CLOCK,	//	act as SPI slave on this pin, and use it to receive the clock signal
-					PINMODE_SPI_SLAVE_MOSI,		//	act as SPI slave on this pin, and use it to receive data from the master
-					PINMODE_SPI_SLAVE_MISO,		//	act as SPI slave on this pin, and use it to send data to the master
-					PINMODE_SPI_SLAVE_SELECT,	//	act as SPI slave on this pin, and use it as chip-select input
-					PINMODE_I2C_CLOCK,
-					PINMODE_I2C_DATA,
-					PINMODE_PWM,
-					PINMODE_UART_TX,
-					PINMODE_UART_RX,
-					PINMODE_UART_CTS,
-					PINMODE_UART_RTS,
-					PINMODE_PCM_CLOCK,
-					PINMODE_PCM_FS,
-					PINMODE_PCM_DIN,
-					PINMODE_PCM_DOUT,
-					PINMODE_JTAG_RESET,
-					PINMODE_JTAG_RTCK,
-					PINMODE_JTAG_TDO,
-					PINMODE_JTAG_TCK,
-					PINMODE_JTAG_TDI,
-					PINMODE_JTAG_TMS
-				};
+				struct	CL3PUBT	IPin;
+				struct	CL3PUBT	IGPIO;
 
 				enum	EPull
 				{
@@ -78,122 +45,95 @@ namespace	cl3
 					PULL_UP
 				};
 
-				typedef	event::TEvent<IGPIOPin, bool>	TOnEdgeEvent;
-
-				struct	CL3PUBT	IGPIOPin
+				enum	EMode
 				{
-					virtual	u32_t			ID			() const CL3_GETTER = 0;
-					virtual	IGPIOController*Controller	() const CL3_GETTER = 0;
-					virtual	EPinMode		Mode		() const CL3_GETTER = 0;
-					virtual	void			Mode		(EPinMode) CL3_SETTER = 0;
-					virtual	EPull			Pull		() const CL3_GETTER = 0;
-					virtual	void			Pull		(EPull) CL3_SETTER = 0;
-					virtual	bool			State		() const CL3_GETTER = 0;
-					virtual	void			State		(bool) CL3_SETTER = 0;
-					virtual	const TOnEdgeEvent&	OnEdge	() const CL3_GETTER = 0;
-					virtual	CL3PUBF	CLASS	~IGPIOPin	();
+					MODE_INPUT,		//	GPIO input
+					MODE_OUTPUT,	//	GPIO output
+					MODE_TRISTATE,	//	disabled/nothing/deactivated/don't care
+					MODE_OTHER		//	other hardware specific special function
 				};
 
-				struct	CL3PUBT	IGPIOController
+				struct	TOnEdgeData
 				{
-					virtual	const collection::IStaticCollection<IGPIOPin* const>&
-										Pins	() CL3_GETTER = 0;
-					virtual	IGPIOPin*	ByID	(u32_t id) CL3_GETTER = 0;
+					bool b_level_prev;
+					bool b_level_now;
+				};
+
+				struct	TOnIdleData
+				{
+				};
+
+				typedef event::TEvent<IPin, TOnEdgeData>	TOnEdgeEvent;
+				typedef event::TEvent<IPin, TOnIdleData>	TOnIdleEvent;
+
+				struct IPin
+				{
+					//	Event callbacks *MAY* be processed by a dedicated thread!
+					virtual	CL3PUBF	const TOnEdgeEvent&	OnEdge	() const CL3_GETTER = 0;
+					virtual	CL3PUBF	const TOnIdleEvent&	OnIdle	() const CL3_GETTER = 0;
+
+					virtual	CL3PUBF	void				IdleTimeout	(system::time::TTime) CL3_SETTER = 0;
+					virtual	CL3PUBF	system::time::TTime	IdleTimeout	() const CL3_GETTER = 0;
+
+					virtual	CL3PUBF EMode	Mode	() const CL3_GETTER = 0;
+					virtual	CL3PUBF void	Mode	(EMode) CL3_SETTER = 0;
+					virtual	CL3PUBF EPull	Pull	() const CL3_GETTER = 0;
+					virtual	CL3PUBF void	Pull	(EPull) CL3_SETTER = 0;
+					virtual	CL3PUBF bool	Level	() const CL3_GETTER = 0;
+					virtual	CL3PUBF void	Level	(bool) CL3_SETTER = 0;
+					virtual	CL3PUBF	CLASS	~IPin	();
+				};
+
+				struct IGPIO
+				{
+					virtual	CL3PUBF const collection::IStaticCollection<IPin* const>&
+											Pins	() CL3_GETTER = 0;
 				};
 			}
 
-			namespace	pwm
-			{
-			};
-
 			namespace	bus
 			{
-				struct	IDevice;
-				struct	IBusController;
-
-				struct	IDevice : public virtual stream::IIn<byte_t>, public virtual stream::IOut<byte_t>
-				{
-					virtual	IBusController*
-									BusController	() const CL3_GETTER = 0;
-					virtual	u32_t	Baudrate		() const CL3_GETTER = 0;
-					virtual	void	Baudrate		(u32_t) CL3_SETTER = 0;
-					virtual	CL3PUBF CLASS ~IDevice	();
-				};
-
-				struct	IBusController
-				{
-					virtual	u32_t	BaudrateMin	() const CL3_GETTER = 0;
-					virtual	u32_t	BaudrateMax	() const CL3_GETTER = 0;
-					virtual	const collection::IStaticCollection<const IDevice* const>&
-									Devices		() const CL3_GETTER = 0;
-					virtual	const collection::IStaticCollection<IDevice* const>&
-									Devices		() CL3_GETTER = 0;
-				};
-
 				namespace	spi
 				{
-					struct	ISPIDevice;
-					struct	ISPIBusController;
+					struct	CL3PUBT	IDevice;
+					struct	CL3PUBT	IBus;
 
-					struct	ISPIBusController : virtual IBusController
+					struct	IBus
 					{
-						virtual	const collection::IStaticCollection<ISPIDevice* const>&
-										SPIDevices		() CL3_GETTER = 0;
-						virtual	ISPIDevice*	ByID		(u32_t id) CL3_GETTER = 0;
+						virtual	u32_t	BaudrateMin	() const CL3_GETTER = 0;
+						virtual	u32_t	BaudrateMax	() const CL3_GETTER = 0;
+						virtual	CL3PUBF const collection::IStaticCollection<IDevice* const>&
+										Devices		() CL3_GETTER = 0;
 					};
 
-					struct	ISPIDevice : IDevice
+					struct	IDevice : stream::IIn<byte_t>, stream::IOut<byte_t>
 					{
-						virtual	u32_t	ID				() const CL3_GETTER = 0;
-						virtual	ISPIBusController*
-										BusController	() const CL3_GETTER = 0;
-						virtual	void	Transfer		(byte_t* buffer, usys_t sz_buffer) = 0;
-						virtual	CL3PUBF CLASS ~ISPIDevice();
+						virtual	CL3PUBF u32_t	Baudrate	() const CL3_GETTER = 0;
+						virtual	CL3PUBF void	Baudrate	(u32_t new_baudrate) CL3_SETTER = 0;
+						virtual	CL3PUBF void	Transfer	(byte_t* buffer, usys_t sz_buffer) = 0;
+						virtual	CL3PUBF CLASS	~IDevice	();
 					};
 				}
 
 				namespace	i2c
 				{
-					struct	II2CDevice;
-					struct	II2CBusController;
+					struct	CL3PUBT	IDevice;
+					struct	CL3PUBT	IBus;
 
-					struct	II2CBusController : virtual IBusController
+					struct	IBus
 					{
-						virtual	const collection::IStaticCollection<II2CDevice* const>&
-										I2CDevices		() CL3_GETTER = 0;
-						virtual	II2CDevice* ByAddress	(u8_t address) CL3_GETTER = 0;
-						virtual	void	Scan			() = 0;
+						virtual	CL3PUBF u32_t		Baudrate	() const CL3_GETTER = 0;
+						virtual	CL3PUBF void		Baudrate	(u32_t new_baudrate) CL3_SETTER = 0;
+						virtual	CL3PUBF const collection::IStaticCollection<IDevice* const>&
+													Devices		() CL3_GETTER = 0;
+						virtual	CL3PUBF IDevice*	ByAddress	(u8_t address) CL3_GETTER = 0;
+						virtual	CL3PUBF void		Scan		() = 0;
 					};
 
-					struct	II2CDevice : IDevice
+					struct	IDevice : stream::IIn<byte_t>, stream::IOut<byte_t>
 					{
-						virtual	u8_t	Address			() const CL3_GETTER = 0;
-						virtual	II2CBusController*
-										BusController	() const CL3_GETTER = 0;
-						virtual	CL3PUBF CLASS ~II2CDevice();
-					};
-				}
-
-				namespace	_1wire
-				{
-					struct	I1wireDevice;
-					struct	I1wireBusController;
-
-					struct	I1wireBusController : virtual IBusController
-					{
-						virtual	const collection::IStaticCollection<const I1wireDevice* const>&
-										_1wireDevices	() const CL3_GETTER = 0;
-						virtual	const collection::IStaticCollection<I1wireDevice* const>&
-										_1wireDevices	() CL3_GETTER = 0;
-					};
-
-					struct	I1wireDevice : IDevice
-					{
-						virtual	CL3PUBF CLASS ~I1wireDevice();
-					};
-
-					class	CL3PUBT	TSoft1wire : public virtual I1wireBusController
-					{
+						virtual	CL3PUBF u8_t		Address		() const CL3_GETTER = 0;
+						virtual	CL3PUBF CLASS		~IDevice	();
 					};
 				}
 			}

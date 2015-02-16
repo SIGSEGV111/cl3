@@ -119,7 +119,7 @@ namespace	cl3
 
 					inline	CLASS	TTime	() : sec(0), asec(0) {}
 					CL3PUBF	CLASS	TTime	(double seconds);
-					CL3PUBF	CLASS	TTime	(s64_t seconds, s64_t attoseconds);
+// 					CL3PUBF	CLASS	TTime	(s64_t seconds, s64_t attoseconds);
 					CL3PUBF	CLASS	TTime	(int seconds, int attoseconds);
 					CL3PUBF	CLASS	TTime	(long long seconds, long long attoseconds);
 					CL3PUBF	CLASS	TTime	(double seconds, double attoseconds);

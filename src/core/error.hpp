@@ -224,10 +224,6 @@ namespace	cl3
 				} \
 			} while(false)
 		#endif
-		#if (CL3_OS == CL3_OS_WINDOWS)
-			#define	CL3_SYSERR(expression)
-		#endif
-
 	}
 }
 

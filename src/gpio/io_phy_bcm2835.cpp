@@ -28,6 +28,22 @@
 #include "bcm2835.h"
 #include "io_phy_bcm2835.hpp"
 #include <cl3/core/error.hpp>
+#include <signal.h>
+#include <sys/signalfd.h>
+#include <poll.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/mman.h>
+
+inline static bool operator==(const struct pollfd& pfd1, const struct pollfd& pfd2) { return memcmp(&pfd1, &pfd2, sizeof(struct pollfd)) == 0; }
+inline static bool operator> (const struct pollfd& pfd1, const struct pollfd& pfd2) { return memcmp(&pfd1, &pfd2, sizeof(struct pollfd)) >  0; }
+inline static bool operator< (const struct pollfd& pfd1, const struct pollfd& pfd2) { return memcmp(&pfd1, &pfd2, sizeof(struct pollfd)) <  0; }
+inline static bool operator>=(const struct pollfd& pfd1, const struct pollfd& pfd2) { return memcmp(&pfd1, &pfd2, sizeof(struct pollfd)) >= 0; }
+inline static bool operator<=(const struct pollfd& pfd1, const struct pollfd& pfd2) { return memcmp(&pfd1, &pfd2, sizeof(struct pollfd)) <= 0; }
 
 namespace	cl3
 {
@@ -35,380 +51,481 @@ namespace	cl3
 	{
 		namespace	phy
 		{
-			using namespace error;
-
-			/*************************************************************************/
-
-			/*
-			PINMODE_GPIO_INPUT,
-			PINMODE_GPIO_OUTPUT,
-			PINMODE_GPIO_CLOCK,
-			PINMODE_SPI_MASTER_CLOCK,
-			PINMODE_SPI_MASTER_MOSI,
-			PINMODE_SPI_MASTER_MISO,
-			PINMODE_SPI_SLAVE_CLOCK,
-			PINMODE_SPI_SLAVE_MOSI,
-			PINMODE_SPI_SLAVE_MISO,
-			PINMODE_I2C_CLOCK,
-			PINMODE_I2C_DATA,
-			PINMODE_PWM,
-			PINMODE_UART_TX,
-			PINMODE_UART_RX,
-			PINMODE_UART_CTS,
-			PINMODE_UART_RTS,
-			PINMODE_PCM_CLOCK,
-			PINMODE_PCM_FS,
-			PINMODE_PCM_DIN,
-			PINMODE_PCM_DOUT,
-			PINMODE_JTAG_RESET,
-			PINMODE_JTAG_RTCK,
-			PINMODE_JTAG_TDO,
-			PINMODE_JTAG_TCK,
-			PINMODE_JTAG_TDI,
-			PINMODE_JTAG_TMS
-			*/
-
-			namespace	gpio
+			namespace	bcm2835
 			{
-				static const EPinMode PIN2FUNC[54][6] =
-					{
-						{PINMODE_I2C_DATA,			PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED,		PINMODE_UNDEFINED,			PINMODE_UNDEFINED }, //  0
-						{PINMODE_I2C_CLOCK,			PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED,		PINMODE_UNDEFINED,			PINMODE_UNDEFINED }, //  1
-						{PINMODE_I2C_DATA,			PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED,		PINMODE_UNDEFINED,			PINMODE_UNDEFINED }, //  2
-						{PINMODE_I2C_CLOCK,			PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED,		PINMODE_UNDEFINED,			PINMODE_UNDEFINED }, //  3
-						{PINMODE_GPIO_CLOCK,		PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED,		PINMODE_UNDEFINED,			PINMODE_UNDEFINED }, //  4
-						{PINMODE_GPIO_CLOCK,		PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED,		PINMODE_UNDEFINED,			PINMODE_UNDEFINED }, //  5
-						{PINMODE_GPIO_CLOCK,		PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED,		PINMODE_UNDEFINED,			PINMODE_UNDEFINED }, //  6
-						{PINMODE_GPIO_OUTPUT,		PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED,		PINMODE_UNDEFINED,			PINMODE_UNDEFINED }, //  7
-						{PINMODE_GPIO_OUTPUT,		PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED,		PINMODE_UNDEFINED,			PINMODE_UNDEFINED }, //  8
-						{PINMODE_SPI_MASTER_MISO,	PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED,		PINMODE_UNDEFINED,			PINMODE_UNDEFINED }, //  9
-						{PINMODE_SPI_MASTER_MOSI,	PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED,		PINMODE_UNDEFINED,			PINMODE_UNDEFINED }, // 10
-						{PINMODE_SPI_MASTER_CLOCK,	PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED,		PINMODE_UNDEFINED,			PINMODE_UNDEFINED }, // 11
-						{PINMODE_PWM,				PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED,		PINMODE_UNDEFINED,			PINMODE_UNDEFINED }, // 12
-						{PINMODE_PWM,				PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED,		PINMODE_UNDEFINED,			PINMODE_UNDEFINED }, // 13
-						{PINMODE_UART_TX,			PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED,		PINMODE_UNDEFINED,			PINMODE_UNDEFINED }, // 14
-						{PINMODE_UART_RX,			PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED,		PINMODE_UNDEFINED,			PINMODE_UNDEFINED }, // 15
-						{PINMODE_UNDEFINED,			PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UART_CTS,			PINMODE_GPIO_OUTPUT,		PINMODE_UART_CTS  }, // 16
-						{PINMODE_UNDEFINED,			PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UART_RTS,			PINMODE_GPIO_OUTPUT,		PINMODE_UART_RTS  }, // 17
-						{PINMODE_PCM_CLOCK,			PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_SPI_SLAVE_MOSI,	PINMODE_GPIO_OUTPUT,		PINMODE_PWM       }, // 18
-						{PINMODE_PCM_FS,			PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_SPI_SLAVE_CLOCK,	PINMODE_SPI_MASTER_MISO,	PINMODE_PWM       }, // 19
-						{PINMODE_PCM_DIN,			PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_SPI_SLAVE_MISO,	PINMODE_SPI_MASTER_MOSI,	PINMODE_GPIO_CLOCK}, // 20
-						{PINMODE_PCM_DOUT,			PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_SPI_SLAVE_SELECT,	PINMODE_SPI_MASTER_CLOCK,	PINMODE_GPIO_CLOCK}, // 21
+				using namespace error;
+				using namespace system::time;
+				using namespace collection::list;
 
-						{PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_JTAG_RESET, PINMODE_UNDEFINED}, // 22
-						{PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_JTAG_RTCK,  PINMODE_UNDEFINED}, // 23
-						{PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_JTAG_TDO,   PINMODE_UNDEFINED}, // 24
-						{PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_JTAG_TCK,   PINMODE_UNDEFINED}, // 25
-						{PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_JTAG_TDI,   PINMODE_UNDEFINED}, // 26
-						{PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_JTAG_TMS,   PINMODE_UNDEFINED}, // 27
+				/*************************************************************************/
 
-						{PINMODE_I2C_DATA,  PINMODE_UNDEFINED, PINMODE_PCM_CLOCK, PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED}, // 28
-						{PINMODE_I2C_CLOCK, PINMODE_UNDEFINED, PINMODE_PCM_FS,    PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UNDEFINED}, // 29
-						{PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_PCM_DIN,   PINMODE_UART_CTS,  PINMODE_UNDEFINED, PINMODE_UART_CTS }, // 30
-						{PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_PCM_DOUT,  PINMODE_UART_RTS,  PINMODE_UNDEFINED, PINMODE_UART_RTS }, // 31
+				static const usys_t N_GPIO_PINS = 54;
 
-						{PINMODE_GPIO_CLOCK, PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UART_TX, PINMODE_UNDEFINED, PINMODE_UART_TX }, // 32
-						{PINMODE_UNDEFINED,  PINMODE_UNDEFINED, PINMODE_UNDEFINED, PINMODE_UART_RX, PINMODE_UNDEFINED, PINMODE_UART_RX }, // 33
-					};
-			}
-
-			CLASS		TBCM2835::TPin::TPin	(TBCM2835* bcm2835, u32_t id) : bcm2835(bcm2835), id(id)
-			{
-			}
-
-			u32_t		TBCM2835::TPin::ID		() const
-			{
-				return this->id;
-			}
-
-			TBCM2835*	TBCM2835::TPin::Controller() const
-			{
-				return this->bcm2835;
-			}
-
-			gpio::EPinMode TBCM2835::TPin::Mode	() const
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			void		TBCM2835::TPin::Mode	(gpio::EPinMode new_pinmode)
-			{
-				CL3_NOT_IMPLEMENTED;
-				//bcm2835_gpio_fsel
-				/*
-					BCM2835_GPIO_FSEL_INPT
-					BCM2835_GPIO_FSEL_OUTP
-					BCM2835_GPIO_FSEL_ALT0
-					BCM2835_GPIO_FSEL_ALT1
-					BCM2835_GPIO_FSEL_ALT2
-					BCM2835_GPIO_FSEL_ALT3
-					BCM2835_GPIO_FSEL_ALT4
-					BCM2835_GPIO_FSEL_ALT5
-				*/
-			}
-
-			gpio::EPull TBCM2835::TPin::Pull	() const
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			void		TBCM2835::TPin::Pull	(gpio::EPull new_pull)
-			{
-				switch(new_pull)
+				CLASS		TPin::TPin	(TGPIO* gpio, u32_t index) : gpio(gpio), index(index), mode(gpio::MODE_TRISTATE), b_level_last(false), dt_idletimeout(-1)
 				{
-					case gpio::PULL_DISABLED:
-						bcm2835_gpio_set_pud(this->id, BCM2835_GPIO_PUD_OFF);
-						break;
-					case gpio::PULL_DOWN:
-						bcm2835_gpio_set_pud(this->id, BCM2835_GPIO_PUD_DOWN);
-						break;
-					case gpio::PULL_UP:
-						bcm2835_gpio_set_pud(this->id, BCM2835_GPIO_PUD_UP);
-						break;
 				}
-			}
 
-			bool		TBCM2835::TPin::State	() const
-			{
-				return bcm2835_gpio_lev(this->id) == HIGH;
-			}
-
-			void		TBCM2835::TPin::State	(bool new_state)
-			{
-				if(new_state)
-					bcm2835_gpio_set(this->id);
-				else
-					bcm2835_gpio_clr(this->id);
-			}
-
-			const gpio::TOnEdgeEvent&
-						TBCM2835::TPin::OnEdge	() const
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			/*************************************************************************/
-
-			CLASS		TBCM2835::TSPIBus::TDevice::TDevice		(TSPIBus* bus, TPin* pin_cs, u32_t id) : bus(bus), pin_cs(pin_cs), id(id), baudrate(bus->BaudrateMin())
-			{
-			}
-
-			u32_t		TBCM2835::TSPIBus::TDevice::ID			() const
-			{
-				return this->id;
-			}
-
-			TBCM2835::TSPIBus* TBCM2835::TSPIBus::TDevice::BusController() const
-			{
-				return this->bus;
-			}
-
-			u32_t		TBCM2835::TSPIBus::TDevice::Baudrate	() const
-			{
-				return this->baudrate;
-			}
-
-			void		TBCM2835::TSPIBus::TDevice::Baudrate	(u32_t new_baudrate)
-			{
-				CL3_CLASS_ERROR(new_baudrate < this->bus->BaudrateMin() || new_baudrate < this->bus->BaudrateMax(), TException, "unsupported baudrate requested");
-				u32_t divider = 1;
-				for(; (125000000 / divider) > new_baudrate; divider *= 2);
-				this->baudrate = 125000000 / divider;
-			}
-
-			usys_t		TBCM2835::TSPIBus::TDevice::Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			usys_t		TBCM2835::TSPIBus::TDevice::Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			void		TBCM2835::TSPIBus::TDevice::Transfer	(byte_t* buffer, usys_t sz_buffer)
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			/*************************************************************************/
-
-			CLASS		TBCM2835::TSPIBus::TSPIBus		(TBCM2835* bcm2835, const collection::IStaticCollection<u32_t>& pins_chipselect, u32_t pin_clock, u32_t pin_mosi, u32_t pin_miso) : bcm2835(bcm2835), pin_clock(bcm2835->ByID(pin_clock)), pin_mosi(bcm2835->ByID(pin_mosi)), pin_miso(bcm2835->ByID(pin_miso))
-			{
-				CL3_CLASS_ERROR_NOARGS(pin_clock != 11 || pin_mosi != 10 || pin_miso != 9, TNotImplementedException);	//	FIXME: can only use SPI0 for now...
-				bcm2835_spi_begin();
-				bcm2835_spi_chipSelect(BCM2835_SPI_CS_NONE);	//	handle chip-select in cl3-/user-code to support more than two devices on the bus and to support crazy devices
-
-				this->pin_clock->Mode(gpio::PINMODE_SPI_MASTER_CLOCK);
-				this->pin_mosi->Mode(gpio::PINMODE_SPI_MASTER_MOSI);
-				this->pin_miso->Mode(gpio::PINMODE_SPI_MASTER_MISO);
-
-				auto it = pins_chipselect.CreateStaticIterator();
-				it->MoveHead();
-				for(u32_t i = 0; it->MoveNext(); i++)
+				const gpio::TOnEdgeEvent&
+							TPin::OnEdge() const
 				{
-					if(it->Item() == (u32_t)-1)
+					return this->on_edge;
+				}
+
+				const gpio::TOnIdleEvent&
+							TPin::OnIdle() const
+				{
+					return this->on_idle;
+				}
+
+				void	TPin::IdleTimeout	(TTime new_idletimeout)
+				{
+					this->dt_idletimeout = new_idletimeout;
+				}
+
+				TTime	TPin::IdleTimeout	() const
+				{
+					return this->dt_idletimeout;
+				}
+
+				gpio::EMode TPin::Mode	() const
+				{
+					return this->mode;
+				}
+
+				void		TPin::Mode	(gpio::EMode new_mode)
+				{
+					switch(new_mode)
 					{
-						//	handle chip-select in user code
-						this->spi_devices.Append(new TBCM2835::TSPIBus::TDevice(this, NULL, i));
+						case gpio::MODE_TRISTATE:	//	disabled/nothing/deactivated/don't care (same as INPT for bcm2835)
+							break;
+						case gpio::MODE_INPUT:	//	GPIO input
+							bcm2835_gpio_fsel(this->index, BCM2835_GPIO_FSEL_INPT);
+							break;
+						case gpio::MODE_OUTPUT:	//	GPIO output
+							bcm2835_gpio_fsel(this->index, BCM2835_GPIO_FSEL_OUTP);
+							break;
+						case gpio::MODE_OTHER:	//	other hardware specific special function
+							CL3_CLASS_FAIL(TException, "cannot set MODE_OTHER thru this interface, please use the bcm2835-specific Function() property instead");
 					}
+					this->mode = new_mode;
+					pthread_kill(this->gpio->th_irq, SIGUSR1);
+				}
+
+				gpio::EPull TPin::Pull	() const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				void		TPin::Pull	(gpio::EPull new_pull)
+				{
+					switch(new_pull)
+					{
+						case gpio::PULL_DISABLED:
+							bcm2835_gpio_set_pud(this->index, BCM2835_GPIO_PUD_OFF);
+							break;
+						case gpio::PULL_DOWN:
+							bcm2835_gpio_set_pud(this->index, BCM2835_GPIO_PUD_DOWN);
+							break;
+						case gpio::PULL_UP:
+							bcm2835_gpio_set_pud(this->index, BCM2835_GPIO_PUD_UP);
+							break;
+					}
+				}
+
+				bool		TPin::Level	() const
+				{
+					return bcm2835_gpio_lev(this->index) == HIGH;
+				}
+
+				void		TPin::Level	(bool new_level)
+				{
+					if(new_level)
+						bcm2835_gpio_set(this->index);
 					else
+						bcm2835_gpio_clr(this->index);
+				}
+
+				void*		TGPIO::ThreadMain	(void* _gpio)
+				{
+// 					fprintf(stderr, "GPIO-IRQ-THREAD: INFO: booting ... \n");
+					int fd_export = -1;
+					int fd_unexport = -1;
+					try
 					{
-						//	handle chip-select in cl3 code
-						TPin* const pin = bcm2835->ByID(it->Item());
-						pin->Mode(gpio::PINMODE_GPIO_OUTPUT);
-						pin->Pull(gpio::PULL_DOWN);
-						pin->State(false);
-						this->spi_devices.Append(new TBCM2835::TSPIBus::TDevice(this, pin, i));
+						TGPIO* gpio = reinterpret_cast<TGPIO*>(_gpio);
+
+						//	open gpio sysfs interface
+						CL3_NONCLASS_SYSERR(fd_export = open("/sys/class/gpio/export", O_CLOEXEC|O_NOCTTY|O_WRONLY));
+						CL3_NONCLASS_SYSERR(fd_unexport = open("/sys/class/gpio/unexport", O_CLOEXEC|O_NOCTTY|O_WRONLY));
+
+						//	block all signals (handle the later via signalfd)
+						{
+							sigset_t ss;
+							sigfillset(&ss);
+							pthread_sigmask(SIG_BLOCK, &ss, NULL);
+						}
+
+						// set realtime prio
+						{
+							sched_param p = {};
+							p.sched_priority = 1;
+							CL3_NONCLASS_SYSERR(sched_setscheduler(0, SCHED_FIFO, &p));
+							CL3_NONCLASS_SYSERR(mlockall(MCL_CURRENT|MCL_FUTURE));
+						}
+
+						//	build list of all FDs to monitor
+						struct pollfd pfds[N_GPIO_PINS + 1];
+
+						{
+							//	init entries for the pins
+							for(usys_t i = 0; i < N_GPIO_PINS; i++)
+							{
+								pfds[i].fd = -1;
+								pfds[i].events = POLLPRI;
+								pfds[i].revents = 0;
+							}
+
+							//	init entry for the signalfd
+							sigset_t ss;
+							sigemptyset(&ss);
+							sigaddset(&ss, SIGTERM);
+							sigaddset(&ss, SIGUSR1);
+							CL3_NONCLASS_SYSERR(pfds[N_GPIO_PINS].fd = signalfd(-1, &ss, SFD_CLOEXEC|SFD_NONBLOCK));
+							pfds[N_GPIO_PINS].events = POLLIN;	//	POLLIN for the signalfd
+							pfds[N_GPIO_PINS].revents = 0;
+						}
+
+// 						fprintf(stderr, "GPIO-IRQ-THREAD: INFO: READY\n");
+						//	set this once all configuration is done to notify the controller thread (which is waiting in TGPIO::TGPIO())
+						*((volatile pthread_t*)(&gpio->th_irq)) = pthread_self();
+
+						//	wait for signals...
+						unsigned dt_idletimeout_ms = (unsigned)-1;
+						bool b_run = true;
+						while(b_run)
+						{
+							int rc_poll;
+							CL3_NONCLASS_SYSERR(rc_poll = poll(pfds, N_GPIO_PINS+1, dt_idletimeout_ms));
+
+							//	reset the idle timeout
+							dt_idletimeout_ms = (usys_t)-1;
+
+							//	check all GPIO pins
+							for(usys_t i = 0; i < N_GPIO_PINS; i++)
+								if(CL3_UNLIKELY(pfds[i].fd != -1))
+								{
+									TPin* const pin = static_cast<TPin*>(gpio->pins[i]);	//	use static_cast to avoid virtual-function-call thru IPin and to get all members
+
+									const bool b_level_new = pin->Level();
+
+									//	raise edge events when the kernel detected a level change, or when we detected a level change
+									if(CL3_LIKELY(pin->b_level_last != b_level_new))
+									{
+										const gpio::TOnEdgeData data = { pin->b_level_last, b_level_new };
+										pin->b_level_last = b_level_new;
+										pin->on_edge.Raise(pin, data);
+									}
+
+									if(CL3_LIKELY(pfds[i].revents))
+									{
+										//	clear the kernel event status
+										char buffer[2] = {};
+										pread(pfds[i].fd, buffer, sizeof(buffer), 0);
+									}
+
+									if(pin->on_idle.HasReceivers())
+									{
+										const unsigned dt_idletimeout_ms_pin = (unsigned)pin->dt_idletimeout.ConvertToI(TIME_UNIT_MILLISECONDS);
+										if(dt_idletimeout_ms_pin > dt_idletimeout_ms || dt_idletimeout_ms == (unsigned)-1)
+											dt_idletimeout_ms = dt_idletimeout_ms_pin;
+
+										if(rc_poll == 0)	//	the call to poll timed-out
+											pin->on_idle.Raise(pin, gpio::TOnIdleData());
+									}
+								}
+
+							if(pfds[N_GPIO_PINS].revents)
+							{
+								//	read signals
+								signalfd_siginfo si;
+								while(read(pfds[N_GPIO_PINS].fd, &si, sizeof(si)) == sizeof(si))
+									switch(si.ssi_signo)
+									{
+										case SIGTERM:
+											//	shutdown requested
+											b_run = false;
+											break;
+										case SIGUSR1:
+											//	pin config changed, rebuild list
+											for(usys_t i = 0; i < N_GPIO_PINS; i++)
+											{
+												TPin* const pin = static_cast<TPin*>(gpio->pins[i]);
+												if(pin->mode == gpio::MODE_INPUT && pfds[i].fd == -1)
+												{
+													//	new pin to monitor
+
+													//	tell kernel to export the pin to sysfs
+													//	we wont check the error code, because either it works or the pin was already exported, so no need to act on it
+													char buffer[64];
+													write(fd_export, buffer, snprintf(buffer, sizeof(buffer), "%u\n", i));
+
+													//	tell the kernel that we want to use the pin as input... hope this does not cause any conflicts with libbcm2835
+													int fd;
+													snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%u/direction", i);
+													CL3_NONCLASS_SYSERR(fd = open(buffer, O_CLOEXEC|O_NOCTTY|O_WRONLY));
+													CL3_NONCLASS_SYSERR(write(fd, "in\n", 3) != 3);
+													close(fd);
+
+													snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%u/edge", i);
+													CL3_NONCLASS_SYSERR(fd = open(buffer, O_CLOEXEC|O_NOCTTY|O_WRONLY));
+													CL3_NONCLASS_SYSERR(write(fd, "both\n", 5) != 5);
+													close(fd);
+
+													//	open the FD for the pin
+													snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%u/value", i);
+													CL3_NONCLASS_SYSERR(pfds[i].fd = open(buffer, O_CLOEXEC|O_NOCTTY|O_RDONLY));
+												}
+												else if(pin->mode != gpio::MODE_INPUT && pfds[i].fd != -1)
+												{
+													//	monitored pin was reconfigured to non-input
+
+													//	close the FD for the pin
+													close(pfds[i].fd);
+													pfds[i].fd = -1;
+
+													//	tell kernel to unexport the pin
+													//	we wont check the error code, because either it works or... I would not know what to do else...
+													char buffer[16];
+													write(fd_unexport, buffer, snprintf(buffer, sizeof(buffer), "%u\n", i));
+												}
+											}
+											break;
+									}
+							}
+						}
+					}
+					catch(const error::TException& ex)
+					{
+						fprintf(stderr, "GPIO-IRQ-THREAD: ERROR: %s\n", ex.message);
+					}
+					catch(...)
+					{
+						fprintf(stderr, "GPIO-IRQ-THREAD: ERROR: unknown error\n");
+					}
+
+// 					fprintf(stderr, "GPIO-IRQ-THREAD: INFO: terminating ... \n");
+
+					//	close gpio sysfs interface
+					close(fd_export);
+					close(fd_unexport);
+
+					//	allow swapping again
+					CL3_NONCLASS_SYSERR(munlockall());
+
+					return NULL;
+				}
+
+				CLASS		TGPIO::TGPIO	(bool debug)
+				{
+					CL3_CLASS_ERROR(bcm2835_init() != 1, TException, "initialization of the bcm2835 lib failed");
+					bcm2835_set_debug(debug ? 1 : 0);
+
+					//	add all 54 GPIO pins available on the BCM2835 to the list of pins
+					for(u32_t i = 0; i < 54; i++)
+						this->pins.Append(new TPin(this, i));
+
+					//	set the local th_irq and the member th_irq to zero
+					pthread_t th_irq_local;
+					pthread_t* th_irq_member = &this->th_irq;
+
+					memset(&th_irq_local, 0, sizeof(pthread_t));
+					memset(th_irq_member, 0, sizeof(pthread_t));
+
+					//	create the threads and safe the thread ID in the local copy of th_irq
+					pthread_create(&th_irq_local, NULL, &ThreadMain, this);
+
+					//	wait until the member version  of th_irq matches the local one
+					while(memcmp(&th_irq_local, th_irq_member, sizeof(pthread_t)) != 0)
+						sched_yield();
+
+					//	the callback thread is now running properly
+				}
+
+				CLASS		TGPIO::~TGPIO	()
+				{
+					pthread_kill(this->th_irq, SIGTERM);
+					pthread_join(this->th_irq, NULL);
+
+					CL3_CLASS_ERROR(bcm2835_close() != 1, TException, "shutdown of the bcm2835 lib failed");
+				}
+
+				const TList<gpio::IPin* const>&
+							TGPIO::Pins		()
+				{
+					return this->pins;
+				}
+
+				u64_t		TGPIO::Tick		()
+				{
+					return bcm2835_st_read();
+				}
+
+				/*************************************************************************/
+
+				CLASS	TSPIDevice::TBusLock::TBusLock	(TSPIDevice* device) : device(device)
+				{
+					//	TODO:
+					//	device->bus->Mutex().Acquire();
+
+					//	set baudrate and other SPI parameters
+					bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
+					bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);	//	TODO: make this a property of TSPIDevice
+					bcm2835_spi_setClockDivider(this->device->divider);
+
+					//	activate chip-select
+					this->device->pin_cs->Level(false);	//	logical "0" means "ON", logical "1" means "OFF"; so this switches the device *ON*
+				}
+
+				CLASS	TSPIDevice::TBusLock::~TBusLock	()
+				{
+					//	deactivate chip-select
+					this->device->pin_cs->Level(true);	//	logical "0" means "ON", logical "1" means "OFF"; so this switches the device *OFF*
+
+					//	no need to reset the baudrate - the next device will set it to its prefered value
+
+					//	TODO:
+					//	bus->Mutex().Release();
+				}
+
+
+
+
+				CLASS		TSPIDevice::TSPIDevice	(TSPIBus* bus, gpio::IPin* pin_cs) : bus(bus), pin_cs(pin_cs), divider(65536)
+				{
+				}
+
+				CLASS		TSPIDevice::~TSPIDevice	()
+				{
+				}
+
+				u32_t		TSPIDevice::Baudrate	() const
+				{
+					return 250000000 / this->divider;
+				}
+
+				void		TSPIDevice::Baudrate	(u32_t new_baudrate)
+				{
+					CL3_CLASS_ERROR(new_baudrate < this->bus->BaudrateMin() || new_baudrate > this->bus->BaudrateMax(), TException, "unsupported baudrate requested");
+					for(this->divider = 2; (250000000 / divider) > new_baudrate; this->divider *= 2);
+				}
+
+				usys_t		TSPIDevice::Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				usys_t		TSPIDevice::Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				void		TSPIDevice::Transfer	(byte_t* buffer, usys_t sz_buffer)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				/*************************************************************************/
+
+				CLASS		TSPIBus::TSPIBus		(unsigned idx_bus, const collection::IStaticCollection<gpio::IPin*>& pins_chipselect) : idx_bus(idx_bus)
+				{
+					bcm2835_spi_begin();
+					bcm2835_spi_chipSelect(BCM2835_SPI_CS_NONE);	//	handle chip-select in cl3-/user-code to support more than two devices on the bus and to support crazy devices
+
+					auto it = pins_chipselect.CreateStaticIterator();
+					it->MoveHead();
+					while(it->MoveNext())
+					{
+						gpio::IPin* const pin = it->Item();
+
+						if(pin == NULL)
+						{
+							//	handle chip-select in user code
+							this->devices.Append(new TSPIDevice(this, NULL));
+						}
+						else
+						{
+							//	handle chip-select in cl3 code
+							pin->Mode(gpio::MODE_OUTPUT);
+							pin->Pull(gpio::PULL_DISABLED);
+							pin->Level(true);	//	logical "0" means "ON", logical "1" means "OFF"; so this switches the device *OFF*
+							this->devices.Append(new TSPIDevice(this, pin));
+						}
 					}
 				}
+
+				CLASS		TSPIBus::~TSPIBus		()
+				{
+					for(usys_t i = 0; i < this->devices.Count(); i++)
+						delete this->devices[i];
+
+					bcm2835_spi_end();
+				}
+
+				u32_t		TSPIBus::BaudrateMin	() const
+				{
+					return 3815;
+				}
+
+				u32_t		TSPIBus::BaudrateMax	() const
+				{
+					return 125000000;
+				}
+
+				const TList<bus::spi::IDevice* const>&
+							TSPIBus::Devices		()
+				{
+					return this->devices;
+				}
+
+				/*************************************************************************/
+
+// 				CLASS		TI2CDevice::TDevice		(TI2CBus* bus, u8_t address)
+// 				{
+// 					CL3_NOT_IMPLEMENTED;
+// 				}
+//
+// 				u8_t		TI2CDevice::Address		() const
+// 				{
+// 					CL3_NOT_IMPLEMENTED;
+// 				}
+//
+// 				TBCM2835::TI2CBus*	TI2CDevice::BusController	() const
+// 				{
+// 					CL3_NOT_IMPLEMENTED;
+// 				}
+//
+// 				u32_t		TI2CDevice::Baudrate	() const
+// 				{
+// 					CL3_NOT_IMPLEMENTED;
+// 				}
+//
+// 				void		TI2CDevice::Baudrate	(u32_t new_baudrate)
+// 				{
+// 					CL3_NOT_IMPLEMENTED;
+// 				}
+//
+// 				usys_t		TI2CDevice::Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
+// 				{
+// 					CL3_NOT_IMPLEMENTED;
+// 				}
+//
+// 				usys_t		TI2CDevice::Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+// 				{
+// 					CL3_NOT_IMPLEMENTED;
+// 				}
+//
+// 				/*************************************************************************/
 			}
-
-			CLASS		TBCM2835::TSPIBus::~TSPIBus		()
-			{
-				bcm2835_spi_end();
-
-				for(usys_t i = 0; i < this->spi_devices.Count(); i++)
-					delete this->spi_devices[i];
-			}
-
-			u32_t		TBCM2835::TSPIBus::BaudrateMin	() const
-			{
-				return 3815;
-			}
-
-			u32_t		TBCM2835::TSPIBus::BaudrateMax	() const
-			{
-				return 125000000;
-			}
-
-			const collection::list::TList<bus::IDevice* const>&
-						TBCM2835::TSPIBus::Devices		()
-			{
-				CL3_NOT_IMPLEMENTED;	//	TODO: implement a type-converting wrapper collection
-			}
-
-			TBCM2835::TSPIBus::TDevice* TBCM2835::TSPIBus::ByID(u32_t id)
-			{
-				return &dynamic_cast<TBCM2835::TSPIBus::TDevice&>(*this->spi_devices[id]);
-			}
-
-			const collection::list::TList<bus::spi::ISPIDevice* const>&
-						TBCM2835::TSPIBus::SPIDevices	()
-			{
-				return this->spi_devices;
-			}
-
-			/*************************************************************************/
-
-			CLASS		TBCM2835::TI2CBus::TDevice::TDevice		(TI2CBus* bus, u8_t address)
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			u8_t		TBCM2835::TI2CBus::TDevice::Address		() const
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			TBCM2835::TI2CBus*	TBCM2835::TI2CBus::TDevice::BusController	() const
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			u32_t		TBCM2835::TI2CBus::TDevice::Baudrate	() const
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			void		TBCM2835::TI2CBus::TDevice::Baudrate	(u32_t new_baudrate)
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			usys_t		TBCM2835::TI2CBus::TDevice::Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			usys_t		TBCM2835::TI2CBus::TDevice::Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			/*************************************************************************/
-
-			CLASS		TBCM2835::TI2CBus::TI2CBus		(TBCM2835* bcm2835, u32_t pin_clock, u32_t pin_data)
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			CLASS		TBCM2835::TI2CBus::~TI2CBus		()
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			u32_t		TBCM2835::TI2CBus::BaudrateMin	() const
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			u32_t		TBCM2835::TI2CBus::BaudrateMax	() const
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			const collection::list::TList<bus::IDevice* const>&
-						TBCM2835::TI2CBus::Devices		()
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			TBCM2835::TI2CBus::TDevice* TBCM2835::TI2CBus::ByAddress(u8_t id)
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			const collection::list::TList<bus::i2c::II2CDevice* const>&
-						TBCM2835::TI2CBus::I2CDevices	()
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			void		TBCM2835::TI2CBus::Scan			()
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			/*************************************************************************/
-
-			CLASS		TBCM2835::TBCM2835	(bool debug)
-			{
-				CL3_CLASS_ERROR(bcm2835_init() != 1, TException, "initialization of the bcm2835 lib failed");
-				bcm2835_set_debug(debug ? 1 : 0);
-
-				//	add all 54 GPIO pins available on the BCM2835 to the list of pins
-				for(u32_t i = 0; i < 54; i++)
-					this->gpio_pins.Append(new TPin(this, i));
-			}
-
-			CLASS		TBCM2835::~TBCM2835	()
-			{
-				CL3_CLASS_ERROR(bcm2835_close() != 1, TException, "shutdown of the bcm2835 lib failed");
-			}
-
-			const collection::list::TList<gpio::IGPIOPin* const>&
-						TBCM2835::Pins		()
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			TBCM2835::TPin*	TBCM2835::ByID	(u32_t id)
-			{
-				return this->gpio_pins[id];
-			}
-
-			/*************************************************************************/
 		}
 	}
 }

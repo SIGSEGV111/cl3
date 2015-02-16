@@ -13,4 +13,4 @@ add_library (cl3-gpio SHARED ${CL3_GPIO_SRC})
 add_dependencies (cl3-gpio_static cl3-core_static)
 add_dependencies (cl3-gpio cl3-core)
 
-#add_subdirectory (test)
+add_subdirectory (test)
