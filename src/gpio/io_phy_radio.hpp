@@ -59,11 +59,11 @@ namespace	cl3
 						CL3PUBF	CLASS	TGPIOPulseReader	(gpio::IPin* pin, bool b_inverted_line = false, system::time::TTime dt_flush = 0.001);
 				};
 
-				class CL3PUBT	TOOKDemodulator : public stream::IOut<TPulseTime>, public stream::ISource<bool>
+				class CL3PUBT	TOOKDecoder : public stream::IOut<TPulseTime>, public stream::ISource<bool>
 				{
 					private:
-						CLASS TOOKDemodulator(const TOOKDemodulator&) = delete;
-						TOOKDemodulator& operator=(const TOOKDemodulator&) = delete;
+						CLASS TOOKDecoder(const TOOKDecoder&) = delete;
+						TOOKDecoder& operator=(const TOOKDecoder&) = delete;
 
 					protected:
 						stream::IOut<bool>* sink;
@@ -72,9 +72,10 @@ namespace	cl3
 						usys_t n_pulses_current;
 
 					public:
-						CL3PUBF	static	system::time::TTime	ComputeLatchPulseLength	(const TPulseTime* arr_items, usys_t n_items);
+						CL3PUBF	static	system::time::TTime	ComputeAveragePulseLength	(const TPulseTime* arr_items, usys_t n_items);
 
 						//	from IOut
+						using IOut<TPulseTime>::Write;
 						CL3PUBF	void	Flush				() final override;
 						CL3PUBF	usys_t	Write				(const TPulseTime* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 
@@ -83,8 +84,8 @@ namespace	cl3
 						CL3PUBF	stream::IOut<bool>*
 										Sink				() const final override CL3_GETTER;
 
-						CL3PUBF	CLASS	TOOKDemodulator		(usys_t n_pulses_buffer = 64, system::time::TTime dt_latch = -1);
-						CL3PUBF	CLASS	~TOOKDemodulator	();
+						CL3PUBF	CLASS	TOOKDecoder			(usys_t n_pulses_buffer = 64, system::time::TTime dt_latch = -1);
+						CL3PUBF	CLASS	~TOOKDecoder		();
 				};
 
 				//	This is a decoder for the crazy 4bit pattern which is received by my RFM26W module... duno if this is useful to others....
@@ -97,6 +98,7 @@ namespace	cl3
 
 					public:
 						//	from IOut
+						using IOut<bool>::Write;
 						CL3PUBF	void	Flush				() final override;
 						CL3PUBF	usys_t	Write				(const bool* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 

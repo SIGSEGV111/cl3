@@ -92,39 +92,36 @@ namespace	cl3
 
 				/***********************************************************************/
 
-				TTime	TOOKDemodulator::ComputeLatchPulseLength	(const TPulseTime* arr_items, usys_t n_items)
+				TTime	TOOKDecoder::ComputeAveragePulseLength	(const TPulseTime* arr_items, usys_t n_items)
 				{
 					if(n_items == 0) return -1;
-
-					fprintf(stderr, "ComputeLatchPulseLength:\n");
 
 					//	we only consider the pulse-length of the LOW pulses (as the LOW-pulses encode the data in OOK)
 					TTime dt_min = arr_items[0].dt_low;
 					TTime dt_max = arr_items[0].dt_low;
-// 					fprintf(stderr, "arr_items[%3u] = { low = %llu µs ; high = %llu µs }\n", 0, arr_items[0].dt_low.ConvertToI(TIME_UNIT_MICROSECONDS), arr_items[0].dt_high.ConvertToI(TIME_UNIT_MICROSECONDS));
 					for(usys_t i = 1; i < n_items; i++)
 					{
 						if(arr_items[i].dt_low < dt_min) dt_min = arr_items[i].dt_low;
 						if(arr_items[i].dt_low > dt_max) dt_max = arr_items[i].dt_low;
-// 						fprintf(stderr, "arr_items[%3u] = { low = %llu µs ; high = %llu µs }\n", i, arr_items[i].dt_low.ConvertToI(TIME_UNIT_MICROSECONDS), arr_items[i].dt_high.ConvertToI(TIME_UNIT_MICROSECONDS));
 					}
 
-					const TTime dt_latch = (dt_min + dt_max) / 2;
+					const TTime dt_avg = (dt_min + dt_max) / 2;
 
-					fprintf(stderr, "low-min = %llu µs\n", dt_min.ConvertToI(TIME_UNIT_MICROSECONDS));
-					fprintf(stderr, "low-max = %llu µs\n", dt_max.ConvertToI(TIME_UNIT_MICROSECONDS));
-					fprintf(stderr, "low-lat = %llu µs\n", dt_latch.ConvertToI(TIME_UNIT_MICROSECONDS));
+// 					fprintf(stderr, "ComputeAveragePulseLength:\n");
+// 					fprintf(stderr, "min = %4llu µs\n", dt_min.ConvertToI(TIME_UNIT_MICROSECONDS));
+// 					fprintf(stderr, "max = %4llu µs\n", dt_max.ConvertToI(TIME_UNIT_MICROSECONDS));
+// 					fprintf(stderr, "avg = %4llu µs\n", dt_avg.ConvertToI(TIME_UNIT_MICROSECONDS));
 
-					return dt_latch;
+					return dt_avg;
 				}
 
-				void	TOOKDemodulator::Flush		()
+				void	TOOKDecoder::Flush			()
 				{
-					if(this->sink)
+					if(this->sink && this->n_pulses_current > 0)
 					{
 						//	ignore the first pulse as it only contains garbage data
 
-						const TTime dt_latch = ComputeLatchPulseLength(this->arr_pulses+1, this->n_pulses_current-1);
+						const TTime dt_latch = ComputeAveragePulseLength(this->arr_pulses+1, this->n_pulses_current-1);
 
 						bool* arr_bits = reinterpret_cast<bool*>(this->arr_pulses);	//	EVIL! don't try this at home! (re-purpose the memory for the pulse-times as buffer for the bits)
 						for(usys_t i = 1; i < this->n_pulses_current-1; i++)
@@ -137,7 +134,7 @@ namespace	cl3
 					this->n_pulses_current = 0;
 				}
 
-				usys_t	TOOKDemodulator::Write		(const TPulseTime* arr_items_write, usys_t n_items_write_max, usys_t)
+				usys_t	TOOKDecoder::Write			(const TPulseTime* arr_items_write, usys_t n_items_write_max, usys_t)
 				{
 					CL3_CLASS_ERROR(this->sink == NULL, TException, "need a sink to work");
 
@@ -151,23 +148,23 @@ namespace	cl3
 					return n_items_write_max;
 				}
 
-				void	TOOKDemodulator::Sink		(stream::IOut<bool>* os)
+				void	TOOKDecoder::Sink			(stream::IOut<bool>* os)
 				{
 					this->sink = os;
 				}
 
 				stream::IOut<bool>*
-						TOOKDemodulator::Sink		() const
+						TOOKDecoder::Sink			() const
 				{
 					return this->sink;
 				}
 
-				CLASS	TOOKDemodulator::TOOKDemodulator		(usys_t n_pulses_buffer, system::time::TTime dt_trigger) : sink(NULL), arr_pulses(NULL), n_pulses_current(0), n_pulses_max(n_pulses_buffer)
+				CLASS	TOOKDecoder::TOOKDecoder	(usys_t n_pulses_buffer, system::time::TTime dt_trigger) : sink(NULL), arr_pulses(NULL), n_pulses_current(0), n_pulses_max(n_pulses_buffer)
 				{
 					this->arr_pulses = (TPulseTime*)Alloc(n_pulses_buffer, &typeinfo::TCTTI<TPulseTime>::rtti);
 				}
 
-				CLASS	TOOKDemodulator::~TOOKDemodulator		()
+				CLASS	TOOKDecoder::~TOOKDecoder	()
 				{
 					Free(this->arr_pulses);
 				}
