@@ -68,8 +68,8 @@ namespace	cl3
 						CL3PUBF	void				IdleTimeout	(system::time::TTime) final override CL3_SETTER;
 						CL3PUBF	system::time::TTime	IdleTimeout	() const final override CL3_GETTER;
 
-						CL3PUBF gpio::EMode	Mode		() const final override CL3_GETTER;
-						CL3PUBF void		Mode		(gpio::EMode) final override CL3_SETTER;
+						CL3PUBF	gpio::EMode	Mode		() const final override CL3_GETTER;
+						CL3PUBF	void		Mode		(gpio::EMode) final override CL3_SETTER;
 						CL3PUBF	gpio::EPull Pull		() const final override CL3_GETTER;
 						CL3PUBF	void		Pull		(gpio::EPull new_pull) final override CL3_SETTER;
 						CL3PUBF	bool		Level		() const final override;

@@ -202,7 +202,7 @@ namespace	cl3
 					CL3PUBF	void	Suspend		();	//	suspends the execution of the thread, throws if the thread is already suspended or not alive at all
 					CL3PUBF	void	Resume		();	//	resumes the execution of a suspended thread, throws if the thread is not suspended or not alive at all
 
-					CL3PUBF	static	void	Sleep	(time::TTime);
+					CL3PUBF	static	void	Sleep	(time::TTime time, time::EClock clock = time::TIME_CLOCK_MONOTONIC);
 					CL3PUBF	static	void	Yield	();
 
 				protected:

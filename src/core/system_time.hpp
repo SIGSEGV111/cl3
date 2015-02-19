@@ -65,12 +65,12 @@ namespace	cl3
 			{
 				TIME_CLOCK_TAI,			//	counted on earth by an monotonic atomic clock (https://en.wikipedia.org/wiki/International_Atomic_Time)
 				TIME_CLOCK_REALTIME,	//	System-wide real-time clock (based on unixtime - *NOT* MONOTONIC !!!).
-				TIME_CLOCK_MONOTONIC,	//	Clock that cannot be set and represents monotonic time since some unspecified starting point not subject to NTP/leap adjustments.
+				TIME_CLOCK_MONOTONIC,	//	Clock that cannot be set and represents monotonic time since some unspecified (and possibly changing) starting point not subject to NTP/leap adjustments.
 				TIME_CLOCK_PROCESS,		//	Process time is defined as the amount of CPU time consumed by a process.
 				TIME_CLOCK_PROCESS_USER,//	as above but only the portion spent in user-mode
 				TIME_CLOCK_PROCESS_SYS,	//	as above but only the portion spent in kernel-mode
-				TIME_CLOCK_THREAD,		//	Process time is defined as the amount of CPU time consumed by a thread.
-				TIME_CLOCK_THREAD_USER,	//	as above but only the portion spent in user-mode
+				TIME_CLOCK_THREAD,		//	Thread  time is defined as the amount of CPU time consumed by a (/ the calling) thread.
+				TIME_CLOCK_THREAD_USER,	//	as above but only the portion spent iqn user-mode
 				TIME_CLOCK_THREAD_SYS	//	as above but only the portion spent in kernel-mode
 			};
 

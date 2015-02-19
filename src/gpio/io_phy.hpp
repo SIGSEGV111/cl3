@@ -75,12 +75,12 @@ namespace	cl3
 					virtual	CL3PUBF	void				IdleTimeout	(system::time::TTime) CL3_SETTER = 0;
 					virtual	CL3PUBF	system::time::TTime	IdleTimeout	() const CL3_GETTER = 0;
 
-					virtual	CL3PUBF EMode	Mode	() const CL3_GETTER = 0;
-					virtual	CL3PUBF void	Mode	(EMode) CL3_SETTER = 0;
-					virtual	CL3PUBF EPull	Pull	() const CL3_GETTER = 0;
-					virtual	CL3PUBF void	Pull	(EPull) CL3_SETTER = 0;
-					virtual	CL3PUBF bool	Level	() const CL3_GETTER = 0;
-					virtual	CL3PUBF void	Level	(bool) CL3_SETTER = 0;
+					virtual	CL3PUBF	EMode	Mode	() const CL3_GETTER = 0;
+					virtual	CL3PUBF	void	Mode	(EMode) CL3_SETTER = 0;
+					virtual	CL3PUBF	EPull	Pull	() const CL3_GETTER = 0;
+					virtual	CL3PUBF	void	Pull	(EPull) CL3_SETTER = 0;
+					virtual	CL3PUBF	bool	Level	() const CL3_GETTER = 0;
+					virtual	CL3PUBF	void	Level	(bool) CL3_SETTER = 0;
 					virtual	CL3PUBF	CLASS	~IPin	();
 				};
 

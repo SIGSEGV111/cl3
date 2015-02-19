@@ -74,4 +74,46 @@ namespace
 		for(usys_t i = 0; i < CL3_MIN(24, ls_bits_out.Count()); i++)
 			EXPECT_EQ(arr_bits[i], ls_bits_out[i]);
 	}
+
+	struct TOnDataListener : TSoftPT2272::TOnDataEvent::IReceiver
+	{
+		TSoftPT2272::TOnDataData data;
+		unsigned n_raised;
+
+		void OnRaise(TSoftPT2272::TOnDataEvent&, TSoftPT2272&, TSoftPT2272::TOnDataData data)
+		{
+			this->data = data;
+			this->n_raised++;
+		}
+
+		TOnDataListener() : n_raised(0) {}
+	};
+
+	TEST(io_phy_radio_TSoftPT2272, decode_a10_d2)
+	{
+		TOnDataListener listener;
+		TSoftPT2272 pt2272(10, 2, 0x230);
+
+		pt2272.OnData().Register(&listener);
+
+		const bool arr_bits_match[] = { 1,1,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,0 };
+		pt2272.Write(arr_bits_match, 24);
+		pt2272.Write(arr_bits_match, 24);
+		EXPECT_EQ(1, listener.n_raised);
+		EXPECT_EQ(0x230, listener.data.address);
+		EXPECT_TRUE(listener.data.arr_data[0]);
+		EXPECT_FALSE(listener.data.arr_data[1]);
+		listener.n_raised = 0;
+		listener.data.address = 0;
+		listener.data.arr_data[0] = false;
+		listener.data.arr_data[1] = false;
+
+		const bool arr_bits_other[] = { 1,0,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,0 };
+		pt2272.Write(arr_bits_other, 24);
+		pt2272.Write(arr_bits_other, 24);
+		EXPECT_EQ(0, listener.n_raised);
+		EXPECT_EQ(0, listener.data.address);
+		EXPECT_FALSE(listener.data.arr_data[0]);
+		EXPECT_FALSE(listener.data.arr_data[1]);
+	}
 }

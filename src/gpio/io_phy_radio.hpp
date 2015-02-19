@@ -38,6 +38,10 @@ namespace	cl3
 
 				class CL3PUBT	TGPIOPulseReader : public stream::ISource<TPulseTime>, protected gpio::TOnEdgeEvent::IReceiver, protected gpio::TOnIdleEvent::IReceiver
 				{
+					private:
+						CLASS TGPIOPulseReader(const TGPIOPulseReader&) = delete;
+						TGPIOPulseReader& operator=(const TGPIOPulseReader&) = delete;
+
 					protected:
 						gpio::IPin* pin;
 						stream::IOut<TPulseTime>* sink;
@@ -46,6 +50,7 @@ namespace	cl3
 						system::time::TTime dt_flush;
 
 						bool b_inverted_line;
+						bool b_idle_registered;
 
 						void	OnRaise	(gpio::TOnEdgeEvent&, gpio::IPin&, gpio::TOnEdgeData data) final override;
 						void	OnRaise	(gpio::TOnIdleEvent&, gpio::IPin&, gpio::TOnIdleData) final override;
@@ -116,29 +121,40 @@ namespace	cl3
 				class CL3PUBT	TSoftPT2272 : public stream::IOut<bool>
 				{
 					public:
-						struct TOnSignalData
+						struct TOnDataData
 						{
 							u16_t address;
-							bool arr_toggle[6];	//	mutable! change what you want
+							bool arr_data[6];
 						};
 
-						typedef event::TEvent<TSoftPT2272, TOnSignalData&> TOnSignalEvent;
+						typedef event::TEvent<TSoftPT2272, TOnDataData> TOnDataEvent;
 
 					protected:
-						TOnSignalEvent on_signal;
+						TOnDataEvent on_data;
+
+						u16_t address;
 						u8_t n_bits_address;
 						u8_t n_bits_data;
-						u16_t address;
 						bool arr_state[6];	//	pin state
 
+						TOnDataData toggle_data_unconfirmed;
+
 					public:
+						inline	u8_t	DataBits	() const CL3_GETTER { return this->n_bits_data; }
+						inline	u8_t	AddressBits	() const CL3_GETTER { return this->n_bits_address; }
+
+						//	returns an array of 6 booleans which hold the current state of the output pins
+						inline	const bool*	State		() const { return this->arr_state; }
+
 						//	from IOut
+						using IOut<bool>::Write;
 						CL3PUBF	usys_t	Write			(const bool* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 
-						CL3PUBF	const TOnSignalEvent&
-										OnSignal		() const;
+						CL3PUBF	const TOnDataEvent&
+										OnData			() const;
 
-						CL3PUBF	CLASS	TSoftPT2272		(u16_t address, u8_t n_bits_address = 5, u8_t n_bits_data = 2);
+						CL3PUBF	CLASS	TSoftPT2272		(u8_t n_bits_address, u8_t n_bits_data);	//	promiscuous mode
+						CL3PUBF	CLASS	TSoftPT2272		(u8_t n_bits_address, u8_t n_bits_data, u16_t address);
 				};
 			}
 		}

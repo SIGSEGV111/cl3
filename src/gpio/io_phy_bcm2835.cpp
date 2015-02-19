@@ -22,6 +22,10 @@
     FOR DETAILS SEE <bcm2835.c> AND/OR <bcm2835.h>
 */
 
+#ifndef INSIDE_CL3
+#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#endif
+
 #include "config.hpp"
 #ifdef CL3_WITH_BCM2835
 
@@ -200,7 +204,7 @@ namespace	cl3
 						*((volatile pthread_t*)(&gpio->th_irq)) = pthread_self();
 
 						//	wait for signals...
-						unsigned dt_idletimeout_ms = (unsigned)-1;
+						int dt_idletimeout_ms = -1;
 						bool b_run = true;
 						while(b_run)
 						{
@@ -208,7 +212,7 @@ namespace	cl3
 							CL3_NONCLASS_SYSERR(rc_poll = poll(pfds, N_GPIO_PINS+1, dt_idletimeout_ms));
 
 							//	reset the idle timeout
-							dt_idletimeout_ms = (usys_t)-1;
+							dt_idletimeout_ms = -1;
 
 							//	check all GPIO pins
 							for(usys_t i = 0; i < N_GPIO_PINS; i++)
@@ -235,8 +239,8 @@ namespace	cl3
 
 									if(pin->on_idle.HasReceivers())
 									{
-										const unsigned dt_idletimeout_ms_pin = (unsigned)pin->dt_idletimeout.ConvertToI(TIME_UNIT_MILLISECONDS);
-										if(dt_idletimeout_ms_pin > dt_idletimeout_ms || dt_idletimeout_ms == (unsigned)-1)
+										const int dt_idletimeout_ms_pin = (int)pin->dt_idletimeout.ConvertToI(TIME_UNIT_MILLISECONDS);
+										if(dt_idletimeout_ms_pin > dt_idletimeout_ms || dt_idletimeout_ms == -1)
 											dt_idletimeout_ms = dt_idletimeout_ms_pin;
 
 										if(rc_poll == 0)	//	the call to poll timed-out

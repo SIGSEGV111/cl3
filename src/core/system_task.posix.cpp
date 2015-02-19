@@ -48,6 +48,7 @@ namespace	cl3
 			using namespace io::text::encoding;
 			using namespace error;
 			using namespace memory;
+			using namespace time;
 
 			/**************************************************************************************/
 
@@ -188,6 +189,31 @@ namespace	cl3
 			TProcess*	TProcess::Self		()
 			{
 				return &proc_self;
+			}
+
+			/**************************************************************************************/
+
+			void	IThread::Sleep	(TTime time, EClock clock)
+			{
+				const struct timespec ts = time;
+				switch(clock)
+				{
+					case TIME_CLOCK_TAI:
+					case TIME_CLOCK_MONOTONIC:
+						CL3_NONCLASS_SYSERR(clock_nanosleep(CLOCK_MONOTONIC, 0, &ts, NULL));
+						break;
+
+					case TIME_CLOCK_REALTIME:
+						CL3_NONCLASS_SYSERR(clock_nanosleep(CLOCK_REALTIME, 0, &ts, NULL));
+						break;
+
+					case TIME_CLOCK_PROCESS:
+						CL3_NONCLASS_SYSERR(clock_nanosleep(CLOCK_PROCESS_CPUTIME_ID, 0, &ts, NULL));
+						break;
+
+					default:
+						CL3_NONCLASS_FAIL(TException, "the requested clock is not supported for Sleep()");
+				}
 			}
 
 			/**************************************************************************************/

@@ -16,11 +16,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef INSIDE_CL3
+#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#endif
+
 #include "io_phy_radio.hpp"
 #include <cl3/core/system_types_typeinfo.hpp>
 #include <cl3/core/error.hpp>
 
 #include <stdio.h>
+#include <string.h>
 
 namespace	cl3
 {
@@ -58,13 +63,24 @@ namespace	cl3
 					}
 					else
 						CL3_CLASS_LOGIC_ERROR(true);	//	WTF???
+
+					if(!this->b_idle_registered)
+					{
+						this->pin->IdleTimeout(dt_flush);
+						this->pin->OnIdle().Register(this);
+						this->b_idle_registered = true;
+					}
 				}
 
 				void	TGPIOPulseReader::OnRaise			(gpio::TOnIdleEvent&, gpio::IPin&, gpio::TOnIdleData)
 				{
 					if(this->sink)
 					{
-// 						sink->Write(&this->pt, 1);
+						//	deregister OnIdle event - to prevent repeated callbacks
+						pin->OnIdle().Unregister(this);
+						this->b_idle_registered = false;
+
+						//	flush buffer since the line is idle for too long
 						this->sink->Flush();
 					}
 				}
@@ -81,13 +97,17 @@ namespace	cl3
 				}
 
 				CLASS	TGPIOPulseReader::TGPIOPulseReader	(gpio::IPin* pin, bool b_inverted_line, system::time::TTime dt_flush)
-					: pin(pin), sink(NULL), dt_flush(dt_flush), b_inverted_line(b_inverted_line)
+					: pin(pin), sink(NULL), dt_flush(dt_flush), b_inverted_line(b_inverted_line), b_idle_registered(false)
 				{
 					pin->Mode(gpio::MODE_INPUT);
 					pin->Pull(gpio::PULL_DISABLED);
-					pin->IdleTimeout(dt_flush);
+
+					if(pin->Level())
+						pt.dt_high = TTime::Now(TIME_CLOCK_MONOTONIC);
+					else
+						pt.dt_low = TTime::Now(TIME_CLOCK_MONOTONIC);
+
 					pin->OnEdge().Register(this);
-					pin->OnIdle().Register(this);
 				}
 
 				/***********************************************************************/
@@ -119,13 +139,13 @@ namespace	cl3
 				{
 					if(this->sink && this->n_pulses_current > 0)
 					{
-						//	ignore the first pulse as it only contains garbage data
+						//	ignore the first pulse as it only contains garbage data (it contains the info how long the line was idle before the first real pulse)
 
-						const TTime dt_latch = ComputeAveragePulseLength(this->arr_pulses+1, this->n_pulses_current-1);
+						const TTime dt_avg = ComputeAveragePulseLength(this->arr_pulses+1, this->n_pulses_current-1);
 
 						bool* arr_bits = reinterpret_cast<bool*>(this->arr_pulses);	//	EVIL! don't try this at home! (re-purpose the memory for the pulse-times as buffer for the bits)
-						for(usys_t i = 1; i < this->n_pulses_current-1; i++)
-							arr_bits[i] = this->arr_pulses[i].dt_low > dt_latch;
+						for(usys_t i = 1; i < this->n_pulses_current; i++)
+							arr_bits[i] = this->arr_pulses[i].dt_low > dt_avg;
 
 						this->sink->Write(arr_bits+1, this->n_pulses_current-1);
 						this->sink->Flush();
@@ -232,18 +252,63 @@ namespace	cl3
 
 				usys_t	TSoftPT2272::Write			(const bool* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
-					CL3_NOT_IMPLEMENTED;
+					const usys_t n_packs = n_items_write_max / 24;
+// 					const usys_t n_items_accept = n_packs * 24;
+
+// 					CL3_CLASS_ERROR(n_items_write_min > n_items_accept, TException, "this class accepts only even multiples of 24 bools as input");
+
+					TOnDataData data_now;
+
+					for(usys_t i = 0; i < n_packs; i++)
+					{
+						memset(&data_now, 0, sizeof(TOnDataData));
+						const bool* arr_bits = arr_items_write + i * 24;
+
+						for(u8_t j = 0; j < this->n_bits_address; j++)
+						{
+							if(!arr_bits[j*2+0]) goto gt_invalid_next;
+							data_now.address <<= 1;
+							data_now.address |= (arr_bits[j*2+1] ? 1 : 0);
+						}
+
+						for(u8_t j = 0; j < this->n_bits_data; j++)
+						{
+							if(!arr_bits[this->n_bits_address*2+j*2+0]) goto gt_invalid_next;
+							data_now.arr_data[j] = arr_bits[this->n_bits_address*2+j*2+1];
+						}
+
+						if(memcmp(&this->toggle_data_unconfirmed, &data_now, sizeof(TOnDataData)) == 0)
+						{
+							if(this->address == (u16_t)-1 || this->address == data_now.address)
+							{
+								this->on_data.Raise(this, data_now);
+							}
+						}
+
+						this->toggle_data_unconfirmed = data_now;
+
+						gt_invalid_next:;
+					}
+
+					return n_items_write_max;
 				}
 
-				const TSoftPT2272::TOnSignalEvent&
-						TSoftPT2272::OnSignal		() const
+				const TSoftPT2272::TOnDataEvent&
+						TSoftPT2272::OnData			() const
 				{
-					CL3_NOT_IMPLEMENTED;
+					return this->on_data;
 				}
 
-				CLASS	TSoftPT2272::TSoftPT2272	(u16_t address, u8_t n_bits_address, u8_t n_bits_data)
+				CLASS	TSoftPT2272::TSoftPT2272	(u8_t n_bits_address, u8_t n_bits_data) : address((u16_t)-1), n_bits_address(n_bits_address), n_bits_data(n_bits_data)
 				{
-					CL3_NOT_IMPLEMENTED;
+					CL3_CLASS_ERROR(n_bits_data > 6, TException, "n_bits_data must be <= 6");
+					CL3_CLASS_ERROR(n_bits_address + n_bits_data != 12, TException, "n_bits_address + n_bits_data must be 12");
+				}
+
+				CLASS	TSoftPT2272::TSoftPT2272	(u8_t n_bits_address, u8_t n_bits_data, u16_t address) : address(address), n_bits_address(n_bits_address), n_bits_data(n_bits_data)
+				{
+					CL3_CLASS_ERROR(n_bits_data > 6, TException, "n_bits_data must be <= 6");
+					CL3_CLASS_ERROR(n_bits_address + n_bits_data != 12, TException, "n_bits_address + n_bits_data must be 12");
 				}
 			}
 		}
