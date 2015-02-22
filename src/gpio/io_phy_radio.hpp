@@ -30,6 +30,17 @@ namespace	cl3
 		{
 			namespace	radio
 			{
+				enum	EModulation
+				{
+					MODULATION_NONE,
+					MODULATION_CW,
+					MODULATION_OOK,
+					MODULATION_2FSK,
+					MODULATION_2GFSK,
+					MODULATION_4FSK,
+					MODULATION_4GFSK
+				};
+
 				struct	TPulseTime
 				{
 					system::time::TTime dt_low;
@@ -49,7 +60,7 @@ namespace	cl3
 						TPulseTime pt;
 						system::time::TTime dt_flush;
 
-						bool b_inverted_line;
+						bool b_inverted_lineidle;
 						bool b_idle_registered;
 
 						void	OnRaise	(gpio::TOnEdgeEvent&, gpio::IPin&, gpio::TOnEdgeData data) final override;
@@ -61,7 +72,8 @@ namespace	cl3
 						CL3PUBF	stream::IOut<TPulseTime>*
 										Sink				() const final override CL3_GETTER;
 
-						CL3PUBF	CLASS	TGPIOPulseReader	(gpio::IPin* pin, bool b_inverted_line = false, system::time::TTime dt_flush = 0.001);
+						CL3PUBF	CLASS	TGPIOPulseReader	(gpio::IPin* pin, bool b_inverted_lineidle = false, system::time::TTime dt_flush = 0.001);
+						CL3PUBF	CLASS	~TGPIOPulseReader	();
 				};
 
 				class CL3PUBT	TOOKDecoder : public stream::IOut<TPulseTime>, public stream::ISource<bool>
@@ -89,17 +101,15 @@ namespace	cl3
 						CL3PUBF	stream::IOut<bool>*
 										Sink				() const final override CL3_GETTER;
 
-						CL3PUBF	CLASS	TOOKDecoder			(usys_t n_pulses_buffer = 64, system::time::TTime dt_latch = -1);
+						CL3PUBF	CLASS	TOOKDecoder			(usys_t n_pulses_buffer = 64);
 						CL3PUBF	CLASS	~TOOKDecoder		();
 				};
 
-				//	This is a decoder for the crazy 4bit pattern which is received by my RFM26W module... duno if this is useful to others....
-				class CL3PUBT	TCrazy4bitDecoder : public stream::IOut<bool>, public stream::ISource<s8_t>
+				//	This is a decoder for the 2bit on-air patterns send by PT2262 chips
+				class CL3PUBT	TInvertedBitsDecoder : public stream::IOut<bool>, public stream::ISource<bool>
 				{
 					protected:
-						stream::IOut<s8_t>* sink;
-						u8_t buffer;
-						u8_t index;
+						stream::IOut<bool>* sink;
 
 					public:
 						//	from IOut
@@ -108,11 +118,11 @@ namespace	cl3
 						CL3PUBF	usys_t	Write				(const bool* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 
 						//	from ISource
-						CL3PUBF	void	Sink				(stream::IOut<s8_t>* os) final override CL3_SETTER;
-						CL3PUBF	stream::IOut<s8_t>*
+						CL3PUBF	void	Sink				(stream::IOut<bool>* os) final override CL3_SETTER;
+						CL3PUBF	stream::IOut<bool>*
 										Sink				() const final override CL3_GETTER;
 
-						CL3PUBF	CLASS	TCrazy4bitDecoder	();
+						CL3PUBF	CLASS	TInvertedBitsDecoder	();
 				};
 
 				//	this emulates the PT2272 chip, which decodes the 12bit signals sent by the PT2262 chip

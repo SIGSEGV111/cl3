@@ -41,15 +41,16 @@ namespace	cl3
 
 				void	TGPIOPulseReader::OnRaise			(event::TEvent<gpio::IPin, gpio::TOnEdgeData>&, gpio::IPin&, gpio::TOnEdgeData data)
 				{
-					data.b_level_prev = data.b_level_prev != this->b_inverted_line;
-					data.b_level_now != data.b_level_now  != this->b_inverted_line;
-
 					const TTime t_now = TTime::Now(TIME_CLOCK_MONOTONIC);
 
 					if(!data.b_level_prev && data.b_level_now)
 					{
 						//	rising edge
 						this->pt.dt_low = t_now - this->pt.dt_low;
+
+						if(this->b_inverted_lineidle && this->sink)
+							sink->Write(&this->pt, 1);
+
 						this->pt.dt_high = t_now;
 					}
 					else if(data.b_level_prev && !data.b_level_now)
@@ -57,7 +58,8 @@ namespace	cl3
 						//	falling edge
 						this->pt.dt_high = t_now - this->pt.dt_high;
 
-						if(sink) sink->Write(&this->pt, 1);
+						if(!this->b_inverted_lineidle && this->sink)
+							sink->Write(&this->pt, 1);
 
 						this->pt.dt_low = t_now;
 					}
@@ -76,8 +78,17 @@ namespace	cl3
 				{
 					if(this->sink)
 					{
+// 						//	FIXME: this should not be required.... but it is for now because the OOK decoder can't handle inverted lines yet
+// 						if(this->pin->Level() != this->b_inverted_line)
+// 						{
+// 							//	line went idle in HIGH mode
+// 							//	create an artificial pulse, to catch the last LOW pulse
+// 							const TPulseTime fake_pt = { this->pt.dt_low, -1 };
+// 							if(this->sink) sink->Write(&fake_pt, 1);
+// 						}
+
 						//	deregister OnIdle event - to prevent repeated callbacks
-						pin->OnIdle().Unregister(this);
+						this->pin->OnIdle().Unregister(this);
 						this->b_idle_registered = false;
 
 						//	flush buffer since the line is idle for too long
@@ -96,8 +107,8 @@ namespace	cl3
 					return this->sink;
 				}
 
-				CLASS	TGPIOPulseReader::TGPIOPulseReader	(gpio::IPin* pin, bool b_inverted_line, system::time::TTime dt_flush)
-					: pin(pin), sink(NULL), dt_flush(dt_flush), b_inverted_line(b_inverted_line), b_idle_registered(false)
+				CLASS	TGPIOPulseReader::TGPIOPulseReader	(gpio::IPin* pin, bool b_inverted_lineidle, system::time::TTime dt_flush)
+					: pin(pin), sink(NULL), dt_flush(dt_flush), b_inverted_lineidle(b_inverted_lineidle), b_idle_registered(false)
 				{
 					pin->Mode(gpio::MODE_INPUT);
 					pin->Pull(gpio::PULL_DISABLED);
@@ -107,7 +118,14 @@ namespace	cl3
 					else
 						pt.dt_low = TTime::Now(TIME_CLOCK_MONOTONIC);
 
-					pin->OnEdge().Register(this);
+					this->pin->OnEdge().Register(this);
+				}
+
+				CLASS	TGPIOPulseReader::~TGPIOPulseReader	()
+				{
+					this->pin->OnEdge().Unregister(this);
+					if(this->b_idle_registered)
+						this->pin->OnIdle().Unregister(this);
 				}
 
 				/***********************************************************************/
@@ -127,25 +145,48 @@ namespace	cl3
 
 					const TTime dt_avg = (dt_min + dt_max) / 2;
 
-// 					fprintf(stderr, "ComputeAveragePulseLength:\n");
-// 					fprintf(stderr, "min = %4llu µs\n", dt_min.ConvertToI(TIME_UNIT_MICROSECONDS));
-// 					fprintf(stderr, "max = %4llu µs\n", dt_max.ConvertToI(TIME_UNIT_MICROSECONDS));
-// 					fprintf(stderr, "avg = %4llu µs\n", dt_avg.ConvertToI(TIME_UNIT_MICROSECONDS));
+// 					fprintf(stderr, "DEBUG: ComputeAveragePulseLength:\n");
+// 					fprintf(stderr, "DEBUG: min = %4llu µs\n", dt_min.ConvertToI(TIME_UNIT_MICROSECONDS));
+// 					fprintf(stderr, "DEBUG: max = %4llu µs\n", dt_max.ConvertToI(TIME_UNIT_MICROSECONDS));
+// 					fprintf(stderr, "DEBUG: avg = %4llu µs\n", dt_avg.ConvertToI(TIME_UNIT_MICROSECONDS));
 
 					return dt_avg;
 				}
+
+// 				TTime	TOOKDecoder::ComputeAveragePulseLength	(const TPulseTime* arr_items, usys_t n_items)
+// 				{
+// 					if(n_items == 0) return -1;
+//
+// 					//	we only consider the pulse-length of the LOW pulses (as the LOW-pulses encode the data in OOK)
+//
+// 					TTime dt_avg = 0;
+// 					for(usys_t i = 0; i < n_items; i++)
+// 						dt_avg += arr_items[i].dt_low;
+//
+// 					dt_avg /= n_items;
+//
+// // 					fprintf(stderr, "DEBUG: ComputeAveragePulseLength:\n");
+// // 					fprintf(stderr, "DEBUG: avg = %4llu µs\n", dt_avg.ConvertToI(TIME_UNIT_MICROSECONDS));
+//
+// 					return dt_avg;
+// 				}
 
 				void	TOOKDecoder::Flush			()
 				{
 					if(this->sink && this->n_pulses_current > 0)
 					{
 						//	ignore the first pulse as it only contains garbage data (it contains the info how long the line was idle before the first real pulse)
-
 						const TTime dt_avg = ComputeAveragePulseLength(this->arr_pulses+1, this->n_pulses_current-1);
 
 						bool* arr_bits = reinterpret_cast<bool*>(this->arr_pulses);	//	EVIL! don't try this at home! (re-purpose the memory for the pulse-times as buffer for the bits)
-						for(usys_t i = 1; i < this->n_pulses_current; i++)
+						for(usys_t i = 0; i < this->n_pulses_current; i++)
+						{
 							arr_bits[i] = this->arr_pulses[i].dt_low > dt_avg;
+// 							fprintf(stderr, "DEBUG: pulse[%4u]: dt_low = %4lu µs ; dt_high = %4lu µs ; value = %s\n", i,
+// 									(unsigned long)this->arr_pulses[i].dt_low.ConvertToI(TIME_UNIT_MICROSECONDS),
+// 									(unsigned long)this->arr_pulses[i].dt_high.ConvertToI(TIME_UNIT_MICROSECONDS),
+// 									arr_bits[i] ? "true" : "false");
+						}
 
 						this->sink->Write(arr_bits+1, this->n_pulses_current-1);
 						this->sink->Flush();
@@ -179,7 +220,7 @@ namespace	cl3
 					return this->sink;
 				}
 
-				CLASS	TOOKDecoder::TOOKDecoder	(usys_t n_pulses_buffer, system::time::TTime dt_trigger) : sink(NULL), arr_pulses(NULL), n_pulses_current(0), n_pulses_max(n_pulses_buffer)
+				CLASS	TOOKDecoder::TOOKDecoder	(usys_t n_pulses_buffer) : sink(NULL), arr_pulses(NULL), n_pulses_current(0), n_pulses_max(n_pulses_buffer)
 				{
 					this->arr_pulses = (TPulseTime*)Alloc(n_pulses_buffer, &typeinfo::TCTTI<TPulseTime>::rtti);
 				}
@@ -191,60 +232,44 @@ namespace	cl3
 
 				/***********************************************************************/
 
-				void	TCrazy4bitDecoder::Flush	()
+				void	TInvertedBitsDecoder::Flush	()
 				{
-					this->buffer = 0;
-					this->index = 0;
+					if(this->sink) this->sink->Flush();
 				}
 
-				usys_t	TCrazy4bitDecoder::Write	(const bool* arr_items_write, usys_t n_items_write_max, usys_t)
+				usys_t	TInvertedBitsDecoder::Write	(const bool* arr_items_write, usys_t n_items_write_max, usys_t)
 				{
 					CL3_CLASS_ERROR(this->sink == NULL, TException, "need a sink to work");
 
-					s8_t arr_bits[n_items_write_max/4+1];
-					usys_t n_bits = 0;
+					usys_t n_bits = n_items_write_max / 2;
+					bool arr_bits[n_bits];
 
-					u8_t buffer = this->buffer;	//	copy buffer for improved performance
-					u8_t index = this->index;
+					usys_t o = 0;
+					for(; o < n_items_write_max && !arr_items_write[o]; o++);	//	scan forward until the first 1-bit
 
-					for(usys_t i = 0; i < n_items_write_max; i++)
-					{
-						buffer <<= 1;
-						buffer |= (arr_items_write[i] ? 1 : 0);
-						buffer &= 0x0F;
-						index++;
+					arr_items_write += o;
+					usys_t n = (n_items_write_max - o) / 2;
 
-						if(index == 4)
-						{
-							if(buffer == 0x0A)
-								arr_bits[n_bits++] = 1;	//	true
-							else if(buffer == 0x0C)
-								arr_bits[n_bits++] = 0;	//	false
-							else
-								arr_bits[n_bits++] = -1;	//	error
-						}
-					}
+					for(usys_t i = 0; i < n; i++)
+						arr_bits[i] = arr_items_write[i*2];	//	TODO: error detection
 
-					this->buffer = buffer;	//	update global buffer
-					this->index = index;
-
-					this->sink->Write(arr_bits, n_bits);
+					this->sink->Write(arr_bits, n);
 
 					return n_items_write_max;
 				}
 
-				void	TCrazy4bitDecoder::Sink		(stream::IOut<s8_t>* os)
+				void	TInvertedBitsDecoder::Sink		(stream::IOut<bool>* os)
 				{
 					this->sink = os;
 				}
 
-				stream::IOut<s8_t>*
-						TCrazy4bitDecoder::Sink		() const
+				stream::IOut<bool>*
+						TInvertedBitsDecoder::Sink		() const
 				{
 					return this->sink;
 				}
 
-				CLASS	TCrazy4bitDecoder::TCrazy4bitDecoder	() : sink(NULL), buffer(0), index(0)
+				CLASS	TInvertedBitsDecoder::TInvertedBitsDecoder	() : sink(NULL)
 				{
 				}
 

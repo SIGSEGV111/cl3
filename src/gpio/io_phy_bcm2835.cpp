@@ -222,7 +222,7 @@ namespace	cl3
 
 									const bool b_level_new = pin->Level();
 
-									//	raise edge events when the kernel detected a level change, or when we detected a level change
+									//	raise edge events when we detected a level change
 									if(CL3_LIKELY(pin->b_level_last != b_level_new))
 									{
 										const gpio::TOnEdgeData data = { pin->b_level_last, b_level_new };
@@ -288,6 +288,9 @@ namespace	cl3
 													//	open the FD for the pin
 													snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%u/value", i);
 													CL3_NONCLASS_SYSERR(pfds[i].fd = open(buffer, O_CLOEXEC|O_NOCTTY|O_RDONLY));
+
+													//	read the current level of the pin (NOTE: this is racey :-/)
+													pin->b_level_last = pin->Level();
 												}
 												else if(pin->mode != gpio::MODE_INPUT && pfds[i].fd != -1)
 												{
@@ -310,11 +313,11 @@ namespace	cl3
 					}
 					catch(const error::TException& ex)
 					{
-						fprintf(stderr, "GPIO-IRQ-THREAD: ERROR: %s\n", ex.message);
+						fprintf(stderr, "ERROR in bcm2835-Thread:\n\tmessage: %s\n\tfile: %s:%u\n\texpression: %s\n", ex.message, ex.codefile, ex.codeline, ex.expression);
 					}
 					catch(...)
 					{
-						fprintf(stderr, "GPIO-IRQ-THREAD: ERROR: unknown error\n");
+						fprintf(stderr, "ERROR in bcm2835-Thread: unknown error\n");
 					}
 
 // 					fprintf(stderr, "GPIO-IRQ-THREAD: INFO: terminating ... \n");
@@ -387,13 +390,15 @@ namespace	cl3
 					bcm2835_spi_setClockDivider(this->device->divider);
 
 					//	activate chip-select
-					this->device->pin_cs->Level(false);	//	logical "0" means "ON", logical "1" means "OFF"; so this switches the device *ON*
+					if(this->device->pin_cs)
+						this->device->pin_cs->Level(false);	//	logical "0" means "ON", logical "1" means "OFF"; so this switches the device *ON*
 				}
 
 				CLASS	TSPIDevice::TBusLock::~TBusLock	()
 				{
 					//	deactivate chip-select
-					this->device->pin_cs->Level(true);	//	logical "0" means "ON", logical "1" means "OFF"; so this switches the device *OFF*
+					if(this->device->pin_cs)
+						this->device->pin_cs->Level(true);	//	logical "0" means "ON", logical "1" means "OFF"; so this switches the device *OFF*
 
 					//	no need to reset the baudrate - the next device will set it to its prefered value
 
@@ -410,6 +415,7 @@ namespace	cl3
 
 				CLASS		TSPIDevice::~TSPIDevice	()
 				{
+					//	nothing to do yet
 				}
 
 				u32_t		TSPIDevice::Baudrate	() const
@@ -423,27 +429,38 @@ namespace	cl3
 					for(this->divider = 2; (250000000 / divider) > new_baudrate; this->divider *= 2);
 				}
 
-				usys_t		TSPIDevice::Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
+				usys_t		TSPIDevice::Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t)
 				{
-					CL3_NOT_IMPLEMENTED;
+					memset(arr_items_read, 0, n_items_read_max);
+					this->Transfer(arr_items_read, n_items_read_max);
+					return n_items_read_max;
 				}
 
-				usys_t		TSPIDevice::Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t		TSPIDevice::Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t)
 				{
-					CL3_NOT_IMPLEMENTED;
+					TBusLock lock(this);
+					bcm2835_spi_writenb(const_cast<char*>(reinterpret_cast<const char*>(arr_items_write)), n_items_write_max);
+					return n_items_write_max;
 				}
 
 				void		TSPIDevice::Transfer	(byte_t* buffer, usys_t sz_buffer)
 				{
-					CL3_NOT_IMPLEMENTED;
+					TBusLock lock(this);
+					bcm2835_spi_transfern(reinterpret_cast<char*>(buffer), sz_buffer);
 				}
 
 				/*************************************************************************/
 
 				CLASS		TSPIBus::TSPIBus		(unsigned idx_bus, const collection::IStaticCollection<gpio::IPin*>& pins_chipselect) : idx_bus(idx_bus)
 				{
+					CL3_CLASS_ERROR_NOARGS(idx_bus != 0, TNotImplementedException);
+
 					bcm2835_spi_begin();
+					bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);
 					bcm2835_spi_chipSelect(BCM2835_SPI_CS_NONE);	//	handle chip-select in cl3-/user-code to support more than two devices on the bus and to support crazy devices
+
+// 					bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
+
 
 					auto it = pins_chipselect.CreateStaticIterator();
 					it->MoveHead();
@@ -477,7 +494,7 @@ namespace	cl3
 
 				u32_t		TSPIBus::BaudrateMin	() const
 				{
-					return 3815;
+					return 3814;
 				}
 
 				u32_t		TSPIBus::BaudrateMax	() const
@@ -490,45 +507,6 @@ namespace	cl3
 				{
 					return this->devices;
 				}
-
-				/*************************************************************************/
-
-// 				CLASS		TI2CDevice::TDevice		(TI2CBus* bus, u8_t address)
-// 				{
-// 					CL3_NOT_IMPLEMENTED;
-// 				}
-//
-// 				u8_t		TI2CDevice::Address		() const
-// 				{
-// 					CL3_NOT_IMPLEMENTED;
-// 				}
-//
-// 				TBCM2835::TI2CBus*	TI2CDevice::BusController	() const
-// 				{
-// 					CL3_NOT_IMPLEMENTED;
-// 				}
-//
-// 				u32_t		TI2CDevice::Baudrate	() const
-// 				{
-// 					CL3_NOT_IMPLEMENTED;
-// 				}
-//
-// 				void		TI2CDevice::Baudrate	(u32_t new_baudrate)
-// 				{
-// 					CL3_NOT_IMPLEMENTED;
-// 				}
-//
-// 				usys_t		TI2CDevice::Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
-// 				{
-// 					CL3_NOT_IMPLEMENTED;
-// 				}
-//
-// 				usys_t		TI2CDevice::Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
-// 				{
-// 					CL3_NOT_IMPLEMENTED;
-// 				}
-//
-// 				/*************************************************************************/
 			}
 		}
 	}

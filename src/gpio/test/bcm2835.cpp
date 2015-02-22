@@ -17,6 +17,7 @@
 */
 
 #include <cl3/core/system_time.hpp>
+#include <cl3/core/io_collection_list.hpp>
 #include <cl3/gpio/io_phy.hpp>
 #include <cl3/gpio/config.hpp>
 #include <stdio.h>
@@ -33,6 +34,7 @@ namespace
 {
 	using namespace cl3::io::phy;
 	using namespace cl3::io::phy::gpio;
+	using namespace cl3::io::collection::list;
 
 	#ifdef CL3_WITH_BCM2835
 		using namespace cl3::io::phy::bcm2835;
@@ -110,14 +112,10 @@ namespace
 
 		struct	TEdgeDetector : gpio::TOnEdgeEvent::IReceiver
 		{
-// 			u64_t t_send;
-// 			u64_t t_receive;
 			volatile TOnEdgeData data;
 
 			void	OnRaise	(gpio::TOnEdgeEvent& event, gpio::IPin& sender, gpio::TOnEdgeData data) final override
 			{
-// 				t_receive = TGPIO::Tick();
-
 				if(!data.b_level_prev && data.b_level_now)
 				{
 					//	rising edge
@@ -160,7 +158,6 @@ namespace
 			for(unsigned i = 0; i < 128; i++)
 			{
 				const bool b_state = (i % 2) == 0;
-// 				detector.t_send = TGPIO::Tick();
 				pin_out.Level(b_state);
 
 				EXPECT_TRUE(pin_in.Level() == b_state);
@@ -169,6 +166,15 @@ namespace
 			}
 
 			pin_in.OnEdge().Unregister(&detector);
+		}
+
+		TEST(io_phy_bcm2835_TSPIBus, basics)
+		{
+			TGPIO gpio;
+			TList<IPin*> pins;
+			pins.Append(gpio.Pins()[8]);
+			pins.Append(gpio.Pins()[7]);
+			TSPIBus spibus(0, pins);
 		}
 
 	#endif

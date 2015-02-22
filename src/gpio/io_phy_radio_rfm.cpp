@@ -26,6 +26,9 @@
 #include <string.h>
 #include <stdio.h>
 
+// #include <cl3/core/util.hpp>
+// #include <cl3/core/io_text_terminal.hpp>
+
 namespace	cl3
 {
 	namespace	io
@@ -42,6 +45,7 @@ namespace	cl3
 					using namespace text::string;
 					using namespace gpio;
 					using namespace file;
+					using namespace system::time;
 
 					bool	TRawIRQInfo::operator==	(const TRawIRQInfo& other) const
 					{
@@ -115,6 +119,20 @@ namespace	cl3
 
 					/**********************************************************************/
 
+					CLASS	TChipException::TChipException	(TRFM*, const char* msg) : TException("radio chip reported error: %s", msg)
+					{
+					}
+
+					CLASS	TChipException::TChipException	(TChipException&& other) : TException((TException&&)other)
+					{
+					}
+
+					CLASS	TChipException::~TChipException	()
+					{
+					}
+
+					/**********************************************************************/
+
 					CLASS	TPin::TPin		(TRFM* rfm, u8_t index)
 					{
 						CL3_NOT_IMPLEMENTED;
@@ -180,6 +198,49 @@ namespace	cl3
 
 					/**********************************************************************/
 
+					const char*	TRFM::FetchAndClearError()
+					{
+						WaitForCTS();
+						byte_t buffer[] = { OPCODE_GET_CHIP_STATUS, 0x77, 0, 0, 0, 0 };
+						this->device->Transfer(buffer, 2);
+						WaitForCTS();
+						buffer[0] = OPCODE_READ_CMD_BUFF;
+						memset(buffer+1, 0, 5);
+						this->device->Transfer(buffer, 5);
+
+						if(buffer[2] & 0x08)
+						{
+							switch(buffer[4])
+							{
+								case 0:
+									//	no error
+									return "No error ???? => logic error in control program or misbehaving radio chip.";
+								case 16:
+									return "Bad command issued.";
+								case 17:
+									return "Argment(s) in issued command were invalid.";
+								case 18:
+									return "Command was issued before previous command was completed.";
+								case 19:
+									return "Command issued was not allowed while in the current device state.";
+								case 49:
+									return "Invalid bootmode supplied.";
+								case 64:
+									return "Bad Property ID (aka. \"index\") was provided.";
+								default:
+									return "undocumented error";
+							}
+						}
+
+						return NULL;
+					}
+
+					void		TRFM::AssertChipStatus	()
+					{
+						const char* const err = FetchAndClearError();
+						CL3_CLASS_ERROR(err != NULL, TChipException, this, err);
+					}
+
 					void		TRFM::Sink		(IOut<byte_t>* os)
 					{
 						this->sink = os;
@@ -217,22 +278,120 @@ namespace	cl3
 						return this->on_irq;
 					}
 
-					void		TRFM::ExecuteRaw(const void* p_cmd, usys_t sz_cmd, void* p_retval, usys_t sz_retval)
+					void		TRFM::WaitForCTS()
+					{
+						byte_t buffer[2];
+
+						buffer[0] = (byte_t)OPCODE_READ_CMD_BUFF;
+						buffer[1] = 0;
+						this->device->Transfer(buffer, 2);
+						if(buffer[1] == 0xff)
+							return;
+
+						const TTime timeout = TTime::Now(TIME_CLOCK_MONOTONIC) + 1.000;
+						do
+						{
+							buffer[0] = (byte_t)OPCODE_READ_CMD_BUFF;
+							buffer[1] = 0;
+							this->device->Transfer(buffer, 2);
+							if(buffer[1] == 0xff)
+								return;
+						}
+						while(TTime::Now(TIME_CLOCK_MONOTONIC) < timeout);
+						CL3_CLASS_FAIL(TException, "radio chip hung-up");
+					}
+
+					void		TRFM::Execute	(const byte_t* p_cmd, usys_t sz_cmd, byte_t* p_retval, usys_t sz_retval)
+					{
+						AssertChipStatus();	//	ensure the chip is ready and has no errors flagged
+						this->device->Write(p_cmd, sz_cmd);	//	send the command to the chip
+
+						if(sz_retval > 0 && p_retval != NULL)
+						{
+							WaitForCTS();	//	wait until chip has finished processing the command
+							byte_t buffer[2+sz_retval];
+							buffer[0] = (byte_t)OPCODE_READ_CMD_BUFF;
+							buffer[1] = 0;	//	placeholder for CTS
+							this->device->Transfer(buffer, 2+sz_retval);
+
+							CL3_CLASS_LOGIC_ERROR(buffer[1] != 0xff);	//	check CTS again (should always be 0xff, since we already waited for this)
+							memcpy(p_retval, buffer+2, sz_retval);	//	copy only the return values to the user-provided buffer (skip opcode and CTS)
+						}
+
+						AssertChipStatus();	//	ensure the chip is ready and has no errors flagged (this would now detect errors with the just executed command)
+					}
+
+					void		TRFM::Property	(u8_t group, u8_t index, u8_t value)
+					{
+						const byte_t buffer[] = { OPCODE_SET_PROPERTY, group, 1, index, value };
+						this->Execute(buffer, sizeof(buffer), NULL, 0);
+					}
+
+					u8_t		TRFM::Property	(u8_t group, u8_t index)
+					{
+						u8_t value;
+						const byte_t buffer[] = { OPCODE_GET_PROPERTY, group, 1, index };
+						this->Execute(buffer, sizeof(buffer), &value, 1);
+						return value;
+					}
+
+					void		TRFM::Reset		()
+					{
+						this->pin_shutdown->Level(true);
+						system::task::IThread::Sleep(0.010);
+						this->pin_shutdown->Level(false);
+						system::task::IThread::Sleep(0.010);
+
+						byte_t buffer[] = { OPCODE_NOP, 0 };
+						this->device->Transfer(buffer, 2);
+						CL3_CLASS_ERROR(buffer[1] != 0xff, TException, "radio chip unoperational or connection problem");
+						AssertChipStatus();
+					}
+
+					void		TRFM::Test		()
 					{
 						CL3_NOT_IMPLEMENTED;
 					}
 
-					void		TRFM::Configure	(const void* p_config, usys_t sz_config)
+					void		TRFM::Patch		(const byte_t* p_patch, usys_t sz_patch)
 					{
-						this->Reset();
-// 						const TPartInfo part_info = this->Identify();
-// 						TFile file_patch(TString("patch/") +
-						CL3_NOT_IMPLEMENTED;
+						WaitForCTS();
+						CL3_CLASS_ERROR((sz_patch % 8) != 0, TException, "invalid patch: patch-size must be a multiple of 8");
+						sz_patch /= 8;
+						for(usys_t i = 0; i < sz_patch; i++)
+						{
+							const byte_t* const line = p_patch + (i * 8);
+							this->device->Write(line, 8);
+							WaitForCTS();
+						}
+						AssertChipStatus();
+					}
+
+					void		TRFM::Configure	(const byte_t* p_config, usys_t sz_config)
+					{
+						for(usys_t p = 0; p < sz_config && p_config[p] != 0;)
+						{
+							const byte_t len = p_config[p++];
+							CL3_CLASS_ERROR(len > 16, TException, "invalid config: command length bigger than 16 bytes");
+							this->Execute(p_config + p, len, NULL, 0);
+							p += len;
+						}
+					}
+
+					void		TRFM::StartRX	()
+					{
+						const byte_t buffer[] = { OPCODE_START_RX };
+						this->Execute(buffer, sizeof(buffer), NULL, 0);
 					}
 
 					TPartInfo	TRFM::Identify	()
 					{
-						CL3_NOT_IMPLEMENTED;
+						TPartInfo part_info = {};
+						const byte_t buffer[] = { OPCODE_PART_INFO };
+						this->Execute(buffer, sizeof(buffer), (byte_t*)&part_info, sizeof(part_info));
+						part_info.part = be16toh(part_info.part);
+						part_info.id = be16toh(part_info.id);
+						return part_info;
 					}
 
 					TString		TRFM::ChipName	()
@@ -243,32 +402,21 @@ namespace	cl3
 						return chip_name;
 					}
 
-					void		TRFM::Reset		()
-					{
-						this->pin_shutdown->Level(true);
-						system::task::IThread::Sleep(0.010);
-						this->pin_shutdown->Level(false);
-						system::task::IThread::Sleep(0.010);
-					}
-
-					void		TRFM::Patch		(const void* p_patch, usys_t sz_patch)
-					{
-						CL3_NOT_IMPLEMENTED;
-					}
-
 					TIRQInfo	TRFM::IRQState	()
 					{
 						CL3_NOT_IMPLEMENTED;
 					}
 
 					CLASS		TRFM::TRFM		(bus::spi::IDevice* device, IPin* pin_shutdown, IPin* pin_irq, IPin* pin_rxdata, IPin* pin_txdata, bool b_autoflush)
+						: device(device), pin_shutdown(pin_shutdown), pin_irq(pin_irq), pin_rxdata(pin_rxdata), pin_txdata(pin_txdata), sink(NULL)
 					{
-						CL3_NOT_IMPLEMENTED;
+						device->Baudrate(2000000);
 					}
 
 					CLASS		TRFM::~TRFM		()
 					{
-						CL3_NOT_IMPLEMENTED;
+						this->pin_shutdown->Level(true);
+						system::task::IThread::Sleep(0.010);
 					}
 				}
 			}

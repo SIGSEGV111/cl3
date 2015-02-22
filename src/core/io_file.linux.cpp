@@ -50,9 +50,9 @@ namespace	cl3
 			using namespace system::types::typeinfo;
 			using namespace error;
 
-			CLASS	TFile::TFile	(bool executeable) : fd(-1), access(FILE_ACCESS_READ | FILE_ACCESS_WRITE | (executeable ? FILE_ACCESS_EXECUTE : 0))
+			CLASS	TFile::TFile	() : fd(-1), access(FILE_ACCESS_READ | FILE_ACCESS_WRITE /*| (executeable ? FILE_ACCESS_EXECUTE : 0)*/)
 			{
-				const int mode = (access & FILE_ACCESS_EXECUTE) ? 0777 : 0666;
+				const int mode = /*(access & FILE_ACCESS_EXECUTE) ? 0777 :*/ 0666;
 				const int flags = O_LARGEFILE | O_NOCTTY | O_CLOEXEC | O_TMPFILE | O_RDWR;
 				const TDirectoryBrowser& cwd = TDirectoryBrowser::ThreadCurrentWorkingDirectory();
 

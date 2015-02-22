@@ -187,7 +187,7 @@ namespace	cl3
 					//	from TFile
 					CL3PUBF	void	Count	(uoff_t) CL3_SETTER;
 
-					CL3PUBF	CLASS	TFile	(bool executeable = false);	//	create temporary file
+					CL3PUBF	CLASS	TFile	();	//	create temporary file
 					CL3PUBF	CLASS	TFile	(const text::string::TString& name, int access = FILE_ACCESS_READ, ECreate create = FILE_CREATE_NEVER);	//	open specific file
 					CL3PUBF	CLASS	TFile	(TFile&&);
 					CL3PUBF	CLASS	~TFile	();

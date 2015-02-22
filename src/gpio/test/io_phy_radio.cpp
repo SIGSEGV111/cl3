@@ -55,7 +55,7 @@ namespace
 	TEST(io_phy_radio_TOOKDecoder, decode_24bit_f350us_t950us_h150us_n20pc)
 	{
 		//	this is the 24bit pattern that is sent by a PT2262 chip when you press a button
-		//	we will use 350 us for a "false" signal, and 950 us for a "true" signal, 150 us whitespace (high level), and add 25% noise
+		//	we will use 350 us for a "false" signal, and 950 us for a "true" signal, 150 us whitespace (high level), and add 20% noise
 		//	this should still decode flawlessly
 
 		const bool arr_bits[] = { 1,1,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,0 };

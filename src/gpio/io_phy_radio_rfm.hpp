@@ -23,6 +23,7 @@
 #include <cl3/core/io_stream.hpp>
 #include <cl3/core/io_collection_list.hpp>
 #include <cl3/core/io_text_string.hpp>
+#include <cl3/core/error.hpp>
 
 namespace	cl3
 {
@@ -36,6 +37,47 @@ namespace	cl3
 				{
 					class CL3PUBT TRFM;
 					class CL3PUBT TPin;
+
+					enum	EOpCode
+					{
+						OPCODE_NOP = 0x00,
+						OPCODE_PART_INFO = 0x01,
+						OPCODE_POWER_UP = 0x02,
+						OPCODE_PATCH_IMAGE = 0x04,
+						OPCODE_FUNC_INFO = 0x10,
+						OPCODE_SET_PROPERTY = 0x11,
+						OPCODE_GET_PROPERTY = 0x12,
+						OPCODE_GPIO_PIN_CFG = 0x13,
+						OPCODE_GET_SENSOR_READING = 0x14,
+						OPCODE_FIFO_INFO = 0x15,
+						OPCODE_GET_INT_STATUS = 0x20,
+						OPCODE_GET_PH_STATUS = 0x21,
+						OPCODE_GET_MODEM_STATUS = 0x22,
+						OPCODE_GET_CHIP_STATUS = 0x23,
+						OPCODE_START_TX = 0x31,
+						OPCODE_START_RX = 0x32,
+						OPCODE_REQUEST_DEVICE_STATE = 0x33,
+						OPCODE_CHANGE_STATE = 0x34,
+						OPCODE_READ_CMD_BUFF = 0x44,
+						OPCODE_FAST_RESPONSE_A = 0x50,
+						OPCODE_FAST_RESPONSE_B = 0x51,
+						OPCODE_FAST_RESPONSE_C = 0x53,
+						OPCODE_FAST_RESPONSE_D = 0x57,
+						OPCODE_TX_FIFO_WRITE = 0x66,
+						OPCODE_RX_FIFO_READ = 0x77
+					};
+
+					CL3_PACK(struct TOpCode
+					{
+						u8_t opcode;
+						union
+						{
+							struct
+							{
+								byte_t fifo[64];
+							};
+						};
+					});
 
 					CL3_PACK(struct	TPartInfo
 					{
@@ -167,6 +209,14 @@ namespace	cl3
 							CL3PUBF	void	Level		(bool) final override CL3_SETTER;
 					};
 
+					class	TChipException : public error::TException
+					{
+						public:
+							CL3PUBF	CLASS	TChipException	(TRFM* rfm, const char* msg);
+							CL3PUBF	CLASS	TChipException	(TChipException&&);
+							CL3PUBF	virtual	~TChipException	();
+					};
+
 					class	TRFM : public stream::ISource<byte_t>, public stream::IOut<byte_t>, public gpio::IGPIO
 					{
 						private:
@@ -181,7 +231,11 @@ namespace	cl3
 							gpio::IPin* pin_txdata;
 							IOut<byte_t>* sink;
 							TOnIRQEvent on_irq;
+// 							TOnCmdEvent on_cmd;
 							collection::list::TList<gpio::IPin* const> pins;
+
+							CL3PUBF	const char*	FetchAndClearError	();
+							CL3PUBF	void		AssertChipStatus	();
 
 						public:
 							//	from ISource
@@ -202,13 +256,21 @@ namespace	cl3
 							CL3PUBF	const TOnIRQEvent&
 												OnIRQ		() const CL3_GETTER;
 
-							CL3PUBF	void		ExecuteRaw	(const void* p_cmd, usys_t sz_cmd, void* p_retval, usys_t sz_retval);
-							CL3PUBF	void		Configure	(const void* p_config, usys_t sz_config);	//	Reset() + Identify() + upload correct Patch() + upload config
+							CL3PUBF	void		WaitForCTS	();
+							CL3PUBF	void		Execute		(const byte_t* p_cmd, usys_t sz_cmd, byte_t* p_retval, usys_t sz_retval);
+							CL3PUBF	void		Property	(u8_t group, u8_t index, u8_t value) CL3_SETTER;
+							CL3PUBF	u8_t		Property	(u8_t group, u8_t index) CL3_GETTER;
+
+							CL3PUBF	void		Reset		();
+							CL3PUBF	void		Test		();
 							CL3PUBF	TPartInfo	Identify	();
+							CL3PUBF	void		Patch		(const byte_t* p_patch, usys_t sz_patch);
+							CL3PUBF	void		Configure	(const byte_t* p_config, usys_t sz_config);
+							CL3PUBF	void		StartRX		();
+
 							CL3PUBF	text::string::TString
 												ChipName	();
-							CL3PUBF	void		Reset		();
-							CL3PUBF	void		Patch		(const void* p_patch, usys_t sz_patch);
+
 							CL3PUBF	TIRQInfo	IRQState	();
 
 							CL3PUBF	CLASS		TRFM		(bus::spi::IDevice* device, gpio::IPin* pin_shutdown, gpio::IPin* pin_irq = NULL, gpio::IPin* pin_rxdata = NULL, gpio::IPin* pin_txdata = NULL, bool b_autoflush = true);
