@@ -171,7 +171,8 @@ namespace	cl3
 
 						// set realtime prio
 						{
-							sched_param p = {};
+							sched_param p;
+							memset(&p, 0, sizeof(p));
 							p.sched_priority = 1;
 							CL3_NONCLASS_SYSERR(sched_setscheduler(0, SCHED_FIFO, &p));
 							CL3_NONCLASS_SYSERR(mlockall(MCL_CURRENT|MCL_FUTURE));

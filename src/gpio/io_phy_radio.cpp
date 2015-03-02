@@ -130,6 +130,56 @@ namespace	cl3
 
 				/***********************************************************************/
 
+				void	TGPIOBusReader::OnRaise				(event::TEvent<gpio::IPin, gpio::TOnEdgeData>&, gpio::IPin&, gpio::TOnEdgeData data)
+				{
+					if(data.b_level_now)
+					{
+						const bool b = this->pin_data->Level();
+						this->sink->Write(&b, 1);
+
+						if(!this->b_idle_registered)
+						{
+							pin_clock->OnIdle().Register(this);
+							this->b_idle_registered = true;
+						}
+					}
+				}
+
+				void	TGPIOBusReader::OnRaise				(gpio::TOnIdleEvent&, gpio::IPin&, gpio::TOnIdleData)
+				{
+					this->sink->Flush();
+					pin_clock->OnIdle().Unregister(this);
+					this->b_idle_registered = false;
+				}
+
+				void	TGPIOBusReader::Sink				(stream::IOut<bool>* os)
+				{
+					if(os == NULL) pin_clock->OnEdge().Unregister(this);
+					this->sink = os;
+					if(os != NULL) pin_clock->OnEdge().Register(this);
+				}
+
+				stream::IOut<bool>*
+						TGPIOBusReader::Sink				() const
+				{
+					return this->sink;
+				}
+
+				CLASS	TGPIOBusReader::TGPIOBusReader		(gpio::IPin* pin_data, gpio::IPin* pin_clock, system::time::TTime dt_flush) : sink(NULL), pin_data(pin_data), pin_clock(pin_clock), b_idle_registered(false)
+				{
+					pin_data->Mode(gpio::MODE_INPUT);
+					pin_clock->Mode(gpio::MODE_INPUT);
+					pin_clock->IdleTimeout(dt_flush);
+				}
+
+				CLASS	TGPIOBusReader::~TGPIOBusReader		()
+				{
+					pin_clock->OnEdge().Unregister(this);
+					pin_clock->OnIdle().Unregister(this);
+				}
+
+				/***********************************************************************/
+
 				TTime	TOOKDecoder::ComputeAveragePulseLength	(const TPulseTime* arr_items, usys_t n_items)
 				{
 					if(n_items == 0) return -1;
@@ -141,14 +191,15 @@ namespace	cl3
 					{
 						if(arr_items[i].dt_low < dt_min) dt_min = arr_items[i].dt_low;
 						if(arr_items[i].dt_low > dt_max) dt_max = arr_items[i].dt_low;
+						fprintf(stderr, "DEBUG: pulse[%2u] = %4llu µs\n", i, arr_items[i].dt_low.ConvertToI(TIME_UNIT_MICROSECONDS));
 					}
 
 					const TTime dt_avg = (dt_min + dt_max) / 2;
 
-// 					fprintf(stderr, "DEBUG: ComputeAveragePulseLength:\n");
-// 					fprintf(stderr, "DEBUG: min = %4llu µs\n", dt_min.ConvertToI(TIME_UNIT_MICROSECONDS));
-// 					fprintf(stderr, "DEBUG: max = %4llu µs\n", dt_max.ConvertToI(TIME_UNIT_MICROSECONDS));
-// 					fprintf(stderr, "DEBUG: avg = %4llu µs\n", dt_avg.ConvertToI(TIME_UNIT_MICROSECONDS));
+					fprintf(stderr, "DEBUG: ComputeAveragePulseLength:\n");
+					fprintf(stderr, "DEBUG: min = %4llu µs\n", dt_min.ConvertToI(TIME_UNIT_MICROSECONDS));
+					fprintf(stderr, "DEBUG: max = %4llu µs\n", dt_max.ConvertToI(TIME_UNIT_MICROSECONDS));
+					fprintf(stderr, "DEBUG: avg = %4llu µs\n", dt_avg.ConvertToI(TIME_UNIT_MICROSECONDS));
 
 					return dt_avg;
 				}
@@ -220,7 +271,7 @@ namespace	cl3
 					return this->sink;
 				}
 
-				CLASS	TOOKDecoder::TOOKDecoder	(usys_t n_pulses_buffer) : sink(NULL), arr_pulses(NULL), n_pulses_current(0), n_pulses_max(n_pulses_buffer)
+				CLASS	TOOKDecoder::TOOKDecoder	(usys_t n_pulses_buffer) : sink(NULL), arr_pulses(NULL), n_pulses_max(n_pulses_buffer), n_pulses_current(0)
 				{
 					this->arr_pulses = (TPulseTime*)Alloc(n_pulses_buffer, &typeinfo::TCTTI<TPulseTime>::rtti);
 				}
@@ -228,49 +279,6 @@ namespace	cl3
 				CLASS	TOOKDecoder::~TOOKDecoder	()
 				{
 					Free(this->arr_pulses);
-				}
-
-				/***********************************************************************/
-
-				void	TInvertedBitsDecoder::Flush	()
-				{
-					if(this->sink) this->sink->Flush();
-				}
-
-				usys_t	TInvertedBitsDecoder::Write	(const bool* arr_items_write, usys_t n_items_write_max, usys_t)
-				{
-					CL3_CLASS_ERROR(this->sink == NULL, TException, "need a sink to work");
-
-					usys_t n_bits = n_items_write_max / 2;
-					bool arr_bits[n_bits];
-
-					usys_t o = 0;
-					for(; o < n_items_write_max && !arr_items_write[o]; o++);	//	scan forward until the first 1-bit
-
-					arr_items_write += o;
-					usys_t n = (n_items_write_max - o) / 2;
-
-					for(usys_t i = 0; i < n; i++)
-						arr_bits[i] = arr_items_write[i*2];	//	TODO: error detection
-
-					this->sink->Write(arr_bits, n);
-
-					return n_items_write_max;
-				}
-
-				void	TInvertedBitsDecoder::Sink		(stream::IOut<bool>* os)
-				{
-					this->sink = os;
-				}
-
-				stream::IOut<bool>*
-						TInvertedBitsDecoder::Sink		() const
-				{
-					return this->sink;
-				}
-
-				CLASS	TInvertedBitsDecoder::TInvertedBitsDecoder	() : sink(NULL)
-				{
 				}
 
 				/***********************************************************************/

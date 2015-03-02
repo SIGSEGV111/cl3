@@ -241,31 +241,6 @@ namespace	cl3
 						CL3_CLASS_ERROR(err != NULL, TChipException, this, err);
 					}
 
-					void		TRFM::Sink		(IOut<byte_t>* os)
-					{
-						this->sink = os;
-					}
-
-					IOut<byte_t>* TRFM::Sink	() const
-					{
-						return this->sink;
-					}
-
-					void		TRFM::Flush		()
-					{
-						CL3_NOT_IMPLEMENTED;	//	send TX-FIFO
-					}
-
-					usys_t		TRFM::Space		() const
-					{
-						CL3_NOT_IMPLEMENTED;	//	query TX-FIFO
-					}
-
-					usys_t		TRFM::Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
-					{
-						CL3_NOT_IMPLEMENTED;
-					}
-
 					CL3PUBF const TList<IPin* const>&
 								TRFM::Pins		()
 					{
@@ -338,13 +313,12 @@ namespace	cl3
 					void		TRFM::Reset		()
 					{
 						this->pin_shutdown->Level(true);
-						system::task::IThread::Sleep(0.010);
+						system::task::IThread::Sleep(0.1);
 						this->pin_shutdown->Level(false);
-						system::task::IThread::Sleep(0.010);
-
+						system::task::IThread::Sleep(0.1);
 						byte_t buffer[] = { OPCODE_NOP, 0 };
 						this->device->Transfer(buffer, 2);
-						CL3_CLASS_ERROR(buffer[1] != 0xff, TException, "radio chip unoperational or connection problem");
+						CL3_CLASS_ERROR(buffer[1] != 0xff, TException, "radio chip unoperational or connection problem(buffer[1] == CTS == 0x%02hhx)", buffer[1]);
 						AssertChipStatus();
 					}
 
@@ -384,9 +358,20 @@ namespace	cl3
 						this->Execute(buffer, sizeof(buffer), NULL, 0);
 					}
 
+					void		TRFM::StartTX	()
+					{
+						const byte_t buffer[] = { OPCODE_START_TX };
+						this->Execute(buffer, sizeof(buffer), NULL, 0);
+					}
+
+					void		TRFM::Stop		()
+					{
+						CL3_NOT_IMPLEMENTED;
+					}
+
 					TPartInfo	TRFM::Identify	()
 					{
-						TPartInfo part_info = {};
+						TPartInfo part_info;
 						const byte_t buffer[] = { OPCODE_PART_INFO };
 						this->Execute(buffer, sizeof(buffer), (byte_t*)&part_info, sizeof(part_info));
 						part_info.part = be16toh(part_info.part);
@@ -407,8 +392,8 @@ namespace	cl3
 						CL3_NOT_IMPLEMENTED;
 					}
 
-					CLASS		TRFM::TRFM		(bus::spi::IDevice* device, IPin* pin_shutdown, IPin* pin_irq, IPin* pin_rxdata, IPin* pin_txdata, bool b_autoflush)
-						: device(device), pin_shutdown(pin_shutdown), pin_irq(pin_irq), pin_rxdata(pin_rxdata), pin_txdata(pin_txdata), sink(NULL)
+					CLASS		TRFM::TRFM		(bus::spi::IDevice* device, IPin* pin_shutdown, IPin* pin_irq)
+						: device(device), pin_shutdown(pin_shutdown), pin_irq(pin_irq)
 					{
 						device->Baudrate(2000000);
 					}

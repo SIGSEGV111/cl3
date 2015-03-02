@@ -217,7 +217,7 @@ namespace	cl3
 							CL3PUBF	virtual	~TChipException	();
 					};
 
-					class	TRFM : public stream::ISource<byte_t>, public stream::IOut<byte_t>, public gpio::IGPIO
+					class	TRFM : public gpio::IGPIO
 					{
 						private:
 							CLASS TRFM(const TRFM&) = delete;
@@ -227,27 +227,13 @@ namespace	cl3
 							bus::spi::IDevice* device;
 							gpio::IPin* pin_shutdown;
 							gpio::IPin* pin_irq;
-							gpio::IPin* pin_rxdata;
-							gpio::IPin* pin_txdata;
-							IOut<byte_t>* sink;
 							TOnIRQEvent on_irq;
-// 							TOnCmdEvent on_cmd;
 							collection::list::TList<gpio::IPin* const> pins;
 
 							CL3PUBF	const char*	FetchAndClearError	();
 							CL3PUBF	void		AssertChipStatus	();
 
 						public:
-							//	from ISource
-							CL3PUBF	void		Sink		(IOut<byte_t>* os) final override CL3_SETTER;
-							CL3PUBF	IOut<byte_t>* Sink		() const final override CL3_GETTER;
-
-							//	from IOut
-							using IOut<byte_t>::Write;
-							CL3PUBF	void		Flush		() final override;
-							CL3PUBF	usys_t		Space		() const final override CL3_GETTER;
-							CL3PUBF	usys_t		Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
-
 							//	from IGPIO
 							CL3PUBF const collection::list::TList<gpio::IPin* const>&
 												Pins		() final override CL3_GETTER;
@@ -267,13 +253,15 @@ namespace	cl3
 							CL3PUBF	void		Patch		(const byte_t* p_patch, usys_t sz_patch);
 							CL3PUBF	void		Configure	(const byte_t* p_config, usys_t sz_config);
 							CL3PUBF	void		StartRX		();
+							CL3PUBF	void		StartTX		();
+							CL3PUBF	void		Stop		();
 
 							CL3PUBF	text::string::TString
 												ChipName	();
 
 							CL3PUBF	TIRQInfo	IRQState	();
 
-							CL3PUBF	CLASS		TRFM		(bus::spi::IDevice* device, gpio::IPin* pin_shutdown, gpio::IPin* pin_irq = NULL, gpio::IPin* pin_rxdata = NULL, gpio::IPin* pin_txdata = NULL, bool b_autoflush = true);
+							CL3PUBF	CLASS		TRFM		(bus::spi::IDevice* device, gpio::IPin* pin_shutdown, gpio::IPin* pin_irq = NULL);
 							CL3PUBF	CLASS		~TRFM		();
 					};
 				}

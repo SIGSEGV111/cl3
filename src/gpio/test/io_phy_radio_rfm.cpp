@@ -54,7 +54,7 @@ namespace
 			pins.Append(gpio.Pins()[7]);
 			TSPIBus spibus(0, pins);
 
-			TRFM rfm(spibus.Devices()[0], gpio.Pins()[24], gpio.Pins()[25], gpio.Pins()[22], NULL);
+			TRFM rfm(spibus.Devices()[0], gpio.Pins()[24], gpio.Pins()[25]);
 
 			rfm.Reset();
 

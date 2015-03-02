@@ -72,8 +72,33 @@ namespace	cl3
 						CL3PUBF	stream::IOut<TPulseTime>*
 										Sink				() const final override CL3_GETTER;
 
-						CL3PUBF	CLASS	TGPIOPulseReader	(gpio::IPin* pin, bool b_inverted_lineidle = false, system::time::TTime dt_flush = 0.001);
+						CL3PUBF	CLASS	TGPIOPulseReader	(gpio::IPin* pin, bool b_inverted_lineidle, system::time::TTime dt_flush);
 						CL3PUBF	CLASS	~TGPIOPulseReader	();
+				};
+
+				class CL3PUBT	TGPIOBusReader : public stream::ISource<bool>, protected gpio::TOnEdgeEvent::IReceiver, protected gpio::TOnIdleEvent::IReceiver
+				{
+					private:
+						CLASS TGPIOBusReader(const TGPIOBusReader&) = delete;
+						TGPIOBusReader& operator=(const TGPIOBusReader&) = delete;
+
+					protected:
+						stream::IOut<bool>* sink;
+						gpio::IPin* pin_data;
+						gpio::IPin* pin_clock;
+						bool b_idle_registered;
+
+						void	OnRaise	(gpio::TOnEdgeEvent&, gpio::IPin&, gpio::TOnEdgeData data) final override;
+						void	OnRaise	(gpio::TOnIdleEvent&, gpio::IPin&, gpio::TOnIdleData) final override;
+
+					public:
+						//	from ISource
+						CL3PUBF	void	Sink				(stream::IOut<bool>* os) final override CL3_SETTER;
+						CL3PUBF	stream::IOut<bool>*
+										Sink				() const final override CL3_GETTER;
+
+						CL3PUBF	CLASS	TGPIOBusReader		(gpio::IPin* pin_data, gpio::IPin* pin_clock, system::time::TTime dt_flush);
+						CL3PUBF	CLASS	~TGPIOBusReader		();
 				};
 
 				class CL3PUBT	TOOKDecoder : public stream::IOut<TPulseTime>, public stream::ISource<bool>
@@ -103,26 +128,6 @@ namespace	cl3
 
 						CL3PUBF	CLASS	TOOKDecoder			(usys_t n_pulses_buffer = 64);
 						CL3PUBF	CLASS	~TOOKDecoder		();
-				};
-
-				//	This is a decoder for the 2bit on-air patterns send by PT2262 chips
-				class CL3PUBT	TInvertedBitsDecoder : public stream::IOut<bool>, public stream::ISource<bool>
-				{
-					protected:
-						stream::IOut<bool>* sink;
-
-					public:
-						//	from IOut
-						using IOut<bool>::Write;
-						CL3PUBF	void	Flush				() final override;
-						CL3PUBF	usys_t	Write				(const bool* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
-
-						//	from ISource
-						CL3PUBF	void	Sink				(stream::IOut<bool>* os) final override CL3_SETTER;
-						CL3PUBF	stream::IOut<bool>*
-										Sink				() const final override CL3_GETTER;
-
-						CL3PUBF	CLASS	TInvertedBitsDecoder	();
 				};
 
 				//	this emulates the PT2272 chip, which decodes the 12bit signals sent by the PT2262 chip
