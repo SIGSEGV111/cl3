@@ -140,6 +140,8 @@ namespace	cl3
 						{
 							u16_t address;
 							bool arr_data[6];
+
+							CL3PUBF	CLASS	TOnDataData	();
 						};
 
 						typedef event::TEvent<TSoftPT2272, TOnDataData> TOnDataEvent;

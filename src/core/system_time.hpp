@@ -109,7 +109,7 @@ namespace	cl3
 					CL3PUBF	static TTime	ConvertFrom	(EUnit unit, s64_t value);
 					CL3PUBF	static TTime	ConvertFrom	(EUnit unit, double value);
 
-					CL3PUBF	static	TTime	Now			(EClock clock = TIME_CLOCK_REALTIME);
+					CL3PUBF	static	TTime	Now			(EClock clock);
 					CL3PUBF	s64_t			UnixTimeI	() const;
 					CL3PUBF	double			UnixTimeF	() const;
 					CL3PUBF	static	TTime	UnixTime	(double unixtime);
@@ -119,12 +119,11 @@ namespace	cl3
 
 					inline	CLASS	TTime	() : sec(0), asec(0) {}
 					CL3PUBF	CLASS	TTime	(double seconds);
-// 					CL3PUBF	CLASS	TTime	(s64_t seconds, s64_t attoseconds);
-					CL3PUBF	CLASS	TTime	(int seconds, int attoseconds);
-					CL3PUBF	CLASS	TTime	(long long seconds, long long attoseconds);
-					CL3PUBF	CLASS	TTime	(double seconds, double attoseconds);
-					inline	CLASS	TTime	(s32_t seconds) : sec(seconds), asec(0) {}
-					inline	CLASS	TTime	(s64_t seconds) : sec(seconds), asec(0) {}
+					CL3PUBF	CLASS	TTime	(s64_t seconds, s64_t attoseconds);
+// 					CL3PUBF	CLASS	TTime	(int seconds, int attoseconds);
+// 					CL3PUBF	CLASS	TTime	(double seconds, double attoseconds);
+// 					inline	CLASS	TTime	(s32_t seconds) : sec(seconds), asec(0) {}
+// 					inline	CLASS	TTime	(s64_t seconds) : sec(seconds), asec(0) {}
 					CL3PUBF	CLASS	TTime	(struct timespec ts);
 					CL3PUBF	CLASS	TTime	(struct timeval tv);
 			};

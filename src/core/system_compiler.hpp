@@ -46,7 +46,7 @@
 
 #if ((CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_CLANG) && CL3_OS == CL3_OS_POSIX)
 	#include <alloca.h>
-	#include <stdint.h>
+	#include <limits.h>
 #endif
 
 #if (CL3_CXX == CL3_CXX_MSVC)
@@ -56,12 +56,114 @@
 	#include <Specstrings.h>
 #endif
 
+#if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_CLANG)
+	namespace	cl3
+	{
+		namespace	system
+		{
+			namespace	types
+			{
+				typedef	unsigned char		u8_t;
+				typedef	signed char			s8_t;
+				typedef	unsigned short		u16_t;
+				typedef	signed short		s16_t;
+
+				#if (UINT_MAX == 4294967295)
+					typedef	unsigned int	u32_t;
+					typedef	signed int		s32_t;
+				#else
+				#error
+				#endif
+
+				#if (ULONG_MAX == 18446744073709551615ULL)
+					typedef	unsigned long	u64_t;
+					typedef	signed long		s64_t;
+				#else
+					typedef	unsigned long long	u64_t;
+					typedef	signed long long	s64_t;
+				#endif
+
+				typedef	float			f32_t;
+				typedef	double			f64_t;
+
+				typedef unsigned char	byte_t;
+
+				#if (__SIZEOF_SIZE_T__ == 4)
+					typedef	u32_t	usys_t;
+					typedef	s32_t	ssys_t;
+				#elif (__SIZEOF_SIZE_T__ == 8)
+					typedef	u64_t	usys_t;
+					typedef	s64_t	ssys_t;
+				#else
+					#error "unknown wordsize"
+				#endif
+
+				typedef s64_t	soff_t;
+				typedef u64_t	uoff_t;
+
+				#if (CL3_OS == CL3_OS_WINDOWS)
+					typedef void* fd_t;	//	HANDLE
+				#elif (CL3_OS == CL3_OS_POSIX)
+					typedef int fd_t;	//	fd
+				#endif
+			};
+		};
+	};
+#elif (CL3_CXX == CL3_CXX_MSVC)
+	namespace	cl3
+	{
+		namespace	system
+		{
+			namespace	types
+			{
+				#if (_MSC_VER < 1300)
+					typedef	unsigned char		u8_t;
+					typedef	signed char			s8_t;
+					typedef	unsigned short		u16_t;
+					typedef	signed short		s16_t;
+					typedef	unsigned int		u32_t;
+					typedef	signed int			s32_t;
+					typedef	unsigned long long	u64_t;
+					typedef	signed long long	s64_t;
+				#else
+					typedef	unsigned __int8		u8_t;
+					typedef	signed __int8		s8_t;
+					typedef	unsigned __int16	u16_t;
+					typedef	signed __int16		s16_t;
+					typedef	unsigned __int32	u32_t;
+					typedef	signed __int32		s32_t;
+					typedef	unsigned __int64	u64_t;
+					typedef	signed __int64		s64_t;
+				#endif
+
+				typedef	float	f32_t;
+				typedef	double	f64_t;
+
+				typedef u8_t byte_t;
+
+				#ifdef _WIN64
+					typedef s64	ssys_t;
+					typedef u64	usys_t;
+				#else
+					typedef s32	ssys_t;
+					typedef u32	usys_t;
+				#endif
+
+				typedef s64_t	soff_t;
+				typedef u64_t	uoff_t;
+			};
+		};
+	};
+#endif
+
 namespace	cl3
 {
 	namespace	system
 	{
 		namespace	compiler
 		{
+			using namespace types;
+
 			enum ECachePrefetchMode
 			{
 				PREFETCH_READ,
@@ -97,20 +199,20 @@ namespace	cl3
 				#define	CachePrefetch(adr,rw,tloc)	__builtin_prefetch((adr),(rw) == PREFETCH_READ ? 0 : ( (rw) == PREFETCH_WRITE ? 1 : 2 ),(tloc))
 
 				//	Returns the number of leading 0-bits in x, starting at the most significant bit position.
-				inline static int CountLeadingZeroes(uint32_t v) { return v == 0 ? (32) : (sizeof(int ) == 4 ? __builtin_clz (v) : __builtin_clzl (v)); }
-				inline static int CountLeadingZeroes(uint64_t v) { return v == 0 ? (64) : (sizeof(long) == 8 ? __builtin_clzl(v) : __builtin_clzll(v)); }
+				inline static int CountLeadingZeroes(u32_t v) { return v == 0 ? (32) : (sizeof(int ) == 4 ? __builtin_clz (v) : __builtin_clzl (v)); }
+				inline static int CountLeadingZeroes(u64_t v) { return v == 0 ? (64) : (sizeof(long) == 8 ? __builtin_clzl(v) : __builtin_clzll(v)); }
 
 				//	Returns one plus the index of the least significant 1-bit of v, or if v is zero, returns zero.
-				inline static int FindFirstSet(uint32_t v) { return sizeof(int ) == 4 ? __builtin_ffs (v) : __builtin_ffsl (v); }
-				inline static int FindFirstSet(uint64_t v) { return sizeof(long) == 8 ? __builtin_ffsl(v) : __builtin_ffsll(v); }
+				inline static int FindFirstSet(u32_t v) { return sizeof(int ) == 4 ? __builtin_ffs (v) : __builtin_ffsl (v); }
+				inline static int FindFirstSet(u64_t v) { return sizeof(long) == 8 ? __builtin_ffsl(v) : __builtin_ffsll(v); }
 
 				//	Returns the number of trailing 0-bits in x, starting at the least significant bit position.
-				inline static int CountTrailingZeroes(uint32_t v) { return v == 0 ? 32 : FindFirstSet(v); }
-				inline static int CountTrailingZeroes(uint64_t v) { return v == 0 ? 64 : FindFirstSet(v); }
+				inline static int CountTrailingZeroes(u32_t v) { return v == 0 ? 32 : FindFirstSet(v); }
+				inline static int CountTrailingZeroes(u64_t v) { return v == 0 ? 64 : FindFirstSet(v); }
 
 				//	Returns one plus the index of the most significant 1-bit of v, or if v is zero, returns zero.
-				inline static int FindLastSet(uint32_t v) { return 32 - CountLeadingZeroes(v); }
-				inline static int FindLastSet(uint64_t v) { return 64 - CountLeadingZeroes(v); }
+				inline static int FindLastSet(u32_t v) { return 32 - CountLeadingZeroes(v); }
+				inline static int FindLastSet(u64_t v) { return 64 - CountLeadingZeroes(v); }
 
 			#endif
 

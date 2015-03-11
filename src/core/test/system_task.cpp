@@ -98,13 +98,13 @@ namespace
 	TEST(system_task_TProcessRunner, sleep)
 	{
 		TList<TString> args;
-		args.Append("0.5");
+		args.Append("0.6");
 		TProcessRunner runner;
 
-		const TTime t_start = TTime::Now();
+		const TTime t_start = TTime::Now(TIME_CLOCK_MONOTONIC);
 		runner.Start("sleep", args);
 		runner.Wait();
-		const TTime t_end = TTime::Now();
+		const TTime t_end = TTime::Now(TIME_CLOCK_MONOTONIC);
 		const TTime t_delta = t_end - t_start;
 		EXPECT_TRUE(t_delta.ConvertToI(TIME_UNIT_MILLISECONDS) >= 500);
 	}
@@ -115,11 +115,11 @@ namespace
 		args.Append("0.5");
 		TProcessRunner runner;
 
-		const TTime t_start = TTime::Now();
+		const TTime t_start = TTime::Now(TIME_CLOCK_MONOTONIC);
 		runner.Start("sleep", args);
 		runner.Kill();
 		runner.Wait();
-		const TTime t_end = TTime::Now();
+		const TTime t_end = TTime::Now(TIME_CLOCK_MONOTONIC);
 		const TTime t_delta = t_end - t_start;
 		EXPECT_TRUE(t_delta.ConvertToI(TIME_UNIT_MILLISECONDS) <= 250);
 	}

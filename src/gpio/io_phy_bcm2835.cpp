@@ -262,7 +262,7 @@ namespace	cl3
 											break;
 										case SIGUSR1:
 											//	pin config changed, rebuild list
-											for(usys_t i = 0; i < N_GPIO_PINS; i++)
+											for(unsigned i = 0; i < N_GPIO_PINS; i++)
 											{
 												TPin* const pin = static_cast<TPin*>(gpio->pins[i]);
 												if(pin->mode == gpio::MODE_INPUT && pfds[i].fd == -1)

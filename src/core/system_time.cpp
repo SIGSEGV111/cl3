@@ -202,10 +202,10 @@ namespace cl3
 						mul /= 1000LL;
 					}
 
-					s64_t sec = value / div;
+					const s64_t sec = value / div;
 					value -= sec * div;
 
-					return TTime(sec, value * mul);
+					return TTime((s64_t)sec, (s64_t)(value * mul));
 				}
 				else
 					return TTime(value * cunit, (s64_t)0);
@@ -289,23 +289,23 @@ namespace cl3
 // 				Normalize();
 // 			}
 
-			CLASS	TTime::TTime		(int seconds, int attoseconds) : sec(seconds), asec(attoseconds)
+// 			CLASS	TTime::TTime		(int seconds, int attoseconds) : sec(seconds), asec(attoseconds)
+// 			{
+// 				Normalize();
+// 			}
+
+			CLASS	TTime::TTime		(s64_t seconds, s64_t attoseconds) : sec(seconds), asec(attoseconds)
 			{
 				Normalize();
 			}
 
-			CLASS	TTime::TTime		(long long seconds, long long attoseconds) : sec(seconds), asec(attoseconds)
-			{
-				Normalize();
-			}
-
-			CLASS	TTime::TTime		(double seconds, double attoseconds) : sec((s64_t)seconds), asec((s64_t)attoseconds)
-			{
-				seconds -= sec;
-				attoseconds -= asec;
-				asec += seconds * 1000000000000000000.0;
-				Normalize();
-			}
+// 			CLASS	TTime::TTime		(double seconds, double attoseconds) : sec((s64_t)seconds), asec((s64_t)attoseconds)
+// 			{
+// 				seconds -= sec;
+// 				attoseconds -= asec;
+// 				asec += seconds * 1000000000000000000.0;
+// 				Normalize();
+// 			}
 
 			CLASS	TTime::TTime		(struct timespec ts) : sec((s64_t)ts.tv_sec), asec((s64_t)ts.tv_nsec * (s64_t)1000000000LL)
 			{

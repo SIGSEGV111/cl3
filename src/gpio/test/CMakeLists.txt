@@ -17,11 +17,11 @@ if (WIN32)
 	add_custom_target (cl3-gpio-test-run ALL "${GEN_DIR}\bin\cl3-gpio-test.exe")
 else ()
 	if (${BUILD_TYPE} STREQUAL "release")
-		add_custom_target (cl3-gpio-test-run ALL sudo "${GEN_DIR}/bin/cl3-gpio-test")
+		add_custom_target (cl3-gpio-test-run ALL "${GEN_DIR}/bin/cl3-gpio-test")
 	else ()
 		add_custom_target (cl3-gpio-coverage-prepare ALL lcov --no-external --base-directory "${ROOT_DIR}/src" --directory "${ROOT_DIR}/tmp/dbg/src/gpio/CMakeFiles/cl3-gpio.dir" --quiet --zerocounters && lcov --no-external --base-directory "${ROOT_DIR}/src" --directory "${ROOT_DIR}/tmp/dbg/src/gpio/CMakeFiles/cl3-gpio.dir" --quiet --initial --capture --output-file base.lcov)
 
-		add_custom_target (cl3-gpio-test-run ALL LD_LIBRARY_PATH=${GEN_DIR}/lib sudo valgrind --quiet --leak-check=full --show-reachable=yes --track-origins=yes --num-callers=30 --trace-children=no --track-fds=yes --error-exitcode=1 --log-file=valgrind.log "${GEN_DIR}/bin/cl3-gpio-test" || (cat valgrind.log; false))
+		add_custom_target (cl3-gpio-test-run ALL LD_LIBRARY_PATH=${GEN_DIR}/lib valgrind --quiet --leak-check=full --show-reachable=yes --track-origins=yes --num-callers=30 --trace-children=no --track-fds=yes --error-exitcode=1 --log-file=valgrind.log "${GEN_DIR}/bin/cl3-gpio-test" || (cat valgrind.log; false))
 
 		add_custom_target (cl3-gpio-coverage ALL lcov --no-external --base-directory "${ROOT_DIR}/src" --directory "${ROOT_DIR}/tmp/dbg/src/gpio/CMakeFiles/cl3-gpio.dir" --quiet --capture --output-file test.lcov && lcov --quiet --add-tracefile base.lcov --add-tracefile test.lcov --output-file cl3-gpio.lcov && genhtml --prefix "${ROOT_DIR}/src" --quiet --output-directory coverage cl3-gpio.lcov)
 

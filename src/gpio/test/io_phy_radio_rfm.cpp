@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define	TEST_RFM
+// #define	TEST_RFM
 
 #ifdef	TEST_RFM
 
