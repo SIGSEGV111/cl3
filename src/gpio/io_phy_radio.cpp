@@ -191,15 +191,15 @@ namespace	cl3
 					{
 						if(arr_items[i].dt_low < dt_min) dt_min = arr_items[i].dt_low;
 						if(arr_items[i].dt_low > dt_max) dt_max = arr_items[i].dt_low;
-						fprintf(stderr, "DEBUG: pulse[%2u] = %4llu µs\n", (unsigned)i, (unsigned long long)arr_items[i].dt_low.ConvertToI(TIME_UNIT_MICROSECONDS));
+// 						fprintf(stderr, "DEBUG: pulse[%2u] = %4llu µs\n", (unsigned)i, (unsigned long long)arr_items[i].dt_low.ConvertToI(TIME_UNIT_MICROSECONDS));
 					}
 
 					const TTime dt_avg = (dt_min + dt_max) / 2;
 
-					fprintf(stderr, "DEBUG: ComputeAveragePulseLength:\n");
-					fprintf(stderr, "DEBUG: min = %4llu µs\n", (unsigned long long)dt_min.ConvertToI(TIME_UNIT_MICROSECONDS));
-					fprintf(stderr, "DEBUG: max = %4llu µs\n", (unsigned long long)dt_max.ConvertToI(TIME_UNIT_MICROSECONDS));
-					fprintf(stderr, "DEBUG: avg = %4llu µs\n", (unsigned long long)dt_avg.ConvertToI(TIME_UNIT_MICROSECONDS));
+// 					fprintf(stderr, "DEBUG: ComputeAveragePulseLength:\n");
+// 					fprintf(stderr, "DEBUG: min = %4llu µs\n", (unsigned long long)dt_min.ConvertToI(TIME_UNIT_MICROSECONDS));
+// 					fprintf(stderr, "DEBUG: max = %4llu µs\n", (unsigned long long)dt_max.ConvertToI(TIME_UNIT_MICROSECONDS));
+// 					fprintf(stderr, "DEBUG: avg = %4llu µs\n", (unsigned long long)dt_avg.ConvertToI(TIME_UNIT_MICROSECONDS));
 
 					return dt_avg;
 				}

@@ -160,9 +160,20 @@ namespace
 				const bool b_state = (i % 2) == 0;
 				pin_out.Level(b_state);
 
-				EXPECT_TRUE(pin_in.Level() == b_state);
-				EXPECT_TRUE(detector.data.b_level_prev == !b_state);
-				EXPECT_TRUE(detector.data.b_level_now == b_state);
+				usleep(1000);
+
+				if(b_state)
+				{
+					EXPECT_TRUE(pin_in.Level());
+					EXPECT_FALSE(detector.data.b_level_prev);
+					EXPECT_TRUE(detector.data.b_level_now);
+				}
+				else
+				{
+					EXPECT_FALSE(pin_in.Level());
+					EXPECT_TRUE(detector.data.b_level_prev);
+					EXPECT_FALSE(detector.data.b_level_now);
+				}
 			}
 
 			pin_in.OnEdge().Unregister(&detector);

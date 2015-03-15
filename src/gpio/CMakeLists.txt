@@ -8,6 +8,7 @@ file (GLOB CL3_GPIO_SRC
 )
 
 set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_INT_LIB})
+set (CMAKE_C_FLAGS   ${CMAKE_C_FLAGS_INT_LIB})
 add_library (cl3-gpio_static STATIC ${CL3_GPIO_SRC})
 add_library (cl3-gpio SHARED ${CL3_GPIO_SRC})
 add_dependencies (cl3-gpio_static cl3-core_static)
