@@ -47,10 +47,10 @@ namespace	cl3
 
 				enum	EMode
 				{
-					MODE_INPUT,		//	GPIO input
-					MODE_OUTPUT,	//	GPIO output
-					MODE_TRISTATE,	//	disabled/nothing/deactivated/don't care
-					MODE_OTHER		//	other hardware specific special function
+					MODE_TRISTATE = 0,	//	disabled/nothing/deactivated/don't care
+					MODE_INPUT = 1,		//	GPIO input
+					MODE_OUTPUT = 2,	//	GPIO output
+					MODE_OTHER			//	other hardware specific special function (any number >= 3)
 				};
 
 				struct	TOnEdgeData
@@ -75,8 +75,8 @@ namespace	cl3
 					virtual	CL3PUBF	void				IdleTimeout	(system::time::TTime) CL3_SETTER = 0;
 					virtual	CL3PUBF	system::time::TTime	IdleTimeout	() const CL3_GETTER = 0;
 
-					virtual	CL3PUBF	EMode	Mode	() const CL3_GETTER = 0;
-					virtual	CL3PUBF	void	Mode	(EMode) CL3_SETTER = 0;
+					virtual	CL3PUBF	int		Mode	() const CL3_GETTER = 0;
+					virtual	CL3PUBF	void	Mode	(int) CL3_SETTER = 0;
 					virtual	CL3PUBF	EPull	Pull	() const CL3_GETTER = 0;
 					virtual	CL3PUBF	void	Pull	(EPull) CL3_SETTER = 0;
 					virtual	CL3PUBF	bool	Level	() const CL3_GETTER = 0;
@@ -108,6 +108,7 @@ namespace	cl3
 
 					struct	IDevice : stream::IIn<byte_t>, stream::IOut<byte_t>
 					{
+						virtual	CL3PUBF	IBus*	Bus			() const CL3_GETTER = 0;
 						virtual	CL3PUBF u32_t	Baudrate	() const CL3_GETTER = 0;
 						virtual	CL3PUBF void	Baudrate	(u32_t new_baudrate) CL3_SETTER = 0;
 						virtual	CL3PUBF void	Transfer	(byte_t* buffer, usys_t sz_buffer) = 0;

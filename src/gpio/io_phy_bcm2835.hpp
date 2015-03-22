@@ -68,8 +68,8 @@ namespace	cl3
 						CL3PUBF	void				IdleTimeout	(system::time::TTime) final override CL3_SETTER;
 						CL3PUBF	system::time::TTime	IdleTimeout	() const final override CL3_GETTER;
 
-						CL3PUBF	gpio::EMode	Mode		() const final override CL3_GETTER;
-						CL3PUBF	void		Mode		(gpio::EMode) final override CL3_SETTER;
+						CL3PUBF	int			Mode		() const final override CL3_GETTER;
+						CL3PUBF	void		Mode		(int) final override CL3_SETTER;
 						CL3PUBF	gpio::EPull Pull		() const final override CL3_GETTER;
 						CL3PUBF	void		Pull		(gpio::EPull new_pull) final override CL3_SETTER;
 						CL3PUBF	bool		Level		() const final override;
@@ -125,6 +125,7 @@ namespace	cl3
 						CL3PUBF CLASS	~TSPIDevice	();
 
 						//	from IDevice
+						CL3PUBF	bus::spi::IBus*	Bus	() const CL3_GETTER;
 						CL3PUBF u32_t	Baudrate	() const final override CL3_GETTER;
 						CL3PUBF void	Baudrate	(u32_t new_baudrate) final override CL3_SETTER;
 						CL3PUBF void	Transfer	(byte_t* buffer, usys_t sz_buffer) final override;

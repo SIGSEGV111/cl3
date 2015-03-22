@@ -91,12 +91,12 @@ namespace	cl3
 					return this->dt_idletimeout;
 				}
 
-				gpio::EMode TPin::Mode	() const
+				int		TPin::Mode	() const
 				{
 					return this->mode;
 				}
 
-				void		TPin::Mode	(gpio::EMode new_mode)
+				void		TPin::Mode	(int new_mode)
 				{
 					switch(new_mode)
 					{
@@ -108,10 +108,10 @@ namespace	cl3
 						case gpio::MODE_OUTPUT:	//	GPIO output
 							bcm2835_gpio_fsel(this->index, BCM2835_GPIO_FSEL_OUTP);
 							break;
-						case gpio::MODE_OTHER:	//	other hardware specific special function
-							CL3_CLASS_FAIL(TException, "cannot set MODE_OTHER thru this interface, please use the bcm2835-specific Function() property instead");
+						default:	//	other hardware specific special function
+							CL3_CLASS_FAIL(TException, "cannot set special mode thru this interface, please use the bcm2835-specific Function()-property instead");
 					}
-					this->mode = new_mode;
+					this->mode = (gpio::EMode)new_mode;
 					pthread_kill(this->gpio->th_irq, SIGUSR1);
 				}
 
@@ -428,6 +428,11 @@ namespace	cl3
 				CLASS		TSPIDevice::~TSPIDevice	()
 				{
 					//	nothing to do yet
+				}
+
+				bus::spi::IBus*	TSPIDevice::Bus		() const
+				{
+					return this->bus;
 				}
 
 				u32_t		TSPIDevice::Baudrate	() const

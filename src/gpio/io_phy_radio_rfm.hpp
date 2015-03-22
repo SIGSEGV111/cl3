@@ -63,8 +63,8 @@ namespace	cl3
 						OPCODE_FAST_RESPONSE_B = 0x51,
 						OPCODE_FAST_RESPONSE_C = 0x53,
 						OPCODE_FAST_RESPONSE_D = 0x57,
-						OPCODE_TX_FIFO_WRITE = 0x66,
-						OPCODE_RX_FIFO_READ = 0x77
+						OPCODE_WRITE_TX_FIFO = 0x66,
+						OPCODE_READ_RX_FIFO = 0x77
 					};
 
 					CL3_PACK(struct TOpCode
@@ -106,24 +106,25 @@ namespace	cl3
 
 					CL3_PACK(struct	TModemIRQ
 					{
-						byte_t	postamble_detect : 1,
-								invalid_sync : 1,
-								rssi_jump : 1,
-								rssi : 1,
-								invalid_preamble : 1,
+						byte_t	sync_detect : 1,
 								preamble_detect : 1,
-								sync_detect : 1,
+								invalid_preamble : 1,
+								rssi : 1,
+								rssi_jump : 1,
+								invalid_sync : 1,
+								postamble_detect : 1,
 								__unused0 : 1;
 					});
 
 					CL3_PACK(struct	TChipIRQ
 					{
-						byte_t	cal : 1,
-								fifo_underflow_overflow_error : 1,
-								state_change : 1,
-								cmd_error : 1,
-								chip_ready : 1,
+						byte_t	wut : 1,
 								low_batt : 1,
+								chip_ready : 1,
+								cmd_error : 1,
+								state_change : 1,
+								fifo_underflow_overflow_error : 1,
+								cal : 1,
 								__unused0 : 1;
 					});
 
@@ -135,6 +136,8 @@ namespace	cl3
 						TModemIRQ modem_status;
 						TChipIRQ chip_pending;
 						TChipIRQ chip_status;
+
+						CL3PUBF	void	Dump	() const;
 					});
 
 					struct	TIRQStatus
@@ -144,10 +147,35 @@ namespace	cl3
 						TChipIRQ chip_status;
 					};
 
-					typedef event::TEvent<TRFM, TOnIRQData> TOnIRQEvent;
+					struct	TOnCmdData
+					{
+						EOpCode opcode;
+						const byte_t* p_args;
+						usys_t sz_args;
+						const byte_t* p_retval;
+						usys_t sz_retval;
+					};
+
+					typedef event::TEvent<TRFM, TOnIRQData&> TOnIRQEvent;
+					typedef event::TEvent<TRFM, const TOnCmdData&> TOnCmdEvent;
 
 					class	TPin : public gpio::IPin
 					{
+						public:
+							enum	EMode
+							{
+								MODE_TRISTATE = 0,
+								MODE_INPUT = 1,
+								MODE_OUTPUT = 2,
+								MODE_IRQ,
+								MODE_SDO,
+								MODE_RXSTATE,
+								MODE_TXSTATE,
+								MODE_RXDATA,
+								MODE_RXCLOCK,
+								MODE_DIVCLOCK
+							};
+
 						friend class TRFM;
 						private:
 							CLASS TPin(const TPin&) = delete;
@@ -156,6 +184,9 @@ namespace	cl3
 						protected:
 							TRFM* rfm;
 							u8_t index;
+							EMode mode;
+							gpio::EPull pull;
+							bool level;
 
 							CL3PUBF	CLASS	TPin	(TRFM* rfm, u8_t index);
 
@@ -172,9 +203,8 @@ namespace	cl3
 							CL3PUBF	system::time::TTime
 											IdleTimeout	() const final override CL3_GETTER;
 
-							CL3PUBF	gpio::EMode
-											Mode		() const final override CL3_GETTER;
-							CL3PUBF	void	Mode		(gpio::EMode) final override CL3_SETTER;
+							CL3PUBF	int		Mode		() const final override CL3_GETTER;
+							CL3PUBF	void	Mode		(int) final override CL3_SETTER;
 							CL3PUBF	gpio::EPull
 											Pull		() const final override CL3_GETTER;
 							CL3PUBF void	Pull		(gpio::EPull) final override CL3_SETTER;
@@ -192,6 +222,7 @@ namespace	cl3
 
 					class	TRFM : public gpio::IGPIO, public stream::ISource<byte_t>, public stream::IOut<byte_t>, protected gpio::TOnEdgeEvent::IReceiver
 					{
+						friend class TPin;
 						private:
 							CLASS TRFM(const TRFM&) = delete;
 							TRFM& operator=(const TRFM&) = delete;
@@ -202,12 +233,16 @@ namespace	cl3
 							gpio::IPin* pin_irq;
 							IOut<byte_t>* sink;
 							TOnIRQEvent on_irq;
+							TOnCmdEvent on_cmd;
 							collection::list::TList<gpio::IPin* const> pins;
 
 							CL3PUBF	const char*	FetchAndClearError	();
 							CL3PUBF	void		AssertChipStatus	();
 
 							void	OnRaise		(gpio::TOnEdgeEvent&, gpio::IPin&, gpio::TOnEdgeData data) final override;
+							void	UpdateGPIO	();
+							void	ParseGPIOCfg(const byte_t* p_cfg, usys_t sz_cfg);
+							void	HandleIRQs	(TOnIRQData);
 
 						public:
 							//	from ISource
@@ -225,6 +260,9 @@ namespace	cl3
 							//	from TRFM
 							CL3PUBF	const TOnIRQEvent&
 												OnIRQ		() const CL3_GETTER;
+
+							CL3PUBF	const TOnCmdEvent&
+												OnCmd		() const CL3_GETTER;
 
 							CL3PUBF	void		WaitForCTS	();
 							CL3PUBF	void		Execute		(const byte_t* p_cmd, usys_t sz_cmd, byte_t* p_retval, usys_t sz_retval);
