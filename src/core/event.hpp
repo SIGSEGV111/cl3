@@ -120,6 +120,15 @@ namespace	cl3
 					return n;	//	return the number of receivers which received the event
 				}
 
+				bool	IsRegistered(IReceiver* receiver) const CL3_GETTER
+				{
+					const usys_t n = receivers.Count();
+					for(usys_t i = 0; i < n; ++i)
+						if(receivers[i] == receiver)
+							return true;
+					return false;
+				}
+
 				//	NOTE: it is possible to Register() and Unregister() on a "const TEvent&", while Raise() can only be called on a non-const reference
 				//	this allows classes which use TEvent to provide a function which returns a "const TEvent&",
 				//	thus allow Register() and Unregister(), but reserving Raise() to itself

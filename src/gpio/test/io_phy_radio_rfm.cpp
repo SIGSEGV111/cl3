@@ -32,6 +32,24 @@
 
 using namespace ::testing;
 
+/*
+	RPi-	RPi-	RFM-	CABLE-
+	FUNC	PIN		FUNC	COLOR
+	------------------------------------
+	GND		20		GND		black
+	GPIO25	22		GP2		white
+	CE0		24		SEL		grey
+	CLK		23		CLK		violet
+	MISO	21		SDO		green	!!!
+	MOSI	19		SDI		blue	!!!
+	GPIO24	18		IRQ		yellow
+	+3.3V	17		VCC		orange
+	GPIO22	15		GP3		red
+	GPIO23	16		SDN		brown
+
+	./dump_rfm 23 24 22 25
+*/
+
 namespace
 {
 	using namespace cl3::io::collection::list;
@@ -54,9 +72,11 @@ namespace
 			pins.Append(gpio.Pins()[7]);
 			TSPIBus spibus(0, pins);
 
-			TRFM rfm(spibus.Devices()[0], gpio.Pins()[24], gpio.Pins()[25]);
+			TRFM rfm(spibus.Devices()[0], gpio.Pins()[25], gpio.Pins()[24]);
 
 			rfm.Reset();
+			rfm.PowerUp();
+			EXPECT_EQ(0, rfm.Test());
 
 			TPartInfo part_info = rfm.Identify();
 

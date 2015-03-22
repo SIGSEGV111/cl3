@@ -39,14 +39,12 @@ namespace
 	#ifdef CL3_WITH_BCM2835
 		using namespace cl3::io::phy::bcm2835;
 
-		TEST(io_phy_bcm2835_TGPIO, Loop_P1_11_12)
+		TEST(io_phy_bcm2835_TGPIO, Loop_05_07)
 		{
-			//	RPi: cross P1-11 with P1-12
-
 			TGPIO gpio;
 
-			TPin& pin_in  = dynamic_cast<TPin&>(*gpio.Pins()[18]);
-			TPin& pin_out = dynamic_cast<TPin&>(*gpio.Pins()[17]);
+			TPin& pin_in  = dynamic_cast<TPin&>(*gpio.Pins()[5]);
+			TPin& pin_out = dynamic_cast<TPin&>(*gpio.Pins()[7]);
 
 			pin_in.Mode(MODE_INPUT);
 			pin_out.Mode(MODE_OUTPUT);
@@ -82,14 +80,12 @@ namespace
 			EXPECT_FALSE(pin_in.Level());
 		}
 
-		TEST(io_phy_bcm2835_TGPIO, Broken_Loop_P1_11_13)
+		TEST(io_phy_bcm2835_TGPIO, Broken_Loop_P1_05_24)
 		{
-			//	RPi: do not cross P1-11 with P1-13
-
 			TGPIO gpio;
 
-			TPin& pin_in  = dynamic_cast<TPin&>(*gpio.Pins()[21]);
-			TPin& pin_out = dynamic_cast<TPin&>(*gpio.Pins()[17]);
+			TPin& pin_in  = dynamic_cast<TPin&>(*gpio.Pins()[5]);
+			TPin& pin_out = dynamic_cast<TPin&>(*gpio.Pins()[24]);
 
 			pin_out.Level(false);
 			usleep(1000);
@@ -138,14 +134,12 @@ namespace
 			}
 		};
 
-		TEST(io_phy_bcm2835_TGPIO, Loop_P1_11_12_OnEdgeEvent)
+		TEST(io_phy_bcm2835_TGPIO, Loop_05_07_OnEdgeEvent)
 		{
-			//	RPi: cross P1-11 with P1-12
-
 			TGPIO gpio;
 
-			TPin& pin_in  = dynamic_cast<TPin&>(*gpio.Pins()[18]);
-			TPin& pin_out = dynamic_cast<TPin&>(*gpio.Pins()[17]);
+			TPin& pin_in  = dynamic_cast<TPin&>(*gpio.Pins()[5]);
+			TPin& pin_out = dynamic_cast<TPin&>(*gpio.Pins()[7]);
 
 			pin_in.Mode(MODE_INPUT);
 			pin_out.Mode(MODE_OUTPUT);

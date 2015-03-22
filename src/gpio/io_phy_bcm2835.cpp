@@ -154,6 +154,10 @@ namespace	cl3
 // 					fprintf(stderr, "GPIO-IRQ-THREAD: INFO: booting ... \n");
 					int fd_export = -1;
 					int fd_unexport = -1;
+
+					//	build list of all FDs to monitor
+					struct pollfd pfds[N_GPIO_PINS + 1];
+
 					try
 					{
 						TGPIO* gpio = reinterpret_cast<TGPIO*>(_gpio);
@@ -177,9 +181,6 @@ namespace	cl3
 							CL3_NONCLASS_SYSERR(sched_setscheduler(0, SCHED_FIFO, &p));
 							CL3_NONCLASS_SYSERR(mlockall(MCL_CURRENT|MCL_FUTURE));
 						}
-
-						//	build list of all FDs to monitor
-						struct pollfd pfds[N_GPIO_PINS + 1];
 
 						{
 							//	init entries for the pins
@@ -321,6 +322,16 @@ namespace	cl3
 						fprintf(stderr, "ERROR in bcm2835-Thread: unknown error\n");
 					}
 
+					for(usys_t i = 0; i < N_GPIO_PINS; i++)
+						if(CL3_UNLIKELY(pfds[i].fd != -1))
+						{
+							close(pfds[i].fd);
+							//	tell kernel to unexport the pin
+							//	we wont check the error code, because either it works or... I would not know what to do else...
+							char buffer[16];
+							write(fd_unexport, buffer, snprintf(buffer, sizeof(buffer), "%u\n", i));
+						}
+
 // 					fprintf(stderr, "GPIO-IRQ-THREAD: INFO: terminating ... \n");
 
 					//	close gpio sysfs interface
@@ -457,11 +468,7 @@ namespace	cl3
 					CL3_CLASS_ERROR_NOARGS(idx_bus != 0, TNotImplementedException);
 
 					bcm2835_spi_begin();
-					bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);
 					bcm2835_spi_chipSelect(BCM2835_SPI_CS_NONE);	//	handle chip-select in cl3-/user-code to support more than two devices on the bus and to support crazy devices
-
-// 					bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
-
 
 					auto it = pins_chipselect.CreateStaticIterator();
 					it->MoveHead();

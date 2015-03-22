@@ -87,30 +87,14 @@ namespace	cl3
 						u16_t id;
 						u8_t customer;
 						u8_t romid;
+
+						CL3PUBF	bool	operator==	(const TPartInfo& rhs) const;
+						CL3PUBF	bool	operator!=	(const TPartInfo& rhs) const;
 					});
 
-					CL3_PACK(struct TRawIRQInfo
+					CL3_PACK(struct	TPaketHandlerIRQ
 					{
-						u8_t	chip_int_pend : 1,
-								modem_int_pend : 1,
-								ph_int_pend : 1,
-								__unused0 : 5;
-
-						u8_t	chip_int_status : 1,
-								modem_int_status : 1,
-								ph_int_status : 1,
-								__unused1 : 5;
-
-						u8_t	rx_fifo_almost_full_pend : 1,
-								tx_fifo_almost_empty_pend : 1,
-								alt_crc_error_pend : 1,
-								crc_error_pend : 1,
-								packet_rx_pend : 1,
-								packet_sent_pend : 1,
-								filter_miss_pend : 1,
-								filter_match_pend : 1;
-
-						u8_t	rx_fifo_almost_full : 1,
+						byte_t	rx_fifo_almost_full : 1,
 								tx_fifo_almost_empty : 1,
 								alt_crc_error : 1,
 								crc_error : 1,
@@ -118,60 +102,49 @@ namespace	cl3
 								packet_sent : 1,
 								filter_miss : 1,
 								filter_match : 1;
+					});
 
-						u8_t	sync_detect_pend : 1,
-								preamble_detect_pend : 1,
-								invalid_preamble_pend : 1,
-								rssi_pend : 1,
-								rssi_jump_pend : 1,
-								invalid_sync_pend : 1,
-								postamble_detect_pend : 1,
-								__unused2 : 1;
-
-						u8_t	sync_detect : 1,
-								preamble_detect : 1,
-								invalid_preamble : 1,
-								rssi : 1,
-								rssi_jump : 1,
+					CL3_PACK(struct	TModemIRQ
+					{
+						byte_t	postamble_detect : 1,
 								invalid_sync : 1,
-								postamble_detect : 1,
-								__unused3 : 1;
+								rssi_jump : 1,
+								rssi : 1,
+								invalid_preamble : 1,
+								preamble_detect : 1,
+								sync_detect : 1,
+								__unused0 : 1;
+					});
 
-						u8_t	wut_pend : 1,
-								low_batt_pend : 1,
-								chip_ready_pend : 1,
-								cmd_error_pend : 1,
-								state_change_pend : 1,
-								fifo_underflow_overflow_error_pend : 1,
-								cal_pend : 1,
-								__unused4 : 1;
-
-						u8_t	wut : 1,
-								low_batt : 1,
-								chip_ready : 1,
-								cmd_error : 1,
-								state_change : 1,
+					CL3_PACK(struct	TChipIRQ
+					{
+						byte_t	cal : 1,
 								fifo_underflow_overflow_error : 1,
-								cal : 1,
-								__unused5 : 1;
-
-						CL3PUBF	bool	operator==	(const TRawIRQInfo& other) const;
-						CL3PUBF	bool	operator!=	(const TRawIRQInfo& other) const;
-						CL3PUBF	bool	Pending		() const;
-						CL3PUBF	void	Print		() const;
+								state_change : 1,
+								cmd_error : 1,
+								chip_ready : 1,
+								low_batt : 1,
+								__unused0 : 1;
 					});
 
-					CL3_PACK(struct	TIRQInfo
+					CL3_PACK(struct	TOnIRQData
 					{
+						TPaketHandlerIRQ ph_pending;
+						TPaketHandlerIRQ ph_status;
+						TModemIRQ modem_pending;
+						TModemIRQ modem_status;
+						TChipIRQ chip_pending;
+						TChipIRQ chip_status;
 					});
 
-					struct	TOnIRQData
+					struct	TIRQStatus
 					{
-						TIRQInfo state;
-						TIRQInfo pending;
+						TPaketHandlerIRQ ph_status;
+						TModemIRQ modem_status;
+						TChipIRQ chip_status;
 					};
 
-					typedef event::TEvent<TRFM, TIRQInfo> TOnIRQEvent;
+					typedef event::TEvent<TRFM, TOnIRQData> TOnIRQEvent;
 
 					class	TPin : public gpio::IPin
 					{
@@ -217,7 +190,7 @@ namespace	cl3
 							CL3PUBF	virtual	~TChipException	();
 					};
 
-					class	TRFM : public gpio::IGPIO
+					class	TRFM : public gpio::IGPIO, public stream::ISource<byte_t>, public stream::IOut<byte_t>, protected gpio::TOnEdgeEvent::IReceiver
 					{
 						private:
 							CLASS TRFM(const TRFM&) = delete;
@@ -227,13 +200,24 @@ namespace	cl3
 							bus::spi::IDevice* device;
 							gpio::IPin* pin_shutdown;
 							gpio::IPin* pin_irq;
+							IOut<byte_t>* sink;
 							TOnIRQEvent on_irq;
 							collection::list::TList<gpio::IPin* const> pins;
 
 							CL3PUBF	const char*	FetchAndClearError	();
 							CL3PUBF	void		AssertChipStatus	();
 
+							void	OnRaise		(gpio::TOnEdgeEvent&, gpio::IPin&, gpio::TOnEdgeData data) final override;
+
 						public:
+							//	from ISource
+							void				Sink		(stream::IOut<byte_t>* os) final override CL3_SETTER;
+							stream::IOut<byte_t>* Sink		() const final override CL3_GETTER;
+
+							//	from IOut
+							void				Flush		() final override;	//	flush send-fifo, blocks until all bytes are sent
+							usys_t				Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
+
 							//	from IGPIO
 							CL3PUBF const collection::list::TList<gpio::IPin* const>&
 												Pins		() final override CL3_GETTER;
@@ -248,18 +232,16 @@ namespace	cl3
 							CL3PUBF	u8_t		Property	(u8_t group, u8_t index) CL3_GETTER;
 
 							CL3PUBF	void		Reset		();
-							CL3PUBF	void		Test		();
+							CL3PUBF	void		PowerUp		();
+							CL3PUBF	u8_t		Test		();
 							CL3PUBF	TPartInfo	Identify	();
 							CL3PUBF	void		Patch		(const byte_t* p_patch, usys_t sz_patch);
 							CL3PUBF	void		Configure	(const byte_t* p_config, usys_t sz_config);
-							CL3PUBF	void		StartRX		();
-							CL3PUBF	void		StartTX		();
-							CL3PUBF	void		Stop		();
 
 							CL3PUBF	text::string::TString
 												ChipName	();
 
-							CL3PUBF	TIRQInfo	IRQState	();
+							CL3PUBF	TIRQStatus	IRQStatus	();
 
 							CL3PUBF	CLASS		TRFM		(bus::spi::IDevice* device, gpio::IPin* pin_shutdown, gpio::IPin* pin_irq = NULL);
 							CL3PUBF	CLASS		~TRFM		();

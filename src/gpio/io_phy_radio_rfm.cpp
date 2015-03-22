@@ -47,22 +47,7 @@ namespace	cl3
 					using namespace file;
 					using namespace system::time;
 
-					bool	TRawIRQInfo::operator==	(const TRawIRQInfo& other) const
-					{
-						return memcmp(this, &other, sizeof(TRawIRQInfo)) == 0;
-					}
-
-					bool	TRawIRQInfo::operator!=	(const TRawIRQInfo& other) const
-					{
-						return memcmp(this, &other, sizeof(TRawIRQInfo)) != 0;
-					}
-
-					bool	TRawIRQInfo::Pending	() const
-					{
-						return this->chip_int_pend || this->modem_int_pend || this->ph_int_pend;
-					}
-
-					void	TRawIRQInfo::Print		() const
+					/*void	TRawIRQInfo::Print		() const
 					{
 						fprintf(stderr, "IRQ-Status:\n\tCHIP_INT_PEND = %hhu\n\tMODEM_INT_PEND = %hhu\n\tPH_INT_PEND = %hhu\n\tCHIP_INT_STATUS = %hhu\n\tMODEM_INT_STATUS = %hhu\n\tPH_INT_STATUS = %hhu\n\tRX_FIFO_ALMOST_FULL_PEND = %hhu\n\tTX_FIFO_ALMOST_EMPTY_PEND = %hhu\n\tALT_CRC_ERROR_PEND = %hhu\n\tCRC_ERROR_PEND = %hhu\n\tPACKET_RX_PEND = %hhu\n\tPACKET_SENT_PEND = %hhu\n\tFILTER_MISS_PEND = %hhu\n\tFILTER_MATCH_PEND = %hhu\n\tRX_FIFO_ALMOST_FULL = %hhu\n\tTX_FIFO_ALMOST_EMPTY = %hhu\n\tALT_CRC_ERROR = %hhu\n\tCRC_ERROR = %hhu\n\tPACKET_RX = %hhu\n\tPACKET_SENT = %hhu\n\tFILTER_MISS = %hhu\n\tFILTER_MATCH = %hhu\n\tSYNC_DETECT_PEND = %hhu\n\tPREAMBLE_DETECT_PEND = %hhu\n\tINVALID_PREAMBLE_PEND = %hhu\n\tRSSI_PEND = %hhu\n\tRSSI_JUMP_PEND = %hhu\n\tINVALID_SYNC_PEND = %hhu\n\tPOSTAMBLE_DETECT_PEND = %hhu\n\tSYNC_DETECT = %hhu\n\tPREAMBLE_DETECT = %hhu\n\tINVALID_PREAMBLE = %hhu\n\tRSSI = %hhu\n\tRSSI_JUMP = %hhu\n\tINVALID_SYNC = %hhu\n\tPOSTAMBLE_DETECT = %hhu\n\tWUT_PEND = %hhu\n\tLOW_BATT_PEND = %hhu\n\tCHIP_READY_PEND = %hhu\n\tCMD_ERROR_PEND = %hhu\n\tSTATE_CHANGE_PEND = %hhu\n\tFIFO_UNDERFLOW_OVERFLOW_ERROR_PEND = %hhu\n\tCAL_PEND = %hhu\n\tWUT = %hhu\n\tLOW_BATT = %hhu\n\tCHIP_READY = %hhu\n\tCMD_ERROR = %hhu\n\tSTATE_CHANGE = %hhu\n\tFIFO_UNDERFLOW_OVERFLOW_ERROR = %hhu\n\tCAL = %hhu\n",
 							chip_int_pend,
@@ -115,7 +100,10 @@ namespace	cl3
 							state_change,
 							fifo_underflow_overflow_error,
 							cal);
-					}
+					}*/
+
+					bool	TPartInfo::operator==	(const TPartInfo& rhs) const { return memcmp(this, &rhs, sizeof(TPartInfo)) == 0; }
+					bool	TPartInfo::operator!=	(const TPartInfo& rhs) const { return memcmp(this, &rhs, sizeof(TPartInfo)) != 0; }
 
 					/**********************************************************************/
 
@@ -198,6 +186,47 @@ namespace	cl3
 
 					/**********************************************************************/
 
+// 						const byte_t buffer[] = { OPCODE_START_TX };
+// 						this->Execute(buffer, sizeof(buffer), NULL, 0);
+
+					void		TRFM::Sink		(IOut<byte_t>* os)
+					{
+						if(this->sink == NULL && os == NULL)
+							return;	//	no nothing
+						else if(this->sink == NULL && os != NULL)
+						{
+							//	enter RX state
+							const byte_t buffer[] = { OPCODE_START_RX };
+							this->Execute(buffer, sizeof(buffer), NULL, 0);
+						}
+						else if(this->sink != NULL && os != NULL)
+						{
+							this->sink = os;
+						}
+						else //if(this->sink != NULL && os == NULL)
+						{
+							//	enter READY state
+							const byte_t buffer[] = { OPCODE_CHANGE_STATE, 3 };
+							this->Execute(buffer, sizeof(buffer), NULL, 0);
+							this->sink = NULL;
+						}
+					}
+
+					IOut<byte_t>* TRFM::Sink	() const
+					{
+						return this->sink;
+					}
+
+					void		TRFM::Flush		()
+					{
+						CL3_NOT_IMPLEMENTED;
+					}
+
+					usys_t		TRFM::Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+					{
+						CL3_NOT_IMPLEMENTED;
+					}
+
 					const char*	TRFM::FetchAndClearError()
 					{
 						WaitForCTS();
@@ -241,7 +270,12 @@ namespace	cl3
 						CL3_CLASS_ERROR(err != NULL, TChipException, this, err);
 					}
 
-					CL3PUBF const TList<IPin* const>&
+					void		TRFM::OnRaise	(gpio::TOnEdgeEvent&, gpio::IPin&, gpio::TOnEdgeData data)
+					{
+						CL3_NOT_IMPLEMENTED;
+					}
+
+					const TList<IPin* const>&
 								TRFM::Pins		()
 					{
 						return this->pins;
@@ -312,26 +346,58 @@ namespace	cl3
 
 					void		TRFM::Reset		()
 					{
+						if(pin_irq->OnEdge().IsRegistered(this))
+							pin_irq->OnEdge().Unregister(this);
 						this->pin_shutdown->Level(true);
 						system::task::IThread::Sleep(0.1);
 						this->pin_shutdown->Level(false);
-						system::task::IThread::Sleep(0.1);
-						byte_t buffer[] = { OPCODE_NOP, 0 };
-						this->device->Transfer(buffer, 2);
-						CL3_CLASS_ERROR(buffer[1] != 0xff, TException, "radio chip unoperational or connection problem(buffer[1] == CTS == 0x%02hhx)", buffer[1]);
+						WaitForCTS();
 						AssertChipStatus();
 					}
 
-					void		TRFM::Test		()
+					void		TRFM::PowerUp	()
 					{
-						CL3_NOT_IMPLEMENTED;
+						const byte_t buffer[] = { OPCODE_POWER_UP, 0x01, 0x00, 0x01, 0xC9, 0xC3, 0x80 };
+						this->Execute(buffer, sizeof(buffer), NULL, 0);
+					}
+
+					u8_t		TRFM::Test		()
+					{
+						try
+						{
+							//	test SPI-bus connection stability
+							const TPartInfo pi_ref = this->Identify();
+							byte_t arr_ref[10];
+							for(unsigned j = 0; j < sizeof(arr_ref); j++)
+								arr_ref[j] = this->Property(0x00, j);
+
+							for(unsigned i = 0; i < 0x1000; i++)
+							{
+								const TPartInfo pi_test = this->Identify();
+								if(pi_test != pi_ref)	//	unless somebody switched the chip in-flight, this should not happen
+									return 1;
+
+								for(unsigned j = 0; j < sizeof(arr_ref); j++)
+								{
+									if(this->Property(0x00, j) != arr_ref[j])
+										return 2;
+								}
+							}
+
+							return 0;
+						}
+						catch(const TChipException& ex)
+						{
+							fprintf(stderr, "ERROR:\n\tmessage: %s\n\tfile: %s:%u\n\texpression: %s\n", ex.message, ex.codefile, ex.codeline, ex.expression);
+							return 255;
+						}
 					}
 
 					void		TRFM::Patch		(const byte_t* p_patch, usys_t sz_patch)
 					{
-						WaitForCTS();
 						CL3_CLASS_ERROR((sz_patch % 8) != 0, TException, "invalid patch: patch-size must be a multiple of 8");
 						sz_patch /= 8;
+						this->Reset();
 						for(usys_t i = 0; i < sz_patch; i++)
 						{
 							const byte_t* const line = p_patch + (i * 8);
@@ -350,23 +416,10 @@ namespace	cl3
 							this->Execute(p_config + p, len, NULL, 0);
 							p += len;
 						}
-					}
 
-					void		TRFM::StartRX	()
-					{
-						const byte_t buffer[] = { OPCODE_START_RX };
-						this->Execute(buffer, sizeof(buffer), NULL, 0);
-					}
+						Property(0x12, 0x0c, 1);	//	IRQ as soon as one byte is in RX-FIFO
 
-					void		TRFM::StartTX	()
-					{
-						const byte_t buffer[] = { OPCODE_START_TX };
-						this->Execute(buffer, sizeof(buffer), NULL, 0);
-					}
-
-					void		TRFM::Stop		()
-					{
-						CL3_NOT_IMPLEMENTED;
+						pin_irq->OnEdge().Register(this);
 					}
 
 					TPartInfo	TRFM::Identify	()
@@ -387,15 +440,29 @@ namespace	cl3
 						return chip_name;
 					}
 
-					TIRQInfo	TRFM::IRQState	()
+					TIRQStatus	TRFM::IRQStatus	()
 					{
-						CL3_NOT_IMPLEMENTED;
+						byte_t buffer[8] = { OPCODE_GET_INT_STATUS, 0xff, 0xff, 0xff };
+						this->Execute(buffer, 4, buffer, 8);
+						TIRQStatus irq_status;
+						irq_status.ph_status = *reinterpret_cast<const TPaketHandlerIRQ*>(buffer+3);
+						irq_status.modem_status = *reinterpret_cast<const TModemIRQ*>(buffer+5);
+						irq_status.chip_status = *reinterpret_cast<const TChipIRQ*>(buffer+7);
+						return irq_status;
 					}
 
 					CLASS		TRFM::TRFM		(bus::spi::IDevice* device, IPin* pin_shutdown, IPin* pin_irq)
-						: device(device), pin_shutdown(pin_shutdown), pin_irq(pin_irq)
+						: device(device), pin_shutdown(pin_shutdown), pin_irq(pin_irq), sink(NULL)
 					{
-						device->Baudrate(2000000);
+						device->Baudrate(10000000);	//	10 MBit/s (=> 10 MHz bus speed, max. for RFM26W)
+// 						device->Baudrate(100000);	//	0.1 MBit/s
+
+						pin_shutdown->Mode(MODE_OUTPUT);
+						pin_shutdown->Pull(PULL_DISABLED);
+						pin_shutdown->Level(false);
+
+						pin_irq->Mode(MODE_INPUT);
+						pin_irq->Pull(PULL_DISABLED);
 					}
 
 					CLASS		TRFM::~TRFM		()
