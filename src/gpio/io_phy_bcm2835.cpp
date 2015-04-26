@@ -322,7 +322,7 @@ namespace	cl3
 						fprintf(stderr, "ERROR in bcm2835-Thread: unknown error\n");
 					}
 
-					for(usys_t i = 0; i < N_GPIO_PINS; i++)
+					for(unsigned i = 0; i < N_GPIO_PINS; i++)
 						if(CL3_UNLIKELY(pfds[i].fd != -1))
 						{
 							close(pfds[i].fd);
