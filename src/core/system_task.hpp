@@ -195,7 +195,7 @@ namespace	cl3
 					CL3PUBF	void*	StackCurrent() const CL3_GETTER;	//	current address of the stack pointer (NOTE: obviously highly volatile if the thread is not suspended)
 					CL3PUBF	usys_t	StackSize	() const CL3_GETTER;	//	returns the size in bytes of the threads stacks
 					CL3PUBF	usys_t	StackFree	() const CL3_GETTER;	//	returns the size in bytes of free (still unused / available) stack space (computed from StackCurrent() and StackEnd() - NOTE: see StackCurrent)
-					CL3PUBF	usys_t	StackUsed	() const CL3_GETTER;	//	returns the size in bytes of used stack space (computed from Current() and Start())
+					CL3PUBF	usys_t	StackUsed	() const CL3_GETTER;	//	returns the size in bytes of used stack space (computed from Current() and Start() - NOTE: see StackCurrent)
 
 					CL3PUBF	void	Start		(usys_t sz_stack = -1UL);	//	starts the thread if it is not alive yet, throws if it is already alive
 					CL3PUBF	void	Shutdown	();	//	sets the "request shutdown" flag, throws if the thread is not alive

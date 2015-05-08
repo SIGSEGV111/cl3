@@ -16,7 +16,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <cl3/gpio/config.hpp>
+
+#ifdef CL3_WITH_BCM2835
 #define	TEST_RFM
+#endif
 
 #ifdef	TEST_RFM
 

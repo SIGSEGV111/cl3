@@ -177,4 +177,25 @@ namespace
 		EXPECT_TRUE(it->Item() == "dummy3");
 		EXPECT_TRUE(!it->MoveNext());
 	}
+
+	struct TTestThread : IThread
+	{
+		volatile bool b_started;
+
+		void ThreadMain() final override
+		{
+			b_started = true;
+		}
+
+		TTestThread() : b_started(false) {}
+	};
+
+	TEST(system_task_IThread, basics)
+	{
+		TTestThread tt;
+		EXPECT_FALSE(tt.b_started);
+		tt.Start();
+		tt.Shutdown();
+		EXPECT_TRUE(tt.b_started);
+	}
 }
