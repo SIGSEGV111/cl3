@@ -40,6 +40,7 @@ namespace	cl3
 					protected:
 						stream::IOut<byte_t>* os;
 						stream::IIn<byte_t>* is;
+						system::memory::TUniquePtr<encoding::IEncoder> encoder;
 
 					public:
 						using IIn<wchar_t>::Read;

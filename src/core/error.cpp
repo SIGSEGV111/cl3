@@ -26,6 +26,9 @@
 #include "util.hpp"
 //#include "system_types_typeinfo.hpp"
 #include "system_memory.hpp"
+#include "io_text.hpp"
+#include "system_task.hpp"
+#include "io_text_terminal.hpp"
 
 namespace	cl3
 {
@@ -33,8 +36,10 @@ namespace	cl3
 	{
 		using namespace system::memory;
 
-		CLASS	TException::TException	(const char* format, ...) : TLocalValueHolder<IDynamicAllocator*>(allocator_generic, allocator_exception.Value()), message(NULL), object(NULL), codefile(NULL), function(NULL), expression(NULL), inner(NULL), codeline(0)
+		CLASS	TException::TException	(const char* format, ...) : message(NULL), object(NULL), codefile(NULL), function(NULL), expression(NULL), inner(NULL), codeline(0)
 		{
+			CL3_CONTEXT_VARIABLE_PUSH(allocator_generic, allocator_exception.Value());
+
 			if(format)
 			{
 				va_list list;
@@ -51,9 +56,15 @@ namespace	cl3
 			}
 		}
 
-		CLASS	TException::TException	(TException&& e) : TLocalValueHolder<IDynamicAllocator*>(static_cast<TLocalValueHolder<IDynamicAllocator*>&&>(e)), message(e.message), object(e.object), codefile(e.codefile), function(e.function), expression(e.expression), inner(e.inner), codeline(e.codeline)
+		CLASS	TException::TException	(TException&& e) : message(e.message), object(e.object), codefile(e.codefile), function(e.function), expression(e.expression), inner(e.inner), codeline(e.codeline)
 		{
 			e.message = NULL;
+		}
+
+		CLASS	TException::TException	(const TException& e) : message(NULL), object(e.object), codefile(e.codefile), function(e.function), expression(e.expression), inner(e.inner), codeline(e.codeline)
+		{
+			CL3_CONTEXT_VARIABLE_PUSH(allocator_generic, allocator_exception.Value());
+			this->message = util::mkstrcpy(e.message).Claim();
 		}
 
 		CLASS	TException::~TException	()
@@ -61,7 +72,7 @@ namespace	cl3
 			Free(message);
 		}
 
-		void	TException::Set	(const void* object, const char* codefile, const char* function, const char* expression, TException* inner, unsigned codeline)
+		void	TException::Set		(const void* object, const char* codefile, const char* function, const char* expression, TException* inner, unsigned codeline)
 		{
 			this->object    = object;
 			this->codefile  = codefile;
@@ -69,6 +80,22 @@ namespace	cl3
 			this->expression = expression;
 			this->inner     = inner;
 			this->codeline  = codeline;
+		}
+
+		void	TException::Print	() const
+		{
+			io::text::terminal::Terminal()<<*this;
+		}
+
+		io::text::ITextWriter&	operator<<	(io::text::ITextWriter& tw, const TException& ex)
+		{
+			tw<<"ERROR:"
+					<<"\n\tthread: "<<system::task::IThread::Self()->Name()
+					<<"\n\tmessage: "<<ex.message
+					<<"\n\tfile: "<<ex.codefile<<":"<<ex.codeline
+					<<"\n\texpression: "<<(ex.expression == NULL ? "<none>" : ex.expression)
+					<<"\n";
+			return tw;
 		}
 
 		CLASS	TNotImplementedException::TNotImplementedException	() : TException("function or feature not implemented yet")

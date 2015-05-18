@@ -29,6 +29,7 @@
 #include <cl3/core/system_task.hpp>
 #include <gtest/gtest.h>
 #include <stdlib.h>
+#include "common.hpp"
 //#include <valgrind/valgrind.h>
 
 using namespace ::testing;
@@ -187,15 +188,23 @@ namespace
 			b_started = true;
 		}
 
-		TTestThread() : b_started(false) {}
+		TTestThread() : IThread("test"), b_started(false) {}
 	};
 
 	TEST(system_task_IThread, basics)
 	{
-		TTestThread tt;
-		EXPECT_FALSE(tt.b_started);
-		tt.Start();
-		tt.Shutdown();
-		EXPECT_TRUE(tt.b_started);
+		try
+		{
+			TTestThread tt;
+			EXPECT_FALSE(tt.b_started);
+			tt.Start();
+			tt.Shutdown();
+			EXPECT_TRUE(tt.b_started);
+		}
+		catch(const TException& ex)
+		{
+			ex.Print();
+			throw ex;
+		}
 	}
 }

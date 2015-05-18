@@ -54,13 +54,14 @@ namespace	cl3
 
 				usys_t	TTerminal::Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
-					CL3_NOT_IMPLEMENTED;
+					return this->encoder->Write(arr_items_write, n_items_write_max, n_items_write_min);
 				}
 
-				CLASS	TTerminal::TTerminal	(IOut<byte_t>* os, IIn<byte_t>* is) : os(os), is(is)
+				CLASS	TTerminal::TTerminal	(IOut<byte_t>* os, IIn<byte_t>* is) : os(os), is(is), encoder(CODEC_CXX_CHAR->CreateEncoder())
 				{
-					CL3_CLASS_ERROR(os == NULL, TException, "os must oint to a valid output stream");
-					CL3_CLASS_ERROR(is == NULL, TException, "is must oint to a valid output stream");
+					CL3_CLASS_ERROR(os == NULL, TException, "os must point to a valid output stream");
+					CL3_CLASS_ERROR(is == NULL, TException, "is must point to a valid output stream");
+					this->encoder->Sink(os);
 				}
 
 				CLASS	TTerminal::~TTerminal	()

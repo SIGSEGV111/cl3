@@ -170,6 +170,7 @@ namespace	cl3
 
 			void*	Alloc	(usys_t n_items, const typeinfo::TRTTI* rtti)
 			{
+				CL3_NONCLASS_ERROR(n_items > (usys_t)-(sizeof(void*)*4), TException, "value in n_items is too big");
 				const usys_t sz_bytes = rtti == NULL ? n_items : n_items * rtti->sz_bytes;
 
 				if(sz_bytes)
@@ -188,6 +189,7 @@ namespace	cl3
 
 			void*	Realloc	(void* p_mem, usys_t n_items_new, const typeinfo::TRTTI* rtti, bool inplace)
 			{
+				CL3_NONCLASS_ERROR(n_items_new > (usys_t)-(sizeof(void*)*4), TException, "value in n_items_new is too big");
 				const usys_t sz_bytes_new = rtti == NULL ? n_items_new : n_items_new * rtti->sz_bytes;
 
 				if(p_mem)

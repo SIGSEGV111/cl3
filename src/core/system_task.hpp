@@ -90,6 +90,7 @@ namespace	cl3
 			class	CL3PUBT TProcess
 			{
 				protected:
+					friend class IThread;
 					handle_t handle;
 					io::collection::list::TList<IThread*> ls_threads;
 
@@ -180,11 +181,25 @@ namespace	cl3
 
 			class	CL3PUBT	IThread : public virtual event::IObservable
 			{
+				private:
+					io::text::string::TString name;
+					#if (CL3_OS == CL3_OS_POSIX)
+						pthread_t pth;
+						static void* PThreadMain(void*);
+					#elif (CL3_OS == CL3_OS_WINDOWS)
+						HANDLE handle;
+					#endif
+
+					system::memory::TUniquePtr<byte_t, system::memory::UPTR_ALLOC> p_stack;
+					size_t sz_stack;
+
+					volatile EState state;
+
 				public:
 					CL3PUBF	static	IThread*	Self	() CL3_GETTER;	//	returns the IThread* for the calling thread
 
 					CL3PUBF	io::text::string::TString
-							Name	() const CL3_GETTER;	//	returns the name of the thread
+										Name	() const CL3_GETTER;	//	returns the name of the thread
 					CL3PUBF	TProcess*	Process	() CL3_GETTER;			//	returns the process to which the thread belongs
 					CL3PUBF	EState		State	() const CL3_GETTER;	//	returns the threads current state
 					CL3PUBF	THost*		Host	() const CL3_GETTER;	//	returns the host machine this thread is executed on (possibly volatile in cluster systems)
@@ -205,9 +220,12 @@ namespace	cl3
 					CL3PUBF	static	void	Sleep	(time::TTime time, time::EClock clock = time::TIME_CLOCK_MONOTONIC);
 					CL3PUBF	static	void	Yield	();
 
+					virtual	CLASS	~IThread	();
+
 				protected:
-					CL3PUBF	void	Name		(const io::text::string::TString&) CL3_SETTER;
+					CL3PUBF	void	Name		(io::text::string::TString) CL3_SETTER;
 					virtual	void	ThreadMain	() = 0;
+					CL3PUBF	CLASS	IThread		(io::text::string::TString name);
 			};
 		}
 	}

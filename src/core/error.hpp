@@ -21,21 +21,20 @@
 
 #include "system_os.hpp"
 #include "system_compiler.hpp"
-#include "context.hpp"
 
 namespace	cl3
 {
-	namespace	system
+	namespace	io
 	{
-		namespace	memory
+		namespace	text
 		{
-			struct	IDynamicAllocator;
+			class	ITextWriter;
 		}
 	}
 
 	namespace	error
 	{
-		class	CL3PUBT	TException : private context::TLocalValueHolder<system::memory::IDynamicAllocator*>
+		class	CL3PUBT	TException
 		{
 			private:
 				TException& operator=(const TException&);	//	not available
@@ -51,9 +50,14 @@ namespace	cl3
 
 				CL3PUBF	CLASS	TException	(const char* format, ...);	//	printf-syle ctor
 				CL3PUBF	CLASS	TException	(TException&&);
+				CL3PUBF	CLASS	TException	(const TException&);
 				virtual	CLASS	~TException	();
-				CL3PUBF	void	Set	(const void* object, const char* codefile, const char* function, const char* expression, TException* inner, unsigned codeline);
+
+				CL3PUBF	void	Set			(const void* object, const char* codefile, const char* function, const char* expression, TException* inner, unsigned codeline);
+				CL3PUBF	void	Print		() const;
 		};
+
+		CL3PUBF	io::text::ITextWriter&	operator<<	(io::text::ITextWriter&, const TException&);
 
 		class	CL3PUBT	TSyscallException : public TException
 		{

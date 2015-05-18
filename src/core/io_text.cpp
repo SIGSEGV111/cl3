@@ -43,6 +43,7 @@ namespace	cl3
 			using namespace stream;
 			using namespace string;
 			using namespace collection::array;
+			using namespace error;
 
 			/******************************** Constants and Variables ******************************************************/
 
@@ -489,12 +490,14 @@ namespace	cl3
 
 			ITextWriter&	ITextWriter::operator<<	(const char* v)
 			{
+				CL3_CLASS_ERROR(v == NULL, TException, "v must point to a valid null-terminated c-string");
 				Write(v, strlen(v));
 				return *this;
 			}
 
 			ITextWriter&	ITextWriter::operator<<	(const wchar_t* v)
 			{
+				CL3_CLASS_ERROR(v == NULL, TException, "v must point to a valid null-terminated wide-string");
 				Write(v, wcslen(v));
 				return *this;
 			}

@@ -42,6 +42,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
+#include <sched.h>
 
 //#include <valgrind/valgrind.h>
 
@@ -179,6 +180,11 @@ namespace	cl3
 				}
 
 				return *ls_env;
+			}
+
+			void	IThread::Yield	()
+			{
+				CL3_NONCLASS_SYSERR(sched_yield());
 			}
 		}
 	}

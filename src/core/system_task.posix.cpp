@@ -34,6 +34,7 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include <sys/ptrace.h>
+#include <pthread.h>
 
 namespace	cl3
 {
@@ -63,7 +64,7 @@ namespace	cl3
 						CL3_CLASS_LOGIC_ERROR(true);
 					}
 
-					CLASS	TMainThread	()
+					CLASS	TMainThread	() : IThread("main")
 					{
 						th_self = this;
 					}
@@ -214,6 +215,86 @@ namespace	cl3
 					default:
 						CL3_NONCLASS_FAIL(TException, "the requested clock is not supported for Sleep()");
 				}
+			}
+
+			void*	IThread::PThreadMain	(void* self)
+			{
+				th_self = (IThread*)self;
+				try
+				{
+					((IThread*)self)->ThreadMain();
+				}
+				catch(const TException& ex)
+				{
+					return new TException(ex);
+				}
+				catch(const char* msg)
+				{
+					TException* ex = new TException("%s", msg);
+					ex->Set(NULL, __FILE__, __PRETTY_FUNCTION__, NULL, NULL, __LINE__);
+					return ex;
+				}
+				catch(...)
+				{
+					TException* ex = new TException("received unknown exception class");
+					ex->Set(NULL, __FILE__, __PRETTY_FUNCTION__, NULL, NULL, __LINE__);
+					return ex;
+				}
+				return NULL;
+			}
+
+			void	IThread::Start		(usys_t sz_stack)
+			{
+				if(sz_stack == (usys_t)-1)
+					sz_stack = 64*1024;
+				CL3_CLASS_ERROR(this->state != STATE_DEAD, TException, "thread is already alive");
+				this->sz_stack = sz_stack;
+				this->p_stack = MakeUniquePtr<system::memory::UPTR_ALLOC>((byte_t*)system::memory::Alloc(sz_stack, NULL));
+
+				pthread_attr_t attr;
+				CL3_CLASS_PTHREAD_ERROR(pthread_attr_init(&attr));
+				try
+				{
+					CL3_CLASS_PTHREAD_ERROR(pthread_attr_setstack(&attr, p_stack.Object(), sz_stack));
+					CL3_CLASS_PTHREAD_ERROR(pthread_create(&this->pth, &attr, &IThread::PThreadMain, this));
+					this->state = STATE_ALIVE_EXECUTING;
+				}
+				catch(...)
+				{
+					pthread_attr_destroy(&attr);
+					throw;
+				}
+			}
+
+			void	IThread::Shutdown	()
+			{
+				CL3_CLASS_ERROR(this->state == STATE_DEAD, TException, "thread is already dead");
+
+				TException* ex = NULL;
+				CL3_CLASS_PTHREAD_ERROR(pthread_join(this->pth, (void**)&ex));
+				this->state = STATE_DEAD;
+				if(ex)
+					CL3_CLASS_FORWARD_ERROR(ex, TException, "thread raised an exception");
+			}
+
+			void	IThread::Suspend	()
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			void	IThread::Resume		()
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS	IThread::IThread	(io::text::string::TString name) : name(name), state(STATE_DEAD)
+			{
+				TProcess::Self()->ls_threads.Append(this);
+			}
+
+			CLASS	IThread::~IThread	()
+			{
+				TProcess::Self()->ls_threads.Remove(this);
 			}
 
 			/**************************************************************************************/

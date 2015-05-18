@@ -43,7 +43,7 @@ namespace	cl3
 			using namespace types;
 
 			CL3PUBF	void	Free	(void*);
-			CL3PUBF	void*	Alloc	(usys_t, const typeinfo::TRTTI*) CL3_WARN_UNUSED_RESULT;
+			CL3PUBF	void*	Alloc	(usys_t, const typeinfo::TRTTI*) CL3_WARN_UNUSED_RESULT;	//	FIXME: Alloc() should return a TUniquePtr
 			CL3PUBF	void*	Realloc	(void* p_mem, usys_t n_items_new, const typeinfo::TRTTI* rtti, bool inplace) CL3_WARN_UNUSED_RESULT;
 			CL3PUBF	usys_t	SizeOf	(void*) CL3_GETTER;
 
