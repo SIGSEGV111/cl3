@@ -68,6 +68,11 @@ namespace	cl3
 				CLASS	ALockable::~ALockable	()
 				{
 				}
+
+				void	TSignal::Acquire	()						{ this->mutex->Acquire(); }
+				bool	TSignal::Acquire	(time::TTime timeout)	{ return this->mutex->Acquire(timeout); }
+				void	TSignal::Release	()						{ this->mutex->Release(); }
+				bool	TSignal::HasAcquired() const 				{ return this->mutex->HasAcquired(); }
 			}
 		}
 	}

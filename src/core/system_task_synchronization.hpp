@@ -23,32 +23,27 @@
 #include "system_compiler.hpp"
 #include "system_os.hpp"
 #include "system_time.hpp"
-#include "io_collection_basiclist.hpp"
+#include "io_collection_list.hpp"
 #include "event.hpp"
 
 #if (CL3_OS == CL3_OS_POSIX)
-#include <pthread.h>
+	#include <pthread.h>
+	#include <poll.h>
 #elif (CL3_OS == CL3_OS_WINDOWS)
-#include <windows.h>
+	#include <windows.h>
 #else
-#error
+	#error
 #endif
 
 namespace	cl3
 {
-	namespace	collection
-	{
-		template<class T>
-		struct	IStaticCollection;
-	}
-
 	using namespace system::types;
 
 	namespace	system
 	{
 		namespace	task
 		{
-			class	IThread;
+			class	IThreadRunner;
 
 			namespace	synchronization
 			{
@@ -106,7 +101,7 @@ namespace	cl3
 					MUTEX_SHARED
 				};
 
-				class	CL3PUBT	IMutex : public virtual event::IObservable
+				class	CL3PUBT	IMutex
 				{
 					protected:
 						event::TEvent<IMutex,TOnMutexActionData> on_mutex_action;
@@ -120,22 +115,35 @@ namespace	cl3
 						virtual	CLASS	~IMutex		();
 				};
 
-				struct	CL3PUBT	ISignal : public virtual IMutex, public virtual event::IObservable
+				class	CL3PUBT	ISignal
 				{
-					virtual	void	Raise	() = 0;
-					virtual	void	WaitFor	() = 0;
-					virtual	bool	WaitFor	(time::TTime timeout) CL3_WARN_UNUSED_RESULT = 0;
+					protected:
+						#if (CL3_OS == CL3_OS_POSIX)
+							virtual	struct ::pollfd	Handle	() const CL3_GETTER = 0;
+						#elif (CL3_OS == CL3_OS_WINDOWS)
+							virtual	HANDLE			Handle	() const CL3_GETTER = 0;
+						#endif
 
-					inline	static	void	WaitFor	(const collection::IStaticCollection<ISignal*>& signals) { CL3_NONCLASS_LOGIC_ERROR(!ISignal::WaitFor(signals, -1)); }
-					CL3PUBF	static	bool	WaitFor	(const collection::IStaticCollection<ISignal*>& signals, time::TTime timeout) CL3_WARN_UNUSED_RESULT;
+						virtual	void	BeforeWait	() = 0;
+						virtual	void	AfterWait	() = 0;
+						virtual	bool	Validate	() const = 0;
+
+					public:
+						inline	void	WaitFor	() { CL3_CLASS_LOGIC_ERROR(!ISignal::WaitFor(-1)); }
+						CL3PUBF	bool	WaitFor	(time::TTime timeout) CL3_WARN_UNUSED_RESULT;
+
+						inline	static	void	WaitFor	(const io::collection::array::IArray<ISignal*>& signals) { CL3_NONCLASS_LOGIC_ERROR(ISignal::WaitFor(signals, -1).Count() == 0); }
+						CL3PUBF	static	io::collection::list::TList<ISignal*>
+												WaitFor	(const io::collection::array::IArray<ISignal*>& signals, time::TTime timeout) CL3_WARN_UNUSED_RESULT;
 				};
 
 				class	CL3PUBT	TMutex : public virtual IMutex
 				{
 					private:
-						CLASS	TMutex	(TMutex&&);
+						CLASS TMutex(TMutex&) = delete;
+						TMutex&	operator=(TMutex&) = delete;
 
-						IThread* owner;
+						IThreadRunner* owner;
 						#if (CL3_OS == CL3_OS_POSIX)
 							pthread_mutex_t mtx;
 						#elif (CL3_OS == CL3_OS_WINDOWS)
@@ -173,6 +181,15 @@ namespace	cl3
 						CL3PUBF	CLASS	~ALockable	();
 				};
 
+				class	CL3PUBT	AThreadSafe
+				{
+					protected:
+						mutable TMutex mutex;
+
+					public:
+						inline	TMutex&	Mutex	() const CL3_GETTER { return this->mutex; }
+				};
+
 				class	CL3PUBT	TInterlockedRegion
 				{
 					private:
@@ -199,6 +216,40 @@ namespace	cl3
 					public:
 						CLASS	TRecurseGuard	(bool* var) : var(var) { CL3_CLASS_LOGIC_ERROR(*var); *var = true; }
 						CLASS	~TRecurseGuard	() { *var = false; }
+				};
+
+				class	TSignal : public ISignal, public IMutex
+				{
+					protected:
+						CLASS TSignal(const TSignal&) = delete;
+						TSignal& operator=(const TSignal&) = delete;
+
+						volatile bool b_raised;
+						int pipe_h2w[2];
+						TMutex* mutex;
+
+						#if (CL3_OS == CL3_OS_POSIX)
+							struct ::pollfd		Handle	() const final override CL3_GETTER;
+						#elif (CL3_OS == CL3_OS_WINDOWS)
+							HANDLE				Handle	() const final override CL3_GETTER;
+						#else
+							#error "unsupported platform"
+						#endif
+
+						CL3PUBF	void	BeforeWait	() final override;
+						CL3PUBF	void	AfterWait	() final override;
+						CL3PUBF	bool	Validate	() const final override;
+
+						CL3PUBF	void	Acquire		() final override;
+						CL3PUBF	bool	Acquire		(time::TTime timeout) final override CL3_WARN_UNUSED_RESULT;
+						CL3PUBF	void	Release		() final override;
+						CL3PUBF	bool	HasAcquired	() const final override CL3_GETTER;
+
+					public:
+						void	Reset		();
+						void	Raise		();
+						CLASS	TSignal		(TMutex*);
+						CLASS	~TSignal	();
 				};
 			}
 		}

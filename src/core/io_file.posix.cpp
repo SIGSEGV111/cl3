@@ -506,9 +506,9 @@ namespace	cl3
 
 			static	void	DeleteThreadDirectoryBrowser
 				(
-					cl3::event::TEvent<const IDynamicCollection<cl3::system::task::IThread *const>, const TOnActionData<cl3::system::task::IThread *const>&> &,
-					const IDynamicCollection<cl3::system::task::IThread *const> &,
-					const TOnActionData<cl3::system::task::IThread *const>& data,
+					cl3::event::TEvent<const IDynamicCollection<cl3::system::task::TThread *const>, const TOnActionData<cl3::system::task::TThread *const>&> &,
+					const IDynamicCollection<cl3::system::task::TThread *const> &,
+					const TOnActionData<cl3::system::task::TThread *const>& data,
 					void *
 				)
 			{

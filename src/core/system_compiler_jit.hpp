@@ -22,6 +22,7 @@
 #include "io_collection_list.hpp"
 #include "system_types_typeinfo.hpp"
 #include "system_memory.hpp"
+#include "io_text_string.hpp"
 
 namespace	cl3
 {

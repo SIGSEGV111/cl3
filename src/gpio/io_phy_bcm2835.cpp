@@ -353,27 +353,12 @@ namespace	cl3
 					for(u32_t i = 0; i < 54; i++)
 						this->pins.Append(new TPin(this, i));
 
-					//	set the local th_irq and the member th_irq to zero
-					pthread_t th_irq_local;
-					pthread_t* th_irq_member = &this->th_irq;
-
-					memset(&th_irq_local, 0, sizeof(pthread_t));
-					memset(th_irq_member, 0, sizeof(pthread_t));
-
-					//	create the threads and safe the thread ID in the local copy of th_irq
-					pthread_create(&th_irq_local, NULL, &ThreadMain, this);
-
-					//	wait until the member version  of th_irq matches the local one
-					while(memcmp(&th_irq_local, th_irq_member, sizeof(pthread_t)) != 0)
-						sched_yield();
-
-					//	the callback thread is now running properly
+					this->Start();
 				}
 
 				CLASS		TGPIO::~TGPIO	()
 				{
-					pthread_kill(this->th_irq, SIGTERM);
-					pthread_join(this->th_irq, NULL);
+					this->Shutdown();
 
 					CL3_CLASS_ERROR(bcm2835_close() != 1, TException, "shutdown of the bcm2835 lib failed");
 				}

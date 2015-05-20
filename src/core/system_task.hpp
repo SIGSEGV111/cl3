@@ -27,6 +27,10 @@
 #include "io_text_string.hpp"
 #include "system_time.hpp"
 
+#if (CL3_OS == CL3_OS_POSIX)
+#include <signal.h>
+#endif
+
 namespace	cl3
 {
 	using namespace system::types;
@@ -35,7 +39,8 @@ namespace	cl3
 	{
 		namespace	task
 		{
-			class CL3PUBT IThread;
+			class CL3PUBT TThread;
+			class CL3PUBT IThreadRunner;
 			class CL3PUBT TProcess;
 			class CL3PUBT TProcessInfo;
 			class CL3PUBT TCPU;
@@ -45,12 +50,10 @@ namespace	cl3
 
 			#if (CL3_OS == CL3_OS_POSIX)
 				typedef int pid_t;
-				typedef int handle_t;
 			#elif (CL3_OS == CL3_OS_WINDOWS)
-				typedef int pid_t;
-				typedef void* handle_t;
+				typedef DWORD pid_t;
 			#else
-				#error "define pid_t for this OS"
+				#error "unsupported platform"
 			#endif
 
 			enum	EState
@@ -87,15 +90,23 @@ namespace	cl3
 					CL3PUBF	usys_t	EnumProcesses	(io::collection::IDynamicCollection<TProcessInfo>&) const;	//	enumerates all processes on this host and adds them to the list; returns the number of processes added
 			};
 
-			class	CL3PUBT TProcess
+			class	CL3PUBT TProcess : public synchronization::AThreadSafe
 			{
 				protected:
-					friend class IThread;
-					handle_t handle;
-					io::collection::list::TList<IThread*> ls_threads;
+					friend class IThreadRunner;
+					friend class TProcessRunner;
+					friend class TThread;
+					pid_t pid;
+					volatile EState state;
+					#if (CL3_OS == CL3_OS_WINDOWS)
+						HANDLE handle;
+					#endif
+					io::collection::list::TList<TThread*> ls_threads;
+					io::collection::list::TList<TProcess*> ls_childs;
+					mutable synchronization::TSignal on_statechange;
 
 				public:
-					CL3PUBF	pid_t	Handle		() const CL3_GETTER;
+					CL3PUBF	pid_t	ID			() const CL3_GETTER;
 
 					CL3PUBF	void	Name		(const io::text::string::TString& new_name) CL3_SETTER;
 					CL3PUBF	io::text::string::TString
@@ -109,22 +120,102 @@ namespace	cl3
 					CL3PUBF	const io::collection::IStaticCollection<const io::text::string::TString>&
 									Environment	() const CL3_GETTER;	//	TODO: use a map (KEY=VALUE) instead of a list
 
-					CL3PUBF	const io::collection::list::TList<IThread*>&
+					CL3PUBF	const io::collection::list::TList<TThread*>&
 									Threads		() const CL3_GETTER;
 
-					CL3PUBF	void	Shutdown	();	//	requests the process to shut down
+					CL3PUBF	const io::collection::list::TList<TProcess*>&
+									Childs		() const CL3_GETTER;
+
+					CL3PUBF	void	Shutdown	();	//	requests the process to shut down, but will *NOT* wait for the process to actually shut down
 					CL3PUBF	void	Suspend		();	//	suspends the execution of the process (suspends all threads)
 					CL3PUBF	void	Resume		();	//	resumes the execution of the process (resumes all threads)
-					CL3PUBF	int		Wait		(time::TTime timeout = -1);	//	waits until the process has shut down (this will not send a shutdown request by its own)
-					CL3PUBF	void	Kill		();	//	kills the process, unsaved data might get lost
-
+					CL3PUBF	void	Kill		();	//	kills the process, unsaved data might get lost, memory leaks may occur, destructors might not get called
+					CL3PUBF	synchronization::TSignal&
+									OnStateChange() const CL3_GETTER;
 					CL3PUBF	EState	State		() const CL3_GETTER;	//	returns the process' current state
-
-					CL3PUBF	static	TProcess*	Self	() CL3_GETTER;
+					CL3PUBF	static	TProcess*
+									Self		() CL3_GETTER;
 
 					CL3PUBF	CLASS	TProcess	(pid_t);
 					CL3PUBF	CLASS	TProcess	(TProcess&&);
 					CL3PUBF	CLASS	~TProcess	();
+			};
+
+			class	CL3PUBT	TThread : public synchronization::AThreadSafe
+			{
+				protected:
+					static void SignalHandler(int signal, siginfo_t*, void*);
+					pid_t tid;
+					volatile EState state;
+					#if (CL3_OS == CL3_OS_WINDOWS)
+						HANDLE handle;
+					#endif
+
+					mutable synchronization::TSignal on_statechange;
+
+					CL3PUBF	CLASS	TThread		();
+
+				public:
+					CL3PUBF	CLASS	TThread		(pid_t tid);
+					CL3PUBF	CLASS	TThread		(TThread&&);
+					CL3PUBF	virtual	~TThread	();
+
+					inline	pid_t	ID			() const CL3_GETTER { return this->tid; }
+
+					CL3PUBF	void	Shutdown	();	//	requests the thread to shut down, but will *NOT* wait for the process to actually shut down
+					CL3PUBF	void	Suspend		();	//	suspends the execution of the thread
+					CL3PUBF	void	Resume		();	//	resumes the execution of the thread
+					CL3PUBF	void	Kill		();	//	kills the process, unsaved data might get lost, memory leaks may occur, destructors might not get called
+					CL3PUBF	synchronization::TSignal&
+									OnStateChange() const CL3_GETTER;
+					CL3PUBF	EState	State		() const CL3_GETTER;	//	returns the threads current state
+
+					CL3PUBF	static	TThread*	Self	() CL3_GETTER;
+					CL3PUBF	static	void		Sleep	(time::TTime time, time::EClock clock = time::TIME_CLOCK_MONOTONIC);
+					CL3PUBF	static	void		Yield	();
+			};
+
+			class	CL3PUBT	IThreadRunner : public TThread
+			{
+				private:
+					io::text::string::TString name;
+					#if (CL3_OS == CL3_OS_POSIX)
+						pthread_t pth;
+						static void* PThreadMain(void*);
+					#elif (CL3_OS == CL3_OS_WINDOWS)
+						HANDLE handle;
+					#endif
+
+					system::memory::TUniquePtr<byte_t, system::memory::UPTR_ALLOC> p_stack;
+					size_t sz_stack;
+
+				public:
+					CL3PUBF	static	IThreadRunner*	Self	() CL3_GETTER;	//	returns the IThreadRunner* for the calling thread
+
+					CL3PUBF	io::text::string::TString
+										Name	() const CL3_GETTER;	//	returns the name of the thread
+					CL3PUBF	TProcess*	Process	() CL3_GETTER;			//	returns the process to which the thread belongs
+					CL3PUBF	THost*		Host	() const CL3_GETTER;	//	returns the host machine this thread is executed on (possibly volatile in cluster systems)
+					CL3PUBF	io::collection::IDynamicCollection<TCPU*>&	Affinity() CL3_GETTER;	//	returns the threads CPU affinity list
+
+					CL3PUBF	void*	StackStart	() const CL3_GETTER;	//	start address of the execution stack
+					CL3PUBF	void*	StackEnd	() const CL3_GETTER;	//	end address of the execution stack
+					CL3PUBF	void*	StackCurrent() const CL3_GETTER;	//	current address of the stack pointer (NOTE: obviously highly volatile if the thread is not suspended)
+					CL3PUBF	usys_t	StackSize	() const CL3_GETTER;	//	returns the size in bytes of the threads stacks
+					CL3PUBF	usys_t	StackFree	() const CL3_GETTER;	//	returns the size in bytes of free (still unused / available) stack space (computed from StackCurrent() and StackEnd() - NOTE: see StackCurrent)
+					CL3PUBF	usys_t	StackUsed	() const CL3_GETTER;	//	returns the size in bytes of used stack space (computed from Current() and Start() - NOTE: see StackCurrent)
+
+					CL3PUBF	void	Start		(usys_t sz_stack = -1UL);	//	starts the thread if it is not alive yet, throws if it is already alive
+
+					CL3PUBF	system::task::synchronization::ISignal&
+									OnTerminate	() const CL3_GETTER;
+
+					virtual	CLASS	~IThreadRunner	();
+
+				protected:
+					CL3PUBF	void	Name		(io::text::string::TString) CL3_SETTER;
+					virtual	void	ThreadMain	() = 0;
+					CL3PUBF	CLASS	IThreadRunner	(io::text::string::TString name);
 			};
 
 			class	CL3PUBT	TProcessRunner : public virtual TProcess, public virtual io::stream::IIn<byte_t>, public virtual io::stream::IOut<byte_t>
@@ -153,79 +244,6 @@ namespace	cl3
 
 					CL3PUBF	CLASS	TProcessRunner	();
 					CL3PUBF	CLASS	~TProcessRunner	();
-			};
-
-			enum	EThreadAction
-			{
-				THREAD_ACTION_START,
-				THREAD_ACTION_SHUTDOWN,
-				THREAD_ACTION_SUSPEND,
-				THREAD_ACTION_RESUMED,
-				THREAD_ACTION_SLEEP,
-				THREAD_ACTION_YIELD
-			};
-
-			enum	EThreadStatus
-			{
-				THREAD_STATUS_REQUESTED,
-				THREAD_STATUS_BEFORE,
-				THREAD_STATUS_AFTER
-			};
-
-			struct	CL3PUBT	TThreadEvent
-			{
-				EThreadAction action;
-				EThreadStatus status;
-				CL3PUBF	CLASS	TThreadEvent	(EThreadAction action, EThreadStatus status);
-			};
-
-			class	CL3PUBT	IThread : public virtual event::IObservable
-			{
-				private:
-					io::text::string::TString name;
-					#if (CL3_OS == CL3_OS_POSIX)
-						pthread_t pth;
-						static void* PThreadMain(void*);
-					#elif (CL3_OS == CL3_OS_WINDOWS)
-						HANDLE handle;
-					#endif
-
-					system::memory::TUniquePtr<byte_t, system::memory::UPTR_ALLOC> p_stack;
-					size_t sz_stack;
-
-					volatile EState state;
-
-				public:
-					CL3PUBF	static	IThread*	Self	() CL3_GETTER;	//	returns the IThread* for the calling thread
-
-					CL3PUBF	io::text::string::TString
-										Name	() const CL3_GETTER;	//	returns the name of the thread
-					CL3PUBF	TProcess*	Process	() CL3_GETTER;			//	returns the process to which the thread belongs
-					CL3PUBF	EState		State	() const CL3_GETTER;	//	returns the threads current state
-					CL3PUBF	THost*		Host	() const CL3_GETTER;	//	returns the host machine this thread is executed on (possibly volatile in cluster systems)
-					CL3PUBF	io::collection::IDynamicCollection<TCPU*>&	Affinity() CL3_GETTER;	//	returns the threads CPU affinity list
-
-					CL3PUBF	void*	StackStart	() const CL3_GETTER;	//	start address of the execution stack
-					CL3PUBF	void*	StackEnd	() const CL3_GETTER;	//	end address of the execution stack
-					CL3PUBF	void*	StackCurrent() const CL3_GETTER;	//	current address of the stack pointer (NOTE: obviously highly volatile if the thread is not suspended)
-					CL3PUBF	usys_t	StackSize	() const CL3_GETTER;	//	returns the size in bytes of the threads stacks
-					CL3PUBF	usys_t	StackFree	() const CL3_GETTER;	//	returns the size in bytes of free (still unused / available) stack space (computed from StackCurrent() and StackEnd() - NOTE: see StackCurrent)
-					CL3PUBF	usys_t	StackUsed	() const CL3_GETTER;	//	returns the size in bytes of used stack space (computed from Current() and Start() - NOTE: see StackCurrent)
-
-					CL3PUBF	void	Start		(usys_t sz_stack = -1UL);	//	starts the thread if it is not alive yet, throws if it is already alive
-					CL3PUBF	void	Shutdown	();	//	sets the "request shutdown" flag, throws if the thread is not alive
-					CL3PUBF	void	Suspend		();	//	suspends the execution of the thread, throws if the thread is already suspended or not alive at all
-					CL3PUBF	void	Resume		();	//	resumes the execution of a suspended thread, throws if the thread is not suspended or not alive at all
-
-					CL3PUBF	static	void	Sleep	(time::TTime time, time::EClock clock = time::TIME_CLOCK_MONOTONIC);
-					CL3PUBF	static	void	Yield	();
-
-					virtual	CLASS	~IThread	();
-
-				protected:
-					CL3PUBF	void	Name		(io::text::string::TString) CL3_SETTER;
-					virtual	void	ThreadMain	() = 0;
-					CL3PUBF	CLASS	IThread		(io::text::string::TString name);
 			};
 		}
 	}

@@ -38,6 +38,7 @@ namespace
 {
 	using namespace cl3::system::types;
 	using namespace cl3::system::task;
+	using namespace cl3::system::task::synchronization;
 	using namespace cl3::system::memory;
 	using namespace cl3::system::time;
 	using namespace cl3::io::text;
@@ -104,7 +105,8 @@ namespace
 
 		const TTime t_start = TTime::Now(TIME_CLOCK_MONOTONIC);
 		runner.Start("sleep", args);
-		runner.Wait();
+		TInterlockedRegion lock(&runner.OnStateChange());
+		runner.OnStateChange().WaitFor();
 		const TTime t_end = TTime::Now(TIME_CLOCK_MONOTONIC);
 		const TTime t_delta = t_end - t_start;
 		EXPECT_TRUE(t_delta.ConvertToI(TIME_UNIT_MILLISECONDS) >= 500);
@@ -119,7 +121,8 @@ namespace
 		const TTime t_start = TTime::Now(TIME_CLOCK_MONOTONIC);
 		runner.Start("sleep", args);
 		runner.Kill();
-		runner.Wait();
+		TInterlockedRegion lock(&runner.OnStateChange());
+		runner.OnStateChange().WaitFor();
 		const TTime t_end = TTime::Now(TIME_CLOCK_MONOTONIC);
 		const TTime t_delta = t_end - t_start;
 		EXPECT_TRUE(t_delta.ConvertToI(TIME_UNIT_MILLISECONDS) <= 250);
@@ -179,7 +182,7 @@ namespace
 		EXPECT_TRUE(!it->MoveNext());
 	}
 
-	struct TTestThread : IThread
+	struct TTestThread : IThreadRunner
 	{
 		volatile bool b_started;
 
@@ -188,17 +191,30 @@ namespace
 			b_started = true;
 		}
 
-		TTestThread() : IThread("test"), b_started(false) {}
+		TTestThread() : IThreadRunner("test"), b_started(false) {}
 	};
 
-	TEST(system_task_IThread, basics)
+	TEST(system_task_IThreadRunner, basics)
 	{
 		try
 		{
 			TTestThread tt;
 			EXPECT_FALSE(tt.b_started);
-			tt.Start();
-			tt.Shutdown();
+
+			{
+				TInterlockedRegion lock(&tt.Mutex());
+				tt.Start();
+			}
+
+			{
+				TInterlockedRegion lock(&tt.OnStateChange());
+				while(tt.State() != STATE_DEAD)
+				{
+					tt.Shutdown();
+					tt.OnStateChange().WaitFor();
+				}
+			}
+
 			EXPECT_TRUE(tt.b_started);
 		}
 		catch(const TException& ex)

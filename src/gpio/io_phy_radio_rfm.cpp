@@ -512,7 +512,7 @@ namespace	cl3
 						if(pin_irq->OnEdge().IsRegistered(this))
 							pin_irq->OnEdge().Unregister(this);
 						this->pin_shutdown->Level(true);
-						system::task::IThread::Sleep(0.1);
+						system::task::TThread::Sleep(0.1);
 						this->pin_shutdown->Level(false);
 						WaitForCTS();
 						AssertChipStatus();
@@ -589,7 +589,7 @@ namespace	cl3
 							{
 								const bool target_level = (i % 2) == 0;
 								pins[4]->Level(target_level);
-								system::task::IThread::Sleep(0.001);
+								system::task::TThread::Sleep(0.001);
 								if(pin_irq->Level() != target_level)
 									return 10;
 							}
@@ -684,7 +684,7 @@ namespace	cl3
 						if(pin_irq->OnEdge().IsRegistered(this))
 							pin_irq->OnEdge().Unregister(this);
 						this->pin_shutdown->Level(true);
-						system::task::IThread::Sleep(0.010);
+						system::task::TThread::Sleep(0.010);
 
 						for(u8_t i = 0; i < 6; i++)
 							delete this->pins[i];

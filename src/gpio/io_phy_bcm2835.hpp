@@ -25,6 +25,7 @@
 #include <pthread.h>
 #include "io_phy.hpp"
 #include <cl3/core/io_collection_list.hpp>
+#include <cl3/core/system_task.hpp>
 
 namespace	cl3
 {
@@ -76,7 +77,7 @@ namespace	cl3
 						CL3PUBF	void		Level		(bool new_level) final override;
 				};
 
-				class	CL3PUBT	TGPIO : public gpio::IGPIO
+				class	CL3PUBT	TGPIO : public gpio::IGPIO, protected system::task::IThread
 				{
 					friend class TPin;
 					private:
@@ -87,7 +88,7 @@ namespace	cl3
 						pthread_t th_irq;
 						collection::list::TList<gpio::IPin* const> pins;
 
-						static void* ThreadMain(void*);
+						void ThreadMain() final override;
 
 					public:
 						CL3PUBF	CLASS	TGPIO	(bool debug = false);

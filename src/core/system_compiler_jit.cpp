@@ -350,6 +350,21 @@ namespace	cl3
 				}
 
 				/*************************************************************************************/
+
+				void									TModule::Optimize	()
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				memory::TUniquePtr<library::ILibrary>	TModule::Compile	() const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				io::text::string::TString				TModule::Transcode	(transcoding::ITranscoder&) const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
 			}
 		}
 	}

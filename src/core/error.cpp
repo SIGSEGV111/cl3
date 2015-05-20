@@ -24,10 +24,8 @@
 #include <stdarg.h>
 #include "error.hpp"
 #include "util.hpp"
-//#include "system_types_typeinfo.hpp"
 #include "system_memory.hpp"
 #include "io_text.hpp"
-#include "system_task.hpp"
 #include "io_text_terminal.hpp"
 
 namespace	cl3
@@ -90,7 +88,6 @@ namespace	cl3
 		io::text::ITextWriter&	operator<<	(io::text::ITextWriter& tw, const TException& ex)
 		{
 			tw<<"ERROR:"
-					<<"\n\tthread: "<<system::task::IThread::Self()->Name()
 					<<"\n\tmessage: "<<ex.message
 					<<"\n\tfile: "<<ex.codefile<<":"<<ex.codeline
 					<<"\n\texpression: "<<(ex.expression == NULL ? "<none>" : ex.expression)
