@@ -79,7 +79,7 @@ namespace	cl3
 						CL3_CLASS_LOGIC_ERROR(true);
 					}
 
-					CLASS	TMainThread	() : TThreadPointerSetter(this), IThreadRunner("main")
+					CLASS	TMainThread	() : TThreadPointerSetter(this), IThreadRunner(L"main")
 					{
 						this->tid = gettid();
 						this->state = STATE_ALIVE_EXECUTING;
