@@ -53,6 +53,10 @@ namespace	cl3
 				struct	ICodec;
 				class	IEncoder;
 				class	IDecoder;
+
+				CL3PUBF extern const ICodec* CODEC_CXX_CHAR;
+				CL3PUBF extern const ICodec* CODEC_CXX_WCHAR;
+				CL3PUBF extern const ICodec* const CODEC_UTF32;	//	fake codec (just passes thru all data)
 			};
 
 			struct	TCollationSequence;
@@ -189,10 +193,6 @@ namespace	cl3
 					ITextWriter& operator=(ITextWriter&&) = delete;
 					ITextWriter& operator=(const ITextWriter&) = delete;
 
-				protected:
-					system::memory::TUniquePtr<encoding::IEncoder> encoder_char;
-					system::memory::TUniquePtr<encoding::IEncoder> encoder_wchar;
-
 				public:
 					using stream::IOut<TUTF32>::Write;
 					using stream::IOut<wchar_t>::Write;
@@ -224,6 +224,28 @@ namespace	cl3
 
 			//	converts object value to human-readable string
 			typedef	void (*FPrint)(ITextWriter&, const void*);
+
+			class	CL3PUBT	TTextWriter : public ITextWriter, public stream::ISource<byte_t>
+			{
+				protected:
+					system::memory::TUniquePtr<encoding::IEncoder> encoder;
+					system::memory::TUniquePtr<encoding::IDecoder> decoder_char;
+					system::memory::TUniquePtr<encoding::IDecoder> decoder_wchar;
+
+				public:
+					CL3PUBF	void	Flush	() final override;
+					CL3PUBF	usys_t	Space	() const final override CL3_GETTER;
+
+					CL3PUBF	usys_t	Write	(const char*    arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
+					CL3PUBF	usys_t	Write	(const wchar_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
+					CL3PUBF	usys_t	Write	(const TUTF32*  arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
+
+					CL3PUBF	void	Sink	(IOut<byte_t>* os) final override CL3_SETTER;
+					CL3PUBF	IOut<byte_t>*
+									Sink	() const final override CL3_GETTER;
+
+					CL3PUBF	CLASS	TTextWriter	(const encoding::ICodec* codec = encoding::CODEC_CXX_CHAR);
+			};
 		}
 	}
 }

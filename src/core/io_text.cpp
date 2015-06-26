@@ -501,6 +501,69 @@ namespace	cl3
 				Write(v, wcslen(v));
 				return *this;
 			}
+
+			/******************************** TTextWriter ******************************************************/
+
+			void	TTextWriter::Flush	()
+			{
+				this->decoder_char->Flush();
+				this->decoder_wchar->Flush();
+				this->encoder->Flush();
+			}
+
+			usys_t	TTextWriter::Space	() const
+			{
+				return ((this->encoder->Sink() == NULL) ? 0 : (this->encoder->Sink()->Space() == 0 ? 0 : (usys_t)-1));
+			}
+
+			usys_t	TTextWriter::Write	(const char*    arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+			{
+				if(n_items_write_min == (usys_t)-1) n_items_write_min = n_items_write_max;
+				usys_t n;
+				CL3_CLASS_LOGIC_ERROR( ((n = this->decoder_wchar->Write((const byte_t*)arr_items_write, n_items_write_max * sizeof(char), n_items_write_min * sizeof(char))) % sizeof(char)) != 0 );
+				return n;
+			}
+
+			usys_t	TTextWriter::Write	(const wchar_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+			{
+				if(n_items_write_min == (usys_t)-1) n_items_write_min = n_items_write_max;
+				usys_t n;
+				CL3_CLASS_LOGIC_ERROR( ((n = this->decoder_wchar->Write((const byte_t*)arr_items_write, n_items_write_max * sizeof(wchar_t), n_items_write_min * sizeof(wchar_t))) % sizeof(wchar_t)) != 0 );
+				return n;
+			}
+
+			usys_t	TTextWriter::Write	(const TUTF32*  arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+			{
+				return this->encoder->Write(arr_items_write, n_items_write_max, n_items_write_min);
+			}
+
+			void	TTextWriter::Sink	(IOut<byte_t>* os)
+			{
+				this->encoder->Sink(os);
+			}
+
+			IOut<byte_t>*
+					TTextWriter::Sink	() const
+			{
+				return this->encoder->Sink();
+			}
+
+			CLASS	TTextWriter::TTextWriter	(const encoding::ICodec* codec)
+			{
+				this->encoder = codec->CreateEncoder();
+
+				if(codec != encoding::CODEC_CXX_CHAR)
+				{
+					this->decoder_char = encoding::CODEC_CXX_CHAR->CreateDecoder();
+					this->decoder_char->Sink(this->encoder.Object());
+				}
+
+				if(codec != encoding::CODEC_CXX_WCHAR)
+				{
+					this->decoder_wchar = encoding::CODEC_CXX_WCHAR->CreateDecoder();
+					this->decoder_wchar->Sink(this->encoder.Object());
+				}
+			}
 		}
 	}
 }
