@@ -39,11 +39,6 @@ static inline bool operator==(const struct ::pollfd& v1, const struct ::pollfd& 
 
 namespace	cl3
 {
-	namespace	event
-	{
-		template class TEvent<system::task::synchronization::IMutex, system::task::synchronization::TOnMutexActionData>;
-	}
-
 	namespace	system
 	{
 		namespace	task

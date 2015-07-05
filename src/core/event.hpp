@@ -40,11 +40,11 @@ namespace	cl3
 				TEvent&	operator=(const TEvent&);
 
 			public:
-				struct	IReceiver
+				struct	CL3PUBT	IReceiver
 				{
 					//	function which gets called, when the event is Raise()'ed
-					virtual void OnRaise(TEvent& event, TSender& sender, TData data) = 0;
-					virtual	~IReceiver	() {}
+					virtual CL3PUBF	void OnRaise(TEvent& event, TSender& sender, TData data) = 0;
+					virtual	CL3PUBF	~IReceiver	() {}
 				};
 
 				enum	EAction
@@ -52,14 +52,14 @@ namespace	cl3
 					ACTION_REGISTER, ACTION_UNREGISTER
 				};
 
-				struct	TOnChangeData
+				struct	CL3PUBT	TOnChangeData
 				{
 					EAction action;
 					IReceiver* receiver;
 				};
 
 			protected:
-				struct	__ICleanup {};	//	just there so we later know what we have to delete() and what not
+				struct	CL3PUBT	__ICleanup {};	//	just there so we later know what we have to delete() and what not
 
 				template<class TReceiver>
 				struct	TMemberFuncReceiver : IReceiver, __ICleanup
