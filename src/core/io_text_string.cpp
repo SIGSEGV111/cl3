@@ -484,9 +484,16 @@ namespace	cl3
 				CLASS	TString::TString	(const wchar_t* str, usys_t maxlen) : TList<TUTF32>()
 				{
 					CL3_CLASS_ERROR(str == NULL, TException, "invalid source string pointer");
-					TUniquePtr<IDecoder> d = CODEC_CXX_WCHAR->CreateDecoder();
-					d->Sink(this);
-					d->Write((const byte_t*)str, wcsnlen(str, maxlen) * sizeof(wchar_t));
+					if(CODEC_CXX_WCHAR == CODEC_UTF32)
+					{
+						this->Append((const TUTF32*)str, wcsnlen(str, maxlen));
+					}
+					else
+					{
+						TUniquePtr<IDecoder> d = CODEC_CXX_WCHAR->CreateDecoder();
+						d->Sink(this);
+						d->Write((const byte_t*)str, wcsnlen(str, maxlen) * sizeof(wchar_t));
+					}
 				}
 
 				CLASS	TString::TString	(const TUTF32*  str, usys_t maxlen) : TList<TUTF32>()

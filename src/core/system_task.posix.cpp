@@ -40,6 +40,14 @@
 
 namespace	cl3
 {
+	namespace	io
+	{
+		namespace	text
+		{
+			struct	TUTF32;
+		}
+	}
+
 	namespace	system
 	{
 		namespace	task
@@ -79,7 +87,7 @@ namespace	cl3
 						CL3_CLASS_LOGIC_ERROR(true);
 					}
 
-					CLASS	TMainThread	() : TThreadPointerSetter(this), IThreadRunner(L"main")
+					CLASS	TMainThread	() : TThreadPointerSetter(this), IThreadRunner((const cl3::io::text::TUTF32*)L"main")
 					{
 						this->tid = gettid();
 						this->state = STATE_ALIVE_EXECUTING;
