@@ -279,12 +279,12 @@ namespace	cl3
 													int fd;
 													snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%u/direction", i);
 													CL3_NONCLASS_SYSERR(fd = open(buffer, O_CLOEXEC|O_NOCTTY|O_WRONLY));
-													CL3_NONCLASS_SYSERR(write(fd, "in\n", 3) != 3);
+													CL3_NONCLASS_ERROR(write(fd, "in\n", 3) != 3, TSyscallException, errno);
 													close(fd);
 
 													snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%u/edge", i);
 													CL3_NONCLASS_SYSERR(fd = open(buffer, O_CLOEXEC|O_NOCTTY|O_WRONLY));
-													CL3_NONCLASS_SYSERR(write(fd, "both\n", 5) != 5);
+													CL3_NONCLASS_ERROR(write(fd, "both\n", 5) != 5, TSyscallException, errno);
 													close(fd);
 
 													//	open the FD for the pin
