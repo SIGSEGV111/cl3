@@ -67,7 +67,7 @@ namespace	cl3
 					CL3_CLASS_SYSERR(::munmap(this->arr_items, this->n_items));
 
 				if(new_count != 0)
-					CL3_CLASS_SYSERR(this->arr_items = (byte_t*)::mmap(NULL, new_count, access, MAP_SHARED|MAP_NONBLOCK, file->fd, new_index));
+					CL3_CLASS_SYSERR(this->arr_items = (byte_t*)::mmap(NULL, new_count, access, MAP_SHARED, file->fd, new_index));
 
 				this->n_items = new_count;
 				this->index = new_index;
