@@ -26,24 +26,27 @@
 #include "io_text_string.hpp"
 #include "system_time.hpp"
 
-namespace	cl3
+namespace cl3
 {
 	using namespace system::types;
 
-	namespace	system
+	namespace system
 	{
-		namespace	task
+		namespace task
 		{
 			typedef int pid_t;
 
-			namespace	synchronization
+			namespace synchronization
 			{
 				struct	IWaitable;
 			}
 
-			class	TProcess;
-			class	TThread;
-			class	IFiber;
+			class TProcess;
+			class TLocalThread;
+			class IFiber;
+			class TCPU;
+
+			typedef io::collection::list::TList<const TCPU* const> TCPUAffinity;
 
 			enum ELogLevel
 			{
@@ -53,11 +56,12 @@ namespace	cl3
 				LOGLEVEL_ERROR
 			};
 
-			class	IFiber
+			class IFiber
 			{
-				friend class TThread;
+				friend class TLocalThread;
 				private:
 					io::text::string::TString name;
+					TLocalThread* volatile thread;
 
 				protected:
 					CL3PUBF void Log(const io::text::string::TString& message);
@@ -68,24 +72,117 @@ namespace	cl3
 					const io::text::string::TString& Name() const;
 					CL3PUBF const io::collection::list::TList<synchronization::IWaitable*>& WaitList() const;
 					CL3PUBF CLASS IFiber(io::text::string::TString name);
+					CL3PUBF static IFiber* Current();
+					CL3PUBF void SwitchTo();
 			};
 
-			class	TThread
+			/************************************************************************************/
+
+			class IThread
 			{
 				friend class TProcess;
-				protected:
-					CL3PUBF CLASS TThread(TProcess*, pid_t);
+				private:
+					IProcess* process;
+					pid_t pid_thread;
 
 				public:
-					CL3PUBF CLASS TThread(IFiber*);
+					virtual IProcess* Process() const CL3_GETTER = 0;
+					virtual void Suspend() = 0;
+					virtual void Resume() = 0;
+					virtual void Kill() = 0;
 			};
 
-			class	TProcess
+			class TLocalThread : public IThread
+			{
+				protected:
+					CL3PUBF CLASS TLocalThread(IProcess*, pid_t);
+					CL3PUBF CLASS TLocalThread(IFiber*);
+
+				public:
+					CL3PUBF TLocalProcess* Process() const final override CL3_GETTER;
+					CL3PUBF static TLocalThread* Current();
+			};
+
+			class TRemoteThread : public IThread
+			{
+			};
+
+			/************************************************************************************/
+
+			class IProcess
+			{
+				protected:
+					IHost* host;
+					io::collection::list::TList<IThread*> threads;
+
+				public:
+					CL3PUBF IHost* Host() const CL3_GETTER;
+					CL3PUBF const io::collection::list::TList<IThread* const>& Threads() const CL3_GETTER;
+					CL3PUBF virtual CLASS ~IProcess();
+			};
+
+			class TLocalProcess : public IProcess
+			{
+			};
+
+			class TOwnProcess : public TLocalProcess
 			{
 				public:
-					const io::collection::list::TList<TThread*>& Threads() const CL3_GETTER;
+					CL3PUBF TLocalThread* CreateThread(IFiber*);
+					CL3PUBF static TOwnProcess& Instance();
+			};
 
-					CL3PUBF CLASS TProcess(pid_t);
+			class TRemoteProcess : public IProcess
+			{
+			};
+
+			/************************************************************************************/
+
+			class TCPU
+			{
+				public:
+					CL3PUBF TNumaNode* NumaNode() const CL3_GETTER;
+			};
+
+			class TNumaNode
+			{
+				public:
+					CL3PUBF const io::collection::TList<TCPU* const>& CPUs() const CL3_GETTER;
+			};
+
+			/************************************************************************************/
+
+			struct thread_info_t
+			{
+				pid_t pid_process;
+				pid_t pid_thread;
+			};
+
+			struct	process_info_t
+			{
+				pid_t pid_process;
+				io::text::string::TString exe;
+				io::collection::list::TList<io::text::string::TString> args;
+				io::collection::list::TList<pid_t> threads;
+			};
+
+			struct	IHost
+			{
+				virtual thread_info_t ThreadInfo(pid_t, pid_t) const = 0;
+				virtual process_info_t ProcessInfo(pid_t) const = 0;
+				virtual io::collection::list::TList<pid_t> EnumProcesses() const = 0;
+				virtual IProcess* OpenProcess(pid_t) = 0;
+				virtual IProcess* CreateProcess(const io::text::string::TString& exe, const io::collection::list::TList<const io::text::string::TString>& args, io::IIn<byte_t>& stdin, io::IOut<byte_t>& stdout, io::IOut<byte_t>& stderr) = 0;
+			};
+
+			class TLocalHost : public IHost
+			{
+				public:
+					CL3PUBF static TLocalHost* Instance();
+			};
+
+			class TRemoteHost : public IHost
+			{
 			};
 		}
 	}
