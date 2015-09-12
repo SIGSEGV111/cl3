@@ -37,6 +37,7 @@
 #include "io_collection_list.hpp"
 #include "io_text_encoding.hpp"
 #include "util.hpp"
+#include "error.hpp"
 
 #include <string.h>
 #include <unistd.h>
@@ -48,6 +49,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/syscall.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 using namespace cl3::system::types;
 
@@ -202,6 +205,77 @@ namespace	cl3
 			void	TThread::Yield	()
 			{
 				CL3_NONCLASS_SYSERR(sched_yield());
+			}
+
+			namespace _
+			{
+				void	TTaskMonitor::ThreadMain	()
+				{
+					try
+					{
+						fprintf(stderr, "monitor-thread alive!\n");
+						int status;
+
+						while(this->b_run)
+						{
+							const pid_t pid_task = waitpid(-1, &status, __WALL|WUNTRACED|WCONTINUED);
+							if(pid_task == -1)
+							{
+								usleep(1000);
+							}
+							else
+							{
+								fprintf(stderr, "monitor-thread: wait returned; pid = %d; status = %d\n", pid_task, status);
+								if(WIFEXITED(status))
+								{
+									fprintf(stderr, "monitor-thread: WIFEXITED\n");
+									this->OnTaskStateChange(pid_task, STATE_DEAD);
+								}
+								else if(WIFSTOPPED(status))
+								{
+									fprintf(stderr, "monitor-thread: WIFSTOPPED\n");
+									this->OnTaskStateChange(pid_task, STATE_ALIVE_SUSPENDED);
+								}
+								else if(WIFSIGNALED(status))
+								{
+									fprintf(stderr, "monitor-thread: WIFSIGNALED\n");
+									this->OnTaskStateChange(pid_task, STATE_DEAD);
+								}
+								else if(WIFCONTINUED(status))
+								{
+									fprintf(stderr, "monitor-thread: WIFCONTINUED\n");
+									this->OnTaskStateChange(pid_task, STATE_ALIVE_EXECUTING);
+								}
+								else
+								{
+									fprintf(stderr, "monitor-thread: unknown\n");
+									CL3_CLASS_LOGIC_ERROR(true);
+								}
+							}
+						}
+					}
+					catch(const TException& ex)
+					{
+						ex.Print();
+					}
+					fprintf(stderr, "monitor-thread going down!\n");
+				}
+
+				void	TTaskMonitor::OnShutdownRequest	()
+				{
+					this->b_run = false;
+					CL3_CLASS_SYSERR(kill(this->tid, SIGINT));
+				}
+
+				CLASS	TTaskMonitor::TTaskMonitor	() : IThreadRunner(L"task-monitor"), b_run(true)
+				{
+					this->Start();
+				}
+
+				CLASS	TTaskMonitor::~TTaskMonitor	()
+				{
+					this->Shutdown();
+				}
 			}
 		}
 	}

@@ -33,8 +33,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-static inline bool operator> (const struct ::pollfd& v1, const struct ::pollfd& v2) { return ::memcmp(&v1, &v2, sizeof(struct ::pollfd)) >  0; }
-static inline bool operator< (const struct ::pollfd& v1, const struct ::pollfd& v2) { return ::memcmp(&v1, &v2, sizeof(struct ::pollfd)) <  0; }
+// static inline bool operator> (const struct ::pollfd& v1, const struct ::pollfd& v2) { return ::memcmp(&v1, &v2, sizeof(struct ::pollfd)) >  0; }
+// static inline bool operator< (const struct ::pollfd& v1, const struct ::pollfd& v2) { return ::memcmp(&v1, &v2, sizeof(struct ::pollfd)) <  0; }
 static inline bool operator==(const struct ::pollfd& v1, const struct ::pollfd& v2) { return ::memcmp(&v1, &v2, sizeof(struct ::pollfd)) == 0; }
 
 namespace	cl3
@@ -171,18 +171,12 @@ namespace	cl3
 				{
 					CL3_CLASS_LOGIC_ERROR(this->mutex->HasAcquired());
 					this->mutex->Acquire();
-				}
-
-				bool	TSignal::Validate	() const
-				{
-					CL3_CLASS_LOGIC_ERROR(!this->mutex->HasAcquired());
-					return this->b_raised;
+					this->Reset();
 				}
 
 				void	TSignal::Reset		()
 				{
 					CL3_CLASS_LOGIC_ERROR(!this->mutex->HasAcquired());
-					this->b_raised = false;
 					byte_t buffer[8];
 					ssize_t r;
 					while((r = ::read(this->pipe_h2w[0], buffer, 8)) > 0);
@@ -192,13 +186,12 @@ namespace	cl3
 				void	TSignal::Raise		()
 				{
 					CL3_CLASS_LOGIC_ERROR(!this->mutex->HasAcquired());
-					this->b_raised = true;
 					const byte_t v = 1;
 					const ssize_t r = ::write(this->pipe_h2w[1], &v, 1);
 					CL3_CLASS_ERROR(r == -1 && errno != EAGAIN && errno != EWOULDBLOCK, TSyscallException, errno);
 				}
 
-				CLASS	TSignal::TSignal	(TMutex* mutex) : b_raised(false), mutex(mutex)
+				CLASS	TSignal::TSignal	(TMutex* mutex) : mutex(mutex)
 				{
 					#if (CL3_OS_DERIVATIVE == CL3_OS_DERIVATIVE_POSIX_LINUX)
 						CL3_CLASS_SYSERR(::pipe2(pipe_h2w, O_NONBLOCK|O_CLOEXEC));

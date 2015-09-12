@@ -21,6 +21,7 @@
 #endif
 
 #include "system_task.hpp"
+#include "error.hpp"
 #include "io_collection_list.hpp"
 
 namespace	cl3
@@ -68,6 +69,13 @@ namespace	cl3
 			{
 				CL3_CLASS_LOGIC_ERROR(!this->Mutex().HasAcquired());
 				return this->state;
+			}
+
+			void IThreadRunner::Shutdown()
+			{
+				CL3_CLASS_LOGIC_ERROR(!this->Mutex().HasAcquired());
+				CL3_CLASS_ERROR(this->state == STATE_DEAD, error::TException, "thread is already dead");
+				this->OnShutdownRequest();
 			}
 		}
 	}

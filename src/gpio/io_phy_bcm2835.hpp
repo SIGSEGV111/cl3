@@ -77,7 +77,7 @@ namespace	cl3
 						CL3PUBF	void		Level		(bool new_level) final override;
 				};
 
-				class	CL3PUBT	TGPIO : public gpio::IGPIO, protected system::task::IThread
+				class	CL3PUBT	TGPIO : public gpio::IGPIO, protected system::task::IThreadRunner
 				{
 					friend class TPin;
 					private:
@@ -89,6 +89,7 @@ namespace	cl3
 						collection::list::TList<gpio::IPin* const> pins;
 
 						void ThreadMain() final override;
+						void OnShutdownRequest() final override;
 
 					public:
 						CL3PUBF	CLASS	TGPIO	(bool debug = false);

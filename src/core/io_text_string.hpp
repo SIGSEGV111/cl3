@@ -51,6 +51,7 @@ namespace	cl3
 								public virtual encoding::AWCharEncoder
 				{
 					public:
+						using collection::list::TList<TUTF32>::Prepend;
 						using collection::list::TList<TUTF32>::Append;
 						using collection::list::TList<TUTF32>::Find;
 

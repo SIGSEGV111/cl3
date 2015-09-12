@@ -416,7 +416,7 @@ namespace
 
 	TEST(io_text_string, Stringify)
 	{
-		EXPECT_TRUE(cl3::system::types::typeinfo::_::is_printable<int>::value);
+		EXPECT_TRUE(cl3::system::types::typeinfo::features::is_printable<int>::value);
 
 		struct T { int x,y,z; } t = {0,0,0};
 		EXPECT_TRUE(Stringify(TCTTI<T>::print, &t) == "<unprintable>");

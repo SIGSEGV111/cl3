@@ -126,7 +126,6 @@ namespace	cl3
 
 						virtual	void	BeforeWait	() = 0;
 						virtual	void	AfterWait	() = 0;
-						virtual	bool	Validate	() const = 0;
 
 					public:
 						inline	void	WaitFor	() { CL3_CLASS_LOGIC_ERROR(!ISignal::WaitFor(-1)); }
@@ -224,11 +223,10 @@ namespace	cl3
 						CLASS TSignal(const TSignal&) = delete;
 						TSignal& operator=(const TSignal&) = delete;
 
-						volatile bool b_raised;
-						int pipe_h2w[2];
 						TMutex* mutex;
 
 						#if (CL3_OS == CL3_OS_POSIX)
+							int pipe_h2w[2];
 							struct ::pollfd		Handle	() const final override CL3_GETTER;
 						#elif (CL3_OS == CL3_OS_WINDOWS)
 							HANDLE				Handle	() const final override CL3_GETTER;
@@ -238,18 +236,18 @@ namespace	cl3
 
 						CL3PUBF	void	BeforeWait	() final override;
 						CL3PUBF	void	AfterWait	() final override;
-						CL3PUBF	bool	Validate	() const final override;
 
+					public:
 						CL3PUBF	void	Acquire		() final override;
 						CL3PUBF	bool	Acquire		(time::TTime timeout) final override CL3_WARN_UNUSED_RESULT;
 						CL3PUBF	void	Release		() final override;
 						CL3PUBF	bool	HasAcquired	() const final override CL3_GETTER;
 
-					public:
-						void	Reset		();
-						void	Raise		();
-						CLASS	TSignal		(TMutex*);
-						CLASS	~TSignal	();
+						CL3PUBF	void	Reset		();
+						CL3PUBF	void	Raise		();
+
+						CL3PUBF	CLASS	TSignal		(TMutex*);
+						CL3PUBF	CLASS	~TSignal	();
 				};
 			}
 		}

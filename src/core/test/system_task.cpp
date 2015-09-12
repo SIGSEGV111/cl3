@@ -191,31 +191,37 @@ namespace
 			b_started = true;
 		}
 
+		void OnShutdownRequest() final override
+		{
+		}
+
 		TTestThread() : IThreadRunner("test"), b_started(false) {}
 	};
 
-	TEST(system_task_IThreadRunner, basics)
+	TEST(system_task_IThreadRunner, constructor_and_destructor)
+	{
+		try
+		{
+			TTestThread tt;
+		}
+		catch(const TException& ex)
+		{
+			ex.Print();
+			throw ex;
+		}
+	}
+
+	TEST(system_task_IThreadRunner, start_wait_stop)
 	{
 		try
 		{
 			TTestThread tt;
 			EXPECT_FALSE(tt.b_started);
-
-			{
-				TInterlockedRegion lock(&tt.Mutex());
-				tt.Start();
-			}
-
-			{
-				TInterlockedRegion lock(&tt.OnStateChange());
-				while(tt.State() != STATE_DEAD)
-				{
-					tt.Shutdown();
-					tt.OnStateChange().WaitFor();
-				}
-			}
-
+			tt.Start();
+			while(tt.State() != STATE_DEAD)
+				tt.OnStateChange().WaitFor();
 			EXPECT_TRUE(tt.b_started);
+
 		}
 		catch(const TException& ex)
 		{

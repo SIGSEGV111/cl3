@@ -80,9 +80,15 @@ namespace	cl3
 					}
 				};
 
+				static void OnInterruptSignal(int)
+				{
+					//	acording to the POSIX specs, a syscall only gets interrupted by a signal, if that signals calls a signal-handler-function.
+					//	well.... this is that said signal-handler-function. And no, it does not do anything.
+				}
+
 				struct	TMainThread : TThreadPointerSetter, IThreadRunner
 				{
-					void	ThreadMain	()
+					void	ThreadMain	() final override
 					{
 						CL3_CLASS_LOGIC_ERROR(true);
 					}
@@ -93,9 +99,8 @@ namespace	cl3
 						this->state = STATE_ALIVE_EXECUTING;
 						struct ::sigaction sa;
 						memset(&sa, 0, sizeof(sa));
-						sa.sa_sigaction = &TThread::SignalHandler;
-						sa.sa_flags = SA_RESTART | SA_SIGINFO;
-						CL3_CLASS_SYSERR(::sigaction(SIGCHLD, &sa, NULL));
+						sa.sa_handler = &OnInterruptSignal;
+						CL3_CLASS_SYSERR(::sigaction(SIGINT, &sa, NULL));
 					}
 
 					CLASS	~TMainThread()
@@ -108,6 +113,11 @@ namespace	cl3
 			}
 
 			static TProcess proc_self(0);
+
+			namespace
+			{
+				static _::TTaskMonitor th_monitor_hidden;
+			}
 
 			IThreadRunner*	IThreadRunner::Self	()
 			{
@@ -217,8 +227,7 @@ namespace	cl3
 			void	TThread::Shutdown	()
 			{
 				CL3_CLASS_LOGIC_ERROR(!this->Mutex().HasAcquired());
-				CL3_CLASS_LOGIC_ERROR(this->tid <= 0);
-				CL3_CLASS_SYSERR(kill(this->tid, SIGTERM));
+				CL3_NOT_IMPLEMENTED;
 			}
 
 			void	TThread::Suspend	()
@@ -233,7 +242,6 @@ namespace	cl3
 
 			CLASS	TThread::TThread	() : tid(-1), state(STATE_DEAD), on_statechange(&this->mutex)
 			{
-				this->Mutex().Release();
 			}
 
 			CLASS	TThread::TThread	(pid_t tid) : tid(tid), state(STATE_DEAD), on_statechange(&this->mutex)
@@ -248,7 +256,7 @@ namespace	cl3
 
 			CLASS	TThread::~TThread	()
 			{
-				this->Mutex().Acquire();
+				CL3_CLASS_LOGIC_ERROR(!this->Mutex().HasAcquired());	//	you can only destroy threads while holding the lock
 			}
 
 			/**************************************************************************************/
@@ -316,6 +324,7 @@ namespace	cl3
 
 			CLASS	IThreadRunner::IThreadRunner	(io::text::string::TString name) : name(name)
 			{
+				CL3_CLASS_LOGIC_ERROR(!this->Mutex().HasAcquired());	//	TThread should have left the mutex locked
 				if(th_self != th_main)
 				{
 					TInterlockedRegion lock(&TProcess::Self()->Mutex());
@@ -325,9 +334,9 @@ namespace	cl3
 
 			CLASS	IThreadRunner::~IThreadRunner	()
 			{
+				CL3_CLASS_LOGIC_ERROR(!this->Mutex().HasAcquired());	//	you can only destroy threads while holding the lock
 				if(this != th_main)
 				{
-					TInterlockedRegion lock_this(&this->Mutex());
 					while(this->state != STATE_DEAD)
 					{
 						this->Shutdown();
@@ -459,89 +468,36 @@ namespace	cl3
 
 			/*******************************************************************/
 
-			void	TThread::SignalHandler	(int signal, siginfo_t* si, void*)
+			namespace _
 			{
-				CL3_NONCLASS_LOGIC_ERROR(signal != si->si_signo);
-
-				switch(signal)
+				void	TTaskMonitor::OnTaskStateChange	(pid_t pid_task, EState state_new)
 				{
-					case SIGCHLD:
+					TInterlockedRegion lock_self(&proc_self.Mutex());
+					const usys_t n_threads = proc_self.Threads().Count();
+					for(usys_t i = 0; i < n_threads; i++)
 					{
-						//	 si_pid, si_uid, si_status, si_utime, si_stime
-						TInterlockedRegion lock_self(&proc_self.Mutex());
-						const usys_t n_threads = proc_self.Threads().Count();
-						for(usys_t i = 0; i < n_threads; i++)
+						TThread* const thread = proc_self.Threads()[i];
+						if(pid_task == thread->ID())
 						{
-							TThread* const thread = proc_self.Threads()[i];
-							if(si->si_pid == thread->ID())
-							{
-								TInterlockedRegion lock_thread(&thread->Mutex());
-								switch(si->si_code)
-								{
-									case CLD_EXITED:
-									case CLD_KILLED:
-									case CLD_DUMPED:
-										CL3_NONCLASS_SYSERR(::waitpid(si->si_pid, NULL, WNOHANG));
-										thread->state = STATE_DEAD;
-										break;
-									case CLD_STOPPED:
-										thread->state = STATE_ALIVE_SUSPENDED;
-										break;
-									case CLD_CONTINUED:
-										CL3_NONCLASS_LOGIC_ERROR(thread->state != STATE_ALIVE_SUSPENDED);
-										thread->state = STATE_ALIVE_EXECUTING;
-										break;
-									case CLD_TRAPPED:
-										//	we don't do anything special here
-										//	we also won't raise a state-change signal, as debugging should be transparent to the application
-										return;
-									default:
-										CL3_NONCLASS_LOGIC_ERROR(true);
-								}
-
-								thread->on_statechange.Raise();
-								break;
-							}
+							TInterlockedRegion lock_thread(&thread->Mutex());
+							thread->state = state_new;
+							thread->on_statechange.Raise();
+							return;
 						}
-
-						const usys_t n_processes = proc_self.Childs().Count();
-						for(usys_t i = 0; i < n_processes; i++)
-						{
-							TProcess* const process = proc_self.Childs()[i];
-							if(si->si_pid == process->ID())
-							{
-								TInterlockedRegion lock_process(&process->Mutex());
-								switch(si->si_code)
-								{
-									case CLD_EXITED:
-									case CLD_KILLED:
-									case CLD_DUMPED:
-										CL3_NONCLASS_SYSERR(::waitpid(si->si_pid, NULL, WNOHANG));
-										process->state = STATE_DEAD;
-										break;
-									case CLD_STOPPED:
-										process->state = STATE_ALIVE_SUSPENDED;
-										break;
-									case CLD_CONTINUED:
-										CL3_NONCLASS_LOGIC_ERROR(process->state != STATE_ALIVE_SUSPENDED);
-										process->state = STATE_ALIVE_EXECUTING;
-										break;
-									case CLD_TRAPPED:
-										//	we don't do anything special here
-										//	we also won't raise a state-change signal, as debugging should be transparent to the application
-										return;
-									default:
-										CL3_NONCLASS_LOGIC_ERROR(true);
-								}
-
-								process->on_statechange.Raise();
-								break;
-							}
-						}
-						break;
 					}
-					default:
-						CL3_UNREACHABLE;
+
+					const usys_t n_processes = proc_self.Childs().Count();
+					for(usys_t i = 0; i < n_processes; i++)
+					{
+						TProcess* const process = proc_self.Childs()[i];
+						if(pid_task == process->ID())
+						{
+							TInterlockedRegion lock_process(&process->Mutex());
+							process->state = state_new;
+							process->on_statechange.Raise();
+							return;
+						}
+					}
 				}
 			}
 		}

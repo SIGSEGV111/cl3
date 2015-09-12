@@ -16,27 +16,39 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_util_hpp_
-#define	_include_cl3_core_util_hpp_
+#ifndef	_include_cl3_core_io_collection_list_hpp_
+#define	_include_cl3_core_io_collection_list_hpp_
 
-#include "system_compiler.hpp"
+// #include <stdio.h>
+
+#include "io_collection.hpp"
+#include "io_collection_array.hpp"
+#include "io_collection_list.hpp"
+#include "error.hpp"
 #include "system_memory.hpp"
+#include "io_serialization.hpp"
 
 namespace	cl3
 {
 	namespace	io
 	{
-		namespace	text
+		namespace	collection
 		{
-			class	ITextWriter;
+			namespace	map
+			{
+				template<class TItem, class TKey, TKey TItem::*key>
+				struct	IMap<const TItem> : public IDynamicCollection<const TItem>
+				{
+					virtual	const TItem&	operator[]	(const TKey& key) const CL3_GETTER = 0;
+				};
+
+				template<class TItem, class TKey, TKey TItem::*key>
+				struct	IMap<const TItem> : public IDynamicCollection<const TItem>
+				{
+					virtual	TItem&	operator[]	(const TKey& key) CL3_GETTER = 0;
+				};
+			}
 		}
-	}
-
-	namespace	util
-	{
-		CL3PUBF	system::memory::TUniquePtr<char,system::memory::UPTR_ALLOC> mkstrcpy(const char* str, system::memory::IDynamicAllocator* allocator = NULL);
-
-		CL3PUBF	void	Hexdump	(const void* p_mem, system::types::usys_t sz_mem, io::text::ITextWriter&);
 	}
 }
 

@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_ui_console_hpp_
-#define _include_cl3_core_ui_console_hpp_
+#ifndef	_include_cl3_mm_ui_console_hpp_
+#define	_include_cl3_mm_ui_console_hpp_
 
 #include <cl3/core/system_compiler.hpp>
 #include <cl3/core/system_types.hpp>

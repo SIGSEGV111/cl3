@@ -19,6 +19,6 @@
 #ifndef	_include_cl3_gpio_config_hpp_
 #define	_include_cl3_gpio_config_hpp_
 
-//#define CL3_WITH_BCM2835	//	enable BCM2835 (aka. "Raspberry PI") specific features
+#define CL3_WITH_BCM2835	//	enable BCM2835 (aka. "Raspberry PI") specific features
 
 #endif

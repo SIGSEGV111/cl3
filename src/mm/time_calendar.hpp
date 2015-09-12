@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_time_calendar_h_
-#define	_include_cl3_core_time_calendar_h_
+#ifndef	_include_cl3_mm_time_calendar_h_
+#define	_include_cl3_mm_time_calendar_h_
 
 #include <cl3/core/system_time.hpp>
 #include <cl3/core/system_memory.hpp>

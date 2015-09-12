@@ -25,7 +25,7 @@ namespace
 {
 	using namespace cl3::system::task::synchronization;
 
-	TEST(system_task_synchonization_TMutex, basic)
+	TEST(system_task_synchonization_TMutex, basics)
 	{
 		TMutex mutex;
 		EXPECT_TRUE(mutex.HasAcquired());
@@ -54,5 +54,29 @@ namespace
 		EXPECT_TRUE(!mutex.HasAcquired());
 		mutex.Acquire();
 		EXPECT_TRUE(mutex.HasAcquired());
+	}
+
+	TEST(system_task_synchronization_TSignal, basics)
+	{
+		TMutex mutex;
+		TSignal signal(&mutex);
+
+		EXPECT_TRUE(signal.HasAcquired());
+		EXPECT_FALSE(signal.WaitFor(0));
+		EXPECT_FALSE(signal.WaitFor(0));
+		EXPECT_FALSE(signal.WaitFor(0));
+		EXPECT_TRUE(signal.HasAcquired());
+		signal.Raise();
+		EXPECT_TRUE(signal.HasAcquired());
+		EXPECT_TRUE(signal.WaitFor(0));
+		EXPECT_TRUE(signal.WaitFor(0));
+		EXPECT_TRUE(signal.WaitFor(0));
+		EXPECT_TRUE(signal.HasAcquired());
+		signal.Reset();
+		EXPECT_TRUE(signal.HasAcquired());
+		EXPECT_FALSE(signal.WaitFor(0));
+		EXPECT_FALSE(signal.WaitFor(0));
+		EXPECT_FALSE(signal.WaitFor(0));
+		EXPECT_TRUE(signal.HasAcquired());
 	}
 }

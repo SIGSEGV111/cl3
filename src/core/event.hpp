@@ -33,13 +33,16 @@ namespace	cl3
 		class	IObservable;
 		typedef TEvent<IObservable, const char*>	TOnChangeEvent;
 
-		template<class TSender, class TData>
+		template<class _TSender, class _TData>
 		class	CL3PUBT	TEvent
 		{
 			private:
-				TEvent&	operator=(const TEvent&);
+				TEvent&	operator=(const TEvent&) = delete;
 
 			public:
+				typedef _TSender TSender;
+				typedef _TData TData;
+
 				struct	CL3PUBT	IReceiver
 				{
 					//	function which gets called, when the event is Raise()'ed

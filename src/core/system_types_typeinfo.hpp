@@ -30,8 +30,8 @@ namespace	cl3
 	{
 		namespace	text
 		{
-			struct	ITextWriter;
-			struct	ITextReader;
+			class	ITextWriter;
+			class	ITextReader;
 
 			//	converts object value to human-readable string
 			typedef	void (*FPrint)(ITextWriter&, const void*);
@@ -132,7 +132,10 @@ namespace	cl3
 
 					template<class T> const FDeserialize TImpl<T, false>::deserinst = NULL;
 					template<class T> const FDeserialize TImpl<T, true >::deserinst = &generic_deserinst<T>;
+				}
 
+				namespace	features
+				{
 					struct yes { char value[1]; };
 					struct no  { char value[sizeof(yes)+1]; };
 
@@ -155,7 +158,7 @@ namespace	cl3
 					{
 						private:
 							template<typename U>
-							static decltype(new U(*reinterpret_cast<const U*>(DUMMY)), yes()) test(int);
+							static decltype(new U(*reinterpret_cast<const U*>(_::DUMMY)), yes()) test(int);
 
 							template<typename>
 							static no test(...);
@@ -169,7 +172,7 @@ namespace	cl3
 					{
 						private:
 							template<typename U>
-							static decltype((reinterpret_cast<U*>(DUMMY)->~U()), yes()) test(int);
+							static decltype((reinterpret_cast<U*>(_::DUMMY)->~U()), yes()) test(int);
 
 							template<typename>
 							static no test(...);
@@ -183,7 +186,7 @@ namespace	cl3
 					{
 						private:
 							template<typename U>
-							static decltype((reinterpret_cast<const U*>(DUMMY)->Serialize(*reinterpret_cast<io::serialization::ISerializer*>(DUMMY))), yes()) test(int);
+							static decltype((reinterpret_cast<const U*>(_::DUMMY)->Serialize(*reinterpret_cast<io::serialization::ISerializer*>(_::DUMMY))), yes()) test(int);
 
 							template<typename>
 							static no test(...);
@@ -197,7 +200,7 @@ namespace	cl3
 					{
 						private:
 							template<typename U>
-							static decltype((reinterpret_cast<U*>(DUMMY)->Deserialize(*reinterpret_cast<io::serialization::IDeserializer*>(DUMMY))), yes()) test(int);
+							static decltype((reinterpret_cast<U*>(_::DUMMY)->Deserialize(*reinterpret_cast<io::serialization::IDeserializer*>(_::DUMMY))), yes()) test(int);
 
 							template<typename>
 							static no test(...);
@@ -211,7 +214,7 @@ namespace	cl3
 					{
 						private:
 							template<typename U>
-							static decltype(U(*reinterpret_cast<io::serialization::IDeserializer*>(DUMMY)), yes()) test(int);
+							static decltype(U(*reinterpret_cast<io::serialization::IDeserializer*>(_::DUMMY)), yes()) test(int);
 
 							template<typename>
 							static no test(...);
@@ -225,13 +228,62 @@ namespace	cl3
 					{
 						private:
 							template<typename U>
-							static decltype( ((*reinterpret_cast<io::text::ITextWriter*>(DUMMY))<<(*reinterpret_cast<const U*>(DUMMY))), yes()) test(int);
+							static decltype( ((*reinterpret_cast<io::text::ITextWriter*>(_::DUMMY))<<(*reinterpret_cast<const U*>(_::DUMMY))), yes()) test(int);
 
 							template<typename>
 							static no test(...);
 
 						public:
 							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+					};
+					
+					template<typename T>
+					class CL3PUBT	is_comparable_lessthan
+					{
+						private:
+							template<typename U>
+							static decltype(( (*reinterpret_cast<const U*>(_::DUMMY)) < (*reinterpret_cast<const U*>(_::DUMMY)) ? 1 : 2 ), yes()) test(int);
+
+							template<typename>
+							static no test(...);
+
+						public:
+							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+					};
+
+					template<typename T>
+					class CL3PUBT	is_comparable_biggerthan
+					{
+						private:
+							template<typename U>
+							static decltype(( (*reinterpret_cast<const U*>(_::DUMMY)) > (*reinterpret_cast<const U*>(_::DUMMY)) ? 1 : 2 ), yes()) test(int);
+
+							template<typename>
+							static no test(...);
+
+						public:
+							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+					};
+
+					template<typename T>
+					class CL3PUBT	is_comparable_equal
+					{
+						private:
+							template<typename U>
+							static decltype(( (*reinterpret_cast<const U*>(_::DUMMY)) == (*reinterpret_cast<const U*>(_::DUMMY)) ? 1 : 2 ), yes()) test(int);
+
+							template<typename>
+							static no test(...);
+
+						public:
+							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+					};
+
+					template<typename T>
+					class CL3PUBT	is_comparable
+					{
+						public:
+							CL3PUBF	static const bool value = is_comparable_biggerthan<T>::value && is_comparable_lessthan<T>::value && is_comparable_equal<T>::value;
 					};
 				}
 
@@ -364,28 +416,28 @@ namespace	cl3
 					CL3PUBF	const static TRTTI rtti;
 				};
 
-				template<class T> const FDestructor				TCTTI<T>::dtor					= _::TImpl<T, _::is_destructible<T>::value>::dtor;
-				template<class T> const FStandardConstructor	TCTTI<T>::ctor					= _::TImpl<T, _::is_default_constructible<T>::value>::ctor;
-				template<class T> const FCopyConstructor		TCTTI<T>::copyctor				= _::TImpl<T, _::is_copy_constructible<T>::value>::copyctor;
-				template<class T> const io::text::FPrint		TCTTI<T>::print					= _::TImpl<T, _::is_printable<T>::value>::print;
-				template<class T> const FSerialize				TCTTI<T>::serialize				= _::TImpl<T, _::is_serializable<T>::value>::serialize;
-				template<class T> const FDeserialize			TCTTI<T>::deserialize_instance	= _::TImpl<T, _::is_deserializable_instance<T>::value>::deserinst;
-				template<class T> const FDeserialize			TCTTI<T>::deserialize_ctor		= _::TImpl<T, _::is_deserializable_ctor<T>::value>::deserctor;
+				template<class T> const FDestructor				TCTTI<T>::dtor					= _::TImpl<T, features::is_destructible<T>::value>::dtor;
+				template<class T> const FStandardConstructor	TCTTI<T>::ctor					= _::TImpl<T, features::is_default_constructible<T>::value>::ctor;
+				template<class T> const FCopyConstructor		TCTTI<T>::copyctor				= _::TImpl<T, features::is_copy_constructible<T>::value>::copyctor;
+				template<class T> const io::text::FPrint		TCTTI<T>::print					= _::TImpl<T, features::is_printable<T>::value>::print;
+				template<class T> const FSerialize				TCTTI<T>::serialize				= _::TImpl<T, features::is_serializable<T>::value>::serialize;
+				template<class T> const FDeserialize			TCTTI<T>::deserialize_instance	= _::TImpl<T, features::is_deserializable_instance<T>::value>::deserinst;
+				template<class T> const FDeserialize			TCTTI<T>::deserialize_ctor		= _::TImpl<T, features::is_deserializable_ctor<T>::value>::deserctor;
 				template<class T> const TRTTI					TCTTI<T>::rtti		= { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, serialize, deserialize_instance, deserialize_ctor, sizeof(T), &typeid(T) };
 
-				template<class T> const FDestructor				TCTTI<const T>::dtor					= _::TImpl<T, _::is_destructible<T>::value>::dtor;
-				template<class T> const FStandardConstructor	TCTTI<const T>::ctor					= _::TImpl<T, _::is_default_constructible<T>::value>::ctor;
-				template<class T> const FCopyConstructor		TCTTI<const T>::copyctor				= _::TImpl<T, _::is_copy_constructible<T>::value>::copyctor;
-				template<class T> const io::text::FPrint		TCTTI<const T>::print					= _::TImpl<T, _::is_printable<T>::value>::print;
-				template<class T> const FSerialize				TCTTI<const T>::serialize				= _::TImpl<T, _::is_serializable<T>::value>::serialize;
+				template<class T> const FDestructor				TCTTI<const T>::dtor					= _::TImpl<T, features::is_destructible<T>::value>::dtor;
+				template<class T> const FStandardConstructor	TCTTI<const T>::ctor					= _::TImpl<T, features::is_default_constructible<T>::value>::ctor;
+				template<class T> const FCopyConstructor		TCTTI<const T>::copyctor				= _::TImpl<T, features::is_copy_constructible<T>::value>::copyctor;
+				template<class T> const io::text::FPrint		TCTTI<const T>::print					= _::TImpl<T, features::is_printable<T>::value>::print;
+				template<class T> const FSerialize				TCTTI<const T>::serialize				= _::TImpl<T, features::is_serializable<T>::value>::serialize;
 				template<class T> const FDeserialize			TCTTI<const T>::deserialize_instance	= NULL;
-				template<class T> const FDeserialize			TCTTI<const T>::deserialize_ctor		= _::TImpl<T, _::is_deserializable_ctor<T>::value>::deserctor;
+				template<class T> const FDeserialize			TCTTI<const T>::deserialize_ctor		= _::TImpl<T, features::is_deserializable_ctor<T>::value>::deserctor;
 				template<class T> const TRTTI					TCTTI<const T>::rtti		= { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, serialize, deserialize_instance, deserialize_ctor, sizeof(T), &typeid(T) };
 
 				template<class T> const FDestructor				TCTTI<T*>::dtor					= NULL;
 				template<class T> const FStandardConstructor	TCTTI<T*>::ctor					= NULL;
 				template<class T> const FCopyConstructor		TCTTI<T*>::copyctor				= NULL;
-				template<class T> const io::text::FPrint		TCTTI<T*>::print				= _::TImpl<T*, _::is_printable<T*>::value>::print;
+				template<class T> const io::text::FPrint		TCTTI<T*>::print				= _::TImpl<T*, features::is_printable<T*>::value>::print;
 				template<class T> const FSerialize				TCTTI<T*>::serialize			= NULL;
 				template<class T> const FDeserialize			TCTTI<T*>::deserialize_instance	= NULL;
 				template<class T> const FDeserialize			TCTTI<T*>::deserialize_ctor		= NULL;
@@ -394,7 +446,7 @@ namespace	cl3
 				template<class T> const FDestructor				TCTTI<T&>::dtor					= NULL;
 				template<class T> const FStandardConstructor	TCTTI<T&>::ctor					= NULL;
 				template<class T> const FCopyConstructor		TCTTI<T&>::copyctor				= NULL;
-				template<class T> const io::text::FPrint		TCTTI<T&>::print				= _::TImpl<T&, _::is_printable<T&>::value>::print;
+				template<class T> const io::text::FPrint		TCTTI<T&>::print				= _::TImpl<T&, features::is_printable<T&>::value>::print;
 				template<class T> const FSerialize				TCTTI<T&>::serialize			= NULL;
 				template<class T> const FDeserialize			TCTTI<T&>::deserialize_instance	= NULL;
 				template<class T> const FDeserialize			TCTTI<T&>::deserialize_ctor		= NULL;

@@ -149,7 +149,7 @@ namespace	cl3
 						bcm2835_gpio_clr(this->index);
 				}
 
-				void*		TGPIO::ThreadMain	(void* _gpio)
+				void		TGPIO::ThreadMain	()
 				{
 // 					fprintf(stderr, "GPIO-IRQ-THREAD: INFO: booting ... \n");
 					int fd_export = -1;
@@ -160,8 +160,6 @@ namespace	cl3
 
 					try
 					{
-						TGPIO* gpio = reinterpret_cast<TGPIO*>(_gpio);
-
 						//	open gpio sysfs interface
 						CL3_NONCLASS_SYSERR(fd_export = open("/sys/class/gpio/export", O_CLOEXEC|O_NOCTTY|O_WRONLY));
 						CL3_NONCLASS_SYSERR(fd_unexport = open("/sys/class/gpio/unexport", O_CLOEXEC|O_NOCTTY|O_WRONLY));
@@ -203,7 +201,7 @@ namespace	cl3
 
 // 						fprintf(stderr, "GPIO-IRQ-THREAD: INFO: READY\n");
 						//	set this once all configuration is done to notify the controller thread (which is waiting in TGPIO::TGPIO())
-						*((volatile pthread_t*)(&gpio->th_irq)) = pthread_self();
+						*((volatile pthread_t*)(&this->th_irq)) = pthread_self();
 
 						//	wait for signals...
 						int dt_idletimeout_ms = -1;
@@ -220,7 +218,7 @@ namespace	cl3
 							for(usys_t i = 0; i < N_GPIO_PINS; i++)
 								if(CL3_UNLIKELY(pfds[i].fd != -1))
 								{
-									TPin* const pin = static_cast<TPin*>(gpio->pins[i]);	//	use static_cast to avoid virtual-function-call thru IPin and to get all members
+									TPin* const pin = static_cast<TPin*>(this->pins[i]);	//	use static_cast to avoid virtual-function-call thru IPin and to get all members
 
 									const bool b_level_new = pin->Level();
 
@@ -265,7 +263,7 @@ namespace	cl3
 											//	pin config changed, rebuild list
 											for(unsigned i = 0; i < N_GPIO_PINS; i++)
 											{
-												TPin* const pin = static_cast<TPin*>(gpio->pins[i]);
+												TPin* const pin = static_cast<TPin*>(this->pins[i]);
 												if(pin->mode == gpio::MODE_INPUT && pfds[i].fd == -1)
 												{
 													//	new pin to monitor
@@ -340,11 +338,14 @@ namespace	cl3
 
 					//	allow swapping again
 					CL3_NONCLASS_SYSERR(munlockall());
-
-					return NULL;
 				}
 
-				CLASS		TGPIO::TGPIO	(bool debug)
+				void TGPIO::OnShutdownRequest()
+				{
+					kill(this->tid, SIGTERM);
+				}
+
+				CLASS		TGPIO::TGPIO	(bool debug) : system::task::IThreadRunner("bcm2835-gpio")
 				{
 					CL3_CLASS_ERROR(bcm2835_init() != 1, TException, "initialization of the bcm2835 lib failed");
 					bcm2835_set_debug(debug ? 1 : 0);

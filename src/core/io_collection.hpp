@@ -78,38 +78,11 @@ namespace	cl3
 
 			/************************************************************************/
 
-			namespace	_
-			{
-				template<typename T>
-				class resolve_type
-				{
-					private:
-						template<typename U>	static typename U::TKey		key		(int);
-						template<typename U>	static typename U::TValue	value	(int);
-						template<typename U>	static typename U::TIO		io		(int);
-						template<typename U>	static typename U::TItem	item	(int);
-
-						template<typename>		static T key	(...);
-						template<typename>		static T value	(...);
-						template<typename>		static T io	(...);
-						template<typename>		static T item	(...);
-
-					public:
-						typedef decltype(key<T>(0))		TKey;
-						typedef decltype(value<T>(0))	TValue;
-						typedef decltype(io<T>(0))		TIO;
-						typedef decltype(item<T>(0))	TItem;
-				};
-			}
-
-			/************************************************************************/
-
 			template<class T>
-			struct	CL3PUBT	IStaticIterator<const T> : virtual stream::IIn<typename _::resolve_type<T>::TIO>
+			struct	CL3PUBT	IStaticIterator<const T> : virtual stream::IIn<T>
 			{
 				virtual	bool	IsValid		() const CL3_GETTER = 0;	//	returns whether the iterator is placed on a valid item (not on head or tail)
-				virtual	const typename _::resolve_type<T>::TItem&
-								Item		() const CL3_GETTER = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
+				virtual	const T& Item		() const CL3_GETTER = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
 				virtual	void	MoveHead	() = 0;	//	move before the first item
 				virtual	void	MoveTail	() = 0;	//	move after last item
 				virtual	bool	MoveFirst	() = 0;	//	move to the first item (returns false if there is no first item / the collection is empty)
@@ -120,11 +93,10 @@ namespace	cl3
 			};
 
 			template<class T>
-			struct	CL3PUBT	IStaticIterator : virtual IStaticIterator<const T>, virtual stream::IOut<typename _::resolve_type<T>::TIO>
+			struct	CL3PUBT	IStaticIterator : virtual IStaticIterator<const T>, virtual stream::IOut<T>
 			{
 				using IStaticIterator<const T>::Item;
-				virtual	typename _::resolve_type<T>::TItem&
-								Item				() CL3_GETTER = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
+				virtual	T&		Item				() CL3_GETTER = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
 				virtual	CLASS	~IStaticIterator	() {}
 			};
 
@@ -133,15 +105,15 @@ namespace	cl3
 			template<class T>
 			struct	CL3PUBT	IDynamicIterator<const T> : virtual IStaticIterator<const T>
 			{
-				virtual	void	Insert	(const typename _::resolve_type<T>::TItem& item_insert) = 0;	//	inserts an item before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to it
-				virtual	void	Insert	(const typename _::resolve_type<T>::TItem* arr_items_insert, usys_t n_items_insert) = 0;	//	inserts items before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to the first of the inserted items (does nothing if the array is empty)
-				virtual	void	Remove	() = 0;	//	removes the current item and moves to the first item after the removed (if the collection supports ordering, or at a implementation choosen position otherwise - avoiding head/tail until the last item gets removed)
+				virtual	void	Insert	(const T& item_insert) = 0;	//	inserts an item before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to it
+				virtual	void	Insert	(const T* arr_items_insert, usys_t n_items_insert) = 0;	//	inserts items before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to the first of the inserted items (does nothing if the array is empty)
 				virtual	CLASS	~IDynamicIterator	() {}
 			};
 
 			template<class T>
 			struct	CL3PUBT	IDynamicIterator : virtual IDynamicIterator<const T>, virtual IStaticIterator<T>
 			{
+				virtual	void	Remove	() = 0;	//	removes the current item and moves to the first item after the removed (if the collection supports ordering, or at a implementation choosen position otherwise - avoiding head/tail until the last item gets removed)
 				virtual	CLASS	~IDynamicIterator	() {}
 			};
 
@@ -156,43 +128,48 @@ namespace	cl3
 				virtual	bool	CountMin	(usys_t count_min) const CL3_GETTER { return Count() >= count_min; }
 				virtual	bool	CountMax	(usys_t count_max) const CL3_GETTER { return Count() <= count_max; }
 
-				virtual	bool	Contains	(const typename _::resolve_type<T>::TKey& item) const CL3_GETTER = 0;
+				virtual	bool	Contains	(const T& item) const CL3_GETTER = 0;
 			};
 
 			template<class T>
 			struct	CL3PUBT	IStaticCollection : virtual IStaticCollection<const T>
 			{
 				using IStaticCollection<const T>::CreateStaticIterator;
+
 				virtual	system::memory::TUniquePtr<IStaticIterator<T> >			CreateStaticIterator	() CL3_WARN_UNUSED_RESULT = 0;
 			};
 
 			/************************************************************************/
 
 			template<class T>
-			class	CL3PUBT	IDynamicCollection<const T> : public virtual IStaticCollection<const T>, public virtual stream::IIn<T>, public virtual stream::IOut<T>, public event::TEvent< IDynamicCollection<const T>, TOnActionData<const T> >
+			class	CL3PUBT	IDynamicCollection<const T> : public virtual IStaticCollection<const T>, public virtual stream::IOut<T>, public event::TEvent< IDynamicCollection<const T>, TOnActionData<const T> >
 			{
+				public:
+					typedef event::TEvent< const IDynamicCollection<const T>, const TOnActionData<const T>& > TOnActionEvent;
+
 				protected:
-					event::TEvent< const IDynamicCollection<const T>, const TOnActionData<const T>& > on_action;
+					TOnActionEvent on_action;
 
 				public:
-					inline	const event::TEvent< const IDynamicCollection<const T>, const TOnActionData<const T>& >&	OnAction	() const CL3_GETTER { return this->on_action; }
+					inline	const TOnActionEvent&	OnAction	() const CL3_GETTER { return this->on_action; }
 
 					//	IIn removes read items, while IOut adds written items (no strict FIFO requirements!)
 					virtual	system::memory::TUniquePtr<IDynamicIterator<const T> >	CreateDynamicIterator	() const CL3_WARN_UNUSED_RESULT = 0;
 
-					virtual	void	Clear	() = 0;	//	removes all items from the collection
-					virtual	void	Add		(const typename _::resolve_type<T>::TItem& item_add) = 0;	//	inserts a single item into the collection, it is left to the implementation to determine where the new item is positioned
-					virtual	void	Add		(const typename _::resolve_type<T>::TItem* arr_items_add, usys_t n_items_add) = 0;	//	like above but for multiple items at once
+					virtual	void	Add		(const T& item_add) = 0;	//	inserts a single item into the collection, it is left to the implementation to determine where the new item is positioned
+					virtual	void	Add		(const T* arr_items_add, usys_t n_items_add) = 0;	//	like above but for multiple items at once
 					virtual	void	Add		(const IStaticCollection<const T>& collection) = 0;	//	inserts another collection into this collection, it is left to the implementation to determine where the new items are positioned
-					virtual	bool	Remove	(const typename _::resolve_type<T>::TKey& item_remove) = 0;	//	removes the specified item from the collection, the reference is free to point to any valid item - the item needs not to be a member of the collection, if however so, then exactly the specified item is removed, if not, one item which compares equal to the specified item is removed - if multiple items compare equal to the specified item, the implementation is free to choose one among them, if no matching item is found false is returned
+
 			};
 
 			template<class T>
-			class	CL3PUBT	IDynamicCollection : public virtual IDynamicCollection<const T>, public virtual IStaticCollection<T>
+			class	CL3PUBT	IDynamicCollection : public virtual IDynamicCollection<const T>, public virtual IStaticCollection<T>, public virtual stream::IIn<T>
 			{
 				public:
 					using IDynamicCollection<const T>::CreateDynamicIterator;
-					virtual	system::memory::TUniquePtr<IDynamicIterator<T> >		CreateDynamicIterator	() CL3_WARN_UNUSED_RESULT = 0;
+					virtual	system::memory::TUniquePtr<IDynamicIterator<T> >	CreateDynamicIterator	() CL3_WARN_UNUSED_RESULT = 0;
+					virtual	void	Clear	() = 0;	//	removes all items from the collection
+					virtual	bool	Remove	(const T& item_remove) = 0;	//	removes the specified item from the collection, the reference is free to point to any valid item - the item needs not to be a member of the collection, if however so, then exactly the specified item is removed, if not, one item which compares equal to the specified item is removed - if multiple items compare equal to the specified item, the implementation is free to choose one among them, if no matching item is found false is returned
 			};
 		}
 	}

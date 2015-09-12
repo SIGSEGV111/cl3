@@ -36,6 +36,26 @@ namespace	cl3
 
 				/************************************************************************/
 
+				namespace _
+				{
+					template<class T, bool is_comparable_biggerthan>
+					struct TIndexOf_impl;
+
+					template<class T>
+					struct TIndexOf_impl<T, true>
+					{
+						static	usys_t	IndexOf	(const T* arr_items, usys_t n_items, const T& item_find, usys_t idx_start, EDirection dir, bool is_sorted) CL3_GETTER;
+					};
+
+					template<class T>
+					struct TIndexOf_impl<T, false>
+					{
+						static	usys_t	IndexOf	(const T* arr_items, usys_t n_items, const T& item_find, usys_t idx_start, EDirection dir, bool is_sorted) CL3_GETTER;
+					};
+				}
+
+				/************************************************************************/
+
 				template<class T>
 				class	CL3PUBT	TIterator<const T> : public virtual IStaticIterator<const T>
 				{
@@ -91,10 +111,15 @@ namespace	cl3
 				template<class T>
 				struct	CL3PUBT	IArray<const T> : virtual IStaticCollection<const T>
 				{
+					bool is_sorted;
+
 					usys_t	AbsIndex	(ssys_t rindex) const CL3_GETTER;
 
 					virtual	const T&	operator[]	(ssys_t index) const CL3_GETTER = 0;
 					virtual	const T*	ItemPtr		(ssys_t index) const CL3_GETTER = 0;
+
+					virtual	usys_t		IndexOf		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) const CL3_GETTER;
+					virtual	const T*	Find		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) const CL3_GETTER;
 
 					virtual	usys_t		Read		(uoff_t index, T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
 					inline	void		Read		(uoff_t index, T* arr_items_write, usys_t n_items_write);
@@ -106,14 +131,17 @@ namespace	cl3
 					using array::IArray<const T>::operator[];
 					using array::IArray<const T>::ItemPtr;
 					using array::IArray<const T>::Read;
+					using array::IArray<const T>::Find;
 
-					virtual	T*			Claim		() = 0;
+					virtual	T*		Claim		() = 0;
 
-					virtual	T&			operator[]	(ssys_t index) CL3_GETTER = 0;
-					virtual	T*			ItemPtr		(ssys_t index) CL3_GETTER = 0;
+					virtual	T&		operator[]	(ssys_t index) CL3_GETTER = 0;
+					virtual	T*		ItemPtr		(ssys_t index) CL3_GETTER = 0;
+					
+					virtual	T*		Find		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) CL3_GETTER;
 
-					virtual	usys_t		Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-					inline	void		Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write);
+					virtual	usys_t	Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+					inline	void	Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write);
 				};
 
 				/************************************************************************/
@@ -487,6 +515,102 @@ namespace	cl3
 							arr_items[i].~T();
 						system::memory::Free(arr_items);
 					}
+				}
+
+				template<class T>
+				usys_t		IArray<const T>::IndexOf	(const T& item_find, usys_t idx_start, EDirection dir) const
+				{
+					return _::TIndexOf_impl<T, typeinfo::features::is_comparable_biggerthan<T>::value>::IndexOf(this->ItemPtr(0), this->Count(), item_find, idx_start, dir, this->is_sorted);
+				}
+
+				namespace _
+				{
+					template<class T>
+					usys_t	TIndexOf_impl<T, true>::IndexOf	(const T* arr_items, usys_t n_items, const T& item_find, usys_t idx_start, EDirection dir, bool is_sorted)
+					{
+						usys_t high = n_items;
+						usys_t low = idx_start;
+
+						CL3_NONCLASS_ERROR(idx_start >= n_items, TIndexOutOfBoundsException, idx_start, n_items);
+
+						if(is_sorted)
+						{
+							usys_t n = high - low;
+							while(sizeof(T) * n > 32)
+							{
+								const usys_t m = low + n / 2;
+
+								if(item_find > arr_items[m])
+									low = m;
+								else if(item_find == arr_items[m])
+									switch(dir)
+									{
+										case DIRECTION_FORWARD:
+											n += 2;
+											break;
+										case DIRECTION_BACKWARD:
+											low = m;
+											break;
+									}
+
+								n = (n+1) / 2;
+							}
+							high = low + n;
+						}
+
+						switch(dir)
+						{
+							case DIRECTION_FORWARD:
+								for(usys_t i = 0; i < high-low; i++)
+									if(item_find == arr_items[low+i])
+										return low+i;
+
+							case DIRECTION_BACKWARD:
+								for(usys_t i = 0; i < high-low; i++)
+									if(item_find == arr_items[high-1-i])
+										return high-1-i;
+						}
+
+						return (usys_t)-1;
+					}
+
+					template<class T>
+					usys_t	TIndexOf_impl<T, false>::IndexOf	(const T* arr_items, usys_t n_items, const T& item_find, usys_t idx_start, EDirection dir, bool is_sorted)
+					{
+						usys_t high = n_items;
+						usys_t low = idx_start;
+
+						CL3_NONCLASS_ERROR(idx_start >= n_items, TIndexOutOfBoundsException, idx_start, n_items);
+
+						switch(dir)
+						{
+							case DIRECTION_FORWARD:
+								for(usys_t i = 0; i < high-low; i++)
+									if(item_find == arr_items[low+i])
+										return low+i;
+
+							case DIRECTION_BACKWARD:
+								for(usys_t i = 0; i < high-low; i++)
+									if(item_find == arr_items[high-1-i])
+										return high-1-i;
+						}
+
+						return (usys_t)-1;
+					}
+				}
+
+				template<class T>
+				const T*	IArray<const T>::Find	(const T& item_find, usys_t idx_start, EDirection dir) const
+				{
+					const usys_t index = this->IndexOf(item_find, idx_start, dir);
+					return index == (usys_t)-1 ? NULL : this->ItemPtr(0) + index;
+				}
+
+				template<class T>
+				T*			IArray<T>::Find		(const T& item_find, usys_t idx_start, EDirection dir)
+				{
+					const usys_t index = this->IndexOf(item_find, idx_start, dir);
+					return index == (usys_t)-1 ? NULL : this->ItemPtr(0) + index;
 				}
 
 				/************************************************************************/

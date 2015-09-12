@@ -37,6 +37,10 @@ namespace	cl3
 		{
 			namespace	list
 			{
+				namespace	_
+				{
+				}
+
 				//	index: a negative index starts at the end of the list (e.g. -1 would be the last item (Count()-1), whereas -2 would be the second last item, ...)
 				//	a list preserves the order of the items unless it was explicitly switched into "lose mode" with "allow_reorder" set to "true"
 
@@ -67,24 +71,13 @@ namespace	cl3
 				template<class T>
 				struct	CL3PUBT	IList<const T> : virtual IDynamicCollection<const T>, virtual array::IArray<const T>
 				{
-					using IStaticCollection<const T>::Count;
-					using IDynamicCollection<const T>::Remove;
-// 					using stream::IIn<T>::Read;
-// 					using array::IArray<const T>::Read;
-
 					inline	IList<const T>&	operator+=	(const IStaticCollection<const T>& rhs) { Append(rhs); return *this; }
-					virtual	IList<const T>&	operator=	(const IStaticCollection<const T>& rhs) = 0;
-					virtual	IList<const T>&	operator=	(IStaticCollection<const T>&& rhs) = 0;
 
-					virtual	void	Shrink		(usys_t n_items_shrink) = 0;
 					virtual	void	Grow		(usys_t n_items_grow, const T& item_init) = 0;
-					virtual	void	Count		(usys_t new_count, const T& item_init = T()) CL3_SETTER = 0;	//	reallocates the list to the specified size, removing items at the end when shrinking and appending new items when enlarging (new items get initialized by copy-constructor from "item_init")
 
 					virtual	void	Insert		(ssys_t rindex, const T& item_insert) = 0;	//	inserts a new item at index "index" which will get copy-constructed from "item_insert"
 					virtual	void	Insert		(ssys_t rindex, const T* arr_items_insert, usys_t n_items_insert) = 0;	//	inserts "n_items_insert" new item at index "index" which will get copy-constructed from the items in "arr_items_insert"
 					virtual	void	Insert		(ssys_t rindex, const IStaticCollection<const T>& collection) = 0;	//	as above but draws the new items from another collection
-
-					virtual	void	Remove		(ssys_t rindex, usys_t n_items_remove) = 0;	//	removes "n_items_remove" items from the list starting at index "index"
 
 					virtual	void	Prepend		(const T& item_prepend) = 0;
 					virtual	void	Prepend		(const T* arr_items_prepend, usys_t n_items_prepend) = 0;
@@ -94,11 +87,6 @@ namespace	cl3
 					virtual	void	Append		(const T* arr_items_append, usys_t n_items_append) = 0;
 					virtual	void	Append		(const IStaticCollection<const T>& collection) = 0;
 
-					//	removed n_head items at the start of the list and n_tail items at the end of the list
-					virtual	void	Cut			(usys_t n_head, usys_t n_tail) = 0;
-
-					virtual	usys_t	Find		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) const CL3_WARN_UNUSED_RESULT = 0;
-
 					virtual	CLASS	~IList		() {}
 				};
 
@@ -107,7 +95,6 @@ namespace	cl3
 				{
 					using IStaticCollection<const T>::Count;
 					using IDynamicCollection<T>::Remove;
-// 					using stream::IIn<T>::Read;
 					using stream::IOut<T>::Write;
 					using array::IArray<T>::Read;
 
@@ -115,17 +102,16 @@ namespace	cl3
 					virtual	IList&	operator=	(const IStaticCollection<T>& rhs) = 0;
 					virtual	IList&	operator=	(IStaticCollection<T>&& rhs) = 0;
 
+					virtual	void	Count		(usys_t new_count, const T& item_init = T()) CL3_SETTER = 0;	//	reallocates the list to the specified size, removing items at the end when shrinking and appending new items when enlarging (new items get initialized by copy-constructor from "item_init")
 					virtual	T*		Claim		() = 0;	//	takes control of the internal memory of the list
+					virtual	void	Remove		(ssys_t rindex, usys_t n_items_remove) = 0;	//	removes "n_items_remove" items from the list starting at index "index"
+					virtual	void	Cut			(usys_t n_head, usys_t n_tail) = 0;	//	removed n_head items at the start of the list and n_tail items at the end of the list
+					virtual	void	Shrink		(usys_t n_items_shrink) = 0;
 
-
-					using IList<const T>::Shrink;
 					using IList<const T>::Grow;
 					using IList<const T>::Count;
 					using IList<const T>::Insert;
-					using IList<const T>::Remove;
 					using IList<const T>::Append;
-					using IList<const T>::Cut;
-					using IList<const T>::Find;
 
 					virtual	CLASS	~IList		() {}
 				};
@@ -145,7 +131,7 @@ namespace	cl3
 					public:
 						//	from IStaticIterator<const T>
 						bool	IsValid		() const CL3_GETTER;
-						const T&Item		() const CL3_GETTER;
+						const T& Item		() const CL3_GETTER;
 						void	MoveHead	();
 						void	MoveTail	();
 						bool	MoveFirst	();
@@ -156,7 +142,6 @@ namespace	cl3
 						//	from IDynamicIterator<T>
 						void	Insert		(const T& item_insert);
 						void	Insert		(const T* arr_items_insert, usys_t n_items_insert);
-						void	Remove		();
 
 						//	from IIn<T>
 						usys_t	Read		(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) CL3_WARN_UNUSED_RESULT;
@@ -190,12 +175,12 @@ namespace	cl3
 						using TIterator<const T>::MoveNext;
 						using TIterator<const T>::MovePrev;
 						using TIterator<const T>::Insert;
-						using TIterator<const T>::Remove;
 						using TIterator<const T>::Read;
 						using TIterator<const T>::Index;
 
 						//	from IStaticIterator<T>
 						T&		Item		() CL3_GETTER;
+						void	Remove		();
 
 						//	from IOut<T>
 						usys_t	Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
@@ -205,24 +190,6 @@ namespace	cl3
 						virtual	~TIterator	() {}
 				};
 
-// 				namespace	_
-// 				{
-// 					template<class T, bool is_sortable>
-// 					struct	TSortableImpl;
-//
-// 					template<class T>
-// 					struct	TSortableImpl<T, true>
-// 					{
-// 						static	usys_t	Find	(const T* arr_items, usys_t n_items, EDirection direction, const T& item_find);
-// 					};
-//
-// 					template<class T>
-// 					struct	TSortableImpl<T, false>
-// 					{
-// 						static	usys_t	Find	(const T* arr_items, usys_t n_items, EDirection direction, const T& item_find);
-// 					};
-// 				}
-
 				template<class T>
 				class	CL3PUBT	TList<const T> : public virtual IList<const T>
 				{
@@ -230,52 +197,35 @@ namespace	cl3
 						T* arr_items;
 						usys_t n_items_current;
 						usys_t n_items_prealloc;
-						bool is_sorted;
 
-						void	Prealloc	(usys_t n_items_prealloc_min);
+						void		Prealloc		(usys_t n_items_prealloc_min);
+						void		InternalClear	();
 
 					public:
-						using array::IArray<const T>::Read;
-						using stream::IIn<T>::Read;
-
 						//	from IStaticCollection
 						system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const final override CL3_WARN_UNUSED_RESULT;
-						usys_t	Count		() const final override CL3_GETTER;
-						bool	CountMin	(usys_t count_min) const final override CL3_GETTER;
-						bool	CountMax	(usys_t count_max) const final override CL3_GETTER;
-						bool	Contains	(const T& item) const final override CL3_GETTER;
+						usys_t		Count		() const final override CL3_GETTER;
+						bool		CountMin	(usys_t count_min) const final override CL3_GETTER;
+						bool		CountMax	(usys_t count_max) const final override CL3_GETTER;
+						bool		Contains	(const T& item) const final override CL3_GETTER;
 
 						//	from IDynamicCollection
 						system::memory::TUniquePtr<IDynamicIterator<const T> >	CreateDynamicIterator	() const final override CL3_WARN_UNUSED_RESULT;
 
-						void	Clear	() final override;
-						void	Add		(const T& item_add) final override;
-						void	Add		(const T* arr_items_add, usys_t n_items_add) final override;
-						void	Add		(const IStaticCollection<const T>& collection) final override;
-						bool	Remove	(const T& item_remove) final override;
+						void		Add		(const T& item_add) final override;
+						void		Add		(const T* arr_items_add, usys_t n_items_add) final override;
+						void		Add		(const IStaticCollection<const T>& collection) final override;
 
 						//	from IOut<T>
 						usys_t		Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 
-						//	from IIn<T>
-						using stream::IIn<T>::WriteOut;
-						usys_t		Read		(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT;
-						usys_t		Remaining	() const final override CL3_GETTER;
-						usys_t		WriteOut	(stream::IOut<T>& os) final override CL3_WARN_UNUSED_RESULT;
-						usys_t		WriteOut	(stream::IOut<T>& os, usys_t n_items_wo_max, usys_t n_items_wo_min) final override CL3_WARN_UNUSED_RESULT;
-
 						//	from IList
-						TList<const T>&		operator=	(const IStaticCollection<const T>& rhs) final override;
-						TList<const T>&		operator=	(IStaticCollection<const T>&& rhs) final override;
 						const T&	operator[]	(ssys_t rindex) const final override CL3_GETTER;
 						const T*	ItemPtr		(ssys_t rindex) const final override CL3_GETTER;
-						void		Shrink		(usys_t n_items_shrink) final override;
 						void		Grow		(usys_t n_items_grow, const T& item_init) final override;
-						void		Count		(usys_t new_count, const T& item_init = T()) final override CL3_SETTER;
 						void		Insert		(ssys_t rindex, const T& item_insert) final override;
 						void		Insert		(ssys_t rindex, const T* arr_items_insert, usys_t n_items_insert) final override;
 						void		Insert		(ssys_t rindex, const IStaticCollection<const T>& collection) final override;
-						void		Remove		(ssys_t rindex, usys_t n_items_remove) final override;
 
 						void		Prepend		(const T& item_prepend) final override;
 						void		Prepend		(const T* arr_items_prepend, usys_t n_items_prepend) final override;
@@ -287,16 +237,7 @@ namespace	cl3
 						void		Append		(const IStaticCollection<const T>& collection) final override;
 						void		Append		(const TList& list);
 
-						void		Cut			(usys_t n_head, usys_t n_tail) final override;
-
-						void		Sorted		(bool is_sorted) CL3_SETTER;
-						bool		Sorted		() const CL3_GETTER;
-						usys_t		Find		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) const final override CL3_GETTER;
-
 						//	from TList
-						TList<const T>&	operator=	(const TList<const T>& rhs);
-						TList<const T>&	operator=	(TList<const T>&& rhs);
-
 						CLASS		TList		();
 						CLASS		TList		(T* arr_items, usys_t n_items, bool claim);
 						CLASS		TList		(const T* arr_items, usys_t n_items);
@@ -315,31 +256,24 @@ namespace	cl3
 						using TList<const T>::n_items_current;
 						using TList<const T>::n_items_prealloc;
 						using TList<const T>::on_change;
-						using TList<const T>::is_sorted;
 						using TList<const T>::Prealloc;
 
 					public:
+						using IStaticCollection<const T>::Count;
 						using stream::IOut<T>::Write;
 						using array::IArray<T>::Write;
 						using TList<const T>::OnChange;
 						using TList<const T>::CreateStaticIterator;
-						using TList<const T>::Count;
 						using TList<const T>::CountMin;
 						using TList<const T>::CountMax;
 						using TList<const T>::CreateDynamicIterator;
-						using TList<const T>::Clear;
 						using TList<const T>::Add;
-						using TList<const T>::Remove;
 						using TList<const T>::Read;
-						using TList<const T>::operator=;
 						using TList<const T>::operator[];
 						using TList<const T>::ItemPtr;
-						using TList<const T>::Shrink;
 						using TList<const T>::Grow;
 						using TList<const T>::Insert;
 						using TList<const T>::Append;
-						using TList<const T>::Cut;
-						using TList<const T>::Find;
 
 						//	from IStaticCollection
 						system::memory::TUniquePtr<IStaticIterator<T> >		CreateStaticIterator	() final override CL3_WARN_UNUSED_RESULT;
@@ -351,6 +285,13 @@ namespace	cl3
 						//	Read is taken from IArray<T> as-is, we only override Write here
 						usys_t		Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 
+						//	from IIn<T>
+						using stream::IIn<T>::WriteOut;
+						usys_t		Read		(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT;
+						usys_t		Remaining	() const final override CL3_GETTER;
+						usys_t		WriteOut	(stream::IOut<T>& os) final override CL3_WARN_UNUSED_RESULT;
+						usys_t		WriteOut	(stream::IOut<T>& os, usys_t n_items_wo_max, usys_t n_items_wo_min) final override CL3_WARN_UNUSED_RESULT;
+
 						//	from IList
 						TList<T>&	operator=	(const IStaticCollection<T>& rhs) final override;
 						TList<T>&	operator=	(IStaticCollection<T>&& rhs) final override;
@@ -358,6 +299,13 @@ namespace	cl3
 
 						T*			Claim		() final override;
 						T*			ItemPtr		(ssys_t rindex) final override CL3_GETTER;
+
+						bool		Remove		(const T& item_remove) final override;
+						void		Remove		(ssys_t rindex, usys_t n_items_remove) final override;
+						void		Clear		() final override;
+						void		Cut			(usys_t n_head, usys_t n_tail) final override;
+						void		Shrink		(usys_t n_items_shrink) final override;
+						void		Count		(usys_t new_count, const T& item_init = T()) final override CL3_SETTER;
 
 						//	from TList
 						TList<T>&	operator=	(const TList<T>& rhs);
@@ -532,12 +480,6 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				template<class T>
-				void	TIterator<const T>::Remove	()
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
 				//	from IOut<T>
 				template<class T>
 				usys_t	TIterator<T>::Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
@@ -589,6 +531,12 @@ namespace	cl3
 				CLASS	TIterator<const T>::TIterator	(TList<const T>* list, usys_t index) : list(list)
 				{
 					this->Index(index);
+				}
+
+				template<class T>
+				void	TIterator<T>::Remove	()
+				{
+					CL3_NOT_IMPLEMENTED;
 				}
 
 				template<class T>
@@ -661,32 +609,13 @@ namespace	cl3
 				template<class T>
 				bool	TList<const T>::Contains	(const T& item) const
 				{
-					return this->Find(item) != (usys_t)-1;
+					return this->IndexOf(item) != (usys_t)-1;
 				}
 
 				template<class T>
 				system::memory::TUniquePtr<IDynamicIterator<const T> >	TList<const T>::CreateDynamicIterator() const
 				{
 					return system::memory::MakeUniquePtr<IDynamicIterator<const T> >(new TIterator<const T>(const_cast<TList*>(this), n_items_current > 0 ? 0 : (usys_t)-1));
-				}
-
-				template<class T>
-				void	TList<const T>::Clear		()
-				{
-					if(this->on_action.HasReceivers())
-					{
-						TIterator<const T> it(this, 0);
-						TOnActionData<const T> data(ACTION_REMOVE, &it);
-						this->on_action.Raise(*this, data);
-					}
-
-					for(usys_t i = 0; i < n_items_current; i++)
-						arr_items[i].~T();
-					n_items_prealloc += n_items_current;
-					n_items_current = 0;
-					system::memory::Free(arr_items);
-					arr_items = NULL;
-					n_items_prealloc = 0;
 				}
 
 				template<class T>
@@ -707,67 +636,7 @@ namespace	cl3
 					Append(collection);
 				}
 
-				template<class T>
-				bool	TList<const T>::Remove	(const T& item_remove)
-				{
-					usys_t index;
-					if(&item_remove >= arr_items && &item_remove < arr_items + n_items_current)
-						index = &item_remove - arr_items;
-					else
-					{
-						index = Find(item_remove);
-						if(index == (usys_t)-1)
-							return false;
-					}
-
-					Remove(index, 1);
-					return true;
-				}
-
-				//	from IIn
-				template<class T>
-				usys_t	TList<const T>::Read		(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
-				{
-					if(n_items_read_min >= n_items_read_max) n_items_read_min = n_items_read_max;
-					CL3_CLASS_ERROR(n_items_read_min > n_items_current, stream::TSourceDryException, n_items_read_max, n_items_read_min, 0, n_items_current);
-					const usys_t n_items_read = CL3_MIN(n_items_read_max, n_items_current);
-
-					for(usys_t i = 0; i < n_items_read; i++)
-						arr_items_read[i] = system::def::move(arr_items[i]);
-
-					Remove(0, n_items_read);
-					return n_items_read;
-				}
-
-				template<class T>
-				usys_t	TList<const T>::Remaining	() const
-				{
-					return this->Count();
-				}
-
-				template<class T>
-				usys_t	TList<const T>::WriteOut	(stream::IOut<T>& os)
-				{
-					const usys_t n_items_wo = os.Write(this->arr_items, this->n_items_current, 0);
-					CL3_CLASS_LOGIC_ERROR(n_items_wo > this->n_items_current);
-					this->Cut(n_items_wo, 0);
-					return n_items_wo;
-				}
-
-				template<class T>
-				usys_t	TList<const T>::WriteOut	(stream::IOut<T>& os, usys_t n_items_wo_max, usys_t n_items_wo_min)
-				{
-					CL3_CLASS_ERROR(this->n_items_current < n_items_wo_min, stream::TSourceDryException, n_items_wo_max, n_items_wo_min, 0, this->n_items_current);
-					if(n_items_wo_max > this->n_items_current)
-						n_items_wo_max = this->n_items_current;
-
-					const usys_t n_items_wo = os.Write(this->arr_items, n_items_wo_max, n_items_wo_min);
-					CL3_CLASS_LOGIC_ERROR(n_items_wo < n_items_wo_min || n_items_wo > n_items_wo_max);
-					this->Cut(n_items_wo, 0);
-
-					return n_items_wo;
-				}
-
+				//	from IOut
 				template<class T>
 				usys_t	TList<const T>::Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
@@ -776,34 +645,6 @@ namespace	cl3
 				}
 
 				//	from IList
-				template<class T>
-				TList<const T>&	TList<const T>::operator=	(const IStaticCollection<const T>& rhs)
-				{
-					const TList<T>* list = dynamic_cast<const TList<T>*>(&rhs);
-					if(list)
-						(*this) = (*list);
-					else
-					{
-						Clear();
-						Append(rhs);
-					}
-					return *this;
-				}
-
-				template<class T>
-				TList<const T>&	TList<const T>::operator=		(IStaticCollection<const T>&& rhs)
-				{
-					TList<T>* list = dynamic_cast<TList<T>*>(&rhs);
-					if(list)
-						(*this) = system::def::move(*list);
-					else
-					{
-						Clear();
-						Append(rhs);
-					}
-					return *this;
-				}
-
 				template<class T>
 				const T&	TList<const T>::operator[]	(ssys_t rindex) const
 				{
@@ -821,7 +662,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				void		TList<const T>::Shrink	(usys_t n_items_shrink)
+				void		TList<T>::Shrink	(usys_t n_items_shrink)
 				{
 					for(usys_t i = 1; i <= n_items_shrink; i++)
 						arr_items[n_items_current - i].~T();
@@ -845,7 +686,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				void		TList<const T>::Count		(usys_t new_count, const T& item_init)
+				void		TList<T>::Count		(usys_t new_count, const T& item_init)
 				{
 					if(new_count > n_items_current)
 						Grow(new_count - n_items_current, item_init);
@@ -901,20 +742,6 @@ namespace	cl3
 						while(it->MoveNext())
 							Insert(index++, it->Item());
 					}
-				}
-
-				template<class T>
-				void		TList<const T>::Remove	(ssys_t rindex, usys_t n_items_remove)
-				{
-					const usys_t index = this->AbsIndex(rindex);
-					CL3_CLASS_ERROR(index + n_items_remove > n_items_current, TIndexOutOfBoundsException, index + n_items_remove, n_items_current);
-
-					const usys_t n_items_after = n_items_current - index - n_items_remove;
-
-					for(usys_t i = 0; i < n_items_after; i++)
-						arr_items[index + i] = system::def::move(arr_items[index + i + n_items_remove]);
-
-					Shrink(n_items_remove);
 				}
 
 				template<class T>
@@ -981,100 +808,39 @@ namespace	cl3
 				}
 
 				template<class T>
-				void		TList<const T>::Cut		(usys_t n_head, usys_t n_tail)
+				void		TList<T>::Cut		(usys_t n_head, usys_t n_tail)
 				{
 					this->Remove(this->n_items_current - n_tail, n_tail);
 					this->Remove(0, n_head);
 				}
 
 				template<class T>
-				void		TList<const T>::Sorted		(bool is_sorted)
+				void	TList<const T>::InternalClear	()
 				{
-					this->is_sorted = is_sorted;
-				}
-
-				template<class T>
-				bool		TList<const T>::Sorted		() const
-				{
-					return this->is_sorted;
-				}
-
-				template<class T>
-				usys_t		TList<const T>::Find	(const T& item_find, usys_t idx_start, EDirection dir) const
-				{
-					usys_t low = idx_start;
-					usys_t high = this->n_items_current;
-
-					if(this->is_sorted)
+					if(this->on_action.HasReceivers())
 					{
-						usys_t n = high - low;
-						while(sizeof(T) * n > 32)
-						{
-							const usys_t m = low + n / 2;
-
-							if(item_find > this->arr_items[m])
-								low = m;
-							else if(item_find == this->arr_items[m])
-								switch(dir)
-								{
-									case DIRECTION_FORWARD:
-										n += 2;
-										break;
-									case DIRECTION_BACKWARD:
-										low = m;
-										break;
-								}
-
-							n = (n+1) / 2;
-						}
-						high = low + n;
+						TIterator<const T> it(this, 0);
+						TOnActionData<const T> data(ACTION_REMOVE, &it);
+						this->on_action.Raise(*this, data);
 					}
 
-					switch(dir)
-					{
-						case DIRECTION_FORWARD:
-							for(usys_t i = 0; i < high-low; i++)
-								if(item_find == this->arr_items[low+i])
-									return low+i;
-
-						case DIRECTION_BACKWARD:
-							for(usys_t i = 0; i < high-low; i++)
-								if(item_find == this->arr_items[high-1-i])
-									return high-1-i;
-					}
-
-					return (usys_t)-1;
+					for(usys_t i = 0; i < n_items_current; i++)
+						arr_items[i].~T();
+					n_items_prealloc += n_items_current;
+					n_items_current = 0;
+					system::memory::Free(arr_items);
+					arr_items = NULL;
+					n_items_prealloc = 0;
 				}
 
-				//	from TList<T>
+				//	from TList<T>q
 				template<class T>
-				TList<const T>&	TList<const T>::operator=	(const TList<const T>& rhs)
-				{
-					Clear();
-					Append(rhs);
-					return *this;
-				}
-
-				template<class T>
-				TList<const T>&	TList<const T>::operator=	(TList<const T>&& rhs)
-				{
-					Clear();
-					arr_items = rhs.arr_items;
-					n_items_current = rhs.n_items_current;
-					n_items_prealloc = rhs.n_items_prealloc;
-					rhs.arr_items = NULL;
-					rhs.n_items_current = 0;
-					rhs.n_items_prealloc = 0;
-					return *this;
-				}
-
-				template<class T>
-				CLASS		TList<const T>::TList		() : arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(false)
+				CLASS		TList<const T>::TList		() : arr_items(NULL), n_items_current(0), n_items_prealloc(0)
 				{
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(T* arr_items, usys_t n_items, bool claim) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(false)
+				CLASS		TList<const T>::TList		(T* arr_items, usys_t n_items, bool claim) : arr_items(NULL), n_items_current(0), n_items_prealloc(0)
 				{
 					if(claim)
 					{
@@ -1089,27 +855,27 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(const T* arr_items, usys_t n_items) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(false)
+				CLASS		TList<const T>::TList		(const T* arr_items, usys_t n_items) : arr_items(NULL), n_items_current(0), n_items_prealloc(0)
 				{
 					Prealloc(n_items);
 					Append(arr_items, n_items);
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(const IStaticCollection<const T>& collection) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(false)
+				CLASS		TList<const T>::TList		(const IStaticCollection<const T>& collection) : arr_items(NULL), n_items_current(0), n_items_prealloc(0)
 				{
 					Append(collection);
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(const TList& list) : event::IObservable(), arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(false)
+				CLASS		TList<const T>::TList		(const TList& list) : event::IObservable(), arr_items(NULL), n_items_current(0), n_items_prealloc(0)
 				{
 					Prealloc(list.n_items_current);
 					Append(list.arr_items, list.n_items_current);
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(TList&& list) : arr_items(list.arr_items), n_items_current(list.n_items_current), n_items_prealloc(list.n_items_prealloc), is_sorted(false)
+				CLASS		TList<const T>::TList		(TList&& list) : arr_items(list.arr_items), n_items_current(list.n_items_current), n_items_prealloc(list.n_items_prealloc)
 				{
 					list.arr_items = NULL;
 					list.n_items_current = 0;
@@ -1119,7 +885,7 @@ namespace	cl3
 				template<class T>
 				CLASS		TList<const T>::~TList	()
 				{
-					Clear();
+					InternalClear();
 				}
 
 				/**************************************************************/
@@ -1149,7 +915,8 @@ namespace	cl3
 				{
 					const TList<const T>* list = dynamic_cast<const TList<const T>*>(&rhs);
 					if(list)
-						(*this) = *list;
+						this->operator=(*list);
+// 						(*this) = *list;
 					else
 					{
 						Clear();
@@ -1219,6 +986,87 @@ namespace	cl3
 					rhs.n_items_current = 0;
 					rhs.n_items_prealloc = 0;
 					return *this;
+				}
+
+				template<class T>
+				bool	TList<T>::Remove	(const T& item_remove)
+				{
+					usys_t index;
+					if(&item_remove >= arr_items && &item_remove < arr_items + n_items_current)
+						index = &item_remove - arr_items;
+					else
+					{
+						index = this->IndexOf(item_remove);
+						if(index == (usys_t)-1)
+							return false;
+					}
+
+					Remove(index, 1);
+					return true;
+				}
+
+				template<class T>
+				void		TList<T>::Remove	(ssys_t rindex, usys_t n_items_remove)
+				{
+					const usys_t index = this->AbsIndex(rindex);
+					CL3_CLASS_ERROR(index + n_items_remove > n_items_current, TIndexOutOfBoundsException, index + n_items_remove, n_items_current);
+
+					const usys_t n_items_after = n_items_current - index - n_items_remove;
+
+					for(usys_t i = 0; i < n_items_after; i++)
+						arr_items[index + i] = system::def::move(arr_items[index + i + n_items_remove]);
+
+					Shrink(n_items_remove);
+				}
+
+				template<class T>
+				void		TList<T>::Clear		()
+				{
+					TList<const T>::InternalClear();
+				}
+				
+				//	from IIn
+				template<class T>
+				usys_t	TList<T>::Read		(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
+				{
+					if(n_items_read_min >= n_items_read_max) n_items_read_min = n_items_read_max;
+					CL3_CLASS_ERROR(n_items_read_min > n_items_current, stream::TSourceDryException, n_items_read_max, n_items_read_min, 0, n_items_current);
+					const usys_t n_items_read = CL3_MIN(n_items_read_max, n_items_current);
+
+					for(usys_t i = 0; i < n_items_read; i++)
+						arr_items_read[i] = system::def::move(arr_items[i]);
+
+					Remove(0, n_items_read);
+					return n_items_read;
+				}
+
+				template<class T>
+				usys_t	TList<T>::Remaining	() const
+				{
+					return this->Count();
+				}
+
+				template<class T>
+				usys_t	TList<T>::WriteOut	(stream::IOut<T>& os)
+				{
+					const usys_t n_items_wo = os.Write(this->arr_items, this->n_items_current, 0);
+					CL3_CLASS_LOGIC_ERROR(n_items_wo > this->n_items_current);
+					this->Cut(n_items_wo, 0);
+					return n_items_wo;
+				}
+
+				template<class T>
+				usys_t	TList<T>::WriteOut	(stream::IOut<T>& os, usys_t n_items_wo_max, usys_t n_items_wo_min)
+				{
+					CL3_CLASS_ERROR(this->n_items_current < n_items_wo_min, stream::TSourceDryException, n_items_wo_max, n_items_wo_min, 0, this->n_items_current);
+					if(n_items_wo_max > this->n_items_current)
+						n_items_wo_max = this->n_items_current;
+
+					const usys_t n_items_wo = os.Write(this->arr_items, n_items_wo_max, n_items_wo_min);
+					CL3_CLASS_LOGIC_ERROR(n_items_wo < n_items_wo_min || n_items_wo > n_items_wo_max);
+					this->Cut(n_items_wo, 0);
+
+					return n_items_wo;
 				}
 
 				template<class T>

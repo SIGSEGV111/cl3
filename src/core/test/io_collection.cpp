@@ -763,29 +763,27 @@ namespace
 		}
 	}
 
-	TEST(io_collection_list_TList, Find_sorted)
-	{
-		for(usys_t n = 0; n <= 1000; n += 97)
-		{
-			TList<usys_t> list;
-			for(usys_t i = 0; i < n; i++)
-				list.Add(i);
-
-			list.Sorted(true);
-
-			for(usys_t i = 0; i < n; i++)
-				EXPECT_EQ(i, list.Find(i, 0, DIRECTION_FORWARD));
-
-			for(usys_t i = 0; i < n; i++)
-				EXPECT_EQ(i, list.Find(i, i, DIRECTION_FORWARD));
-
-			for(usys_t i = 0; i < n; i++)
-				EXPECT_EQ(i, list.Find(i, 0, DIRECTION_BACKWARD));
-
-			for(usys_t i = 0; i < n; i++)
-				EXPECT_EQ(i, list.Find(i, i, DIRECTION_BACKWARD));
-		}
-	}
+// 	TEST(io_collection_list_TList, Find_sorted)
+// 	{
+// 		for(usys_t n = 0; n <= 1000; n += 97)
+// 		{
+// 			TList<usys_t> list;
+// 			for(usys_t i = 0; i < n; i++)
+// 				list.Add(i);
+// 
+// 			for(usys_t i = 0; i < n; i++)
+// 				EXPECT_EQ(i, *list.Find(i, 0, DIRECTION_FORWARD));
+// 
+// 			for(usys_t i = 0; i < n; i++)
+// 				EXPECT_EQ(i, *list.Find(i, i, DIRECTION_FORWARD));
+// 
+// 			for(usys_t i = 0; i < n; i++)
+// 				EXPECT_EQ(i, *list.Find(i, 0, DIRECTION_BACKWARD));
+// 
+// 			for(usys_t i = 0; i < n; i++)
+// 				EXPECT_EQ(i, *list.Find(i, i, DIRECTION_BACKWARD));
+// 		}
+// 	}
 
 	TEST(io_collection_list_TList, Find_unsorted)
 	{
@@ -795,61 +793,55 @@ namespace
 			for(usys_t i = 0; i < n; i++)
 				list.Add(i);
 
-			list.Sorted(false);
+			for(usys_t i = 0; i < n; i++)
+				EXPECT_EQ(i, *list.Find(i, 0, DIRECTION_FORWARD));
 
 			for(usys_t i = 0; i < n; i++)
-				EXPECT_EQ(i, list.Find(i, 0, DIRECTION_FORWARD));
+				EXPECT_EQ(i, *list.Find(i, i, DIRECTION_FORWARD));
 
 			for(usys_t i = 0; i < n; i++)
-				EXPECT_EQ(i, list.Find(i, i, DIRECTION_FORWARD));
+				EXPECT_EQ(i, *list.Find(i, 0, DIRECTION_BACKWARD));
 
 			for(usys_t i = 0; i < n; i++)
-				EXPECT_EQ(i, list.Find(i, 0, DIRECTION_BACKWARD));
-
-			for(usys_t i = 0; i < n; i++)
-				EXPECT_EQ(i, list.Find(i, i, DIRECTION_BACKWARD));
+				EXPECT_EQ(i, *list.Find(i, i, DIRECTION_BACKWARD));
 		}
 	}
 
-	TEST(io_collection_list_TList, Find_first)
-	{
-		for(usys_t n = 0; n <= 1000; n += 97)
-		{
-			TList<usys_t> list;
-			for(usys_t i = 0; i < n; i++)
-				list.Add(i/3);
-
-			list.Sorted(false);
-
-			for(usys_t i = 0; i < n/3; i++)
-				EXPECT_EQ(i*3, list.Find(i, 0, DIRECTION_FORWARD));
-
-			list.Sorted(true);
-
-			for(usys_t i = 0; i < n/3; i++)
-				EXPECT_EQ(i*3, list.Find(i, 0, DIRECTION_FORWARD));
-		}
-	}
-
-	TEST(io_collection_list_TList, Find_last)
-	{
-		for(usys_t n = 0; n <= 1000; n += 97)
-		{
-			TList<usys_t> list;
-			for(usys_t i = 0; i < n; i++)
-				list.Add(i/3);
-
-			list.Sorted(false);
-
-			for(usys_t i = 0; i < n/3; i++)
-				EXPECT_EQ(i*3+2, list.Find(i, 0, DIRECTION_BACKWARD));
-
-			list.Sorted(true);
-
-			for(usys_t i = 0; i < n/3; i++)
-				EXPECT_EQ(i*3+2, list.Find(i, 0, DIRECTION_BACKWARD));
-		}
-	}
+// 	TEST(io_collection_list_TList, Find_first)
+// 	{
+// 		for(usys_t n = 0; n <= 1000; n += 97)
+// 		{
+// 			TList<usys_t> list;
+// 			for(usys_t i = 0; i < n; i++)
+// 				list.Add(i/3);
+// 
+// 			for(usys_t i = 0; i < n/3; i++)
+// 				EXPECT_EQ(i*3, *list.Find(i, 0, DIRECTION_FORWARD));
+// 
+// // 			list.Sorted(true);
+// // 
+// // 			for(usys_t i = 0; i < n/3; i++)
+// // 				EXPECT_EQ(i*3, list.Find(i, 0, DIRECTION_FORWARD));
+// 		}
+// 	}
+// 
+// 	TEST(io_collection_list_TList, Find_last)
+// 	{
+// 		for(usys_t n = 0; n <= 1000; n += 97)
+// 		{
+// 			TList<usys_t> list;
+// 			for(usys_t i = 0; i < n; i++)
+// 				list.Add(i/3);
+// 
+// 			for(usys_t i = 0; i < n/3; i++)
+// 				EXPECT_EQ(i*3+2, *list.Find(i, 0, DIRECTION_BACKWARD));
+// 
+// // 			list.Sorted(true);
+// // 
+// // 			for(usys_t i = 0; i < n/3; i++)
+// // 				EXPECT_EQ(i*3+2, list.Find(i, 0, DIRECTION_BACKWARD));
+// 		}
+// 	}
 }
 
 
