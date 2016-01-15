@@ -155,7 +155,7 @@ namespace cl3
 
 			struct IThread
 			{
-				CL3PUBF static void Sleep(time::TTime time, time::EClock clock);
+				CL3PUBF static void Sleep(time::TTime time, time::EClock clock = time::TIME_CLOCK_MONOTONIC);
 				virtual pid_t ID() const CL3_GETTER = 0;
 				virtual io::collection::list::TList<TCPU* const>& Affinity() = 0;
 				virtual IProcess* Process() const CL3_GETTER = 0;

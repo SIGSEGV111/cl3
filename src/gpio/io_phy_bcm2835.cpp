@@ -149,203 +149,203 @@ namespace	cl3
 						bcm2835_gpio_clr(this->index);
 				}
 
-				void		TGPIO::ThreadMain	()
-				{
-// 					fprintf(stderr, "GPIO-IRQ-THREAD: INFO: booting ... \n");
-					int fd_export = -1;
-					int fd_unexport = -1;
+// 				void		TGPIO::ThreadMain	()
+// 				{
+// // 					fprintf(stderr, "GPIO-IRQ-THREAD: INFO: booting ... \n");
+// 					int fd_export = -1;
+// 					int fd_unexport = -1;
+//
+// 					//	build list of all FDs to monitor
+// 					struct pollfd pfds[N_GPIO_PINS + 1];
+//
+// 					try
+// 					{
+// 						//	open gpio sysfs interface
+// 						CL3_NONCLASS_SYSERR(fd_export = open("/sys/class/gpio/export", O_CLOEXEC|O_NOCTTY|O_WRONLY));
+// 						CL3_NONCLASS_SYSERR(fd_unexport = open("/sys/class/gpio/unexport", O_CLOEXEC|O_NOCTTY|O_WRONLY));
+//
+// 						//	block all signals (handle the later via signalfd)
+// 						{
+// 							sigset_t ss;
+// 							sigfillset(&ss);
+// 							pthread_sigmask(SIG_BLOCK, &ss, NULL);
+// 						}
+//
+// 						// set realtime prio
+// 						{
+// 							sched_param p;
+// 							memset(&p, 0, sizeof(p));
+// 							p.sched_priority = 1;
+// 							CL3_NONCLASS_SYSERR(sched_setscheduler(0, SCHED_FIFO, &p));
+// 							CL3_NONCLASS_SYSERR(mlockall(MCL_CURRENT|MCL_FUTURE));
+// 						}
+//
+// 						{
+// 							//	init entries for the pins
+// 							for(usys_t i = 0; i < N_GPIO_PINS; i++)
+// 							{
+// 								pfds[i].fd = -1;
+// 								pfds[i].events = POLLPRI;
+// 								pfds[i].revents = 0;
+// 							}
+//
+// 							//	init entry for the signalfd
+// 							sigset_t ss;
+// 							sigemptyset(&ss);
+// 							sigaddset(&ss, SIGTERM);
+// 							sigaddset(&ss, SIGUSR1);
+// 							CL3_NONCLASS_SYSERR(pfds[N_GPIO_PINS].fd = signalfd(-1, &ss, SFD_CLOEXEC|SFD_NONBLOCK));
+// 							pfds[N_GPIO_PINS].events = POLLIN;	//	POLLIN for the signalfd
+// 							pfds[N_GPIO_PINS].revents = 0;
+// 						}
+//
+// // 						fprintf(stderr, "GPIO-IRQ-THREAD: INFO: READY\n");
+// 						//	set this once all configuration is done to notify the controller thread (which is waiting in TGPIO::TGPIO())
+// 						*((volatile pthread_t*)(&this->th_irq)) = pthread_self();
+//
+// 						//	wait for signals...
+// 						int dt_idletimeout_ms = -1;
+// 						bool b_run = true;
+// 						while(b_run)
+// 						{
+// 							int rc_poll;
+// 							CL3_NONCLASS_SYSERR(rc_poll = poll(pfds, N_GPIO_PINS+1, dt_idletimeout_ms));
+//
+// 							//	reset the idle timeout
+// 							dt_idletimeout_ms = -1;
+//
+// 							//	check all GPIO pins
+// 							for(usys_t i = 0; i < N_GPIO_PINS; i++)
+// 								if(CL3_UNLIKELY(pfds[i].fd != -1))
+// 								{
+// 									TPin* const pin = static_cast<TPin*>(this->pins[i]);	//	use static_cast to avoid virtual-function-call thru IPin and to get all members
+//
+// 									const bool b_level_new = pin->Level();
+//
+// 									//	raise edge events when we detected a level change
+// 									if(CL3_LIKELY(pin->b_level_last != b_level_new))
+// 									{
+// 										const gpio::TOnEdgeData data = { pin->b_level_last, b_level_new };
+// 										pin->b_level_last = b_level_new;
+// 										pin->on_edge.Raise(pin, data);
+// 									}
+//
+// 									if(CL3_LIKELY(pfds[i].revents))
+// 									{
+// 										//	clear the kernel event status
+// 										char buffer[2] = {};
+// 										pread(pfds[i].fd, buffer, sizeof(buffer), 0);
+// 									}
+//
+// 									if(pin->on_idle.HasReceivers())
+// 									{
+// 										const int dt_idletimeout_ms_pin = (int)pin->dt_idletimeout.ConvertToI(TIME_UNIT_MILLISECONDS);
+// 										if(dt_idletimeout_ms_pin > dt_idletimeout_ms || dt_idletimeout_ms == -1)
+// 											dt_idletimeout_ms = dt_idletimeout_ms_pin;
+//
+// 										if(rc_poll == 0)	//	the call to poll timed-out
+// 											pin->on_idle.Raise(pin, gpio::TOnIdleData());
+// 									}
+// 								}
+//
+// 							if(pfds[N_GPIO_PINS].revents)
+// 							{
+// 								//	read signals
+// 								signalfd_siginfo si;
+// 								while(read(pfds[N_GPIO_PINS].fd, &si, sizeof(si)) == sizeof(si))
+// 									switch(si.ssi_signo)
+// 									{
+// 										case SIGTERM:
+// 											//	shutdown requested
+// 											b_run = false;
+// 											break;
+// 										case SIGUSR1:
+// 											//	pin config changed, rebuild list
+// 											for(unsigned i = 0; i < N_GPIO_PINS; i++)
+// 											{
+// 												TPin* const pin = static_cast<TPin*>(this->pins[i]);
+// 												if(pin->mode == gpio::MODE_INPUT && pfds[i].fd == -1)
+// 												{
+// 													//	new pin to monitor
+//
+// 													//	tell kernel to export the pin to sysfs
+// 													//	we wont check the error code, because either it works or the pin was already exported, so no need to act on it
+// 													char buffer[64];
+// 													write(fd_export, buffer, snprintf(buffer, sizeof(buffer), "%u\n", i));
+//
+// 													//	tell the kernel that we want to use the pin as input... hope this does not cause any conflicts with libbcm2835
+// 													int fd;
+// 													snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%u/direction", i);
+// 													CL3_NONCLASS_SYSERR(fd = open(buffer, O_CLOEXEC|O_NOCTTY|O_WRONLY));
+// 													CL3_NONCLASS_ERROR(write(fd, "in\n", 3) != 3, TSyscallException, errno);
+// 													close(fd);
+//
+// 													snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%u/edge", i);
+// 													CL3_NONCLASS_SYSERR(fd = open(buffer, O_CLOEXEC|O_NOCTTY|O_WRONLY));
+// 													CL3_NONCLASS_ERROR(write(fd, "both\n", 5) != 5, TSyscallException, errno);
+// 													close(fd);
+//
+// 													//	open the FD for the pin
+// 													snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%u/value", i);
+// 													CL3_NONCLASS_SYSERR(pfds[i].fd = open(buffer, O_CLOEXEC|O_NOCTTY|O_RDONLY));
+//
+// 													//	read the current level of the pin (NOTE: this is racey :-/)
+// 													pin->b_level_last = pin->Level();
+// 												}
+// 												else if(pin->mode != gpio::MODE_INPUT && pfds[i].fd != -1)
+// 												{
+// 													//	monitored pin was reconfigured to non-input
+//
+// 													//	close the FD for the pin
+// 													close(pfds[i].fd);
+// 													pfds[i].fd = -1;
+//
+// 													//	tell kernel to unexport the pin
+// 													//	we wont check the error code, because either it works or... I would not know what to do else...
+// 													char buffer[16];
+// 													write(fd_unexport, buffer, snprintf(buffer, sizeof(buffer), "%u\n", i));
+// 												}
+// 											}
+// 											break;
+// 									}
+// 							}
+// 						}
+// 					}
+// 					catch(const error::TException& ex)
+// 					{
+// 						fprintf(stderr, "ERROR in bcm2835-Thread:\n\tmessage: %s\n\tfile: %s:%u\n\texpression: %s\n", ex.message, ex.codefile, ex.codeline, ex.expression);
+// 					}
+// 					catch(...)
+// 					{
+// 						fprintf(stderr, "ERROR in bcm2835-Thread: unknown error\n");
+// 					}
+//
+// 					for(unsigned i = 0; i < N_GPIO_PINS; i++)
+// 						if(CL3_UNLIKELY(pfds[i].fd != -1))
+// 						{
+// 							close(pfds[i].fd);
+// 							//	tell kernel to unexport the pin
+// 							//	we wont check the error code, because either it works or... I would not know what to do else...
+// 							char buffer[16];
+// 							write(fd_unexport, buffer, snprintf(buffer, sizeof(buffer), "%u\n", i));
+// 						}
+//
+// // 					fprintf(stderr, "GPIO-IRQ-THREAD: INFO: terminating ... \n");
+//
+// 					//	close gpio sysfs interface
+// 					close(fd_export);
+// 					close(fd_unexport);
+//
+// 					//	allow swapping again
+// 					CL3_NONCLASS_SYSERR(munlockall());
+// 				}
 
-					//	build list of all FDs to monitor
-					struct pollfd pfds[N_GPIO_PINS + 1];
+// 				void TGPIO::OnShutdownRequest()
+// 				{
+// 					kill(this->tid, SIGTERM);
+// 				}
 
-					try
-					{
-						//	open gpio sysfs interface
-						CL3_NONCLASS_SYSERR(fd_export = open("/sys/class/gpio/export", O_CLOEXEC|O_NOCTTY|O_WRONLY));
-						CL3_NONCLASS_SYSERR(fd_unexport = open("/sys/class/gpio/unexport", O_CLOEXEC|O_NOCTTY|O_WRONLY));
-
-						//	block all signals (handle the later via signalfd)
-						{
-							sigset_t ss;
-							sigfillset(&ss);
-							pthread_sigmask(SIG_BLOCK, &ss, NULL);
-						}
-
-						// set realtime prio
-						{
-							sched_param p;
-							memset(&p, 0, sizeof(p));
-							p.sched_priority = 1;
-							CL3_NONCLASS_SYSERR(sched_setscheduler(0, SCHED_FIFO, &p));
-							CL3_NONCLASS_SYSERR(mlockall(MCL_CURRENT|MCL_FUTURE));
-						}
-
-						{
-							//	init entries for the pins
-							for(usys_t i = 0; i < N_GPIO_PINS; i++)
-							{
-								pfds[i].fd = -1;
-								pfds[i].events = POLLPRI;
-								pfds[i].revents = 0;
-							}
-
-							//	init entry for the signalfd
-							sigset_t ss;
-							sigemptyset(&ss);
-							sigaddset(&ss, SIGTERM);
-							sigaddset(&ss, SIGUSR1);
-							CL3_NONCLASS_SYSERR(pfds[N_GPIO_PINS].fd = signalfd(-1, &ss, SFD_CLOEXEC|SFD_NONBLOCK));
-							pfds[N_GPIO_PINS].events = POLLIN;	//	POLLIN for the signalfd
-							pfds[N_GPIO_PINS].revents = 0;
-						}
-
-// 						fprintf(stderr, "GPIO-IRQ-THREAD: INFO: READY\n");
-						//	set this once all configuration is done to notify the controller thread (which is waiting in TGPIO::TGPIO())
-						*((volatile pthread_t*)(&this->th_irq)) = pthread_self();
-
-						//	wait for signals...
-						int dt_idletimeout_ms = -1;
-						bool b_run = true;
-						while(b_run)
-						{
-							int rc_poll;
-							CL3_NONCLASS_SYSERR(rc_poll = poll(pfds, N_GPIO_PINS+1, dt_idletimeout_ms));
-
-							//	reset the idle timeout
-							dt_idletimeout_ms = -1;
-
-							//	check all GPIO pins
-							for(usys_t i = 0; i < N_GPIO_PINS; i++)
-								if(CL3_UNLIKELY(pfds[i].fd != -1))
-								{
-									TPin* const pin = static_cast<TPin*>(this->pins[i]);	//	use static_cast to avoid virtual-function-call thru IPin and to get all members
-
-									const bool b_level_new = pin->Level();
-
-									//	raise edge events when we detected a level change
-									if(CL3_LIKELY(pin->b_level_last != b_level_new))
-									{
-										const gpio::TOnEdgeData data = { pin->b_level_last, b_level_new };
-										pin->b_level_last = b_level_new;
-										pin->on_edge.Raise(pin, data);
-									}
-
-									if(CL3_LIKELY(pfds[i].revents))
-									{
-										//	clear the kernel event status
-										char buffer[2] = {};
-										pread(pfds[i].fd, buffer, sizeof(buffer), 0);
-									}
-
-									if(pin->on_idle.HasReceivers())
-									{
-										const int dt_idletimeout_ms_pin = (int)pin->dt_idletimeout.ConvertToI(TIME_UNIT_MILLISECONDS);
-										if(dt_idletimeout_ms_pin > dt_idletimeout_ms || dt_idletimeout_ms == -1)
-											dt_idletimeout_ms = dt_idletimeout_ms_pin;
-
-										if(rc_poll == 0)	//	the call to poll timed-out
-											pin->on_idle.Raise(pin, gpio::TOnIdleData());
-									}
-								}
-
-							if(pfds[N_GPIO_PINS].revents)
-							{
-								//	read signals
-								signalfd_siginfo si;
-								while(read(pfds[N_GPIO_PINS].fd, &si, sizeof(si)) == sizeof(si))
-									switch(si.ssi_signo)
-									{
-										case SIGTERM:
-											//	shutdown requested
-											b_run = false;
-											break;
-										case SIGUSR1:
-											//	pin config changed, rebuild list
-											for(unsigned i = 0; i < N_GPIO_PINS; i++)
-											{
-												TPin* const pin = static_cast<TPin*>(this->pins[i]);
-												if(pin->mode == gpio::MODE_INPUT && pfds[i].fd == -1)
-												{
-													//	new pin to monitor
-
-													//	tell kernel to export the pin to sysfs
-													//	we wont check the error code, because either it works or the pin was already exported, so no need to act on it
-													char buffer[64];
-													write(fd_export, buffer, snprintf(buffer, sizeof(buffer), "%u\n", i));
-
-													//	tell the kernel that we want to use the pin as input... hope this does not cause any conflicts with libbcm2835
-													int fd;
-													snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%u/direction", i);
-													CL3_NONCLASS_SYSERR(fd = open(buffer, O_CLOEXEC|O_NOCTTY|O_WRONLY));
-													CL3_NONCLASS_ERROR(write(fd, "in\n", 3) != 3, TSyscallException, errno);
-													close(fd);
-
-													snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%u/edge", i);
-													CL3_NONCLASS_SYSERR(fd = open(buffer, O_CLOEXEC|O_NOCTTY|O_WRONLY));
-													CL3_NONCLASS_ERROR(write(fd, "both\n", 5) != 5, TSyscallException, errno);
-													close(fd);
-
-													//	open the FD for the pin
-													snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%u/value", i);
-													CL3_NONCLASS_SYSERR(pfds[i].fd = open(buffer, O_CLOEXEC|O_NOCTTY|O_RDONLY));
-
-													//	read the current level of the pin (NOTE: this is racey :-/)
-													pin->b_level_last = pin->Level();
-												}
-												else if(pin->mode != gpio::MODE_INPUT && pfds[i].fd != -1)
-												{
-													//	monitored pin was reconfigured to non-input
-
-													//	close the FD for the pin
-													close(pfds[i].fd);
-													pfds[i].fd = -1;
-
-													//	tell kernel to unexport the pin
-													//	we wont check the error code, because either it works or... I would not know what to do else...
-													char buffer[16];
-													write(fd_unexport, buffer, snprintf(buffer, sizeof(buffer), "%u\n", i));
-												}
-											}
-											break;
-									}
-							}
-						}
-					}
-					catch(const error::TException& ex)
-					{
-						fprintf(stderr, "ERROR in bcm2835-Thread:\n\tmessage: %s\n\tfile: %s:%u\n\texpression: %s\n", ex.message, ex.codefile, ex.codeline, ex.expression);
-					}
-					catch(...)
-					{
-						fprintf(stderr, "ERROR in bcm2835-Thread: unknown error\n");
-					}
-
-					for(unsigned i = 0; i < N_GPIO_PINS; i++)
-						if(CL3_UNLIKELY(pfds[i].fd != -1))
-						{
-							close(pfds[i].fd);
-							//	tell kernel to unexport the pin
-							//	we wont check the error code, because either it works or... I would not know what to do else...
-							char buffer[16];
-							write(fd_unexport, buffer, snprintf(buffer, sizeof(buffer), "%u\n", i));
-						}
-
-// 					fprintf(stderr, "GPIO-IRQ-THREAD: INFO: terminating ... \n");
-
-					//	close gpio sysfs interface
-					close(fd_export);
-					close(fd_unexport);
-
-					//	allow swapping again
-					CL3_NONCLASS_SYSERR(munlockall());
-				}
-
-				void TGPIO::OnShutdownRequest()
-				{
-					kill(this->tid, SIGTERM);
-				}
-
-				CLASS		TGPIO::TGPIO	(bool debug) : system::task::IThreadRunner("bcm2835-gpio")
+				CLASS		TGPIO::TGPIO	(bool debug) /*: system::task::IThreadRunner("bcm2835-gpio")*/
 				{
 					CL3_CLASS_ERROR(bcm2835_init() != 1, TException, "initialization of the bcm2835 lib failed");
 					bcm2835_set_debug(debug ? 1 : 0);
@@ -354,12 +354,12 @@ namespace	cl3
 					for(u32_t i = 0; i < 54; i++)
 						this->pins.Append(new TPin(this, i));
 
-					this->Start();
+// 					this->Start();
 				}
 
 				CLASS		TGPIO::~TGPIO	()
 				{
-					this->Shutdown();
+// 					this->Shutdown();
 
 					CL3_CLASS_ERROR(bcm2835_close() != 1, TException, "shutdown of the bcm2835 lib failed");
 				}
