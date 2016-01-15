@@ -69,7 +69,7 @@ namespace
 		ook_decoder.Write(arr_pulses, 25);
 		ook_decoder.Flush();
 
-		EXPECT_EQ(24, ls_bits_out.Count());
+		EXPECT_EQ(24U, ls_bits_out.Count());
 
 		for(usys_t i = 0; i < CL3_MIN(24, ls_bits_out.Count()); i++)
 			EXPECT_EQ(arr_bits[i], ls_bits_out[i]);
@@ -99,7 +99,7 @@ namespace
 		const bool arr_bits_match[] = { 1,1,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,0 };
 		pt2272.Write(arr_bits_match, 24);
 		pt2272.Write(arr_bits_match, 24);
-		EXPECT_EQ(1, listener.n_raised);
+		EXPECT_EQ(1U, listener.n_raised);
 		EXPECT_EQ(0x230, listener.data.address);
 		EXPECT_TRUE(listener.data.arr_data[0]);
 		EXPECT_FALSE(listener.data.arr_data[1]);
@@ -111,8 +111,8 @@ namespace
 		const bool arr_bits_other[] = { 1,0,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,0 };
 		pt2272.Write(arr_bits_other, 24);
 		pt2272.Write(arr_bits_other, 24);
-		EXPECT_EQ(0, listener.n_raised);
-		EXPECT_EQ(0, listener.data.address);
+		EXPECT_EQ(0U, listener.n_raised);
+		EXPECT_EQ(0U, listener.data.address);
 		EXPECT_FALSE(listener.data.arr_data[0]);
 		EXPECT_FALSE(listener.data.arr_data[1]);
 	}
