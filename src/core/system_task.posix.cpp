@@ -66,6 +66,15 @@ namespace	cl3
 
 			pid_t gettid();
 
+			static CL3_THREAD TLocalThread* th_self = NULL;
+
+			/**************************************************************************************/
+
+			CLASS TLocalProcess::TLocalProcess()
+			{
+				this->id = getpid();
+			}
+
 			/**************************************************************************************/
 
 			void	IThread::Sleep	(TTime time, EClock clock)
@@ -89,6 +98,54 @@ namespace	cl3
 					default:
 						CL3_NONCLASS_FAIL(TException, "the requested clock is not supported for Sleep()");
 				}
+			}
+
+			void TLocalThread::Suspend()
+			{
+				CL3_CLASS_PTHREAD_ERROR(pthread_kill(this->pth, SIGSTOP));
+			}
+
+			void TLocalThread::Resume()
+			{
+				CL3_CLASS_PTHREAD_ERROR(pthread_kill(this->pth, SIGCONT));
+			}
+
+			void TLocalThread::Kill()
+			{
+				CL3_CLASS_PTHREAD_ERROR(pthread_kill(this->pth, SIGKILL));
+			}
+
+			void TLocalThread::Shutdown()
+			{
+				CL3_CLASS_PTHREAD_ERROR(pthread_kill(this->pth, SIGTERM));
+			}
+
+			void TLocalProcess::Start()
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			TLocalThread* TLocalThread::Self()
+			{
+				CL3_NONCLASS_LOGIC_ERROR(th_self == NULL);
+				return th_self;
+			}
+
+			CLASS TLocalThread::TLocalThread(IFiber* fiber, bool autostart) : fiber(fiber)
+			{
+				CL3_CLASS_ERROR(fiber == NULL, TException, "fiber cannot be NULL");
+				CL3_NOT_IMPLEMENTED;
+				if(autostart)
+					this->Start();
+			}
+
+			CLASS TLocalThread::~TLocalThread()
+			{
+				/*
+				 * 1) Acquire lock
+				 * 2) if running; Stop()
+				 */
+				CL3_NOT_IMPLEMENTED;
 			}
 		}
 	}

@@ -31,6 +31,19 @@ namespace	cl3
 		namespace	task
 		{
 			using namespace io::collection::list;
+
+			IFiber* IFiber::Self()
+			{
+				return TLocalThread::Self()->CurrentFiber();
+			}
+
+			TLocalProcess* TLocalProcess::Self()
+			{
+				static TLocalProcess* proc_self = NULL;
+				if(proc_self == NULL)
+					proc_self = new TLocalProcess();
+				return proc_self;
+			}
 		}
 	}
 }

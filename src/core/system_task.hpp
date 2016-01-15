@@ -61,8 +61,9 @@ namespace cl3
 					CL3PUBF static io::collection::list::TList<bool> WaitFor(const io::collection::list::TList<IWaitable* const>& waitables, time::TTime timeout = -1);
 				};
 
-				struct IMutex : IWaitable
+				struct IMutex
 				{
+					virtual IWaitable& OnRelease() = 0;
 					virtual bool Acquire(time::TTime timeout) CL3_WARN_UNUSED_RESULT = 0;
 					inline void Acquire() { CL3_CLASS_LOGIC_ERROR(!this->Acquire(time::TTime(-1))); }
 					inline bool TryAcquire() CL3_WARN_UNUSED_RESULT { return this->Acquire(time::TTime(0)); }
@@ -73,8 +74,14 @@ namespace cl3
 
 				struct ISignal : IMutex
 				{
-					virtual void Raise() = 0;
-					virtual void Clear() = 0;
+					virtual IWaitable& OnSignal() = 0;
+				};
+
+				class TSignal : public ISignal
+				{
+					public:
+						virtual void Raise() = 0;
+						virtual void Clear() = 0;
 				};
 			}
 
@@ -117,7 +124,7 @@ namespace cl3
 
 					CL3PUBF CLASS explicit IFiber(const io::text::string::TString& name);
 
-					CL3PUBF static IFiber* Self();
+					CL3PUBF static IFiber* Self() CL3_GETTER;
 			};
 
 			/************************************************************************************/
@@ -143,12 +150,21 @@ namespace cl3
 
 			class TLocalProcess : public IProcess
 			{
+				private:
+					CLASS TLocalProcess(const TLocalProcess&) = delete;
+					CLASS TLocalProcess();
+
 				protected:
 					io::collection::list::TList<TLocalThread*> threads;
 					pid_t id;
 
 				public:
-					CL3PUBF static TLocalProcess& Self();
+					CL3PUBF pid_t ID() const CL3_GETTER;
+					CL3PUBF const io::collection::list::TList<IThread* const>& Threads() const CL3_GETTER;
+					CL3PUBF io::text::string::TString Executable() const CL3_GETTER;
+					CL3PUBF io::collection::list::TList<io::text::string::TString>& Arguments() const CL3_GETTER;
+					CL3PUBF io::collection::map::TStdMap<io::text::string::TString, io::text::string::TString> Environment() const CL3_GETTER;
+					CL3PUBF static TLocalProcess* Self();
 			};
 
 			/************************************************************************************/
@@ -168,16 +184,16 @@ namespace cl3
 			{
 				private:
 					CLASS TForeignThread(const TForeignThread&) = delete;
-					TForeignProcess* process;
-					io::collection::list::TList<TCPU* const> affinity;
 
 				protected:
-					pid_t pid_thread;
+					TForeignProcess* process;
+					io::collection::list::TList<TCPU* const> affinity;
+					pid_t id;
 
 				public:
-					CL3PUBF pid_t ID() const final override CL3_GETTER;
-					CL3PUBF io::collection::list::TList<TCPU* const>& Affinity() final override;
-					CL3PUBF TForeignProcess* Process() const  final override CL3_GETTER;
+					CL3PUBF pid_t ID() const final override CL3_GETTER { return this->id; }
+					CL3PUBF io::collection::list::TList<TCPU* const>& Affinity() final override { return this->affinity; }
+					CL3PUBF TForeignProcess* Process() const  final override CL3_GETTER { return this->process; }
 					CL3PUBF void Suspend() final override;
 					CL3PUBF void Resume() final override;
 					CL3PUBF void Kill() final override;
@@ -189,23 +205,32 @@ namespace cl3
 					CLASS TLocalThread(const TLocalThread&) = delete;
 
 				protected:
+					io::collection::list::TList<TCPU* const> affinity;
+					IFiber* fiber;
 					#if (CL3_OS == CL3_OS_POSIX)
+						io::stream::fd::TFDStream fds_signal;
 						pthread_t pth;
 					#elif (CL3_OS == CL3_OS_WINDOWS)
 						HANDLE hth;
 					#else
 						#error
 					#endif
+					pid_t id;
+
 
 				public:
-					CL3PUBF pid_t ID() const final override CL3_GETTER;
-					CL3PUBF io::collection::list::TList<TCPU* const>& Affinity() final override;
-					CL3PUBF TLocalProcess* Process() const  final override CL3_GETTER;
+					CL3PUBF pid_t ID() const final override CL3_GETTER { return this->id; }
+					CL3PUBF io::collection::list::TList<TCPU* const>& Affinity() final override { return this->affinity; }
+					CL3PUBF TLocalProcess* Process() const  final override CL3_GETTER { return TLocalProcess::Self(); }
 					CL3PUBF void Suspend() final override;
 					CL3PUBF void Resume() final override;
 					CL3PUBF void Kill() final override;
+					CL3PUBF void Shutdown();
+					CL3PUBF void Start();
+					CL3PUBF IFiber* CurrentFiber() const CL3_GETTER { return this->fiber; }
 					CL3PUBF static TLocalThread* Self();
-					CL3PUBF CLASS explicit TLocalThread(IFiber*);
+					CL3PUBF CLASS explicit TLocalThread(IFiber*, bool autostart = true);
+					CL3PUBF CLASS ~TLocalThread();
 			};
 
 			/************************************************************************************/
