@@ -31,52 +31,6 @@ namespace	cl3
 		namespace	task
 		{
 			using namespace io::collection::list;
-
-			io::text::string::TString
-					IThreadRunner::Name		() const
-			{
-				return name;
-			}
-
-			EState	TProcess::State		() const
-			{
-				return this->state;
-			}
-
-			const TList<TThread*>&
-					TProcess::Threads	() const
-			{
-				return this->ls_threads;
-			}
-
-			const TList<TProcess*>&
-					TProcess::Childs	() const
-			{
-				return this->ls_childs;
-			}
-
-			system::task::synchronization::TSignal&	TProcess::OnStateChange	() const
-			{
-				return this->on_statechange;
-			}
-
-			system::task::synchronization::TSignal&	TThread::OnStateChange	() const
-			{
-				return this->on_statechange;
-			}
-
-			EState	TThread::State	() const
-			{
-				CL3_CLASS_LOGIC_ERROR(!this->Mutex().HasAcquired());
-				return this->state;
-			}
-
-			void IThreadRunner::Shutdown()
-			{
-				CL3_CLASS_LOGIC_ERROR(!this->Mutex().HasAcquired());
-				CL3_CLASS_ERROR(this->state == STATE_DEAD, error::TException, "thread is already dead");
-				this->OnShutdownRequest();
-			}
 		}
 	}
 }

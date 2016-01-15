@@ -30,49 +30,6 @@ namespace	cl3
 		{
 			namespace	synchronization
 			{
-				CLASS	TOnMutexActionData::TOnMutexActionData		(EMutexAction action, EMutexStatus status) : action(action), status(status) {}
-				CLASS	TOnSignalActionData::TOnSignalActionData	(ESignalAction action, ESignalStatus status) : action(action), status(status) {}
-
-				CLASS	IMutex::~IMutex			()
-				{
-				}
-
-				void	ALockable::Acquire		()
-				{
-					if(mutex != NULL) mutex->Acquire();
-				}
-
-				bool	ALockable::Acquire		(time::TTime timeout)
-				{
-					return (mutex != NULL) ? mutex->Acquire(timeout) : true;
-				}
-
-				void	ALockable::Release		()
-				{
-					if(mutex != NULL) mutex->Release();
-				}
-
-				bool	ALockable::HasAcquired	() const
-				{
-					return (mutex != NULL) ? mutex->HasAcquired() : true;
-				}
-
-				CLASS	ALockable::ALockable	() : mutex()
-				{
-				}
-
-				CLASS	ALockable::ALockable	(system::memory::TUniquePtr<IMutex>&& mutex) : mutex(static_cast<system::memory::TUniquePtr<IMutex>&&>(mutex))
-				{
-				}
-
-				CLASS	ALockable::~ALockable	()
-				{
-				}
-
-				void	TSignal::Acquire	()						{ this->mutex->Acquire(); }
-				bool	TSignal::Acquire	(time::TTime timeout)	{ return this->mutex->Acquire(timeout); }
-				void	TSignal::Release	()						{ this->mutex->Release(); }
-				bool	TSignal::HasAcquired() const 				{ return this->mutex->HasAcquired(); }
 			}
 		}
 	}

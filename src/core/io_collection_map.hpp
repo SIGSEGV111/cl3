@@ -16,17 +16,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef	_include_cl3_core_io_collection_list_hpp_
-#define	_include_cl3_core_io_collection_list_hpp_
-
-// #include <stdio.h>
+#ifndef	_include_cl3_core_io_collection_map_hpp_
+#define	_include_cl3_core_io_collection_map_hpp_
 
 #include "io_collection.hpp"
-#include "io_collection_array.hpp"
-#include "io_collection_list.hpp"
 #include "error.hpp"
-#include "system_memory.hpp"
-#include "io_serialization.hpp"
 
 namespace	cl3
 {
@@ -37,15 +31,20 @@ namespace	cl3
 			namespace	map
 			{
 				template<class TItem, class TKey, TKey TItem::*key>
-				struct	IMap<const TItem> : public IDynamicCollection<const TItem>
+				struct	IMap;
+
+				template<class TItem, class TKey, TKey TItem::*key>
+				struct	IMap<const TItem, TKey, key> : public IDynamicCollection<const TItem>
 				{
-					virtual	const TItem&	operator[]	(const TKey& key) const CL3_GETTER = 0;
+					virtual	const TItem&	operator[]	(const TKey&) const CL3_GETTER = 0;
 				};
 
 				template<class TItem, class TKey, TKey TItem::*key>
-				struct	IMap<const TItem> : public IDynamicCollection<const TItem>
+				class TInlinedMap;
+
+				template<class TItem, class TKey>
+				class TStdMap
 				{
-					virtual	TItem&	operator[]	(const TKey& key) CL3_GETTER = 0;
 				};
 			}
 		}

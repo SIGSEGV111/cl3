@@ -29,7 +29,6 @@
 
 #include "io_file.hpp"
 #include "io_collection_list.hpp"
-#include "system_task.hpp"
 
 #include <sys/types.h>
 #include <sys/mman.h>
@@ -501,37 +500,9 @@ namespace	cl3
 					CL3_CLASS_SYSERR(::close(this->fd));
 			}
 
-			static CL3_THREAD TDirectoryBrowser* db_thread = NULL;
-			static bool db_thread_handler_registered = false;
-
-			static	void	DeleteThreadDirectoryBrowser
-				(
-					cl3::event::TEvent<const IDynamicCollection<cl3::system::task::TThread *const>, const TOnActionData<cl3::system::task::TThread *const>&> &,
-					const IDynamicCollection<cl3::system::task::TThread *const> &,
-					const TOnActionData<cl3::system::task::TThread *const>& data,
-					void *
-				)
-			{
-				if(data.action == collection::ACTION_REMOVE)
-				{
-					delete db_thread;
-					db_thread = NULL;
-				}
-			}
-
 			TDirectoryBrowser&	TDirectoryBrowser::ThreadCurrentWorkingDirectory	()
 			{
-				if(db_thread == NULL)
-				{
-					db_thread = new TDirectoryBrowser();
-
-					if(!db_thread_handler_registered)
-					{
-						system::task::TProcess::Self()->Threads().OnAction().Register<void>(&DeleteThreadDirectoryBrowser, NULL);
-						db_thread_handler_registered = true;
-					}
-				}
-				return *db_thread;
+				CL3_NOT_IMPLEMENTED;
 			}
 
 			TDirectoryBrowser&	TDirectoryBrowser::ProcessCurrentWorkingDirectory	()

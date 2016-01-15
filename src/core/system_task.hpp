@@ -22,9 +22,17 @@
 #include "system_compiler.hpp"
 #include "system_types.hpp"
 #include "io_collection_list.hpp"
+#include "io_collection_map.hpp"
 #include "io_stream_fd.hpp"
 #include "io_text_string.hpp"
 #include "system_time.hpp"
+
+#if (CL3_OS == CL3_OS_POSIX)
+	#include <poll.h>
+	#include <pthread.h>
+#elif (CL3_OS == CL3_OS_WINDOWS)
+	#include <windows.h>
+#endif
 
 namespace cl3
 {
@@ -38,15 +46,37 @@ namespace cl3
 
 			namespace synchronization
 			{
-				struct	IWaitable;
+				struct IWaitable
+				{
+					#if (CL3_OS == CL3_OS_POSIX)
+						virtual struct ::pollfd __PollInfo() const CL3_GETTER = 0;
+					#elif (CL3_OS == CL3_OS_WINDOWS)
+						virtual HANDLE __Handle() const CL3_GETTER = 0;
+					#else
+						#error
+					#endif
+
+					CL3PUBF bool WaitFor(time::TTime timeout) CL3_WARN_UNUSED_RESULT;
+					inline void WaitFor() { CL3_CLASS_LOGIC_ERROR(!this->WaitFor(time::TTime(-1))); }
+					CL3PUBF static io::collection::list::TList<bool> WaitFor(const io::collection::list::TList<IWaitable* const>& waitables, time::TTime timeout = -1);
+				};
+
+				struct IMutex : IWaitable
+				{
+					virtual bool Acquire(time::TTime timeout) CL3_WARN_UNUSED_RESULT = 0;
+					inline void Acquire() { CL3_CLASS_LOGIC_ERROR(!this->Acquire(time::TTime(-1))); }
+					inline bool TryAcquire() CL3_WARN_UNUSED_RESULT { return this->Acquire(time::TTime(0)); }
+					virtual void Release() = 0;
+					virtual usys_t TimesAcquired() const CL3_GETTER = 0;
+					inline bool HasAcquired() const CL3_GETTER { return this->TimesAcquired() > 0; }
+				};
+
+				struct ISignal : IMutex
+				{
+					virtual void Raise() = 0;
+					virtual void Clear() = 0;
+				};
 			}
-
-			class TProcess;
-			class TLocalThread;
-			class IFiber;
-			class TCPU;
-
-			typedef io::collection::list::TList<const TCPU* const> TCPUAffinity;
 
 			enum ELogLevel
 			{
@@ -56,84 +86,126 @@ namespace cl3
 				LOGLEVEL_ERROR
 			};
 
+			class IFiber;
+			struct IThread;
+			class TForeignThread;
+			class TLocalThread;
+			struct IProcess;
+			class TForeignProcess;
+			class TLocalProcess;
+			class TCPU;
+			class TNUMANode;
+
+			/************************************************************************************/
+
 			class IFiber
 			{
-				friend class TLocalThread;
 				private:
 					io::text::string::TString name;
-					TLocalThread* volatile thread;
+					io::collection::list::TList<synchronization::IWaitable*> waitlist;
+					IFiber* on_block;
 
 				protected:
-					CL3PUBF void Log(const io::text::string::TString& message);
 					virtual void Main() = 0;
 
 				public:
-					volatile ELogLevel loglevel;
-					const io::text::string::TString& Name() const;
-					CL3PUBF const io::collection::list::TList<synchronization::IWaitable*>& WaitList() const;
-					CL3PUBF CLASS IFiber(io::text::string::TString name);
-					CL3PUBF static IFiber* Current();
+					CL3PUBF static void Log(ELogLevel reqll, const io::text::string::TString& message);
+					CL3PUBF const io::collection::list::TList<synchronization::IWaitable*>& WaitList() const CL3_GETTER;
 					CL3PUBF void SwitchTo();
+					CL3PUBF void OnBlock(IFiber* on_block) CL3_SETTER;
+					CL3PUBF IFiber* OnBlock() const CL3_GETTER;
+
+					CL3PUBF CLASS explicit IFiber(const io::text::string::TString& name);
+
+					CL3PUBF static IFiber* Self();
 			};
 
 			/************************************************************************************/
 
-			class IThread
+			struct IProcess
 			{
-				friend class TProcess;
-				private:
-					IProcess* process;
-					pid_t pid_thread;
-
-				public:
-					virtual IProcess* Process() const CL3_GETTER = 0;
-					virtual void Suspend() = 0;
-					virtual void Resume() = 0;
-					virtual void Kill() = 0;
+				virtual pid_t ID() const CL3_GETTER = 0;
+				virtual const io::collection::list::TList<IThread* const>& Threads() const CL3_GETTER = 0;
+				virtual io::text::string::TString Executable() const CL3_GETTER = 0;
+				virtual io::collection::list::TList<io::text::string::TString>& Arguments() const CL3_GETTER = 0;
+				virtual io::collection::map::TStdMap<io::text::string::TString, io::text::string::TString> Environment() const CL3_GETTER = 0;
+				//	TODO: io-streams...
 			};
 
-			class TLocalThread : public IThread
+			class TForeignProcess : public IProcess
 			{
 				protected:
-					CL3PUBF CLASS TLocalThread(IProcess*, pid_t);
-					CL3PUBF CLASS TLocalThread(IFiber*);
+					io::collection::list::TList<TForeignThread*> threads;
+					pid_t id;
 
 				public:
-					CL3PUBF TLocalProcess* Process() const final override CL3_GETTER;
-					CL3PUBF static TLocalThread* Current();
-			};
-
-			class TRemoteThread : public IThread
-			{
-			};
-
-			/************************************************************************************/
-
-			class IProcess
-			{
-				protected:
-					IHost* host;
-					io::collection::list::TList<IThread*> threads;
-
-				public:
-					CL3PUBF IHost* Host() const CL3_GETTER;
-					CL3PUBF const io::collection::list::TList<IThread* const>& Threads() const CL3_GETTER;
-					CL3PUBF virtual CLASS ~IProcess();
 			};
 
 			class TLocalProcess : public IProcess
 			{
-			};
+				protected:
+					io::collection::list::TList<TLocalThread*> threads;
+					pid_t id;
 
-			class TOwnProcess : public TLocalProcess
-			{
 				public:
-					CL3PUBF TLocalThread* CreateThread(IFiber*);
-					CL3PUBF static TOwnProcess& Instance();
+					CL3PUBF static TLocalProcess& Self();
 			};
 
-			class TRemoteProcess : public IProcess
+			/************************************************************************************/
+
+			struct IThread
 			{
+				CL3PUBF static void Sleep(time::TTime time, time::EClock clock);
+				virtual pid_t ID() const CL3_GETTER = 0;
+				virtual io::collection::list::TList<TCPU* const>& Affinity() = 0;
+				virtual IProcess* Process() const CL3_GETTER = 0;
+				virtual void Suspend() = 0;
+				virtual void Resume() = 0;
+				virtual void Kill() = 0;
+			};
+
+			class TForeignThread : public IThread
+			{
+				private:
+					CLASS TForeignThread(const TForeignThread&) = delete;
+					TForeignProcess* process;
+					io::collection::list::TList<TCPU* const> affinity;
+
+				protected:
+					pid_t pid_thread;
+
+				public:
+					CL3PUBF pid_t ID() const final override CL3_GETTER;
+					CL3PUBF io::collection::list::TList<TCPU* const>& Affinity() final override;
+					CL3PUBF TForeignProcess* Process() const  final override CL3_GETTER;
+					CL3PUBF void Suspend() final override;
+					CL3PUBF void Resume() final override;
+					CL3PUBF void Kill() final override;
+			};
+
+			class TLocalThread : public IThread
+			{
+				private:
+					CLASS TLocalThread(const TLocalThread&) = delete;
+
+				protected:
+					#if (CL3_OS == CL3_OS_POSIX)
+						pthread_t pth;
+					#elif (CL3_OS == CL3_OS_WINDOWS)
+						HANDLE hth;
+					#else
+						#error
+					#endif
+
+				public:
+					CL3PUBF pid_t ID() const final override CL3_GETTER;
+					CL3PUBF io::collection::list::TList<TCPU* const>& Affinity() final override;
+					CL3PUBF TLocalProcess* Process() const  final override CL3_GETTER;
+					CL3PUBF void Suspend() final override;
+					CL3PUBF void Resume() final override;
+					CL3PUBF void Kill() final override;
+					CL3PUBF static TLocalThread* Self();
+					CL3PUBF CLASS explicit TLocalThread(IFiber*);
 			};
 
 			/************************************************************************************/
@@ -141,13 +213,13 @@ namespace cl3
 			class TCPU
 			{
 				public:
-					CL3PUBF TNumaNode* NumaNode() const CL3_GETTER;
+					CL3PUBF TNUMANode* NumaNode() const CL3_GETTER;
 			};
 
-			class TNumaNode
+			class TNUMANode
 			{
 				public:
-					CL3PUBF const io::collection::TList<TCPU* const>& CPUs() const CL3_GETTER;
+					CL3PUBF const io::collection::list::TList<TCPU* const>& CPUs() const CL3_GETTER;
 			};
 
 			/************************************************************************************/
@@ -163,27 +235,21 @@ namespace cl3
 				pid_t pid_process;
 				io::text::string::TString exe;
 				io::collection::list::TList<io::text::string::TString> args;
+				io::collection::map::TStdMap<io::text::string::TString, io::text::string::TString> env;
 				io::collection::list::TList<pid_t> threads;
 			};
 
-			struct	IHost
-			{
-				virtual thread_info_t ThreadInfo(pid_t, pid_t) const = 0;
-				virtual process_info_t ProcessInfo(pid_t) const = 0;
-				virtual io::collection::list::TList<pid_t> EnumProcesses() const = 0;
-				virtual IProcess* OpenProcess(pid_t) = 0;
-				virtual IProcess* CreateProcess(const io::text::string::TString& exe, const io::collection::list::TList<const io::text::string::TString>& args, io::IIn<byte_t>& stdin, io::IOut<byte_t>& stdout, io::IOut<byte_t>& stderr) = 0;
-			};
+			CL3PUBF thread_info_t ThreadInfo(pid_t, pid_t);
+			CL3PUBF process_info_t ProcessInfo(pid_t);
+			CL3PUBF io::collection::list::TList<pid_t> EnumProcesses();
+			CL3PUBF system::memory::TUniquePtr<TForeignProcess> OpenProcess(pid_t);
 
-			class TLocalHost : public IHost
-			{
-				public:
-					CL3PUBF static TLocalHost* Instance();
-			};
-
-			class TRemoteHost : public IHost
-			{
-			};
+			CL3PUBF system::memory::TUniquePtr<TForeignProcess> CreateProcess(const io::text::string::TString& exe,
+					const io::collection::list::TList<const io::text::string::TString>& args,
+					const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& env,
+					io::stream::IIn<byte_t>* stdin,
+					io::stream::IOut<byte_t>* stdout,
+					io::stream::IOut<byte_t>* stderr);	//	TODO: default parameters
 		}
 	}
 }

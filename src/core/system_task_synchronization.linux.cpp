@@ -35,7 +35,7 @@
 
 // static inline bool operator> (const struct ::pollfd& v1, const struct ::pollfd& v2) { return ::memcmp(&v1, &v2, sizeof(struct ::pollfd)) >  0; }
 // static inline bool operator< (const struct ::pollfd& v1, const struct ::pollfd& v2) { return ::memcmp(&v1, &v2, sizeof(struct ::pollfd)) <  0; }
-static inline bool operator==(const struct ::pollfd& v1, const struct ::pollfd& v2) { return ::memcmp(&v1, &v2, sizeof(struct ::pollfd)) == 0; }
+// static inline bool operator==(const struct ::pollfd& v1, const struct ::pollfd& v2) { return ::memcmp(&v1, &v2, sizeof(struct ::pollfd)) == 0; }
 
 namespace	cl3
 {
@@ -45,94 +45,6 @@ namespace	cl3
 		{
 			namespace	synchronization
 			{
-				using namespace error;
-				using namespace system::time;
-				using namespace io::collection;
-				using namespace io::collection::list;
-				using namespace io::collection::array;
-
-				/***************************************************************/
-
-// 				CL3_THREAD fd_t fd_timer = -1;
-//
-// 				static	void	DeleteThreadTimerFD
-// 					(
-// 						cl3::event::TEvent<const io::collection::IDynamicCollection<cl3::system::task::TThread *const>, const TOnActionData<cl3::system::task::TThread *const>&> &,
-// 						const io::collection::IDynamicCollection<cl3::system::task::TThread *const> &,
-// 						const io::collection::TOnActionData<cl3::system::task::TThread *const>& data,
-// 						void *
-// 					)
-// 				{
-// 					if(data.action == io::collection::ACTION_REMOVE && fd_timer != -1)
-// 					{
-// 						CL3_NONCLASS_SYSERR(::close(fd_timer));
-// 						fd_timer = -1;
-// 					}
-// 				}
-//
-// 				static	fd_t	TimerFD		()
-// 				{
-// 					if(fd_timer == -1)
-// 					{
-// 						CL3_NONCLASS_SYSERR(fd_timer = ::timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK|TFD_CLOEXEC));
-// 						system::task::TProcess::Self()->Threads().OnAction().Register<void>(&DeleteThreadTimerFD, NULL);
-// 					}
-// 					return fd_timer;
-// 				}
-
-				TList<ISignal*>
-						ISignal::WaitFor	(const IArray<ISignal*>& signals, time::TTime timeout)
-				{
-					const usys_t n_signals = signals.Count();
-					TList<struct ::pollfd> pfds;
-					TList<ISignal*> signaled_signals;
-					pfds.Count(n_signals);
-
-// 					pfds[0].fd = timeout < 0 ? -1 : TimerFD();
-// 					pfds[0].events = POLLIN;
-// 					pfds[0].revents = 0;
-//
-// 					if(timeout >= 0)
-// 					{
-// 						struct ::itimerspec its;
-// 						its.it_interval.tv_sec = 0;
-// 						its.it_interval.tv_nsec = 0;
-// 						its.it_value = timeout;
-// 						CL3_NONCLASS_SYSERR(timerfd_settime(pfds[0].fd, 0, &its, NULL));
-// 					}
-//
-					for(usys_t i = 0; i < n_signals; i++)
-					{
-						pfds[i] = signals[i]->Handle();
-						pfds[i].revents = 0;
-					}
-
-					if(signaled_signals.Count() > 0 || pfds[0].revents != 0)
-						return signaled_signals;
-
-					for(usys_t i = 0; i < n_signals; i++)
-						signals[i]->BeforeWait();
-
-					try
-					{
-						CL3_NONCLASS_ERROR(poll(pfds.ItemPtr(0), n_signals, timeout.ConvertToI(TIME_UNIT_MILLISECONDS)) == -1 && errno != EINTR, TSyscallException, errno);
-
-						for(usys_t i = 0; i < n_signals; i++)
-							if(pfds[i].revents != 0)
-								signaled_signals.Add(signals[i]);
-					}
-					catch(...)
-					{
-						for(usys_t i = 0; i < n_signals; i++)
-							signals[i]->AfterWait();
-						throw;
-					}
-
-					for(usys_t i = 0; i < n_signals; i++)
-						signals[i]->AfterWait();
-
-					return signaled_signals;
-				}
 			}
 		}
 	}
