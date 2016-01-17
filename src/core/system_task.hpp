@@ -72,16 +72,19 @@ namespace cl3
 					inline bool HasAcquired() const CL3_GETTER { return this->TimesAcquired() > 0; }
 				};
 
-				struct ISignal : IMutex
+				struct ISignal
 				{
-					virtual IWaitable& OnSignal() = 0;
+					virtual IWaitable& OnSignal() CL3_GETTER = 0;
+					virtual IMutex& Mutex() CL3_GETTER = 0;
 				};
 
 				class TSignal : public ISignal
 				{
 					public:
-						virtual void Raise() = 0;
-						virtual void Clear() = 0;
+						CL3PUBF IWaitable& OnSignal() CL3_GETTER;
+						CL3PUBF IMutex& Mutex() CL3_GETTER;
+						CL3PUBF void Raise();
+						CL3PUBF void Clear();
 				};
 			}
 
@@ -216,7 +219,6 @@ namespace cl3
 						#error
 					#endif
 					pid_t id;
-
 
 				public:
 					CL3PUBF pid_t ID() const final override CL3_GETTER { return this->id; }

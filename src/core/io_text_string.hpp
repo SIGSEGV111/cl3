@@ -163,10 +163,10 @@ namespace	cl3
 
 						using collection::list::TList<byte_t>::Claim;
 
-						CL3PUBF	CLASS	TCString	(const encoding::ICodec*);
-						CL3PUBF	CLASS	TCString	(const TString&, const encoding::ICodec*);
-						CL3PUBF	CLASS	TCString	(const TCString&);
-						CL3PUBF	CLASS	TCString	(TCString&&);
+						CL3PUBF	CLASS explicit TCString	(const encoding::ICodec*);
+						CL3PUBF	CLASS explicit TCString	(const TString&, const encoding::ICodec*);
+						CL3PUBF	CLASS explicit TCString	(const TCString&);
+						CL3PUBF	CLASS explicit TCString	(TCString&&);
 				};
 
 				CL3PUBF	TString	Stringify	(FPrint print, const void* object);

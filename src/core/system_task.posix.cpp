@@ -96,7 +96,7 @@ namespace	cl3
 						break;
 
 					default:
-						CL3_NONCLASS_FAIL(TException, "the requested clock is not supported for Sleep()");
+						CL3_NONCLASS_FAIL(TException, "the requested clock is not supported by Sleep()");
 				}
 			}
 
@@ -120,7 +120,7 @@ namespace	cl3
 				CL3_CLASS_PTHREAD_ERROR(pthread_kill(this->pth, SIGTERM));
 			}
 
-			void TLocalProcess::Start()
+			void TLocalThread::Start()
 			{
 				CL3_NOT_IMPLEMENTED;
 			}

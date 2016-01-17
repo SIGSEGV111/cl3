@@ -43,7 +43,7 @@ namespace	cl3
 				using namespace encoding;
 				using namespace error;
 
-				static	usys_t	ustrlen	(const TUTF32* str, usys_t maxlen)
+				static	usys_t	UnicodeStringLength	(const TUTF32* str, usys_t maxlen)
 				{
 					for(usys_t i = 0; i < maxlen; i++)
 						if(str[i].code == 0U)
@@ -182,7 +182,7 @@ namespace	cl3
 
 				TString&	TString::operator+=	(const TUTF32* str_append)
 				{
-					this->Append(str_append, ustrlen(str_append, (usys_t)-1));
+					this->Append(str_append, UnicodeStringLength(str_append, (usys_t)-1));
 					return *this;
 				}
 
@@ -465,7 +465,7 @@ namespace	cl3
 
 				usys_t	TString::Length		() const
 				{
-					return ustrlen(this->arr_items, this->n_items_current);
+					return UnicodeStringLength(this->arr_items, this->n_items_current);
 				}
 
 				CLASS	TString::TString	() : TList<TUTF32>()
@@ -499,7 +499,7 @@ namespace	cl3
 				CLASS	TString::TString	(const TUTF32*  str, usys_t maxlen) : TList<TUTF32>()
 				{
 					CL3_CLASS_ERROR(str == NULL, TException, "invalid source string pointer");
-					this->Append(str, ustrlen(str, maxlen));
+					this->Append(str, UnicodeStringLength(str, maxlen));
 				}
 
 				CLASS	TString::TString	(const TString& other) : event::IObservable(), TList<const TUTF32>(other), TList<TUTF32>(other)
