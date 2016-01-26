@@ -111,9 +111,9 @@ namespace	cl3
 				template<class T>
 				struct	CL3PUBT	IArray<const T> : virtual IStaticCollection<const T>
 				{
-					bool is_sorted;
-
 					usys_t	AbsIndex	(ssys_t rindex) const CL3_GETTER;
+
+					virtual	bool		IsSorted	() const CL3_GETTER = 0;
 
 					virtual	const T&	operator[]	(ssys_t index) const CL3_GETTER = 0;
 					virtual	const T*	ItemPtr		(ssys_t index) const CL3_GETTER = 0;
@@ -137,7 +137,7 @@ namespace	cl3
 
 					virtual	T&		operator[]	(ssys_t index) CL3_GETTER = 0;
 					virtual	T*		ItemPtr		(ssys_t index) CL3_GETTER = 0;
-					
+
 					virtual	T*		Find		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) CL3_GETTER;
 
 					virtual	usys_t	Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
@@ -155,8 +155,12 @@ namespace	cl3
 						T* arr_items;
 						usys_t n_items;
 						bool b_claim;
+						bool is_sorted;
 
 					public:
+						//	from IArray
+						bool	IsSorted	() const final override CL3_GETTER;
+
 						//	from IStaticCollection
 						system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const final override CL3_WARN_UNUSED_RESULT;
 						usys_t	Count		() const final override CL3_GETTER;
@@ -419,6 +423,12 @@ namespace	cl3
 				/************************************************************************/
 
 				template<class T>
+				bool	TArray<const T>::IsSorted		() const
+				{
+					return this->is_sorted;
+				}
+
+				template<class T>
 				system::memory::TUniquePtr<IStaticIterator<const T> >	TArray<const T>::CreateStaticIterator	() const
 				{
 					return system::memory::MakeUniquePtr<IStaticIterator<const T> >(new TIterator<const T>(this, n_items > 0 ? 0 : (usys_t)-1));
@@ -488,19 +498,19 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TArray<const T>::TArray		(const T* arr_items, usys_t n_items, bool b_claim) : arr_items((T*)arr_items), n_items(n_items), b_claim(b_claim)
+				CLASS		TArray<const T>::TArray		(const T* arr_items, usys_t n_items, bool b_claim) : arr_items((T*)arr_items), n_items(n_items), b_claim(b_claim), is_sorted(false)
 				{
 				}
 
 				template<class T>
-				CLASS		TArray<const T>::TArray		(const TArray& other) : event::IObservable(), arr_items((T*)system::memory::Alloc(other.n_items, &system::types::typeinfo::TCTTI<T>::rtti)), n_items(other.n_items)
+				CLASS		TArray<const T>::TArray		(const TArray& other) : event::IObservable(), arr_items((T*)system::memory::Alloc(other.n_items, &system::types::typeinfo::TCTTI<T>::rtti)), n_items(other.n_items), is_sorted(other.is_sorted)
 				{
 					for(usys_t i = 0; i < n_items; i++)
 						new (arr_items + i) T(other.arr_items[i]);
 				}
 
 				template<class T>
-				CLASS		TArray<const T>::TArray		(TArray&& other) : arr_items(other.arr_items), n_items(other.n_items)
+				CLASS		TArray<const T>::TArray		(TArray&& other) : arr_items(other.arr_items), n_items(other.n_items), is_sorted(other.is_sorted)
 				{
 					other.arr_items = NULL;
 					other.n_items = 0;
@@ -520,7 +530,7 @@ namespace	cl3
 				template<class T>
 				usys_t		IArray<const T>::IndexOf	(const T& item_find, usys_t idx_start, EDirection dir) const
 				{
-					return _::TIndexOf_impl<T, typeinfo::features::is_comparable_biggerthan<T>::value>::IndexOf(this->ItemPtr(0), this->Count(), item_find, idx_start, dir, this->is_sorted);
+					return _::TIndexOf_impl<T, typeinfo::features::is_comparable_biggerthan<T>::value>::IndexOf(this->ItemPtr(0), this->Count(), item_find, idx_start, dir, this->IsSorted());
 				}
 
 				namespace _

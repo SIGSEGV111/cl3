@@ -19,6 +19,7 @@
 #ifndef	_include_cl3_core_system_task_hpp_
 #define	_include_cl3_core_system_task_hpp_
 
+#include "event.hpp"
 #include "system_compiler.hpp"
 #include "system_types.hpp"
 #include "io_collection_list.hpp"
@@ -158,7 +159,7 @@ namespace cl3
 					CLASS TLocalProcess();
 
 				protected:
-					io::collection::list::TList<TLocalThread*> threads;
+					io::collection::list::TList<IThread*> threads;
 					pid_t id;
 
 				public:
@@ -204,10 +205,15 @@ namespace cl3
 
 			class TLocalThread : public IThread
 			{
+				public:
+					struct TEventData {};
+
 				private:
 					CLASS TLocalThread(const TLocalThread&) = delete;
 
 				protected:
+					CLASS TLocalThread();
+
 					io::collection::list::TList<TCPU* const> affinity;
 					IFiber* fiber;
 					#if (CL3_OS == CL3_OS_POSIX)
@@ -220,7 +226,10 @@ namespace cl3
 					#endif
 					pid_t id;
 
+					event::TEvent<TLocalThread, TEventData> on_shutdown;
+
 				public:
+					CL3PUBF const event::TEvent<TLocalThread, TEventData>& OnShutdown() { return this->on_shutdown; }
 					CL3PUBF pid_t ID() const final override CL3_GETTER { return this->id; }
 					CL3PUBF io::collection::list::TList<TCPU* const>& Affinity() final override { return this->affinity; }
 					CL3PUBF TLocalProcess* Process() const  final override CL3_GETTER { return TLocalProcess::Self(); }

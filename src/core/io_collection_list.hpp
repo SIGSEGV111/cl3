@@ -197,11 +197,15 @@ namespace	cl3
 						T* arr_items;
 						usys_t n_items_current;
 						usys_t n_items_prealloc;
+						bool is_sorted;
 
 						void		Prealloc		(usys_t n_items_prealloc_min);
 						void		InternalClear	();
 
 					public:
+						//	from IArray
+						bool	IsSorted	() const final override CL3_GETTER;
+
 						//	from IStaticCollection
 						system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const final override CL3_WARN_UNUSED_RESULT;
 						usys_t		Count		() const final override CL3_GETTER;
@@ -239,12 +243,12 @@ namespace	cl3
 
 						//	from TList
 						CLASS		TList		();
-						CLASS		TList		(T* arr_items, usys_t n_items, bool claim);
-						CLASS		TList		(const T* arr_items, usys_t n_items);
-						CLASS		TList		(const IStaticCollection<const T>&);
-						CLASS		TList		(const TList&);
-						CLASS		TList		(TList&&);
-						CLASS		TList		(serialization::IDeserializer&);
+						explicit CLASS		TList		(T* arr_items, usys_t n_items, bool claim);
+						explicit CLASS		TList		(const T* arr_items, usys_t n_items);
+						explicit CLASS		TList		(const IStaticCollection<const T>&);
+						explicit CLASS		TList		(const TList&);
+						explicit CLASS		TList		(TList&&);
+						explicit CLASS		TList		(serialization::IDeserializer&);
 						virtual		~TList		();
 				};
 
@@ -582,6 +586,12 @@ namespace	cl3
 				}
 
 				template<class T>
+				bool	TList<const T>::IsSorted	() const
+				{
+					return this->is_sorted;
+				}
+
+				template<class T>
 				system::memory::TUniquePtr<IStaticIterator<const T> >
 						TList<const T>::CreateStaticIterator	() const
 				{
@@ -835,12 +845,12 @@ namespace	cl3
 
 				//	from TList<T>q
 				template<class T>
-				CLASS		TList<const T>::TList		() : arr_items(NULL), n_items_current(0), n_items_prealloc(0)
+				CLASS		TList<const T>::TList		() : arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(false)
 				{
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(T* arr_items, usys_t n_items, bool claim) : arr_items(NULL), n_items_current(0), n_items_prealloc(0)
+				CLASS		TList<const T>::TList		(T* arr_items, usys_t n_items, bool claim) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(false)
 				{
 					if(claim)
 					{
@@ -855,27 +865,27 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(const T* arr_items, usys_t n_items) : arr_items(NULL), n_items_current(0), n_items_prealloc(0)
+				CLASS		TList<const T>::TList		(const T* arr_items, usys_t n_items) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(false)
 				{
 					Prealloc(n_items);
 					Append(arr_items, n_items);
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(const IStaticCollection<const T>& collection) : arr_items(NULL), n_items_current(0), n_items_prealloc(0)
+				CLASS		TList<const T>::TList		(const IStaticCollection<const T>& collection) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(false)
 				{
 					Append(collection);
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(const TList& list) : event::IObservable(), arr_items(NULL), n_items_current(0), n_items_prealloc(0)
+				CLASS		TList<const T>::TList		(const TList& list) : event::IObservable(), arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(list.is_sorted)
 				{
 					Prealloc(list.n_items_current);
 					Append(list.arr_items, list.n_items_current);
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(TList&& list) : arr_items(list.arr_items), n_items_current(list.n_items_current), n_items_prealloc(list.n_items_prealloc)
+				CLASS		TList<const T>::TList		(TList&& list) : arr_items(list.arr_items), n_items_current(list.n_items_current), n_items_prealloc(list.n_items_prealloc), is_sorted(list.is_sorted)
 				{
 					list.arr_items = NULL;
 					list.n_items_current = 0;
@@ -1024,7 +1034,7 @@ namespace	cl3
 				{
 					TList<const T>::InternalClear();
 				}
-				
+
 				//	from IIn
 				template<class T>
 				usys_t	TList<T>::Read		(T* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)

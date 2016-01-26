@@ -44,6 +44,20 @@ namespace	cl3
 					proc_self = new TLocalProcess();
 				return proc_self;
 			}
+
+			pid_t TLocalProcess::ID() const
+			{
+				return this->id;
+			}
+
+			const io::collection::list::TList<IThread* const>& TLocalProcess::Threads() const
+			{
+				return this->threads;
+			}
+
+			CLASS TLocalThread::TLocalThread()
+			{
+			}
 		}
 	}
 }

@@ -29,6 +29,7 @@
 
 #include "io_file.hpp"
 #include "io_collection_list.hpp"
+#include "system_task.hpp"
 
 #include <sys/types.h>
 #include <sys/mman.h>
@@ -500,14 +501,35 @@ namespace	cl3
 					CL3_CLASS_SYSERR(::close(this->fd));
 			}
 
+			static CL3_THREAD TDirectoryBrowser* browser_thread = NULL;
+			static TDirectoryBrowser browser_process;
+
+			static void CleanupThreadDirectoryBrowser(
+							event::TEvent<system::task::TLocalThread, system::task::TLocalThread::TEventData>&,
+							system::task::TLocalThread& thread,
+							system::task::TLocalThread::TEventData,
+							TDirectoryBrowser* browser)
+			{
+				CL3_NONCLASS_LOGIC_ERROR(&thread != system::task::TLocalThread::Self());
+				CL3_NONCLASS_LOGIC_ERROR(browser_thread == NULL);
+				CL3_NONCLASS_LOGIC_ERROR(browser_thread != browser);
+				delete browser_thread;
+				browser_thread = NULL;
+			}
+
 			TDirectoryBrowser&	TDirectoryBrowser::ThreadCurrentWorkingDirectory	()
 			{
-				CL3_NOT_IMPLEMENTED;
+				if(browser_thread == NULL)
+				{
+					browser_thread = new TDirectoryBrowser();
+					system::task::TLocalThread::Self()->OnShutdown().Register(&CleanupThreadDirectoryBrowser, browser_thread);
+				}
+				return browser_process;
 			}
 
 			TDirectoryBrowser&	TDirectoryBrowser::ProcessCurrentWorkingDirectory	()
 			{
-				CL3_NOT_IMPLEMENTED;
+				return browser_process;
 			}
 		}
 	}

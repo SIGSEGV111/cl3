@@ -68,11 +68,37 @@ namespace	cl3
 
 			static CL3_THREAD TLocalThread* th_self = NULL;
 
+			struct TMainThread : public TLocalThread
+			{
+				CLASS TMainThread()
+				{
+					th_self = this;
+				}
+
+				CLASS ~TMainThread()
+				{
+					TEventData ed;
+					this->on_shutdown.Raise(*this, ed);
+				}
+			};
+
+			static TMainThread th_main;
+
 			/**************************************************************************************/
 
 			CLASS TLocalProcess::TLocalProcess()
 			{
 				this->id = getpid();
+			}
+
+			io::collection::list::TList<io::text::string::TString>& TLocalProcess::Arguments() const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			io::collection::map::TStdMap<io::text::string::TString, io::text::string::TString> TLocalProcess::Environment() const
+			{
+				CL3_NOT_IMPLEMENTED;
 			}
 
 			/**************************************************************************************/
@@ -145,8 +171,11 @@ namespace	cl3
 				 * 1) Acquire lock
 				 * 2) if running; Stop()
 				 */
-				CL3_NOT_IMPLEMENTED;
+// 				CL3_NOT_IMPLEMENTED;
 			}
+
+			/**************************************************************************************/
+
 		}
 	}
 }
