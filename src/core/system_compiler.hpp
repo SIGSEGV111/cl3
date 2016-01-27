@@ -187,7 +187,13 @@ namespace	cl3
 
 				#define CL3_PACK( ... ) __VA_ARGS__ __attribute__((__packed__))
 				#define	CL3_WARN_UNUSED_RESULT	__attribute__((warn_unused_result))
-				#define CL3_UNREACHABLE	__builtin_unreachable() /* LCOV_EXCL_LINE */
+
+				#ifdef CL3_DEBUG
+					#define CL3_UNREACHABLE	CL3_NONCLASS_LOGIC_ERROR(true) /* LCOV_EXCL_LINE */
+				#else
+					#define CL3_UNREACHABLE	__builtin_unreachable() /* LCOV_EXCL_LINE */
+				#endif
+
 				#define	CL3_LIKELY(expr)	__builtin_expect((expr), true)
 				#define	CL3_UNLIKELY(expr)	__builtin_expect((expr), false)
 
