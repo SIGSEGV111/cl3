@@ -53,6 +53,13 @@ namespace	cl3
 					ERRORACTION_ABORT		//	throw TTranscodeException
 				};
 
+				enum	EErrorHandling
+				{
+					ERRORHANDLING_ASK,
+					ERRORHANDLING_IGNORE,
+					ERRORHANDLING_ABORT
+				};
+
 				struct	CL3PUBT	TTranscodeException : virtual error::TException
 				{
 					const ICodec* codec;
@@ -74,12 +81,21 @@ namespace	cl3
 					virtual	system::memory::TUniquePtr<IDecoder>	CreateDecoder	() const CL3_WARN_UNUSED_RESULT = 0;
 				};
 
-				struct	CL3PUBT	IXCoder
+				class	CL3PUBT	IXCoder
 				{
-					virtual	const ICodec*	Codec	() const CL3_GETTER = 0;
-					virtual	void			Reset	() = 0;
-					virtual	bool			IsDirty	() const CL3_GETTER = 0;
-					virtual	CLASS			~IXCoder() {}
+					protected:
+						EErrorHandling eh;
+
+					public:
+						inline	EErrorHandling	ErrorHandling	() const CL3_GETTER { return this->eh; }
+						inline	void			ErrorHandling	(EErrorHandling new_eh) CL3_SETTER { this->eh = new_eh; }
+
+						virtual	const ICodec*	Codec	() const CL3_GETTER = 0;
+						virtual	void			Reset	() = 0;
+						virtual	bool			IsDirty	() const CL3_GETTER = 0;
+
+						inline	CLASS			IXCoder	() : eh(ERRORHANDLING_ASK) {}
+						virtual	CLASS			~IXCoder() {}
 				};
 
 				class	CL3PUBT	IEncoder : public stream::ISource<byte_t>, public virtual stream::IOut<TUTF32>, public virtual IXCoder

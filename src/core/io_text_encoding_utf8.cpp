@@ -108,17 +108,30 @@ namespace	cl3
 							}
 							else	//	errors...
 							{
-								TTranscodeException e(CODEC_UTF8, DIRECTION_ENCODE, REASON_NOT_REPRESENTABLE, i, n_out);
-								on_error.Raise(*this, e);
-								switch(e.action)
+								switch(this->eh)
 								{
-									case ERRORACTION_CONTINUE:
+									case ERRORHANDLING_ASK:
+									{
+										TTranscodeException e(CODEC_UTF8, DIRECTION_ENCODE, REASON_NOT_REPRESENTABLE, i, n_out);
+										on_error.Raise(*this, e);
+										switch(e.action)
+										{
+											case ERRORACTION_CONTINUE:
+												continue;
+											case ERRORACTION_ABORT:
+												CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_ENCODE, REASON_NOT_REPRESENTABLE, i, n_out);
+												break;
+										}
+										CL3_UNREACHABLE;
+									}
+
+									case ERRORHANDLING_IGNORE:
+										this->Reset();
 										continue;
-									case ERRORACTION_ABORT:
-										CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_ENCODE, REASON_NOT_REPRESENTABLE, i, n_out);
+
+									case ERRORHANDLING_ABORT:
+										CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INVALID, i, n_out);
 										break;
-									default:
-										CL3_CLASS_LOGIC_ERROR(true);
 								}
 								CL3_UNREACHABLE;
 							}
@@ -174,7 +187,6 @@ namespace	cl3
 						{
 							const u32_t b = arr_items_write[i];
 
-							gt_again:;
 							if(local_shift == 0)
 							{
 								if((b & 0x80) == 0x00)	//	1-byte-codes
@@ -203,18 +215,36 @@ namespace	cl3
 								}
 								else	//	errors...
 								{
-									this->shift = local_shift;
-									this->state = local_state;
-									TTranscodeException e(CODEC_UTF8, DIRECTION_DECODE, REASON_INVALID, i, n_out);
-									on_error.Raise(*this, e);
-									switch(e.action)
+									switch(this->eh)
 									{
-										case ERRORACTION_CONTINUE:
+										case ERRORHANDLING_ASK:
+										{
+											this->shift = local_shift;
+											this->state = local_state;
+											TTranscodeException e(CODEC_UTF8, DIRECTION_DECODE, REASON_INVALID, i, n_out);
+											on_error.Raise(*this, e);
+											local_shift = this->shift;
+											local_state = this->state;
+											switch(e.action)
+											{
+												case ERRORACTION_CONTINUE:
+													continue;
+												case ERRORACTION_ABORT:
+													CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INVALID, i, n_out);
+													break;
+											}
+											CL3_UNREACHABLE;
+										}
+
+										case ERRORHANDLING_IGNORE:
+											this->Reset();
 											continue;
-										case ERRORACTION_ABORT:
+
+										case ERRORHANDLING_ABORT:
 											CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INVALID, i, n_out);
 											break;
 									}
+									CL3_UNREACHABLE;
 								}
 							}
 							else
@@ -269,19 +299,36 @@ namespace	cl3
 								}
 								else	//	errors...
 								{
-									this->shift = local_shift;
-									this->state = local_state;
-									TTranscodeException e(CODEC_UTF8, DIRECTION_DECODE, REASON_INCOMPLETE, i, n_out);
-									on_error.Raise(*this, e);
-									switch(e.action)
+									switch(this->eh)
 									{
-										case ERRORACTION_CONTINUE:
-											Reset();
-											goto gt_again;
-										case ERRORACTION_ABORT:
+										case ERRORHANDLING_ASK:
+										{
+											this->shift = local_shift;
+											this->state = local_state;
+											TTranscodeException e(CODEC_UTF8, DIRECTION_DECODE, REASON_INCOMPLETE, i, n_out);
+											on_error.Raise(*this, e);
+											local_shift = this->shift;
+											local_state = this->state;
+											switch(e.action)
+											{
+												case ERRORACTION_CONTINUE:
+													continue;
+												case ERRORACTION_ABORT:
+													CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INCOMPLETE, i, n_out);
+													break;
+											}
+											CL3_UNREACHABLE;
+										}
+
+										case ERRORHANDLING_IGNORE:
+											this->Reset();
+											continue;
+
+										case ERRORHANDLING_ABORT:
 											CL3_CLASS_FAIL(TTranscodeException, CODEC_UTF8, DIRECTION_DECODE, REASON_INCOMPLETE, i, n_out);
 											break;
 									}
+									CL3_UNREACHABLE;
 								}
 							}
 						}
