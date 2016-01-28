@@ -237,7 +237,8 @@ namespace	cl3
 										}
 
 										case ERRORHANDLING_IGNORE:
-											this->Reset();
+											local_shift = 0;
+											local_state = 0;
 											continue;
 
 										case ERRORHANDLING_ABORT:
@@ -321,7 +322,8 @@ namespace	cl3
 										}
 
 										case ERRORHANDLING_IGNORE:
-											this->Reset();
+											local_shift = 0;
+											local_state = 0;
 											continue;
 
 										case ERRORHANDLING_ABORT:
