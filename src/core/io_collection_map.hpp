@@ -43,7 +43,12 @@ namespace	cl3
 				class TInlinedMap;
 
 				template<class TItem, class TKey>
-				class TStdMap
+				class TStdMap : public TStdMap<const TItem, const TKey>
+				{
+				};
+
+				template<class TItem, class TKey>
+				class TStdMap<const TItem, const TKey>
 				{
 				};
 			}
