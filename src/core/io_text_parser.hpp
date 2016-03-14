@@ -34,7 +34,7 @@ namespace	cl3
 
 			namespace	array
 			{
-				template<class T>	class	IArray;
+				template<class T>	struct	IArray;
 			}
 		}
 

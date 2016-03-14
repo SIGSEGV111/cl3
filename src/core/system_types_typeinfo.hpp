@@ -30,8 +30,8 @@ namespace	cl3
 	{
 		namespace	text
 		{
-			struct	ITextWriter;
-			struct	ITextReader;
+			class	ITextWriter;
+			class	ITextReader;
 
 			//	converts object value to human-readable string
 			typedef	void (*FPrint)(ITextWriter&, const void*);
