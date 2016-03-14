@@ -31,6 +31,11 @@ namespace	cl3
 		{
 			template<class T>	struct	IStaticCollection;
 			template<class T>	struct	IStaticIterator;
+
+			namespace	array
+			{
+				template<class T>	struct	IArray;
+			}
 		}
 
 		namespace	text

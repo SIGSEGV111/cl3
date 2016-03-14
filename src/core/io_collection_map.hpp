@@ -107,6 +107,9 @@ namespace	cl3
 				class TStdMap : public virtual TStdMap<const TKey, const TItem>, public virtual IMap<TKey, TItem>
 				{
 					public:
+						using TStdMap<const TKey, const TItem>::CreateDynamicIterator;
+						using TStdMap<const TKey, const TItem>::CreateStaticIterator;
+
 						//	from IMap
 						CL3PUBF	TItem&	operator[]	(const TKey&) final override CL3_GETTER;
 
