@@ -10,6 +10,7 @@ add_library (cl3-core_static STATIC ${CL3_CORE_SRC})
 add_library (cl3-core SHARED ${CL3_CORE_SRC})
 
 target_link_libraries (cl3-core pthread)
+target_link_libraries (cl3-core cl3-extlib)
 target_link_libraries (cl3-core dl)
 
 add_subdirectory (test)
