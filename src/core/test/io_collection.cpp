@@ -813,6 +813,7 @@ namespace
 	using namespace cl3::io::collection;
 	using namespace cl3::io::collection::array;
 	using namespace cl3::system::types;
+	using namespace cl3::system::memory;
 	using namespace cl3::unittest_support;
 
 	TEST(io_collection_array_TStaticArray, Construct_without_args)
@@ -842,6 +843,15 @@ namespace
 			ok = true;
 		}
 		EXPECT_TRUE(ok);
+	}
+
+	TEST(io_collection_array_TStaticArray, With_TUniquePtr)
+	{
+		TStaticArray<TUniquePtr<int>, 3> array( MakeUniquePtr(new int(0)), MakeUniquePtr(new int(1)), MakeUniquePtr(new int(2)) );
+
+		EXPECT_EQ(0, *array[0]);
+		EXPECT_EQ(1, *array[1]);
+		EXPECT_EQ(2, *array[2]);
 	}
 }
 

@@ -236,7 +236,7 @@ namespace	cl3
 						public:
 							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
-					
+
 					template<typename T>
 					class CL3PUBT	is_comparable_lessthan
 					{
@@ -284,6 +284,20 @@ namespace	cl3
 					{
 						public:
 							CL3PUBF	static const bool value = is_comparable_biggerthan<T>::value && is_comparable_lessthan<T>::value && is_comparable_equal<T>::value;
+					};
+
+					template<typename T>
+					class CL3PUBT	is_assignable
+					{
+						private:
+							template<typename U>
+							static decltype(( (*reinterpret_cast<U*>(_::DUMMY)) = (*reinterpret_cast<const U*>(_::DUMMY)) ), yes()) test(int);
+
+							template<typename>
+							static no test(...);
+
+						public:
+							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
 				}
 

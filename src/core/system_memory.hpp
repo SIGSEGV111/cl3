@@ -108,8 +108,8 @@ namespace	cl3
 					const T*	operator->	() const CL3_GETTER { return this->object; }
 					const T&	operator*	() const CL3_GETTER { return *this->object; }
 
-					bool		operator==	(const TUniquePtr& rhs) const CL3_GETTER { return this->object == rhs->object; }
-					bool		operator!=	(const TUniquePtr& rhs) const CL3_GETTER { return this->object != rhs->object; }
+					bool		operator==	(const TUniquePtr& rhs) const CL3_GETTER { return this->object == rhs.object; }
+					bool		operator!=	(const TUniquePtr& rhs) const CL3_GETTER { return this->object != rhs.object; }
 					bool		operator==	(const T* rhs) const CL3_GETTER { return this->object == rhs; }
 					bool		operator!=	(const T* rhs) const CL3_GETTER { return this->object != rhs; }
 

@@ -19,6 +19,8 @@
 #ifndef	_include_cl3_core_io_collection_array_hpp_
 #define	_include_cl3_core_io_collection_array_hpp_
 
+#include <utility>
+
 #include "io_collection.hpp"
 #include "system_types_typeinfo.hpp"
 
@@ -51,6 +53,36 @@ namespace	cl3
 					struct TIndexOf_impl<T, false>
 					{
 						static	usys_t	IndexOf	(const T* arr_items, usys_t n_items, const T& item_find, usys_t idx_start, EDirection dir, bool is_sorted) CL3_GETTER;
+					};
+
+					template<class T, bool is_assignable>
+					struct TRead_impl;
+
+					template<class T>
+					struct TRead_impl<T, true>
+					{
+						virtual	usys_t		Read		(uoff_t index, T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+						inline	void		Read		(uoff_t index, T* arr_items_write, usys_t n_items_write);
+					};
+
+					template<class T>
+					struct TRead_impl<T, false>
+					{
+					};
+
+					template<class T, bool is_assignable>
+					struct TWrite_impl;
+
+					template<class T>
+					struct TWrite_impl<T, true>
+					{
+						virtual	usys_t	Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+						inline	void	Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write);
+					};
+
+					template<class T>
+					struct TWrite_impl<T, false>
+					{
 					};
 				}
 
@@ -109,7 +141,7 @@ namespace	cl3
 				/************************************************************************/
 
 				template<class T>
-				struct	CL3PUBT	IArray<const T> : virtual IStaticCollection<const T>
+				struct	CL3PUBT	IArray<const T> : virtual IStaticCollection<const T>, public _::TRead_impl<T, system::types::typeinfo::features::is_assignable<T>::value>
 				{
 					usys_t	AbsIndex	(ssys_t rindex) const CL3_GETTER;
 
@@ -120,17 +152,13 @@ namespace	cl3
 
 					virtual	usys_t		IndexOf		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) const CL3_GETTER;
 					virtual	const T*	Find		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) const CL3_GETTER;
-
-					virtual	usys_t		Read		(uoff_t index, T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-					inline	void		Read		(uoff_t index, T* arr_items_write, usys_t n_items_write);
 				};
 
 				template<class T>
-				struct	CL3PUBT	IArray : virtual IArray<const T>,  virtual IStaticCollection<T>
+				struct	CL3PUBT	IArray : virtual IArray<const T>,  virtual IStaticCollection<T>, public _::TWrite_impl<T, system::types::typeinfo::features::is_assignable<T>::value>
 				{
 					using array::IArray<const T>::operator[];
 					using array::IArray<const T>::ItemPtr;
-					using array::IArray<const T>::Read;
 					using array::IArray<const T>::Find;
 
 					virtual	T*		Claim		() = 0;
@@ -139,9 +167,6 @@ namespace	cl3
 					virtual	T*		ItemPtr		(ssys_t index) CL3_GETTER = 0;
 
 					virtual	T*		Find		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) CL3_GETTER;
-
-					virtual	usys_t	Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
-					inline	void	Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write);
 				};
 
 				/************************************************************************/
@@ -227,10 +252,10 @@ namespace	cl3
 				}
 
 				template<class T>
-				usys_t		IArray<const T>::Read		(uoff_t index, T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t		_::TRead_impl<T, true>::Read	(uoff_t index, T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
-					const T* const arr_items = this->ItemPtr(0);
-					const usys_t n_items = this->Count();
+					const T* const arr_items = static_cast<IArray<const T>*>(this)->ItemPtr(0);
+					const usys_t n_items = static_cast<IArray<const T>*>(this)->Count();
 
 					if(n_items_write_min == (usys_t)-1)
 						n_items_write_min = n_items_write_max;
@@ -246,9 +271,9 @@ namespace	cl3
 				}
 
 				template<class T>
-				usys_t		IArray<T>::Write	(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t		_::TWrite_impl<T, true>::Write	(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
-					const usys_t n_items = this->Count();
+					const usys_t n_items = static_cast<IArray<T>*>(this)->Count();
 					const usys_t n_items_space = n_items - index;
 
 					if(n_items_write_min == (usys_t)-1)
@@ -261,7 +286,7 @@ namespace	cl3
 
 					if(n_items_write > 0)
 					{
-						T* const arr_items = this->ItemPtr(index);
+						T* const arr_items = static_cast<IArray<T>*>(this)->ItemPtr(index);
 						for(usys_t i = 0; i < n_items_write; i++)
 							arr_items[i] = arr_items_write[i];
 					}
@@ -704,16 +729,28 @@ namespace	cl3
 					protected:
 						T arr_items[n_items];
 
-						void RecursiveInitItems(usys_t index, T a0)
+						void RecursiveInitItems(usys_t index, const T& a0)
 						{
 							this->arr_items[index] = a0;
 						}
 
 						template<typename... Args>
-						void RecursiveInitItems(usys_t index, T a0, Args... args)
+						void RecursiveInitItems(usys_t index, const T& a0, const Args&... args)
 						{
 							this->arr_items[index] = a0;
 							this->RecursiveInitItems(index + 1, args...);
+						}
+
+						void RecursiveInitItems(usys_t index, T&& a0)
+						{
+							this->arr_items[index] = std::move(a0);
+						}
+
+						template<typename... Args>
+						void RecursiveInitItems(usys_t index, T&& a0, Args&&... args)
+						{
+							this->arr_items[index] = std::move(a0);
+							this->RecursiveInitItems(index + 1, std::forward<Args>(args)...);
 						}
 
 					public:
@@ -730,11 +767,19 @@ namespace	cl3
 						CLASS explicit TStaticArray(const T* arr_items_init, usys_t n_items_init);
 
 						template<typename... Args>
-						CLASS explicit TStaticArray(const T& a0, Args... args)
+						CLASS explicit TStaticArray(const T& a0, const Args&... args)
 						{
 							static_assert(sizeof...(Args) == n_items-1, "number of args must match n_items");
 							this->arr_items[0] = a0;
 							this->RecursiveInitItems(1, args...);
+						}
+
+						template<typename... Args>
+						CLASS explicit TStaticArray(T&& a0, Args&&... args)
+						{
+							static_assert(sizeof...(Args) == n_items-1, "number of args must match n_items");
+							this->arr_items[0] = std::move(a0);
+							this->RecursiveInitItems(1, std::forward<Args>(args)...);
 						}
 				};
 
@@ -742,6 +787,10 @@ namespace	cl3
 				class	TStaticArray : public virtual TStaticArray<const T, n_items>, public virtual IArray<T>
 				{
 					public:
+						using TStaticArray<const T, n_items>::operator[];
+						using TStaticArray<const T, n_items>::ItemPtr;
+						using TStaticArray<const T, n_items>::CreateStaticIterator;
+
 						system::memory::TUniquePtr<IStaticIterator<T> >
 								CreateStaticIterator	() final override CL3_WARN_UNUSED_RESULT;
 
@@ -754,7 +803,10 @@ namespace	cl3
 						CLASS explicit TStaticArray(const T* arr_items_init, usys_t n_items_init) : TStaticArray<const T, n_items>(arr_items_init, n_items_init) {}
 
 						template<typename... Args>
-						CLASS explicit TStaticArray(const T& a0, Args... args) : TStaticArray<const T, n_items>(a0, args...) {}
+						CLASS explicit TStaticArray(const T& a0, const Args&... args) : TStaticArray<const T, n_items>(a0, args...) {}
+
+						template<typename... Args>
+						CLASS explicit TStaticArray(T&& a0, Args&&... args) : TStaticArray<const T, n_items>(std::forward<T>(a0), std::forward<Args>(args)...) {}
 				};
 
 				template<class T, usys_t n_items>
