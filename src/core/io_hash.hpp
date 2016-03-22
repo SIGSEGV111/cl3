@@ -20,8 +20,7 @@
 #define	_include_cl3_core_io_hash_hpp_
 
 #include "io_stream.hpp"
-
-extern "C" void hashlittle2(const void *key, size_t length, u32_t *pc, u32_t *pb);
+#include "system_types.hpp"
 
 namespace cl3
 {
@@ -29,6 +28,16 @@ namespace cl3
 	{
 		namespace hash
 		{
+			using namespace system::types;
+
+			template<class T>
+			struct IHash : public stream::IOut<byte_t>
+			{
+				virtual T Hash() const CL3_GETTER = 0;
+			};
+
+			extern "C" void hashlittle2(const void *key, size_t length, u32_t *pc, u32_t *pb);
+
 			static u64_t JenkinsHash(const byte_t* arr_items, usys_t n_items)
 			{
 				union
@@ -38,16 +47,27 @@ namespace cl3
 						u32_t l,h;
 					};
 					u64_t qw;
-				};
+				} a;
 
-				::hashlittle2(arr_items, n_items, &l, &h);
+				a.qw = 0;
 
-				return qw;
+				hashlittle2(arr_items, n_items, &a.l, &a.h);
+
+				return a.qw;
 			}
 
-			class TJenkinsHash : public IIn<byte_t>
+			class CL3PUBT TMurMur32Hash : public IHash<u32_t>
 			{
-				
+				protected:
+					u32_t h;
+					u32_t n_partial;
+					byte_t arr_partial[4];
+
+				public:
+					CL3PUBF	void	Flush	() final override;
+					CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
+					CL3PUBF	u32_t	Hash	() const final override CL3_GETTER;
+					CL3PUBF	CLASS	TMurMur32Hash(u32_t seed = 0);
 			};
 		}
 	}
