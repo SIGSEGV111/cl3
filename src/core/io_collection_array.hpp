@@ -694,6 +694,90 @@ namespace	cl3
 				CLASS		TArray<T>::~TArray		()
 				{
 				}
+
+				template<class T, usys_t n_items>
+				class	TStaticArray;
+
+				template<class T, usys_t n_items>
+				class	TStaticArray<const T, n_items> : public virtual IArray<const T>
+				{
+					protected:
+						T arr_items[n_items];
+
+						void RecursiveInitItems(usys_t index, T a0)
+						{
+							this->arr_items[index] = a0;
+						}
+
+						template<typename... Args>
+						void RecursiveInitItems(usys_t index, T a0, Args... args)
+						{
+							this->arr_items[index] = a0;
+							this->RecursiveInitItems(index + 1, args...);
+						}
+
+					public:
+						system::memory::TUniquePtr<IStaticIterator<const T> >
+								CreateStaticIterator	() const final override CL3_WARN_UNUSED_RESULT;
+						usys_t	Count					() const final override CL3_GETTER { return n_items; }
+						bool	Contains				(const T& item) const final override CL3_GETTER { CL3_NOT_IMPLEMENTED; }
+
+						bool		IsSorted	() const final override CL3_GETTER { return false; }
+						const T&	operator[]	(ssys_t index) const final override CL3_GETTER { return this->arr_items[this->AbsIndex(index)]; }
+						const T*	ItemPtr		(ssys_t index) const final override CL3_GETTER { return this->arr_items + this->AbsIndex(index); }
+
+						CLASS explicit TStaticArray() {}
+						CLASS explicit TStaticArray(const T* arr_items_init, usys_t n_items_init);
+
+						template<typename... Args>
+						CLASS explicit TStaticArray(const T& a0, Args... args)
+						{
+							static_assert(sizeof...(Args) == n_items-1, "number of args must match n_items");
+							this->arr_items[0] = a0;
+							this->RecursiveInitItems(1, args...);
+						}
+				};
+
+				template<class T, usys_t n_items>
+				class	TStaticArray : public virtual TStaticArray<const T, n_items>, public virtual IArray<T>
+				{
+					public:
+						system::memory::TUniquePtr<IStaticIterator<T> >
+								CreateStaticIterator	() final override CL3_WARN_UNUSED_RESULT;
+
+						T*		Claim		() { CL3_NOT_IMPLEMENTED; }
+
+						T&		operator[]	(ssys_t index) CL3_GETTER { return this->arr_items[this->AbsIndex(index)]; }
+						T*		ItemPtr		(ssys_t index) CL3_GETTER { return this->arr_items + this->AbsIndex(index); }
+
+						CLASS explicit TStaticArray() {}
+						CLASS explicit TStaticArray(const T* arr_items_init, usys_t n_items_init) : TStaticArray<const T, n_items>(arr_items_init, n_items_init) {}
+
+						template<typename... Args>
+						CLASS explicit TStaticArray(const T& a0, Args... args) : TStaticArray<const T, n_items>(a0, args...) {}
+				};
+
+				template<class T, usys_t n_items>
+				CLASS TStaticArray<const T, n_items>::TStaticArray(const T* arr_items_init, usys_t n_items_init)
+				{
+					CL3_CLASS_ERROR(n_items != n_items_init, error::TException, "n_items does not match in constructor");
+					for(usys_t i = 0; i < n_items; i++)
+						this->arr_items[i] = arr_items_init[i];
+				}
+
+				template<class T, usys_t n_items>
+				system::memory::TUniquePtr<IStaticIterator<const T> >
+						TStaticArray<const T, n_items>::CreateStaticIterator	() const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				template<class T, usys_t n_items>
+				system::memory::TUniquePtr<IStaticIterator<T> >
+						TStaticArray<T, n_items>::CreateStaticIterator		()
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
 			}
 		}
 	}

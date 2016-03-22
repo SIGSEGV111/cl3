@@ -770,16 +770,16 @@ namespace
 // 			TList<usys_t> list;
 // 			for(usys_t i = 0; i < n; i++)
 // 				list.Add(i);
-// 
+//
 // 			for(usys_t i = 0; i < n; i++)
 // 				EXPECT_EQ(i, *list.Find(i, 0, DIRECTION_FORWARD));
-// 
+//
 // 			for(usys_t i = 0; i < n; i++)
 // 				EXPECT_EQ(i, *list.Find(i, i, DIRECTION_FORWARD));
-// 
+//
 // 			for(usys_t i = 0; i < n; i++)
 // 				EXPECT_EQ(i, *list.Find(i, 0, DIRECTION_BACKWARD));
-// 
+//
 // 			for(usys_t i = 0; i < n; i++)
 // 				EXPECT_EQ(i, *list.Find(i, i, DIRECTION_BACKWARD));
 // 		}
@@ -806,6 +806,44 @@ namespace
 				EXPECT_EQ(i, *list.Find(i, i, DIRECTION_BACKWARD));
 		}
 	}
+}
+
+namespace
+{
+	using namespace cl3::io::collection;
+	using namespace cl3::io::collection::array;
+	using namespace cl3::system::types;
+	using namespace cl3::unittest_support;
+
+	TEST(io_collection_array_TStaticArray, Construct_without_args)
+	{
+		TStaticArray<int, 3> array;
+	}
+
+	TEST(io_collection_array_TStaticArray, Construct_correct_number_of_args)
+	{
+		TStaticArray<int, 3> array(0,1,2);
+
+		EXPECT_EQ(0, array[0]);
+		EXPECT_EQ(1, array[1]);
+		EXPECT_EQ(2, array[2]);
+	}
+
+	TEST(io_collection_array_TStaticArray, Construct_wrong_number_of_args)
+	{
+		bool ok = false;
+		int arr_src[] = { 1,2,3,4 };
+		try
+		{
+			TStaticArray<int, 3> array(arr_src, 4);
+		}
+		catch(const cl3::error::TException&)
+		{
+			ok = true;
+		}
+		EXPECT_TRUE(ok);
+	}
+}
 
 // 	TEST(io_collection_list_TList, Find_first)
 // 	{
@@ -814,17 +852,17 @@ namespace
 // 			TList<usys_t> list;
 // 			for(usys_t i = 0; i < n; i++)
 // 				list.Add(i/3);
-// 
+//
 // 			for(usys_t i = 0; i < n/3; i++)
 // 				EXPECT_EQ(i*3, *list.Find(i, 0, DIRECTION_FORWARD));
-// 
+//
 // // 			list.Sorted(true);
-// // 
+// //
 // // 			for(usys_t i = 0; i < n/3; i++)
 // // 				EXPECT_EQ(i*3, list.Find(i, 0, DIRECTION_FORWARD));
 // 		}
 // 	}
-// 
+//
 // 	TEST(io_collection_list_TList, Find_last)
 // 	{
 // 		for(usys_t n = 0; n <= 1000; n += 97)
@@ -832,17 +870,16 @@ namespace
 // 			TList<usys_t> list;
 // 			for(usys_t i = 0; i < n; i++)
 // 				list.Add(i/3);
-// 
+//
 // 			for(usys_t i = 0; i < n/3; i++)
 // 				EXPECT_EQ(i*3+2, *list.Find(i, 0, DIRECTION_BACKWARD));
-// 
+//
 // // 			list.Sorted(true);
-// // 
+// //
 // // 			for(usys_t i = 0; i < n/3; i++)
 // // 				EXPECT_EQ(i*3+2, list.Find(i, 0, DIRECTION_BACKWARD));
 // 		}
 // 	}
-}
 
 
 
