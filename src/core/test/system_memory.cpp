@@ -215,9 +215,9 @@ namespace
 	{
 		ELastOp op1 = OP_UNDEFINED, op2 = OP_UNDEFINED, op3 = OP_UNDEFINED;
 
-		auto p1 = MakeSharedPtr<TCDCTester, THREADING_SINGLE>(&op1, 0);
-		auto p2 = MakeSharedPtr<TCDCTester, THREADING_SINGLE>(&op2, 17);
-		auto p3 = MakeSharedPtr<TCDCTester, THREADING_MULTI>(&op3, 112);
+		TSharedPtr<TCDCTester, THREADING_SINGLE> p1 = new TShared<TCDCTester, THREADING_SINGLE>(&op1, 0);
+		TSharedPtr<TCDCTester, THREADING_SINGLE> p2 = new TShared<TCDCTester, THREADING_SINGLE>(&op2, 17);
+		TSharedPtr<TCDCTester, THREADING_MULTI> p3 = new TShared<TCDCTester, THREADING_MULTI>(&op3, 112);
 
 		EXPECT_TRUE(op1 == OP_CONSTRUCT);
 		EXPECT_TRUE(op2 == OP_CONSTRUCT);

@@ -19,6 +19,8 @@
 #ifndef	_include_cl3_core_system_memory_hpp_
 #define	_include_cl3_core_system_memory_hpp_
 
+#include <utility>
+
 #include "system_compiler.hpp"
 #include "system_types.hpp"
 #include "error.hpp"
@@ -161,17 +163,17 @@ namespace	cl3
 
 					void	DecRef	() const
 					{
-						usys_t n_refs_now;
+						usys_t n_refs_before;
 						switch(th)
 						{
 							case THREADING_SINGLE:
-								n_refs_now = n_refs--;
+								n_refs_before = n_refs--;
 								break;
 							case THREADING_MULTI:
-								n_refs_now = system::compiler::AtomicSub<usys_t>(n_refs, 1);
+								n_refs_before = system::compiler::AtomicSub<usys_t>(n_refs, 1);
 								break;
 						}
-						if(n_refs_now == 1)
+						if(n_refs_before == 1)
 							delete this;
 					}
 
@@ -180,36 +182,9 @@ namespace	cl3
 
 				public:
 					CLASS	TShared	() : n_refs(0), object() {}
-					template<class A1>
-					CLASS	TShared(A1 a1) : n_refs(0), object(a1) {}
-					template<class A1, class A2>
-					CLASS	TShared(A1 a1, A2 a2) : n_refs(0), object(a1, a2) {}
-					template<class A1, class A2, class A3>
-					CLASS	TShared(A1 a1, A2 a2, A3 a3) : n_refs(0), object(a1, a2, a3) {}
-					template<class A1, class A2, class A3, class A4>
-					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4) : n_refs(0), object(a1, a2, a3, a4) {}
-					template<class A1, class A2, class A3, class A4, class A5>
-					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) : n_refs(0), object(a1, a2, a3, a4, a5) {}
-					template<class A1, class A2, class A3, class A4, class A5, class A6>
-					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) : n_refs(0), object(a1, a2, a3, a4, a5, a6) {}
-					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7>
-					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7) {}
-					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
-					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8) {}
-					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
-					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9) {}
-					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
-					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) {}
-					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
-					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) {}
-					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
-					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12) {}
-					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
-					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13) {}
-					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
-					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14) {}
-					template<class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
-					CLASS	TShared(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) : n_refs(0), object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) {}
+
+					template<typename... Args>
+					CLASS	TShared	(Args&&... args) : n_refs(0), object(std::forward<Args>(args)...) {}
 			};
 
 			template<class T, EThreading th = THREADING_MULTI>
@@ -231,23 +206,6 @@ namespace	cl3
 					CLASS	TSharedPtr	(const TSharedPtr& rhs) : rcobj(rhs.rcobj)		{ if(rcobj) rcobj->IncRef(); }
 					CLASS	~TSharedPtr	() 												{ if(rcobj) rcobj->DecRef(); }
 			};
-
-			template<class T, EThreading th> static TSharedPtr<T,th> MakeSharedPtr() { return TSharedPtr<T,th>(new TShared<T,th>()); }
-			template<class T, EThreading th, class A1> static TSharedPtr<T,th> MakeSharedPtr(A1 a1) { return TSharedPtr<T,th>(new TShared<T,th>(a1)); }
-			template<class T, EThreading th, class A1, class A2> static TSharedPtr<T,th> MakeSharedPtr(A1 a1, A2 a2) { return TSharedPtr<T,th>(new TShared<T,th>(a1, a2)); }
-			template<class T, EThreading th, class A1, class A2, class A3> static TSharedPtr<T,th> MakeSharedPtr(A1 a1, A2 a2, A3 a3) { return TSharedPtr<T,th>(new TShared<T,th>(a1, a2, a3)); }
-			template<class T, EThreading th, class A1, class A2, class A3, class A4> static TSharedPtr<T,th> MakeSharedPtr(A1 a1, A2 a2, A3 a3, A4 a4) { return TSharedPtr<T,th>(new TShared<T,th>(a1, a2, a3, a4)); }
-			template<class T, EThreading th, class A1, class A2, class A3, class A4, class A5> static TSharedPtr<T,th> MakeSharedPtr(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) { return TSharedPtr<T,th>(new TShared<T,th>(a1, a2, a3, a4, a5)); }
-			template<class T, EThreading th, class A1, class A2, class A3, class A4, class A5, class A6> static TSharedPtr<T,th> MakeSharedPtr(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) { return TSharedPtr<T,th>(new TShared<T,th>(a1, a2, a3, a4, a5, a6)); }
-			template<class T, EThreading th, class A1, class A2, class A3, class A4, class A5, class A6, class A7> static TSharedPtr<T,th> MakeSharedPtr(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) { return TSharedPtr<T,th>(new TShared<T,th>(a1, a2, a3, a4, a5, a6, a7)); }
-			template<class T, EThreading th, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> static TSharedPtr<T,th> MakeSharedPtr(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) { return TSharedPtr<T,th>(new TShared<T,th>(a1, a2, a3, a4, a5, a6, a7, a8)); }
-			template<class T, EThreading th, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> static TSharedPtr<T,th> MakeSharedPtr(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) { return TSharedPtr<T,th>(new TShared<T,th>(a1, a2, a3, a4, a5, a6, a7, a8, a9)); }
-			template<class T, EThreading th, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> static TSharedPtr<T,th> MakeSharedPtr(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) { return TSharedPtr<T,th>(new TShared<T,th>(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)); }
-			template<class T, EThreading th, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> static TSharedPtr<T,th> MakeSharedPtr(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11) { return TSharedPtr<T,th>(new TShared<T,th>(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)); }
-			template<class T, EThreading th, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> static TSharedPtr<T,th> MakeSharedPtr(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12) { return TSharedPtr<T,th>(new TShared<T,th>(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)); }
-			template<class T, EThreading th, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> static TSharedPtr<T,th> MakeSharedPtr(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return TSharedPtr<T,th>(new TShared<T,th>(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)); }
-			template<class T, EThreading th, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> static TSharedPtr<T,th> MakeSharedPtr(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14) { return TSharedPtr<T,th>(new TShared<T,th>(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)); }
-			template<class T, EThreading th, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> static TSharedPtr<T,th> MakeSharedPtr(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13, A14 a14, A15 a15) { return TSharedPtr<T,th>(new TShared<T,th>(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)); }
 
 			class	CL3PUBT	TBadAllocException : public error::TException
 			{
