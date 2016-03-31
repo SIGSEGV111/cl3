@@ -135,28 +135,35 @@ namespace cl3
 			class TProcess
 			{
 				//	no monitoring, just information extracted from OS APIs (/proc/<pid>/*)
+				protected:
+					pid_t pid;
+					mutable system::memory::TUniquePtr<io::collection::list::TList<const io::text::string::TString>> args;
+					mutable system::memory::TUniquePtr<io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>> env;
+
 				public:
 					CL3PUBF pid_t ID() const CL3_GETTER;
 					CL3PUBF const io::text::string::TString& Executable() const CL3_GETTER;
 					CL3PUBF const io::collection::list::TList<const io::text::string::TString>& Arguments() const CL3_GETTER;
 					CL3PUBF const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& Environment() const CL3_GETTER;
+
+					CLASS explicit TProcess(pid_t pid);
 			};
 
-			class TProcessMonitor
-			{
-				//	monitoring using black-magic agent-library injection
-				public:
-					CL3PUBF const synchronization::ISignal& OnShutdown() const CL3_GETTER;
-					CL3PUBF const io::collection::list::TList<IThread* const>& Threads() const CL3_GETTER;
-
-					CL3PUBF explicit CLASS TProcessMonitor(system::memory::TUniquePtr<TProcess>);
-			};
-
-			class TProcessDebugger
-			{
-				//	ptrace()-like deep hijacking
-				//	to manipulate the input/output data streams (e.g. stdio) install IO-filters
-			};
+// 			class TProcessMonitor
+// 			{
+// 				//	monitoring using black-magic agent-library injection
+// 				public:
+// 					CL3PUBF const synchronization::ISignal& OnShutdown() const CL3_GETTER;
+// 					CL3PUBF const io::collection::list::TList<IThread* const>& Threads() const CL3_GETTER;
+//
+// 					CL3PUBF explicit CLASS TProcessMonitor(system::memory::TUniquePtr<TProcess>);
+// 			};
+//
+// 			class TProcessDebugger
+// 			{
+// 				//	ptrace()-like deep hijacking
+// 				//	to manipulate the input/output data streams (e.g. stdio) install IO-filters
+// 			};
 
 			class TLocalProcess : public TProcess
 			{
@@ -166,19 +173,18 @@ namespace cl3
 
 				protected:
 					io::collection::list::TList<IThread*> threads;
-					pid_t id;
 
 				public:
 					CL3PUBF pid_t ID() const CL3_GETTER;
 					CL3PUBF const io::collection::list::TList<IThread* const>& Threads() const CL3_GETTER;
 					CL3PUBF io::text::string::TString Executable() const CL3_GETTER;
-					CL3PUBF io::collection::list::TList<io::text::string::TString>& Arguments() const CL3_GETTER;
-					CL3PUBF io::collection::map::TStdMap<io::text::string::TString, io::text::string::TString> Environment() const CL3_GETTER;
+// 					CL3PUBF io::collection::list::TList<io::text::string::TString>& Arguments() const CL3_GETTER;
+// 					CL3PUBF io::collection::map::TStdMap<io::text::string::TString, io::text::string::TString> Environment() const CL3_GETTER;
 					CL3PUBF static TLocalProcess* Self();
 
-					CL3PUBF static io::stream::fd::TFDStream* StdIn() CL3_GETTER;
-					CL3PUBF static io::stream::fd::TFDStream* StdOut() CL3_GETTER;
-					CL3PUBF static io::stream::fd::TFDStream* StdErr() CL3_GETTER;
+					CL3PUBF static io::stream::fd::TFDStream& StdIn() CL3_GETTER;
+					CL3PUBF static io::stream::fd::TFDStream& StdOut() CL3_GETTER;
+					CL3PUBF static io::stream::fd::TFDStream& StdErr() CL3_GETTER;
 			};
 
 			/************************************************************************************/
@@ -293,9 +299,9 @@ namespace cl3
 			CL3PUBF system::memory::TUniquePtr<TProcess> CreateProcess(const io::text::string::TString& exe,
 					const io::collection::list::TList<const io::text::string::TString>& args,
 					const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& env = TLocalProcess::Self()->Environment(),
-					io::stream::IIn<byte_t>* stdin = TLocalProcess::StdIn(),
-					io::stream::IOut<byte_t>* stdout = TLocalProcess::StdOut(),
-					io::stream::IOut<byte_t>* stderr = TLocalProcess::StdErr());
+					io::stream::IIn<byte_t>* stdin = &TLocalProcess::StdIn(),
+					io::stream::IOut<byte_t>* stdout = &TLocalProcess::StdOut(),
+					io::stream::IOut<byte_t>* stderr = &TLocalProcess::StdErr());
 		}
 	}
 }

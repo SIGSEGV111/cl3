@@ -22,8 +22,8 @@
 
 #include "io_text_terminal.hpp"
 #include "error.hpp"
-#include "io_stdio.hpp"
 #include "system_memory.hpp"
+#include "system_task.hpp"
 
 namespace	cl3
 {
@@ -74,7 +74,7 @@ namespace	cl3
 				{
 					if(terminal == NULL)
 					{
-						TTerminal* t = new TTerminal(stdio::stdout.Value(), stdio::stdin.Value());
+						TTerminal* t = new TTerminal(&system::task::TLocalProcess::StdOut(), &system::task::TLocalProcess::StdIn());
 						if(terminal.AtomicSwap(NULL, t) != NULL)
 							delete t;
 					}

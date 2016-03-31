@@ -80,8 +80,8 @@ namespace	cl3
 						CL3PUBF	TString&	operator+=	(const collection::IStaticCollection<const wchar_t>& collection_append);
 						CL3PUBF	TString&	operator+=	(const collection::IStaticCollection<const TUTF32>& collection_append);
 
-						CL3PUBF	TString		operator+	(const TString& rhs);
-						CL3PUBF	TString		operator+	(TString&& rhs);
+						CL3PUBF	TString		operator+	(const TString& rhs) const;
+						CL3PUBF	TString		operator+	(TString&& rhs) const;
 
 						//	remove string
 						/*

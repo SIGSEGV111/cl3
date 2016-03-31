@@ -157,7 +157,7 @@ namespace	cl3
 			io::text::string::TString TLocalProcess::Executable() const
 			{
 				char symlink[32] = {};
-				snprintf(symlink, sizeof(symlink), "/proc/%d/exe", this->id);
+				snprintf(symlink, sizeof(symlink), "/proc/%d/exe", this->pid);
 				char exe[256];
 				CL3_CLASS_SYSERR(readlink(symlink, exe, sizeof(exe)));
 				return io::text::string::TString(exe);

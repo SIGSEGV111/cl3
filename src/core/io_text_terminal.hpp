@@ -19,7 +19,6 @@
 #ifndef	_include_cl3_core_io_text_terminal_hpp_
 #define	_include_cl3_core_io_text_terminal_hpp_
 
-#include "io_text.hpp"
 #include "io_text_encoding.hpp"
 
 namespace	cl3

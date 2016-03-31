@@ -47,7 +47,7 @@ namespace	cl3
 
 			pid_t TLocalProcess::ID() const
 			{
-				return this->id;
+				return this->pid;
 			}
 
 			const io::collection::list::TList<IThread* const>& TLocalProcess::Threads() const

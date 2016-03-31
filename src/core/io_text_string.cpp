@@ -204,12 +204,12 @@ namespace	cl3
 					return *this;
 				}
 
-				TString		TString::operator+	(const TString& rhs)
+				TString		TString::operator+	(const TString& rhs) const
 				{
 					return TString(*this) += rhs;
 				}
 
-				TString		TString::operator+	(TString&& rhs)
+				TString		TString::operator+	(TString&& rhs) const
 				{
 					rhs.Insert(0, *this);
 					return rhs;

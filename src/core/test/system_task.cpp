@@ -38,16 +38,18 @@ namespace
 {
 	using namespace cl3::system::types;
 	using namespace cl3::system::task;
-	using namespace cl3::system::task::synchronization;
 	using namespace cl3::system::memory;
 	using namespace cl3::system::time;
 	using namespace cl3::io::text;
-	using namespace cl3::io::file;
 	using namespace cl3::io::text::string;
-	using namespace cl3::io::text::encoding;
-	using namespace cl3::io::text::encoding::utf8;
 	using namespace cl3::io::collection::list;
 	using namespace cl3::io::collection;
 	using namespace cl3::error;
 
+	TEST(system_task_CreateProcess, basic)
+	{
+		TList<TString> args;
+		args.Append("test");
+		TUniquePtr<TProcess> p = CreateProcess("/bin/echo", args);
+	}
 }

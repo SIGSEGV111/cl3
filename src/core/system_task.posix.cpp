@@ -38,6 +38,8 @@
 #include <pthread.h>
 #include <sys/wait.h>
 
+#include <stdio.h>
+
 namespace	cl3
 {
 	namespace	io
@@ -56,6 +58,7 @@ namespace	cl3
 			using namespace io::collection::list;
 			using namespace io::text::string;
 			using namespace io::stream;
+			using namespace io::stream::fd;
 			using namespace io::text::encoding;
 			using namespace error;
 			using namespace memory;
@@ -86,19 +89,30 @@ namespace	cl3
 
 			/**************************************************************************************/
 
-			CLASS TLocalProcess::TLocalProcess()
+			CLASS TLocalProcess::TLocalProcess() : TProcess(getpid())
 			{
-				this->id = getpid();
 			}
 
-			io::collection::list::TList<io::text::string::TString>& TLocalProcess::Arguments() const
+			const io::collection::list::TList<const io::text::string::TString>& TProcess::Arguments() const
 			{
-				CL3_NOT_IMPLEMENTED;
+				if(this->args == NULL)
+				{
+					this->args = MakeUniquePtr(new io::collection::list::TList<const io::text::string::TString>());
+				}
+				return *this->args;
 			}
 
-			io::collection::map::TStdMap<io::text::string::TString, io::text::string::TString> TLocalProcess::Environment() const
+			const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& TProcess::Environment() const
 			{
-				CL3_NOT_IMPLEMENTED;
+				if(this->env == NULL)
+				{
+					this->env = MakeUniquePtr(new io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>());
+				}
+				return *this->env;
+			}
+
+			CLASS	TProcess::TProcess(pid_t pid) : pid(pid)
+			{
 			}
 
 			/**************************************************************************************/
@@ -176,6 +190,189 @@ namespace	cl3
 
 			/**************************************************************************************/
 
+			static TFDStream fds_stdin(STDIN_FILENO);
+			static TFDStream fds_stdout(STDOUT_FILENO);
+			static TFDStream fds_stderr(STDERR_FILENO);
+
+			io::stream::fd::TFDStream& TLocalProcess::StdIn()
+			{
+				return fds_stdin;
+			}
+
+			io::stream::fd::TFDStream& TLocalProcess::StdOut()
+			{
+				return fds_stdout;
+			}
+
+			io::stream::fd::TFDStream& TLocalProcess::StdErr()
+			{
+				return fds_stderr;
+			}
+
+			/**************************************************************************************/
+
+			struct TPipe
+			{
+				int fd[2];	//	[0] = read; [1] = write
+
+				void CloseRead()
+				{
+					if(fd[0] != -1)
+					{
+						CL3_NONCLASS_SYSERR(::close(fd[0]));
+						fd[0] = -1;
+					}
+				}
+
+				void CloseWrite()
+				{
+					if(fd[1] != -1)
+					{
+						CL3_NONCLASS_SYSERR(::close(fd[1]));
+						fd[1] = -1;
+					}
+				}
+
+				int ReadFD() const CL3_GETTER
+				{
+					return this->fd[0];
+				}
+
+				int WriteFD() const CL3_GETTER
+				{
+					return this->fd[1];
+				}
+
+				CLASS TPipe()
+				{
+					fd[0] = -1;
+					fd[1] = -1;
+					CL3_NONCLASS_SYSERR(::pipe(this->fd));
+					try
+					{
+						CL3_CLASS_LOGIC_ERROR(fd[0] == STDIN_FILENO || fd[0] == STDOUT_FILENO || fd[0] == STDERR_FILENO);
+						CL3_CLASS_LOGIC_ERROR(fd[1] == STDIN_FILENO || fd[1] == STDOUT_FILENO || fd[1] == STDERR_FILENO);
+					}
+					catch(...)
+					{
+						::close(fd[0]);
+						::close(fd[1]);
+						throw;
+					}
+				}
+
+				CLASS ~TPipe()
+				{
+					if(fd[0] != -1)
+						::close(fd[0]);
+					if(fd[1] != -1)
+						::close(fd[1]);
+				}
+
+				CLASS TPipe(const TPipe&) = delete;
+			};
+
+			/**************************************************************************************/
+
+			system::memory::TUniquePtr<TProcess> CreateProcess(const io::text::string::TString& exe,
+																const io::collection::list::TList<const io::text::string::TString>& args,
+																const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& env,
+																io::stream::IIn<byte_t>* stdin,
+																io::stream::IOut<byte_t>* stdout,
+																io::stream::IOut<byte_t>* stderr)
+			{
+				TPipe* pipe_stdin = stdin != NULL && stdin != &TLocalProcess::StdIn() ? new TPipe() : NULL;
+				TPipe* pipe_stdout = stdout != NULL && stdout != &TLocalProcess::StdOut() ? new TPipe() : NULL;
+				TPipe* pipe_stderr = stderr != NULL && stderr != &TLocalProcess::StdErr() ? new TPipe() : NULL;
+
+				int pid_child;
+				CL3_NONCLASS_SYSERR(pid_child = ::fork());
+
+				if(pid_child == 0)
+				{
+					try
+					{
+						//	child
+						if(pipe_stdin)
+						{
+							pipe_stdin->CloseWrite();
+							CL3_NONCLASS_SYSERR(::dup2(STDIN_FILENO, pipe_stdin->ReadFD()));
+							pipe_stdin->CloseRead();
+						}
+						else if(stdin == NULL)
+							::close(STDIN_FILENO);
+
+						if(pipe_stdout)
+						{
+							pipe_stdout->CloseRead();
+							CL3_NONCLASS_SYSERR(::dup2(STDOUT_FILENO, pipe_stdout->WriteFD()));
+							pipe_stdout->CloseWrite();
+						}
+						else if(stdout == NULL)
+							::close(STDOUT_FILENO);
+
+						if(pipe_stderr)
+						{
+							pipe_stderr->CloseRead();
+							CL3_NONCLASS_SYSERR(::dup2(STDERR_FILENO, pipe_stderr->WriteFD()));
+							pipe_stderr->CloseWrite();
+						}
+						else if(stderr == NULL)
+							::close(STDERR_FILENO);
+
+						TList<char*> args_cstr;
+						args_cstr.Count(args.Count() + 2);	//	+2 for exe filename and terminating NULL
+						memset(args_cstr.ItemPtr(0), 0, args_cstr.Count() * sizeof(char*));
+
+						TList<char*> env_cstr;
+						env_cstr.Count(env.Count() + 1);	//	+1 for the terminating NULL
+						memset(env_cstr.ItemPtr(0),  0, env_cstr.Count()  * sizeof(char*));
+
+						args_cstr[0] = (char*)TCString(exe, CODEC_CXX_CHAR).Claim();
+
+						auto it = args.CreateStaticIterator();
+						for(usys_t i = 1; it->MoveNext(); i++)
+							args_cstr[i] = (char*)TCString(it->Item(), CODEC_CXX_CHAR).Claim();
+
+// 						auto it = env.CreateStaticIterator();
+// 						for(usys_t i = 0; it->MoveNext(); i++)
+// 							env_cstr[i] = (char*)TCString(it->Item().key + "=" + it->Item().value, CODEC_CXX_CHAR).Claim();
+
+						printf("args_cstr[0] = \"%s\"; args = [ \"%s\", %p ]\n", args_cstr[0], args_cstr[1], args_cstr[2]);
+						const long r = ::execvpe(args_cstr[0], (char**)args_cstr.ItemPtr(0), (char**)env_cstr.ItemPtr(0));
+						printf("r = %ld; errno = %d\n", r, errno);
+						perror("exec failed");
+					}
+					catch(...)
+					{
+					}
+					::_exit(1);
+					CL3_NONCLASS_LOGIC_ERROR(true);
+				}
+				else
+				{
+					//	parent
+					if(pipe_stdin)
+					{
+						pipe_stdin->CloseRead();
+						//	TODO: create and register an async event handler for I/O
+					}
+
+					if(pipe_stdout)
+					{
+						pipe_stdout->CloseWrite();
+						//	TODO: create and register an async event handler for I/O
+					}
+
+					if(pipe_stderr)
+					{
+						pipe_stderr->CloseWrite();
+						//	TODO: create and register an async event handler for I/O
+					}
+
+					return MakeUniquePtr<TProcess>(NULL);
+				}
+			}
 		}
 	}
 }
