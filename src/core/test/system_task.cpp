@@ -63,4 +63,13 @@ namespace
 		EXPECT_EQ(TString("dummy2"), args[2]);
 		EXPECT_EQ(TString("dummy3"), args[3]);
 	}
+
+	TEST(system_task_TLocalProcess, Environment)
+	{
+		auto& env = TLocalProcess::Self()->Environment();
+
+		printf("env.Count() = %zu\n", env.Count());
+		for(auto it = env.CreateStaticIterator(); it->IsValid(); it->MoveNext())
+			printf("key = \"%s\"; value = \"%s\"\n", TCString(it->Item().key, CODEC_CXX_CHAR).Chars(), TCString(it->Item().value, CODEC_CXX_CHAR).Chars());
+	}
 }

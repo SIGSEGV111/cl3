@@ -362,6 +362,8 @@ namespace	cl3
 				{
 					if(n_chars > this->Count())
 						n_chars = this->Count();
+					if(n_chars == 0)
+						return TString();
 					TString r;
 					r.Append(this->ItemPtr(0), n_chars);
 					return r;
@@ -371,6 +373,8 @@ namespace	cl3
 				{
 					if(n_chars > this->Count())
 						n_chars = this->Count();
+					if(n_chars == 0)
+						return TString();
 					TString r;
 					r.Append(this->ItemPtr(this->Count() - n_chars), n_chars);
 					return r;
@@ -380,6 +384,8 @@ namespace	cl3
 				{
 					if(n_chars == (usys_t)-1)
 						n_chars = this->Count() - index;
+					if(n_chars == 0)
+						return TString();
 					CL3_CLASS_ERROR(index + n_chars > this->Count(), collection::TIndexOutOfBoundsException, index + n_chars - 1, this->Count());
 					TString r;
 					r.Append(this->ItemPtr(index), n_chars);

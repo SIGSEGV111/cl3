@@ -50,8 +50,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/syscall.h>
-#include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 using namespace cl3::system::types;
 
@@ -149,6 +150,9 @@ namespace	cl3
 		namespace	task
 		{
 			using namespace io::file;
+			using namespace io::collection::map;
+			using namespace memory;
+			using namespace error;
 
 			pid_t gettid()
 			{
@@ -156,6 +160,32 @@ namespace	cl3
 			}
 
 			/************************************************************************************/
+
+			static void ReadProcFile(const char* filename, char*& buffer, usys_t& sz)
+			{
+				sz = 1024;
+				usys_t p = 0;
+				ssize_t r;
+				buffer = (char*)Alloc(sz, NULL);
+				int fd;
+				CL3_NONCLASS_SYSERR(fd = ::open(filename, O_RDONLY|O_CLOEXEC|O_NOCTTY));
+
+				for(;;)
+				{
+					CL3_NONCLASS_SYSERR(r = ::read(fd, buffer + p, sz - p));
+					if(r == 0)
+						break;
+
+					p += r;
+					if(sz == p)
+					{
+						sz += 1024;
+						buffer = (char*)Realloc(buffer, sz, NULL, false);
+					}
+				}
+				::close(fd);
+				sz = p;
+			}
 
 			io::text::string::TString TLocalProcess::Executable() const
 			{
@@ -174,20 +204,38 @@ namespace	cl3
 
 					char filename[32] = {};
 					snprintf(filename, sizeof(filename), "/proc/%d/cmdline", this->pid);
-					TFile file(filename);
+					char* buffer = NULL;
+					usys_t sz = 0;
 
-					const usys_t sz = file.Count();
-					char buffer[sz];
-					TStream(&file).Read((byte_t*)buffer, sz);
+					try
+					{
+						ReadProcFile(filename, buffer, sz);
 
-					this->args->Append(TString(buffer));
+						if(sz > 0)
+							this->args->Append(TString(buffer));
 
-					char* e = buffer + sz - 1;
-					for(char* p = buffer; p < e; p++)
-						if(*p == 0)
-							this->args->Append(TString(p+1));
+						char* e = buffer + sz - 1;
+						for(char* p = buffer; p < e; p++)
+							if(*p == 0)
+								this->args->Append(TString(p+1));
+
+						Free(buffer);
+					}
+					catch(...)
+					{
+						Free(buffer);
+						throw;
+					}
 				}
+
 				return *this->args;
+			}
+
+			static TPair<TString, TString> SplitKeyValue(const TString& str)
+			{
+				TString key = str.Left(str.Find("="));
+				TString value = str.Slice(str.Find("=")+1);
+				return TPair<TString, TString>(key, value);
 			}
 
 			const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& TProcess::Environment() const
@@ -195,6 +243,31 @@ namespace	cl3
 				if(this->env == NULL)
 				{
 					this->env = MakeUniquePtr(new io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>());
+
+					char filename[32] = {};
+					snprintf(filename, sizeof(filename), "/proc/%d/environ", this->pid);
+					char* buffer = NULL;
+					usys_t sz = 0;
+
+					try
+					{
+						ReadProcFile(filename, buffer, sz);
+
+						if(sz > 0)
+							this->env->Add(SplitKeyValue(buffer));
+
+						char* e = buffer + sz - 1;
+						for(char* p = buffer; p < e; p++)
+							if(*p == 0)
+								this->env->Add(SplitKeyValue(p+1));
+
+						Free(buffer);
+					}
+					catch(...)
+					{
+						Free(buffer);
+						throw;
+					}
 				}
 				return *this->env;
 			}

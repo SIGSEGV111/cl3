@@ -30,105 +30,108 @@ namespace	cl3
 		{
 			namespace	map
 			{
-				template<class TKey, class TItem>
+				template<class TKey, class TValue>
 				struct TPair
 				{
-					TItem key;
-					TKey value;
+					TKey key;
+					TValue value;
 
 					inline bool operator==(const TPair& rhs) const { return this->key == rhs.key && this->value == rhs.value; }
+
+					CLASS explicit TPair() {}
+					CLASS explicit TPair(TKey key, TValue value) : key(key), value(value) {}
 				};
 
-				template<class TKey, class TItem>
+				template<class TKey, class TValue>
 				struct	IMap;
 
-				template<class TKey, class TItem>
-				struct	IMap<const TKey, const TItem> : virtual IDynamicCollection<const TPair<TKey, TItem>>
+				template<class TKey, class TValue>
+				struct	IMap<const TKey, const TValue> : virtual IDynamicCollection<const TPair<TKey, TValue>>
 				{
-					virtual	const TItem&	operator[]	(const TKey&) const CL3_GETTER = 0;
+					virtual	const TValue&	operator[]	(const TKey&) const CL3_GETTER = 0;
 				};
 
-				template<class TKey, class TItem>
-				struct	IMap : virtual IMap<const TKey, const TItem>, virtual IDynamicCollection<TPair<TKey, TItem>>
+				template<class TKey, class TValue>
+				struct	IMap : virtual IMap<const TKey, const TValue>, virtual IDynamicCollection<TPair<TKey, TValue>>
 				{
-					virtual	TItem&	operator[]	(const TKey&) CL3_GETTER = 0;
+					virtual	TValue&	operator[]	(const TKey&) CL3_GETTER = 0;
 				};
 
 				/************************************************************************************/
 
-				template<class TKey, class TItem>
+				template<class TKey, class TValue>
 				class TInlinedMap;
 
-				template<class TKey, class TItem>
-				class TInlinedMap<const TKey, const TItem> : virtual IMap<const TKey, const TItem>
+				template<class TKey, class TValue>
+				class TInlinedMap<const TKey, const TValue> : virtual IMap<const TKey, const TValue>
 				{
 				};
 
-				template<class TKey, class TItem>
-				class TInlinedMap : public TInlinedMap<const TKey, const TItem>, virtual IMap<TKey, TItem>
+				template<class TKey, class TValue>
+				class TInlinedMap : public TInlinedMap<const TKey, const TValue>, virtual IMap<TKey, TValue>
 				{
 				};
 
 				/************************************************************************************/
 
-				template<class TKey, class TItem>
+				template<class TKey, class TValue>
 				class TStdMap;
 
-				template<class TKey, class TItem>
-				class TStdMap<const TKey, const TItem> : public virtual IMap<const TKey, const TItem>
+				template<class TKey, class TValue>
+				class TStdMap<const TKey, const TValue> : public virtual IMap<const TKey, const TValue>
 				{
 					protected:
-						list::TList<TPair<TKey, TItem>> items;
+						list::TList<TPair<TKey, TValue>> items;
 
 					public:
 						//	from IMap
-						CL3PUBF	const TItem&	operator[]	(const TKey&) const final override CL3_GETTER;
+						CL3PUBF	const TValue&	operator[]	(const TKey&) const final override CL3_GETTER;
 
 						//	from IDynamicCollection
-						CL3PUBF	void			Add			(const TPair<TKey, TItem>& item_add) final override;
-						CL3PUBF	void			Add			(const TPair<TKey, TItem>* arr_items_add, usys_t n_items_add) final override;
-						CL3PUBF	void			Add			(const IStaticCollection<const TPair<TKey, TItem>>& collection) final override;
-						CL3PUBF	system::memory::TUniquePtr<IDynamicIterator<const TPair<TKey, TItem>> >
+						CL3PUBF	void			Add			(const TPair<TKey, TValue>& item_add) final override;
+						CL3PUBF	void			Add			(const TPair<TKey, TValue>* arr_items_add, usys_t n_items_add) final override;
+						CL3PUBF	void			Add			(const IStaticCollection<const TPair<TKey, TValue>>& collection) final override;
+						CL3PUBF	system::memory::TUniquePtr<IDynamicIterator<const TPair<TKey, TValue>> >
 									CreateDynamicIterator	() const final override CL3_WARN_UNUSED_RESULT;
 
 						//	from IStaticCollection
 						CL3PUBF	usys_t			Count		() const final override CL3_GETTER;
-						CL3PUBF	bool			Contains	(const TPair<TKey, TItem>& item) const final override CL3_GETTER;
-						CL3PUBF	system::memory::TUniquePtr<IStaticIterator<const TPair<TKey, TItem>> >
+						CL3PUBF	bool			Contains	(const TPair<TKey, TValue>& item) const final override CL3_GETTER;
+						CL3PUBF	system::memory::TUniquePtr<IStaticIterator<const TPair<TKey, TValue>> >
 									CreateStaticIterator	() const final override CL3_WARN_UNUSED_RESULT;
 
 						// from IOut
-						CL3PUBF	usys_t			Write		(const TPair<TKey, TItem>* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
+						CL3PUBF	usys_t			Write		(const TPair<TKey, TValue>* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 
 						//	from TStdMap
 						CL3PUBF	CLASS			TStdMap		();
 						CL3PUBF	CLASS virtual	~TStdMap	();
 				};
 
-				template<class TKey, class TItem>
-				class TStdMap : public virtual TStdMap<const TKey, const TItem>, public virtual IMap<TKey, TItem>
+				template<class TKey, class TValue>
+				class TStdMap : public virtual TStdMap<const TKey, const TValue>, public virtual IMap<TKey, TValue>
 				{
 					public:
-						using TStdMap<const TKey, const TItem>::CreateDynamicIterator;
-						using TStdMap<const TKey, const TItem>::CreateStaticIterator;
+						using TStdMap<const TKey, const TValue>::CreateDynamicIterator;
+						using TStdMap<const TKey, const TValue>::CreateStaticIterator;
 
 						//	from IMap
-						CL3PUBF	TItem&	operator[]	(const TKey&) final override CL3_GETTER;
+						CL3PUBF	TValue&	operator[]	(const TKey&) final override CL3_GETTER;
 
 						//	from IDynamicCollection
 						CL3PUBF	void	Clear		() final override;
-						CL3PUBF	bool	Remove		(const TPair<TKey, TItem>& item_remove) final override;
+						CL3PUBF	bool	Remove		(const TPair<TKey, TValue>& item_remove) final override;
 
-						CL3PUBF	system::memory::TUniquePtr<IDynamicIterator<TPair<TKey, TItem>> >
+						CL3PUBF	system::memory::TUniquePtr<IDynamicIterator<TPair<TKey, TValue>> >
 									CreateDynamicIterator	() final override CL3_WARN_UNUSED_RESULT;
 
 						//	from IStaticCollection
-						CL3PUBF	system::memory::TUniquePtr<IStaticIterator<TPair<TKey, TItem>> >
+						CL3PUBF	system::memory::TUniquePtr<IStaticIterator<TPair<TKey, TValue>> >
 									CreateStaticIterator	() final override CL3_WARN_UNUSED_RESULT;
 
 						//	from IIn
 						CL3PUBF	usys_t	Remaining	() const final override CL3_GETTER;
-						CL3PUBF	usys_t	Read		(TPair<TKey, TItem>* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT;
+						CL3PUBF	usys_t	Read		(TPair<TKey, TValue>* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT;
 
 						//	from TStdMap
 						CL3PUBF	CLASS			TStdMap		();
@@ -136,121 +139,121 @@ namespace	cl3
 				};
 
 
-				template<class TKey, class TItem>
-				const TItem&	TStdMap<const TKey, const TItem>::operator[]	(const TKey&) const
+				template<class TKey, class TValue>
+				const TValue&	TStdMap<const TKey, const TValue>::operator[]	(const TKey&) const
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				template<class TKey, class TItem>
-				void			TStdMap<const TKey, const TItem>::Add		(const TPair<TKey, TItem>& item_add)
+				template<class TKey, class TValue>
+				void			TStdMap<const TKey, const TValue>::Add		(const TPair<TKey, TValue>& item_add)
+				{
+					this->items.Append(item_add);	//	FIXME
+				}
+
+				template<class TKey, class TValue>
+				void			TStdMap<const TKey, const TValue>::Add		(const TPair<TKey, TValue>* arr_items_add, usys_t n_items_add)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				template<class TKey, class TItem>
-				void			TStdMap<const TKey, const TItem>::Add		(const TPair<TKey, TItem>* arr_items_add, usys_t n_items_add)
+				template<class TKey, class TValue>
+				void			TStdMap<const TKey, const TValue>::Add		(const IStaticCollection<const TPair<TKey, TValue>>& collection)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				template<class TKey, class TItem>
-				void			TStdMap<const TKey, const TItem>::Add		(const IStaticCollection<const TPair<TKey, TItem>>& collection)
+				template<class TKey, class TValue>
+				system::memory::TUniquePtr<IDynamicIterator<const TPair<TKey, TValue>> > TStdMap<const TKey, const TValue>::CreateDynamicIterator	() const
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				template<class TKey, class TItem>
-				system::memory::TUniquePtr<IDynamicIterator<const TPair<TKey, TItem>> > TStdMap<const TKey, const TItem>::CreateDynamicIterator	() const
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				template<class TKey, class TItem>
-				usys_t			TStdMap<const TKey, const TItem>::Count		() const
+				template<class TKey, class TValue>
+				usys_t			TStdMap<const TKey, const TValue>::Count		() const
 				{
 					return this->items.Count();
 				}
 
-				template<class TKey, class TItem>
-				bool			TStdMap<const TKey, const TItem>::Contains	(const TPair<TKey, TItem>& item) const
+				template<class TKey, class TValue>
+				bool			TStdMap<const TKey, const TValue>::Contains	(const TPair<TKey, TValue>& item) const
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				template<class TKey, class TItem>
-				system::memory::TUniquePtr<IStaticIterator<const TPair<TKey, TItem>>> TStdMap<const TKey, const TItem>::CreateStaticIterator	() const
+				template<class TKey, class TValue>
+				system::memory::TUniquePtr<IStaticIterator<const TPair<TKey, TValue>>> TStdMap<const TKey, const TValue>::CreateStaticIterator	() const
+				{
+					return this->items.CreateStaticIterator();
+				}
+
+				template<class TKey, class TValue>
+				usys_t			TStdMap<const TKey, const TValue>::Write		(const TPair<TKey, TValue>* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				template<class TKey, class TItem>
-				usys_t			TStdMap<const TKey, const TItem>::Write		(const TPair<TKey, TItem>* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				template<class TKey, class TValue>
+				CLASS			TStdMap<const TKey, const TValue>::TStdMap	()
+				{
+				}
+
+				template<class TKey, class TValue>
+				CLASS 			TStdMap<const TKey, const TValue>::~TStdMap	()
+				{
+				}
+
+				template<class TKey, class TValue>
+				TValue&	TStdMap<TKey, TValue>::operator[](const TKey&)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				template<class TKey, class TItem>
-				CLASS			TStdMap<const TKey, const TItem>::TStdMap	()
-				{
-				}
-
-				template<class TKey, class TItem>
-				CLASS 			TStdMap<const TKey, const TItem>::~TStdMap	()
-				{
-				}
-
-				template<class TKey, class TItem>
-				TItem&	TStdMap<TKey, TItem>::operator[](const TKey&)
+				template<class TKey, class TValue>
+				void	TStdMap<TKey, TValue>::Clear		()
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				template<class TKey, class TItem>
-				void	TStdMap<TKey, TItem>::Clear		()
+				template<class TKey, class TValue>
+				bool	TStdMap<TKey, TValue>::Remove	(const TPair<TKey, TValue>& item_remove)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				template<class TKey, class TItem>
-				bool	TStdMap<TKey, TItem>::Remove	(const TPair<TKey, TItem>& item_remove)
+				template<class TKey, class TValue>
+				system::memory::TUniquePtr<IDynamicIterator<TPair<TKey, TValue>>>
+						TStdMap<TKey, TValue>::CreateDynamicIterator	()
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				template<class TKey, class TItem>
-				system::memory::TUniquePtr<IDynamicIterator<TPair<TKey, TItem>>>
-						TStdMap<TKey, TItem>::CreateDynamicIterator	()
+				template<class TKey, class TValue>
+				system::memory::TUniquePtr<IStaticIterator<TPair<TKey, TValue>>>
+						TStdMap<TKey, TValue>::CreateStaticIterator	()
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				template<class TKey, class TItem>
-				system::memory::TUniquePtr<IStaticIterator<TPair<TKey, TItem>>>
-						TStdMap<TKey, TItem>::CreateStaticIterator	()
+				template<class TKey, class TValue>
+				usys_t	TStdMap<TKey, TValue>::Remaining	() const
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				template<class TKey, class TItem>
-				usys_t	TStdMap<TKey, TItem>::Remaining	() const
+				template<class TKey, class TValue>
+				usys_t	TStdMap<TKey, TValue>::Read		(TPair<TKey, TValue>* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				template<class TKey, class TItem>
-				usys_t	TStdMap<TKey, TItem>::Read		(TPair<TKey, TItem>* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
-				{
-					CL3_NOT_IMPLEMENTED;
-				}
-
-				template<class TKey, class TItem>
-				CLASS	TStdMap<TKey, TItem>::TStdMap	()
+				template<class TKey, class TValue>
+				CLASS	TStdMap<TKey, TValue>::TStdMap	()
 				{
 				}
 
-				template<class TKey, class TItem>
-				CLASS	TStdMap<TKey, TItem>::~TStdMap	()
+				template<class TKey, class TValue>
+				CLASS	TStdMap<TKey, TValue>::~TStdMap	()
 				{
 				}
 			}
