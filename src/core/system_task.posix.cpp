@@ -93,24 +93,6 @@ namespace	cl3
 			{
 			}
 
-			const io::collection::list::TList<const io::text::string::TString>& TProcess::Arguments() const
-			{
-				if(this->args == NULL)
-				{
-					this->args = MakeUniquePtr(new io::collection::list::TList<const io::text::string::TString>());
-				}
-				return *this->args;
-			}
-
-			const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& TProcess::Environment() const
-			{
-				if(this->env == NULL)
-				{
-					this->env = MakeUniquePtr(new io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>());
-				}
-				return *this->env;
-			}
-
 			CLASS	TProcess::TProcess(pid_t pid) : pid(pid)
 			{
 			}
@@ -300,7 +282,7 @@ namespace	cl3
 							pipe_stdin->CloseRead();
 						}
 						else if(stdin == NULL)
-							::close(STDIN_FILENO);
+							::close(STDIN_FILENO);	//	FIXME: pass a handle to /dev/null
 
 						if(pipe_stdout)
 						{
@@ -309,7 +291,7 @@ namespace	cl3
 							pipe_stdout->CloseWrite();
 						}
 						else if(stdout == NULL)
-							::close(STDOUT_FILENO);
+							::close(STDOUT_FILENO);	//	FIXME: pass a handle to /dev/null
 
 						if(pipe_stderr)
 						{
@@ -318,7 +300,7 @@ namespace	cl3
 							pipe_stderr->CloseWrite();
 						}
 						else if(stderr == NULL)
-							::close(STDERR_FILENO);
+							::close(STDERR_FILENO);	//	FIXME: pass a handle to /dev/null
 
 						TList<char*> args_cstr;
 						args_cstr.Count(args.Count() + 2);	//	+2 for exe filename and terminating NULL
@@ -331,6 +313,7 @@ namespace	cl3
 						args_cstr[0] = (char*)TCString(exe, CODEC_CXX_CHAR).Claim();
 
 						auto it = args.CreateStaticIterator();
+						it->MoveHead();
 						for(usys_t i = 1; it->MoveNext(); i++)
 							args_cstr[i] = (char*)TCString(it->Item(), CODEC_CXX_CHAR).Claim();
 
@@ -338,10 +321,7 @@ namespace	cl3
 // 						for(usys_t i = 0; it->MoveNext(); i++)
 // 							env_cstr[i] = (char*)TCString(it->Item().key + "=" + it->Item().value, CODEC_CXX_CHAR).Claim();
 
-						printf("args_cstr[0] = \"%s\"; args = [ \"%s\", %p ]\n", args_cstr[0], args_cstr[1], args_cstr[2]);
-						const long r = ::execvpe(args_cstr[0], (char**)args_cstr.ItemPtr(0), (char**)env_cstr.ItemPtr(0));
-						printf("r = %ld; errno = %d\n", r, errno);
-						perror("exec failed");
+						::execvpe(args_cstr[0], (char**)args_cstr.ItemPtr(0), (char**)env_cstr.ItemPtr(0));
 					}
 					catch(...)
 					{
@@ -370,7 +350,7 @@ namespace	cl3
 						//	TODO: create and register an async event handler for I/O
 					}
 
-					return MakeUniquePtr<TProcess>(NULL);
+					return MakeUniquePtr<TProcess>(new TProcess(pid_child));
 				}
 			}
 		}

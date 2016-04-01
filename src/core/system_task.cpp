@@ -21,6 +21,7 @@
 #endif
 
 #include "system_task.hpp"
+#include "system_memory.hpp"
 #include "error.hpp"
 #include "io_collection_list.hpp"
 
@@ -37,12 +38,13 @@ namespace	cl3
 				return TLocalThread::Self()->CurrentFiber();
 			}
 
+			static memory::TUniquePtr<TLocalProcess> proc_self;
+
 			TLocalProcess* TLocalProcess::Self()
 			{
-				static TLocalProcess* proc_self = NULL;
 				if(proc_self == NULL)
-					proc_self = new TLocalProcess();
-				return proc_self;
+					proc_self = memory::MakeUniquePtr(new TLocalProcess());
+				return proc_self.Object();
 			}
 
 			pid_t TLocalProcess::ID() const

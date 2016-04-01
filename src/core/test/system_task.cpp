@@ -41,15 +41,26 @@ namespace
 	using namespace cl3::system::memory;
 	using namespace cl3::system::time;
 	using namespace cl3::io::text;
+	using namespace cl3::io::text::encoding;
 	using namespace cl3::io::text::string;
 	using namespace cl3::io::collection::list;
 	using namespace cl3::io::collection;
 	using namespace cl3::error;
 
-	TEST(system_task_CreateProcess, basic)
+	TEST(system_task_CreateProcess, Invocation)
 	{
+		//	will not output anything, but will test if the call to CreateProcess works without error
 		TList<TString> args;
-		args.Append("test");
+		args.Append("-n");
 		TUniquePtr<TProcess> p = CreateProcess("/bin/echo", args);
+	}
+
+	TEST(system_task_TLocalProcess, Arguments)
+	{
+		//	test if the commandline arguments to the process running these tests are dummy1 dummy2 dummy3
+		auto& args = TLocalProcess::Self()->Arguments();
+		EXPECT_EQ(TString("dummy1"), args[1]);
+		EXPECT_EQ(TString("dummy2"), args[2]);
+		EXPECT_EQ(TString("dummy3"), args[3]);
 	}
 }

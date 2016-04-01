@@ -36,6 +36,7 @@
 #include "io_text_string.hpp"
 #include "io_collection_list.hpp"
 #include "io_text_encoding.hpp"
+#include "io_file.hpp"
 #include "util.hpp"
 #include "error.hpp"
 
@@ -147,6 +148,8 @@ namespace	cl3
 	{
 		namespace	task
 		{
+			using namespace io::file;
+
 			pid_t gettid()
 			{
 				return (pid_t)syscall(SYS_gettid);
@@ -161,6 +164,39 @@ namespace	cl3
 				char exe[256];
 				CL3_CLASS_SYSERR(readlink(symlink, exe, sizeof(exe)));
 				return io::text::string::TString(exe);
+			}
+
+			const io::collection::list::TList<const io::text::string::TString>& TProcess::Arguments() const
+			{
+				if(this->args == NULL)
+				{
+					this->args = MakeUniquePtr(new io::collection::list::TList<const io::text::string::TString>());
+
+					char filename[32] = {};
+					snprintf(filename, sizeof(filename), "/proc/%d/cmdline", this->pid);
+					TFile file(filename);
+
+					const usys_t sz = file.Count();
+					char buffer[sz];
+					TStream(&file).Read((byte_t*)buffer, sz);
+
+					this->args->Append(TString(buffer));
+
+					char* e = buffer + sz - 1;
+					for(char* p = buffer; p < e; p++)
+						if(*p == 0)
+							this->args->Append(TString(p+1));
+				}
+				return *this->args;
+			}
+
+			const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& TProcess::Environment() const
+			{
+				if(this->env == NULL)
+				{
+					this->env = MakeUniquePtr(new io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>());
+				}
+				return *this->env;
 			}
 		}
 	}

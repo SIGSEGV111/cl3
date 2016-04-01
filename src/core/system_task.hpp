@@ -178,8 +178,6 @@ namespace cl3
 					CL3PUBF pid_t ID() const CL3_GETTER;
 					CL3PUBF const io::collection::list::TList<IThread* const>& Threads() const CL3_GETTER;
 					CL3PUBF io::text::string::TString Executable() const CL3_GETTER;
-// 					CL3PUBF io::collection::list::TList<io::text::string::TString>& Arguments() const CL3_GETTER;
-// 					CL3PUBF io::collection::map::TStdMap<io::text::string::TString, io::text::string::TString> Environment() const CL3_GETTER;
 					CL3PUBF static TLocalProcess* Self();
 
 					CL3PUBF static io::stream::fd::TFDStream& StdIn() CL3_GETTER;
