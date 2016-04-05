@@ -23,6 +23,7 @@
 #include "system_os.hpp"
 #include "system_types.hpp"
 #include "io_stream.hpp"
+#include "system_task_synchronization.hpp"
 
 namespace	cl3
 {
@@ -34,6 +35,27 @@ namespace	cl3
 		{
 			namespace	fd
 			{
+				class TWaitable : public system::task::synchronization::IWaitable
+				{
+					protected:
+						fd_t fd;
+						bool input;
+						bool output;
+						bool error;
+
+						#if (CL3_OS == CL3_OS_POSIX)
+							struct ::pollfd __PollInfo() const final override CL3_GETTER;
+						#elif (CL3_OS == CL3_OS_WINDOWS)
+							HANDLE __Handle() const final override CL3_GETTER;
+						#else
+							#error
+						#endif
+
+					public:
+						CL3PUBF CLASS TWaitable();
+						CL3PUBF CLASS TWaitable(fd_t fd, bool input, bool output, bool error);
+				};
+
 				//	generic buffered io-stream for interaction with operating systems io-structures (POSIX-fd, Windows HANDLE, etc.)
 				class	TFDStream : public virtual IIn<byte_t>, public virtual IOut<byte_t>
 				{
@@ -41,11 +63,18 @@ namespace	cl3
 						fd_t fd;
 
 					public:
+						CL3PUBF TWaitable OnOutputReady() const;
+						CL3PUBF TWaitable OnInputReady() const;
+
 						CL3PUBF	fd_t	FD		() const CL3_GETTER;
 						CL3PUBF	void	FD		(fd_t) CL3_SETTER;
 
-						CL3PUBF	usys_t	Read	(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min = (usys_t)-1);
-						CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1);
+						CL3PUBF	usys_t	Read	(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min = (usys_t)-1) final override;
+						CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1) final override;
+
+						CL3PUBF	usys_t	Remaining	() const  final override CL3_GETTER;
+
+						CL3PUBF	void	Close		();
 
 						CL3PUBF	CLASS	TFDStream	();
 						CL3PUBF	CLASS	TFDStream	(fd_t fd);	//	TFDStream takes ownership of the file-descriptor fd

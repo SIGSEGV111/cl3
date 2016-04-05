@@ -45,6 +45,48 @@ namespace	cl3
 		{
 			namespace	synchronization
 			{
+				struct IWaitable
+				{
+					#if (CL3_OS == CL3_OS_POSIX)
+						virtual struct ::pollfd __PollInfo() const CL3_GETTER = 0;
+						virtual void __PollResult(short revents) {}
+					#elif (CL3_OS == CL3_OS_WINDOWS)
+						virtual HANDLE __Handle() const CL3_GETTER = 0;
+					#else
+						#error
+					#endif
+
+					CL3PUBF bool WaitFor(time::TTime timeout) CL3_WARN_UNUSED_RESULT;
+					inline void WaitFor() { CL3_CLASS_LOGIC_ERROR(!this->WaitFor(time::TTime(-1))); }
+					CL3PUBF static io::collection::list::TList<bool> WaitFor(const io::collection::IStaticCollection<IWaitable* const>& waitables, time::TTime timeout = -1);
+				};
+
+				struct IMutex
+				{
+					virtual IWaitable& OnRelease() = 0;
+					virtual bool Acquire(time::TTime timeout) CL3_WARN_UNUSED_RESULT = 0;
+					inline void Acquire() { CL3_CLASS_LOGIC_ERROR(!this->Acquire(time::TTime(-1))); }
+					inline bool TryAcquire() CL3_WARN_UNUSED_RESULT { return this->Acquire(time::TTime(0)); }
+					virtual void Release() = 0;
+					virtual usys_t TimesAcquired() const CL3_GETTER = 0;
+					inline bool HasAcquired() const CL3_GETTER { return this->TimesAcquired() > 0; }
+				};
+
+				struct ISignal
+				{
+					virtual IWaitable& OnSignal() CL3_GETTER = 0;
+					virtual IMutex& Mutex() CL3_GETTER = 0;
+				};
+
+				class TSignal : public ISignal
+				{
+					public:
+						CL3PUBF IWaitable& OnSignal() CL3_GETTER;
+						CL3PUBF IMutex& Mutex() CL3_GETTER;
+						CL3PUBF void Raise();
+						CL3PUBF void Clear();
+				};
+
 				class	CL3PUBT	TRecurseGuard
 				{
 					protected:

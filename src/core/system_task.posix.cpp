@@ -225,6 +225,14 @@ namespace	cl3
 					return this->fd[1];
 				}
 
+				void Claim(bool read, bool write)
+				{
+					if(read)
+						this->fd[0] = -1;
+					if(write)
+						this->fd[1] = -1;
+				}
+
 				CLASS TPipe()
 				{
 					fd[0] = -1;
@@ -256,16 +264,73 @@ namespace	cl3
 
 			/**************************************************************************************/
 
-			system::memory::TUniquePtr<TProcess> CreateProcess(const io::text::string::TString& exe,
-																const io::collection::list::TList<const io::text::string::TString>& args,
-																const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& env,
-																io::stream::IIn<byte_t>* stdin,
-																io::stream::IOut<byte_t>* stdout,
-																io::stream::IOut<byte_t>* stderr)
+			CLASS TProcess::TProcess() : pid(-1)
 			{
-				TPipe* pipe_stdin = stdin != NULL && stdin != &TLocalProcess::StdIn() ? new TPipe() : NULL;
-				TPipe* pipe_stdout = stdout != NULL && stdout != &TLocalProcess::StdOut() ? new TPipe() : NULL;
-				TPipe* pipe_stderr = stderr != NULL && stderr != &TLocalProcess::StdErr() ? new TPipe() : NULL;
+			}
+
+			void TChildProcess::AsyncCallback(TAsyncEventProcessor* aep, synchronization::IWaitable* waitable)
+			{
+				byte_t buffer[4096];
+
+				if(waitable == &this->w_stdin)
+				{
+					if(fds_stdin.Space() > 0 && this->is_stdin->Remaining() > 0)
+					{
+						const usys_t n = this->is_stdin->Read(buffer, sizeof(buffer), 0);
+						this->fds_stdin.Write(buffer, n);
+					}
+					else
+					{
+						//	no more data (child closed stdout)
+						this->callback_stdin.Unregister();
+						this->fds_stdin.Close();
+					}
+				}
+				else if(waitable == &this->w_stdout)
+				{
+					if(fds_stdout.Remaining() > 0)
+					{
+						const usys_t n = this->fds_stdout.Read(buffer, sizeof(buffer), 1);
+						this->os_stdout->Write(buffer, n);
+					}
+					else
+					{
+						//	no more data (child closed stdout)
+						this->callback_stdout.Unregister();
+						this->fds_stdout.Close();
+						this->os_stdout->Flush();
+					}
+				}
+				else if(waitable == &this->w_stderr)
+				{
+					if(fds_stderr.Remaining() > 0)
+					{
+						const usys_t n = this->fds_stderr.Read(buffer, sizeof(buffer), 1);
+						this->os_stderr->Write(buffer, n);
+					}
+					else
+					{
+						//	no more data (child closed stderr)
+						this->callback_stderr.Unregister();
+						this->fds_stderr.Close();
+						this->os_stderr->Flush();
+					}
+				}
+				else
+					CL3_CLASS_LOGIC_ERROR(true);
+			}
+
+			CLASS TChildProcess::TChildProcess(const io::text::string::TString& exe,
+												const io::collection::list::TList<const io::text::string::TString>& args,
+												const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& env,
+												io::stream::IIn<byte_t>* stdin,
+												io::stream::IOut<byte_t>* stdout,
+												io::stream::IOut<byte_t>* stderr,
+												TAsyncEventProcessor* aep) : TProcess(), is_stdin(stdin), os_stdout(stdout), os_stderr(stderr)
+			{
+				TUniquePtr<TPipe> pipe_stdin = MakeUniquePtr(stdin != NULL && stdin != &TLocalProcess::StdIn() ? new TPipe() : NULL);
+				TUniquePtr<TPipe> pipe_stdout = MakeUniquePtr(stdout != NULL && stdout != &TLocalProcess::StdOut() ? new TPipe() : NULL);
+				TUniquePtr<TPipe> pipe_stderr = MakeUniquePtr(stderr != NULL && stderr != &TLocalProcess::StdErr() ? new TPipe() : NULL);
 
 				int pid_child;
 				CL3_NONCLASS_SYSERR(pid_child = ::fork());
@@ -275,28 +340,28 @@ namespace	cl3
 					try
 					{
 						//	child
-						if(pipe_stdin)
+						if(pipe_stdin != NULL)
 						{
 							pipe_stdin->CloseWrite();
-							CL3_NONCLASS_SYSERR(::dup2(STDIN_FILENO, pipe_stdin->ReadFD()));
+							CL3_NONCLASS_SYSERR(::dup2(pipe_stdin->ReadFD(), STDIN_FILENO));
 							pipe_stdin->CloseRead();
 						}
 						else if(stdin == NULL)
 							::close(STDIN_FILENO);	//	FIXME: pass a handle to /dev/null
 
-						if(pipe_stdout)
+						if(pipe_stdout != NULL)
 						{
 							pipe_stdout->CloseRead();
-							CL3_NONCLASS_SYSERR(::dup2(STDOUT_FILENO, pipe_stdout->WriteFD()));
+							CL3_NONCLASS_SYSERR(::dup2(pipe_stdout->WriteFD(), STDOUT_FILENO));
 							pipe_stdout->CloseWrite();
 						}
 						else if(stdout == NULL)
 							::close(STDOUT_FILENO);	//	FIXME: pass a handle to /dev/null
 
-						if(pipe_stderr)
+						if(pipe_stderr != NULL)
 						{
 							pipe_stderr->CloseRead();
-							CL3_NONCLASS_SYSERR(::dup2(STDERR_FILENO, pipe_stderr->WriteFD()));
+							CL3_NONCLASS_SYSERR(::dup2(pipe_stderr->WriteFD(), STDERR_FILENO));
 							pipe_stderr->CloseWrite();
 						}
 						else if(stderr == NULL)
@@ -312,14 +377,18 @@ namespace	cl3
 
 						args_cstr[0] = (char*)TCString(exe, CODEC_CXX_CHAR).Claim();
 
-						auto it = args.CreateStaticIterator();
-						it->MoveHead();
-						for(usys_t i = 1; it->MoveNext(); i++)
-							args_cstr[i] = (char*)TCString(it->Item(), CODEC_CXX_CHAR).Claim();
+						{
+							auto it = args.CreateStaticIterator();
+							it->MoveHead();
+							for(usys_t i = 1; it->MoveNext(); i++)
+								args_cstr[i] = (char*)TCString(it->Item(), CODEC_CXX_CHAR).Claim();
+						}
 
-// 						auto it = env.CreateStaticIterator();
-// 						for(usys_t i = 0; it->MoveNext(); i++)
-// 							env_cstr[i] = (char*)TCString(it->Item().key + "=" + it->Item().value, CODEC_CXX_CHAR).Claim();
+						{
+							auto it = env.CreateStaticIterator();
+							for(usys_t i = 0; it->MoveNext(); i++)
+								env_cstr[i] = (char*)TCString(it->Item().key + "=" + it->Item().value, CODEC_CXX_CHAR).Claim();
+						}
 
 						::execvpe(args_cstr[0], (char**)args_cstr.ItemPtr(0), (char**)env_cstr.ItemPtr(0));
 					}
@@ -332,27 +401,63 @@ namespace	cl3
 				else
 				{
 					//	parent
-					if(pipe_stdin)
+					if(pipe_stdin != NULL)
 					{
 						pipe_stdin->CloseRead();
-						//	TODO: create and register an async event handler for I/O
+						this->fds_stdin.FD(pipe_stdin->WriteFD());
+						this->w_stdin = this->fds_stdin.OnOutputReady();
+						pipe_stdin->Claim(false,true);
+						this->callback_stdin.Register(aep, &this->w_stdin, this);
 					}
 
-					if(pipe_stdout)
+					if(pipe_stdout != NULL)
 					{
 						pipe_stdout->CloseWrite();
-						//	TODO: create and register an async event handler for I/O
+						this->fds_stdout.FD(pipe_stdout->ReadFD());
+						this->w_stdout = this->fds_stdout.OnInputReady();
+						pipe_stdout->Claim(true,false);
+						this->callback_stdout.Register(aep, &this->w_stdout, this);
 					}
 
-					if(pipe_stderr)
+					if(pipe_stderr != NULL)
 					{
 						pipe_stderr->CloseWrite();
-						//	TODO: create and register an async event handler for I/O
+						this->fds_stderr.FD(pipe_stderr->ReadFD());
+						this->w_stderr = this->fds_stderr.OnInputReady();
+						pipe_stderr->Claim(true,false);
+						this->callback_stderr.Register(aep, &this->w_stderr, this);
 					}
 
-					return MakeUniquePtr<TProcess>(new TProcess(pid_child));
+					this->pid = pid_child;
 				}
 			}
+
+			CLASS TChildProcess::~TChildProcess()
+			{
+				::kill(this->pid, SIGKILL);
+				int status = 0;
+				::waitpid(this->pid, &status, 0);
+			}
+
+			usys_t TAsyncEventProcessor::ProcessEvents()
+			{
+				const usys_t n_callbacks = this->callbacks.Count();
+
+				struct pollfd pfds[n_callbacks];
+				for(usys_t i = 0; i < n_callbacks; i++)
+					pfds[i] = this->callbacks[i]->waitable->__PollInfo();
+
+				int n_events;
+				CL3_CLASS_SYSERR(n_events = ::poll(pfds, n_callbacks, 0));
+
+				if(n_events > 0)
+					for(usys_t i = 0; i < n_callbacks; i++)
+						if(pfds[i].revents != 0)
+							this->callbacks[i]->receiver->AsyncCallback(this, this->callbacks[i]->waitable);
+
+				return n_events;
+			}
+
 		}
 	}
 }

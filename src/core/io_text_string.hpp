@@ -54,6 +54,7 @@ namespace	cl3
 						using collection::list::TList<TUTF32>::Prepend;
 						using collection::list::TList<TUTF32>::Append;
 						using collection::list::TList<TUTF32>::Find;
+						using collection::list::TList<TUTF32>::Contains;
 
 						CL3PUBF	void		Prepend		(const char& item_append);
 						CL3PUBF	void		Prepend		(const char* arr_items_append, usys_t n_items_append = (usys_t)-1);
@@ -116,6 +117,8 @@ namespace	cl3
 						//	find substring
 						CL3PUBF	usys_t		Find		(const TString& str_find) const CL3_GETTER;
 						CL3PUBF	usys_t		Find		(const TString& str_find, usys_t idx_start, collection::EDirection direction) const CL3_GETTER;
+
+						inline	bool		Contains	(const TString& str_contains) const { return this->Find(str_contains) != (usys_t)-1; }
 
 						//	return parts of the string
 						CL3PUBF	TString		Left		(usys_t n_chars) const CL3_GETTER;

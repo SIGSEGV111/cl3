@@ -76,6 +76,9 @@ namespace	cl3
 
 				usys_t	TFDStream::Read		(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
 				{
+					if(n_items_read_min == (usys_t)-1)
+						n_items_read_min = n_items_read_max;
+
 					bool b_would_block = false;
 					usys_t n_already_read = 0;
 					errno = 0;	//	reset error indicator
@@ -129,6 +132,9 @@ namespace	cl3
 
 				usys_t	TFDStream::Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
+					if(n_items_write_min == (usys_t)-1)
+						n_items_write_min = n_items_write_max;
+
 					bool b_would_block = false;
 					usys_t n_already_written = 0;
 					errno = 0;	//	reset error indicator
@@ -181,6 +187,32 @@ namespace	cl3
 
 				/******************************************************************/
 
+				usys_t	TFDStream::Remaining	() const
+				{
+					struct pollfd pfd = { this->fd, POLLIN|POLLPRI|POLLERR|POLLHUP|POLLNVAL|POLLRDHUP, 0 };
+					CL3_CLASS_SYSERR(::poll(&pfd, 1, 0));
+					if(pfd.revents)
+					{
+						if((pfd.revents & POLLIN) == POLLIN || (pfd.revents & POLLPRI) == POLLPRI)
+							return (usys_t)-1;	//	yep, there is data
+						else
+							return 0;	//	error
+					}
+					else
+						return (usys_t)-1;	//	the FD seems operational, so we can assume there is more data to be read at some future point
+				}
+
+				void	TFDStream::Close		()
+				{
+					if(this->fd != -1)
+					{
+						CL3_CLASS_SYSERR(::close(this->fd));
+						this->fd = -1;
+					}
+				}
+
+				/******************************************************************/
+
 				CLASS	TFDStream::TFDStream	() : fd(-1)
 				{
 				}
@@ -190,8 +222,6 @@ namespace	cl3
 					CL3_CLASS_ERROR(fd == -1, TException, "file-descriptor is invalid");
 					this->FD(fd);
 				}
-
-				/******************************************************************/
 
 				CLASS	TFDStream::TFDStream	(const TFDStream& other)
 				{
@@ -208,8 +238,43 @@ namespace	cl3
 
 				CLASS	TFDStream::~TFDStream	()
 				{
-					if(this->fd != -1)
-						CL3_CLASS_SYSERR(::close(this->fd));
+					this->Close();
+				}
+
+				/******************************************************************/
+
+				TWaitable TFDStream::OnOutputReady() const
+				{
+					return TWaitable(this->fd, false, true, true);
+				}
+
+				TWaitable TFDStream::OnInputReady() const
+				{
+					return TWaitable(this->fd, true, false, true);
+				}
+
+				/******************************************************************/
+
+				CLASS TWaitable::TWaitable() : fd(-1), input(false), output(false), error(false)
+				{
+				}
+
+				CLASS TWaitable::TWaitable(fd_t fd, bool input, bool output, bool error) : fd(fd), input(input), output(output), error(error)
+				{
+				}
+
+				struct ::pollfd TWaitable::__PollInfo() const
+				{
+					struct ::pollfd pfd = {
+						this->fd,
+						(short)(
+							(this->input ? POLLIN|POLLPRI : 0) |
+							(this->output ? POLLOUT : 0) |
+							(this->error ? POLLERR : 0)
+						),
+						0
+					};
+					return pfd;
 				}
 			}
 		}

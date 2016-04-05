@@ -45,49 +45,48 @@ namespace cl3
 		{
 			typedef int pid_t;
 
-			namespace synchronization
+			namespace	synchronization
 			{
-				struct IWaitable
-				{
-					#if (CL3_OS == CL3_OS_POSIX)
-						virtual struct ::pollfd __PollInfo() const CL3_GETTER = 0;
-					#elif (CL3_OS == CL3_OS_WINDOWS)
-						virtual HANDLE __Handle() const CL3_GETTER = 0;
-					#else
-						#error
-					#endif
-
-					CL3PUBF bool WaitFor(time::TTime timeout) CL3_WARN_UNUSED_RESULT;
-					inline void WaitFor() { CL3_CLASS_LOGIC_ERROR(!this->WaitFor(time::TTime(-1))); }
-					CL3PUBF static io::collection::list::TList<bool> WaitFor(const io::collection::list::TList<IWaitable* const>& waitables, time::TTime timeout = -1);
-				};
-
-				struct IMutex
-				{
-					virtual IWaitable& OnRelease() = 0;
-					virtual bool Acquire(time::TTime timeout) CL3_WARN_UNUSED_RESULT = 0;
-					inline void Acquire() { CL3_CLASS_LOGIC_ERROR(!this->Acquire(time::TTime(-1))); }
-					inline bool TryAcquire() CL3_WARN_UNUSED_RESULT { return this->Acquire(time::TTime(0)); }
-					virtual void Release() = 0;
-					virtual usys_t TimesAcquired() const CL3_GETTER = 0;
-					inline bool HasAcquired() const CL3_GETTER { return this->TimesAcquired() > 0; }
-				};
-
-				struct ISignal
-				{
-					virtual IWaitable& OnSignal() CL3_GETTER = 0;
-					virtual IMutex& Mutex() CL3_GETTER = 0;
-				};
-
-				class TSignal : public ISignal
-				{
-					public:
-						CL3PUBF IWaitable& OnSignal() CL3_GETTER;
-						CL3PUBF IMutex& Mutex() CL3_GETTER;
-						CL3PUBF void Raise();
-						CL3PUBF void Clear();
-				};
+				struct IWaitable;
 			}
+
+			class TAsyncEventProcessor
+			{
+				public:
+					class TCallback
+					{
+						public:
+							struct IReceiver
+							{
+								virtual void AsyncCallback(TAsyncEventProcessor*, synchronization::IWaitable*) = 0;
+							};
+
+						protected:
+							friend class TAsyncEventProcessor;
+							TAsyncEventProcessor* aep;
+							synchronization::IWaitable* waitable;
+							IReceiver* receiver;
+
+						public:
+							CL3PUBF void Register(TAsyncEventProcessor*, synchronization::IWaitable*, IReceiver*);
+							CL3PUBF void Unregister();
+							CL3PUBF bool IsRegistered() const CL3_GETTER;
+
+							CLASS TCallback(const TCallback&) = delete;
+							CL3PUBF CLASS explicit TCallback();
+							CL3PUBF CLASS explicit TCallback(TAsyncEventProcessor*, synchronization::IWaitable*, IReceiver*);
+							CL3PUBF CLASS ~TCallback();
+					};
+
+				protected:
+					io::collection::list::TList<TCallback*> callbacks;
+
+				public:
+					CL3PUBF usys_t CountCallbacks() const CL3_GETTER;	//	returns the number of registered callbacks
+					CL3PUBF usys_t ProcessEvents();						//	processes all pending events
+					CL3PUBF static TAsyncEventProcessor& Default();
+			};
+
 
 			enum ELogLevel
 			{
@@ -134,17 +133,23 @@ namespace cl3
 
 			class TProcess
 			{
-				//	no monitoring, just information extracted from OS APIs (/proc/<pid>/*)
+				//	just information extracted from OS APIs (e.g. /proc/<pid>/*)
 				protected:
 					pid_t pid;
 					mutable system::memory::TUniquePtr<io::collection::list::TList<const io::text::string::TString>> args;
 					mutable system::memory::TUniquePtr<io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>> env;
+
+					CL3PUBF CLASS explicit TProcess();
 
 				public:
 					CL3PUBF pid_t ID() const CL3_GETTER;
 					CL3PUBF const io::text::string::TString& Executable() const CL3_GETTER;
 					CL3PUBF const io::collection::list::TList<const io::text::string::TString>& Arguments() const CL3_GETTER;
 					CL3PUBF const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& Environment() const CL3_GETTER;
+
+					CL3PUBF void Shutdown();	//	request shutdown (SIGTERM on POSIX)
+					CL3PUBF void Kill();		//	hard kill process (SIGKILL on POSIX)
+					CL3PUBF synchronization::IWaitable& OnTerminate();
 
 					CLASS explicit TProcess(pid_t pid);
 			};
@@ -183,6 +188,39 @@ namespace cl3
 					CL3PUBF static io::stream::fd::TFDStream& StdIn() CL3_GETTER;
 					CL3PUBF static io::stream::fd::TFDStream& StdOut() CL3_GETTER;
 					CL3PUBF static io::stream::fd::TFDStream& StdErr() CL3_GETTER;
+			};
+
+			class TChildProcess : public TProcess, private TAsyncEventProcessor::TCallback::IReceiver
+			{
+				private:
+					void AsyncCallback(TAsyncEventProcessor*, synchronization::IWaitable*) final override;
+
+				protected:
+					io::stream::fd::TFDStream fds_stdin;
+					io::stream::fd::TFDStream fds_stdout;
+					io::stream::fd::TFDStream fds_stderr;
+					io::stream::fd::TWaitable w_stdin;
+					io::stream::fd::TWaitable w_stdout;
+					io::stream::fd::TWaitable w_stderr;
+					TAsyncEventProcessor::TCallback callback_stdin;
+					TAsyncEventProcessor::TCallback callback_stdout;
+					TAsyncEventProcessor::TCallback callback_stderr;
+					io::stream::IIn<byte_t>* is_stdin;
+					io::stream::IOut<byte_t>* os_stdout;
+					io::stream::IOut<byte_t>* os_stderr;
+
+				public:
+					CLASS TChildProcess(const TChildProcess&) = delete;
+
+					CL3PUBF CLASS explicit TChildProcess(const io::text::string::TString& exe,
+														const io::collection::list::TList<const io::text::string::TString>& args,
+														const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& env = TLocalProcess::Self()->Environment(),
+														io::stream::IIn<byte_t>* stdin = &TLocalProcess::StdIn(),
+														io::stream::IOut<byte_t>* stdout = &TLocalProcess::StdOut(),
+														io::stream::IOut<byte_t>* stderr = &TLocalProcess::StdErr(),
+														TAsyncEventProcessor* aep = &TAsyncEventProcessor::Default());
+
+					CL3PUBF CLASS ~TChildProcess();
 			};
 
 			/************************************************************************************/
@@ -293,13 +331,6 @@ namespace cl3
 			CL3PUBF process_info_t ProcessInfo(pid_t);
 			CL3PUBF io::collection::list::TList<pid_t> EnumProcesses();
 			CL3PUBF system::memory::TUniquePtr<TProcess> OpenProcess(pid_t);
-
-			CL3PUBF system::memory::TUniquePtr<TProcess> CreateProcess(const io::text::string::TString& exe,
-					const io::collection::list::TList<const io::text::string::TString>& args,
-					const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& env = TLocalProcess::Self()->Environment(),
-					io::stream::IIn<byte_t>* stdin = &TLocalProcess::StdIn(),
-					io::stream::IOut<byte_t>* stdout = &TLocalProcess::StdOut(),
-					io::stream::IOut<byte_t>* stderr = &TLocalProcess::StdErr());
 		}
 	}
 }

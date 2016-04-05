@@ -42,6 +42,22 @@ namespace	cl3
 					CLASS explicit TPair(TKey key, TValue value) : key(key), value(value) {}
 				};
 
+				template<class TKey>
+				struct TKeyNotFoundException : error::TException
+				{
+					TKey key;
+					CLASS TKeyNotFoundException(const TKey& key) : TException("the specified key was not found within the map"), key(key) {}
+				};
+
+				template<class TKey>
+				struct TNonUniqueKeyException : error::TException
+				{
+					TKey key;
+					CLASS TNonUniqueKeyException(const TKey& key) : TException("the specified key was not found within the map"), key(key) {}
+				};
+
+				/************************************************************************************/
+
 				template<class TKey, class TValue>
 				struct	IMap;
 
@@ -104,7 +120,13 @@ namespace	cl3
 						CL3PUBF	usys_t			Write		(const TPair<TKey, TValue>* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 
 						//	from TStdMap
+						CL3PUBF	const TPair<TKey, TValue>*
+												Find		(const TKey& key) const;
+
+						CL3PUBF	bool			Contains	(const TKey& key) const;
+
 						CL3PUBF	CLASS			TStdMap		();
+						CL3PUBF	CLASS			TStdMap		(const TStdMap& other);
 						CL3PUBF	CLASS virtual	~TStdMap	();
 				};
 
@@ -134,21 +156,29 @@ namespace	cl3
 						CL3PUBF	usys_t	Read		(TPair<TKey, TValue>* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT;
 
 						//	from TStdMap
+						CL3PUBF	TPair<TKey, TValue>*
+										Find		(const TKey& key);
+
 						CL3PUBF	CLASS			TStdMap		();
+						CL3PUBF	CLASS			TStdMap		(const TStdMap<const TKey, const TValue>&);
+						CL3PUBF	CLASS			TStdMap		(const TStdMap& other);
 						CL3PUBF	CLASS virtual	~TStdMap	();
 				};
 
 
 				template<class TKey, class TValue>
-				const TValue&	TStdMap<const TKey, const TValue>::operator[]	(const TKey&) const
+				const TValue&	TStdMap<const TKey, const TValue>::operator[]	(const TKey& key) const
 				{
-					CL3_NOT_IMPLEMENTED;
+					const TPair<TKey, TValue>* item;
+					CL3_CLASS_ERROR((item = this->Find(key)) == NULL, TKeyNotFoundException<TKey>, key);
+					return item->value;
 				}
 
 				template<class TKey, class TValue>
 				void			TStdMap<const TKey, const TValue>::Add		(const TPair<TKey, TValue>& item_add)
 				{
-					this->items.Append(item_add);	//	FIXME
+					CL3_CLASS_ERROR(this->Contains(item_add.key), TNonUniqueKeyException<TKey>, item_add.key);
+					this->items.Append(item_add);	//	FIXME sorted insert
 				}
 
 				template<class TKey, class TValue>
@@ -170,7 +200,7 @@ namespace	cl3
 				}
 
 				template<class TKey, class TValue>
-				usys_t			TStdMap<const TKey, const TValue>::Count		() const
+				usys_t			TStdMap<const TKey, const TValue>::Count	() const
 				{
 					return this->items.Count();
 				}
@@ -188,13 +218,35 @@ namespace	cl3
 				}
 
 				template<class TKey, class TValue>
-				usys_t			TStdMap<const TKey, const TValue>::Write		(const TPair<TKey, TValue>* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t			TStdMap<const TKey, const TValue>::Write	(const TPair<TKey, TValue>* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
 				template<class TKey, class TValue>
+				bool			TStdMap<const TKey, const TValue>::Contains	(const TKey& key) const
+				{
+					return this->Find(key) != NULL;
+				}
+
+				template<class TKey, class TValue>
+				const TPair<TKey, TValue>*
+								TStdMap<const TKey, const TValue>::Find		(const TKey& key) const
+				{
+					//	FIXME slow, use binary search and only fall back to linear search below some number of items
+					for(usys_t i = 0; i < this->items.Count(); i++)
+						if(this->items[i].key == key)
+							return this->items.ItemPtr(i);
+					return NULL;
+				}
+
+				template<class TKey, class TValue>
 				CLASS			TStdMap<const TKey, const TValue>::TStdMap	()
+				{
+				}
+
+				template<class TKey, class TValue>
+				CLASS			TStdMap<const TKey, const TValue>::TStdMap	(const TStdMap& other) : event::IObservable(), items(other.items)
 				{
 				}
 
@@ -204,9 +256,16 @@ namespace	cl3
 				}
 
 				template<class TKey, class TValue>
-				TValue&	TStdMap<TKey, TValue>::operator[](const TKey&)
+				TValue&	TStdMap<TKey, TValue>::operator[](const TKey& key)
 				{
-					CL3_NOT_IMPLEMENTED;
+					TPair<TKey, TValue>* item = this->Find(key);
+					if(item == NULL)
+					{
+						//	FIXME: Add should give us a pointer the the newly inserted item
+						this->Add(TPair<TKey,TValue>(key,TValue()));
+						CL3_CLASS_LOGIC_ERROR((item = this->Find(key)) == NULL);
+					}
+					return item->value;
 				}
 
 				template<class TKey, class TValue>
@@ -248,7 +307,28 @@ namespace	cl3
 				}
 
 				template<class TKey, class TValue>
+				TPair<TKey, TValue>*
+						TStdMap<TKey, TValue>::Find		(const TKey& key)
+				{
+					//	FIXME slow, use binary search and only fall back to linear search below some number of items
+					for(usys_t i = 0; i < this->items.Count(); i++)
+						if(this->items[i].key == key)
+							return this->items.ItemPtr(i);
+					return NULL;
+				}
+
+				template<class TKey, class TValue>
 				CLASS	TStdMap<TKey, TValue>::TStdMap	()
+				{
+				}
+
+				template<class TKey, class TValue>
+				CLASS	TStdMap<TKey, TValue>::TStdMap	(const TStdMap<const TKey, const TValue>& other) : TStdMap<const TKey, const TValue>(other)
+				{
+				}
+
+				template<class TKey, class TValue>
+				CLASS	TStdMap<TKey, TValue>::TStdMap	(const TStdMap& other) : event::IObservable(), TStdMap<const TKey, const TValue>(other)
 				{
 				}
 

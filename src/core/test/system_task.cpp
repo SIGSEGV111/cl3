@@ -44,15 +44,63 @@ namespace
 	using namespace cl3::io::text::encoding;
 	using namespace cl3::io::text::string;
 	using namespace cl3::io::collection::list;
+	using namespace cl3::io::collection::array;
+	using namespace cl3::io::collection::map;
 	using namespace cl3::io::collection;
 	using namespace cl3::error;
 
 	TEST(system_task_CreateProcess, Invocation)
 	{
 		//	will not output anything, but will test if the call to CreateProcess works without error
+
 		TList<TString> args;
 		args.Append("-n");
-		TUniquePtr<TProcess> p = CreateProcess("/bin/echo", args);
+
+		TChildProcess cp("/bin/echo", args);
+	}
+
+	TEST(system_task_CreateProcess, InjectEnv)
+	{
+		TList<TString> args;
+		args.Append("-c");
+		args.Append("export -p | sort");
+		TStdMap<TString,TString> env = TLocalProcess::Self()->Environment();
+
+		//	add a new environment variables named "foo" with the value "bar"
+		env["foo"] = "bar";
+
+		TString output;
+		utf8::TUTF8Decoder decoder;
+		decoder.Sink(&output);
+
+		TChildProcess cp("/bin/bash", args, env, NULL, &decoder);
+
+		//	FIXME: TAsyncEventProcessor should not be used like this
+		//	WARNING: below code is plain out wrong and WIP
+		while(TAsyncEventProcessor::Default().CountCallbacks() > 0)
+			TAsyncEventProcessor::Default().ProcessEvents();
+
+		//	see if "export -p" printed out the injected environment variable
+		EXPECT_TRUE(output.Contains("declare -x foo=\"bar\"\n"));
+	}
+
+	TEST(system_task_CreateProcess, Pipe)
+	{
+		TList<TString> args;
+
+		TList<byte_t> input;
+		TList<byte_t> output;
+
+		input.Append((const byte_t*)"a\nz\ne\nx\n", 8);
+
+		TChildProcess cp("/bin/sort", args, TLocalProcess::Self()->Environment(), &input, &output);
+
+		//	FIXME: TAsyncEventProcessor should not be used like this
+		//	WARNING: below code is plain out wrong and WIP
+		while(TAsyncEventProcessor::Default().CountCallbacks() > 0)
+			TAsyncEventProcessor::Default().ProcessEvents();
+
+		EXPECT_TRUE(output.Count() == 8 && memcmp(output.ItemPtr(0), "a\ne\nx\nz\n", 8) == 0);
 	}
 
 	TEST(system_task_TLocalProcess, Arguments)
@@ -68,8 +116,7 @@ namespace
 	{
 		auto& env = TLocalProcess::Self()->Environment();
 
-		printf("env.Count() = %zu\n", env.Count());
-		for(auto it = env.CreateStaticIterator(); it->IsValid(); it->MoveNext())
-			printf("key = \"%s\"; value = \"%s\"\n", TCString(it->Item().key, CODEC_CXX_CHAR).Chars(), TCString(it->Item().value, CODEC_CXX_CHAR).Chars());
+		EXPECT_TRUE(env.Count() > 2);
+		EXPECT_EQ(env["PWD"], cl3::io::file::TDirectoryBrowser::ProcessCurrentWorkingDirectory().AbsolutePath());
 	}
 }
