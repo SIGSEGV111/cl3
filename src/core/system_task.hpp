@@ -27,6 +27,7 @@
 #include "io_stream_fd.hpp"
 #include "io_text_string.hpp"
 #include "system_time.hpp"
+#include "system_task_async.hpp"
 
 #if (CL3_OS == CL3_OS_POSIX)
 	#include <poll.h>
@@ -49,44 +50,6 @@ namespace cl3
 			{
 				struct IWaitable;
 			}
-
-			class TAsyncEventProcessor
-			{
-				public:
-					class TCallback
-					{
-						public:
-							struct IReceiver
-							{
-								virtual void AsyncCallback(TAsyncEventProcessor*, synchronization::IWaitable*) = 0;
-							};
-
-						protected:
-							friend class TAsyncEventProcessor;
-							TAsyncEventProcessor* aep;
-							synchronization::IWaitable* waitable;
-							IReceiver* receiver;
-
-						public:
-							CL3PUBF void Register(TAsyncEventProcessor*, synchronization::IWaitable*, IReceiver*);
-							CL3PUBF void Unregister();
-							CL3PUBF bool IsRegistered() const CL3_GETTER;
-
-							CLASS TCallback(const TCallback&) = delete;
-							CL3PUBF CLASS explicit TCallback();
-							CL3PUBF CLASS explicit TCallback(TAsyncEventProcessor*, synchronization::IWaitable*, IReceiver*);
-							CL3PUBF CLASS ~TCallback();
-					};
-
-				protected:
-					io::collection::list::TList<TCallback*> callbacks;
-
-				public:
-					CL3PUBF usys_t CountCallbacks() const CL3_GETTER;	//	returns the number of registered callbacks
-					CL3PUBF usys_t ProcessEvents();						//	processes all pending events
-					CL3PUBF static TAsyncEventProcessor& Default();
-			};
-
 
 			enum ELogLevel
 			{
@@ -190,10 +153,10 @@ namespace cl3
 					CL3PUBF static io::stream::fd::TFDStream& StdErr() CL3_GETTER;
 			};
 
-			class TChildProcess : public TProcess, private TAsyncEventProcessor::TCallback::IReceiver
+			class TChildProcess : public TProcess, private async::TAsyncEventProcessor::TCallback::IReceiver
 			{
 				private:
-					void AsyncCallback(TAsyncEventProcessor*, synchronization::IWaitable*) final override;
+					void AsyncCallback(async::TAsyncEventProcessor*, synchronization::IWaitable*) final override;
 
 				protected:
 					io::stream::fd::TFDStream fds_stdin;
@@ -202,9 +165,9 @@ namespace cl3
 					io::stream::fd::TWaitable w_stdin;
 					io::stream::fd::TWaitable w_stdout;
 					io::stream::fd::TWaitable w_stderr;
-					TAsyncEventProcessor::TCallback callback_stdin;
-					TAsyncEventProcessor::TCallback callback_stdout;
-					TAsyncEventProcessor::TCallback callback_stderr;
+					async::TAsyncEventProcessor::TCallback callback_stdin;
+					async::TAsyncEventProcessor::TCallback callback_stdout;
+					async::TAsyncEventProcessor::TCallback callback_stderr;
 					io::stream::IIn<byte_t>* is_stdin;
 					io::stream::IOut<byte_t>* os_stdout;
 					io::stream::IOut<byte_t>* os_stderr;
@@ -218,7 +181,7 @@ namespace cl3
 														io::stream::IIn<byte_t>* stdin = &TLocalProcess::StdIn(),
 														io::stream::IOut<byte_t>* stdout = &TLocalProcess::StdOut(),
 														io::stream::IOut<byte_t>* stderr = &TLocalProcess::StdErr(),
-														TAsyncEventProcessor* aep = &TAsyncEventProcessor::Default());
+														async::TAsyncEventProcessor* aep = &async::TAsyncEventProcessor::Default());
 
 					CL3PUBF CLASS ~TChildProcess();
 			};

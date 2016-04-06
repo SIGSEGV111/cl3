@@ -32,6 +32,7 @@ namespace	cl3
 		namespace	task
 		{
 			using namespace io::collection::list;
+			using namespace async;
 			using namespace synchronization;
 
 			IFiber* IFiber::Self()
@@ -60,59 +61,6 @@ namespace	cl3
 
 			CLASS TLocalThread::TLocalThread()
 			{
-			}
-
-			void TAsyncEventProcessor::TCallback::Register(TAsyncEventProcessor* aep, IWaitable* waitable, IReceiver* receiver)
-			{
-				this->Unregister();
-
-				this->aep = aep;
-				this->waitable = waitable;
-				this->receiver = receiver;
-
-				aep->callbacks.Add(this);
-			}
-
-			void TAsyncEventProcessor::TCallback::Unregister()
-			{
-				if(this->IsRegistered())
-				{
-					this->aep->callbacks.Remove(this);
-					this->aep = NULL;
-				}
-			}
-
-			bool TAsyncEventProcessor::TCallback::IsRegistered() const
-			{
-				return this->aep != NULL;
-			}
-
-			CLASS TAsyncEventProcessor::TCallback::TCallback() : aep(NULL), waitable(NULL), receiver(NULL)
-			{
-			}
-
-			CLASS TAsyncEventProcessor::TCallback::TCallback(TAsyncEventProcessor* aep, IWaitable* waitable, IReceiver* receiver) : aep(NULL), waitable(NULL), receiver(NULL)
-			{
-				this->Register(aep, waitable, receiver);
-			}
-
-			CLASS TAsyncEventProcessor::TCallback::~TCallback()
-			{
-				this->Unregister();
-			}
-
-			static memory::TUniquePtr<TAsyncEventProcessor> aep_default;
-
-			usys_t TAsyncEventProcessor::CountCallbacks() const
-			{
-				return this->callbacks.Count();
-			}
-
-			TAsyncEventProcessor& TAsyncEventProcessor::Default()
-			{
-				if(aep_default == NULL)
-					aep_default = memory::MakeUniquePtr(new TAsyncEventProcessor());
-				return *aep_default;
 			}
 		}
 	}

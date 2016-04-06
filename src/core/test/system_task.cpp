@@ -27,6 +27,7 @@
 #include <cl3/core/io_text_encoding.hpp>
 #include <cl3/core/io_text_encoding_utf8.hpp>
 #include <cl3/core/system_task.hpp>
+#include <cl3/core/system_task_async.hpp>
 #include <gtest/gtest.h>
 #include <stdlib.h>
 #include "common.hpp"
@@ -40,6 +41,7 @@ namespace
 	using namespace cl3::system::task;
 	using namespace cl3::system::memory;
 	using namespace cl3::system::time;
+	using namespace cl3::system::task::async;
 	using namespace cl3::io::text;
 	using namespace cl3::io::text::encoding;
 	using namespace cl3::io::text::string;
