@@ -22,11 +22,11 @@
 
 #include "math_formular.hpp"
 
-// #include <llvm/IR/Constants.h>
-// #include <llvm/IR/LLVMContext.h>
-// #include <llvm/IR/IRBuilder.h>
-// #include <llvm/IR/Module.h>
-// #include <llvm/IR/Constants.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Constants.h>
 
 namespace	cl3
 {
@@ -35,16 +35,277 @@ namespace	cl3
 		namespace	formular
 		{
 			using namespace io::text::string;
-			using namespace system::compiler::jit;
+			using namespace system::memory;
+			using namespace node;
 
-			TModule jit_module;
+// 			template<TValue::EType type>
+// 			struct	get_type;
+//
+// 			template<>
+// 			struct	get_type<TValue::EType::S8>
+// 			{
+// 				typedef s8_t T;
+// 			};
 
-			TFunction&	Parse	(const TString& formular)
+			namespace node
+			{
+				CLASS	INode::~INode()
+				{
+				}
+
+				TValue::EType TReferenceNode::Decltype() const
+				{
+					return this->type;
+				}
+
+				CLASS	TReferenceNode::TReferenceNode				(TValue::EType type, const void* ptr) : type(type), ptr(ptr) {}
+
+				TValue::EType TConstantNode::Decltype() const
+				{
+					return this->value.type;
+				}
+
+				CLASS	TConstantNode::TConstantNode				(TValue value) : value(value) {}
+
+				TValue::EType TBinaryOperatorNode::Decltype() const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS	TBinaryOperatorNode::TBinaryOperatorNode	(EOperation op, TSharedPtr<INode> lhs, TSharedPtr<INode> rhs) : op(op), lhs(lhs), rhs(rhs) {}
+
+				TValue::EType TFunctionCallNode::Decltype() const
+				{
+					return this->type_return;
+				}
+
+				CLASS	TFunctionCallNode::TFunctionCallNode		(void* func, TValue::EType type_return , TValue::EType type_arg, TSharedPtr<INode*> arg) : func(func), type_return(type_return), type_arg(type_arg), arg(arg) {}
+			}
+
+			TFormular	TFormular::operator+	(const TFormular& rhs) const
+			{
+				return TFormular(*this) += rhs;
+			}
+
+			TFormular	TFormular::operator-	(const TFormular& rhs) const
+			{
+				return TFormular(*this) -= rhs;
+			}
+
+			TFormular	TFormular::operator*	(const TFormular& rhs) const
+			{
+				return TFormular(*this) *= rhs;
+			}
+
+			TFormular	TFormular::operator/	(const TFormular& rhs) const
+			{
+				return TFormular(*this) /= rhs;
+			}
+
+			TFormular	TFormular::operator%	(const TFormular& rhs) const
+			{
+				return TFormular(*this) %= rhs;
+			}
+
+			TFormular	TFormular::operator^	(const TFormular& rhs) const
+			{
+				return TFormular(*this) ^= rhs;
+			}
+
+			TFormular	TFormular::operator>	(const TFormular& rhs) const
+			{
+				return TFormular(MakeSharedPtr(new TBinaryOperatorNode(TBinaryOperatorNode::EOperation::BIGGER_THAN, this->node_root, rhs.node_root)));
+			}
+
+			TFormular	TFormular::operator<	(const TFormular& rhs) const
+			{
+				return TFormular(MakeSharedPtr(new TBinaryOperatorNode(TBinaryOperatorNode::EOperation::LESS_THAN, this->node_root, rhs.node_root)));
+			}
+
+			TFormular	TFormular::operator>=	(const TFormular& rhs) const
+			{
+				return TFormular(MakeSharedPtr(new TBinaryOperatorNode(TBinaryOperatorNode::EOperation::BIGGER_OR_EQUAL_THAN, this->node_root, rhs.node_root)));
+			}
+
+			TFormular	TFormular::operator<=	(const TFormular& rhs) const
+			{
+				return TFormular(MakeSharedPtr(new TBinaryOperatorNode(TBinaryOperatorNode::EOperation::LESS_OR_EQUAL_THAN, this->node_root, rhs.node_root)));
+			}
+
+			TFormular	TFormular::operator==	(const TFormular& rhs) const
+			{
+				return TFormular(MakeSharedPtr(new TBinaryOperatorNode(TBinaryOperatorNode::EOperation::EQUAL, this->node_root, rhs.node_root)));
+			}
+
+			TFormular	TFormular::operator!=	(const TFormular& rhs) const
+			{
+				return TFormular(MakeSharedPtr(new TBinaryOperatorNode(TBinaryOperatorNode::EOperation::NOT_EQUAL, this->node_root, rhs.node_root)));
+			}
+
+			//	appends to the current formular object
+			TFormular&	TFormular::operator+=	(const TFormular& rhs)
+			{
+				this->node_root = MakeSharedPtr(new TBinaryOperatorNode(TBinaryOperatorNode::EOperation::ADD, this->node_root, rhs.node_root));
+				return *this;
+			}
+
+			TFormular&	TFormular::operator-=	(const TFormular& rhs)
+			{
+				this->node_root = MakeSharedPtr(new TBinaryOperatorNode(TBinaryOperatorNode::EOperation::SUB, this->node_root, rhs.node_root));
+				return *this;
+			}
+
+			TFormular&	TFormular::operator*=	(const TFormular& rhs)
+			{
+				this->node_root = MakeSharedPtr(new TBinaryOperatorNode(TBinaryOperatorNode::EOperation::MUL, this->node_root, rhs.node_root));
+				return *this;
+			}
+
+			TFormular&	TFormular::operator/=	(const TFormular& rhs)
+			{
+				this->node_root = MakeSharedPtr(new TBinaryOperatorNode(TBinaryOperatorNode::EOperation::DIV, this->node_root, rhs.node_root));
+				return *this;
+			}
+
+			TFormular&	TFormular::operator%=	(const TFormular& rhs)
+			{
+				this->node_root = MakeSharedPtr(new TBinaryOperatorNode(TBinaryOperatorNode::EOperation::MOD, this->node_root, rhs.node_root));
+				return *this;
+			}
+
+			TFormular&	TFormular::operator^=	(const TFormular& rhs)
+			{
+				this->node_root = MakeSharedPtr(new TBinaryOperatorNode(TBinaryOperatorNode::EOperation::POW, this->node_root, rhs.node_root));
+				return *this;
+			}
+
+			//	creates a new sub-expression which refers to the pointed-to variable
+			CLASS		TFormular::TFormular	(const f32_t*)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			TFunction&	Parse	(const TString& formular, TModule& module)
+			CLASS		TFormular::TFormular	(const f64_t*)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const u8_t*)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const s8_t*)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const u16_t*)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const s16_t*)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const u32_t*)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const s32_t*)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const u64_t*)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const s64_t*)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			//	creates a new sub-expression which holds a copy of the variable
+			CLASS		TFormular::TFormular	(const f32_t)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const f64_t)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const u8_t)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const s8_t)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const u16_t)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const s16_t)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const u32_t)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const s32_t)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const u64_t)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const s64_t)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(const TFormular&)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(TFormular&&)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			CLASS		TFormular::TFormular	(system::memory::TSharedPtr<node::INode> node_root) : node_root(node_root)
+			{
+			}
+
+			CLASS		TFormular::TFormular	(const io::text::string::TString&)
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			llvm::Function*	TFormular::GenerateCode	(llvm::Module&) const
+			{
+				CL3_NOT_IMPLEMENTED;
+			}
+
+			TValue::EType	TFormular::Decltype() const
 			{
 				CL3_NOT_IMPLEMENTED;
 			}

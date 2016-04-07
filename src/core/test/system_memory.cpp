@@ -215,9 +215,9 @@ namespace
 	{
 		ELastOp op1 = OP_UNDEFINED, op2 = OP_UNDEFINED, op3 = OP_UNDEFINED;
 
-		TSharedPtr<TCDCTester, THREADING_SINGLE> p1 = new TShared<TCDCTester, THREADING_SINGLE>(&op1, 0);
-		TSharedPtr<TCDCTester, THREADING_SINGLE> p2 = new TShared<TCDCTester, THREADING_SINGLE>(&op2, 17);
-		TSharedPtr<TCDCTester, THREADING_MULTI> p3 = new TShared<TCDCTester, THREADING_MULTI>(&op3, 112);
+		TSharedPtr<TCDCTester> p1 = MakeSharedPtr(new TCDCTester(&op1, 0));
+		TSharedPtr<TCDCTester> p2 = MakeSharedPtr(new TCDCTester(&op2, 17));
+		TSharedPtr<TCDCTester> p3 = MakeSharedPtr(new TCDCTester(&op3, 112));
 
 		EXPECT_TRUE(op1 == OP_CONSTRUCT);
 		EXPECT_TRUE(op2 == OP_CONSTRUCT);
@@ -249,19 +249,19 @@ namespace
 		EXPECT_TRUE(op2 == OP_DESTRUCT);
 		EXPECT_TRUE(op3 == OP_ASSIGN);
 
-		p1 = NULL;
+		p2.Clear();
 
 		EXPECT_TRUE(op1 == OP_ASSIGN);
 		EXPECT_TRUE(op2 == OP_DESTRUCT);
 		EXPECT_TRUE(op3 == OP_ASSIGN);
 
-		p2 = NULL;
+		p1.Clear();
 
 		EXPECT_TRUE(op1 == OP_DESTRUCT);
 		EXPECT_TRUE(op2 == OP_DESTRUCT);
 		EXPECT_TRUE(op3 == OP_ASSIGN);
 
-		p3 = NULL;
+		p3.Clear();
 
 		EXPECT_TRUE(op1 == OP_DESTRUCT);
 		EXPECT_TRUE(op2 == OP_DESTRUCT);
