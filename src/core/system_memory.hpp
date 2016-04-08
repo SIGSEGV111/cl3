@@ -154,7 +154,8 @@ namespace	cl3
 
 				inline void DecRef()
 				{
-					if(compiler::AtomicSub(this->n_refs, 1U) <= 1)
+					CL3_CLASS_LOGIC_ERROR(this->n_refs < 1);
+					if(compiler::AtomicSub(this->n_refs, 1U) == 1)
 					{
 						this->FDelete(this->obj);
 						delete this;
