@@ -1,0 +1,35 @@
+{
+   getElapsedWallTime/1
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:_ZN3cl36system6memoryL10cxx_mallocEm
+   fun:_ZN3cl36system6memory17TDefaultAllocator5AllocEm
+   fun:_ZN3cl36system6memory5AllocEmPKNS0_5types8typeinfo5TRTTIE
+   fun:_Znwm
+   fun:_ZL18getElapsedWallTimev
+   fun:__cxx_global_var_init
+   fun:_GLOBAL__sub_I_Process.cpp
+   fun:call_init.part.0
+   fun:_dl_init
+   obj:/lib64/ld-2.19.so
+   obj:*
+   obj:*
+}
+
+{
+   getElapsedWallTime/2
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:_ZN3cl36system6memoryL10cxx_mallocEm
+   fun:_ZN3cl36system6memory17TDefaultAllocator5AllocEm
+   fun:_ZN3cl36system6memory5AllocEmPKNS0_5types8typeinfo5TRTTIE
+   fun:_Znwm
+   fun:_ZL18getElapsedWallTimev
+   fun:__cxx_global_var_init
+   fun:_GLOBAL__sub_I_Process.cpp
+   fun:call_init.part.0
+   fun:_dl_init
+   obj:/lib64/ld-2.19.so
+}
