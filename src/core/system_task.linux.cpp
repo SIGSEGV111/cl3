@@ -163,7 +163,7 @@ namespace	cl3
 
 			static void ReadProcFile(const char* filename, char*& buffer, usys_t& sz)
 			{
-				sz = 1024;
+				sz = 4096;
 				usys_t p = 0;
 				ssize_t r;
 				buffer = (char*)Alloc(sz, NULL);
@@ -179,7 +179,7 @@ namespace	cl3
 					p += r;
 					if(sz == p)
 					{
-						sz += 1024;
+						sz += 512 + sz/5;
 						buffer = (char*)Realloc(buffer, sz, NULL, false);
 					}
 				}

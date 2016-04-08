@@ -194,7 +194,8 @@ namespace	cl3
 				}
 
 				template<class TKey, class TValue>
-				system::memory::TUniquePtr<IDynamicIterator<const TPair<TKey, TValue>> > TStdMap<const TKey, const TValue>::CreateDynamicIterator	() const
+				system::memory::TUniquePtr<IDynamicIterator<const TPair<TKey, TValue>> >
+								TStdMap<const TKey, const TValue>::CreateDynamicIterator	() const
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -212,7 +213,8 @@ namespace	cl3
 				}
 
 				template<class TKey, class TValue>
-				system::memory::TUniquePtr<IStaticIterator<const TPair<TKey, TValue>>> TStdMap<const TKey, const TValue>::CreateStaticIterator	() const
+				system::memory::TUniquePtr<IStaticIterator<const TPair<TKey, TValue>>>
+								TStdMap<const TKey, const TValue>::CreateStaticIterator	() const
 				{
 					return this->items.CreateStaticIterator();
 				}
