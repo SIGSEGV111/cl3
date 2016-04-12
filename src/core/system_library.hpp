@@ -32,7 +32,14 @@ namespace	cl3
 		{
 			CL3PUBV	io::collection::list::TList<io::text::string::TString> library_search_path;
 
-			class	CL3PUBT	TLibrary
+			struct	ILibrary
+			{
+				virtual void* ResolveSymbol(const io::text::string::TString& name) CL3_WARN_UNUSED_RESULT = 0;
+				virtual void* ResolveSymbol(const char* name) CL3_WARN_UNUSED_RESULT = 0;
+				virtual ~ILibrary() {}
+			};
+
+			class	CL3PUBT	TLibrary : public ILibrary
 			{
 				private:
 					CLASS TLibrary(const TLibrary&) = delete;
@@ -53,8 +60,8 @@ namespace	cl3
 					CL3PUBF	CLASS	TLibrary		(const io::text::string::TString& libname);
 					CL3PUBF	CLASS	~TLibrary		();
 
-					CL3PUBF	void*	ResolveSymbol	(const io::text::string::TString& name) CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	void*	ResolveSymbol	(const char* name) CL3_WARN_UNUSED_RESULT;
+					CL3PUBF	void*	ResolveSymbol	(const io::text::string::TString& name) final override CL3_WARN_UNUSED_RESULT;
+					CL3PUBF	void*	ResolveSymbol	(const char* name) final override CL3_WARN_UNUSED_RESULT;
 
 					template<class T>
 					void	LoadSymbol	(const io::text::string::TString& name, T*& variable)

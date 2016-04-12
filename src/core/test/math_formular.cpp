@@ -18,10 +18,11 @@
 
 #include <cl3/core/math_formular.hpp>
 #include <cl3/core/io_text_string.hpp>
+#include <cl3/core/system_compiler_jit.hpp>
+#include <llvm/IR/Module.h>
+
 #include <gtest/gtest.h>
 
-#include <llvm/IR/Module.h>
-#include <llvm/IR/LLVMContext.h>
 
 using namespace ::testing;
 
@@ -29,52 +30,52 @@ namespace
 {
 	using namespace cl3::math::formular;
 	using namespace cl3::system::memory;
+	using namespace cl3::system::compiler::jit;
 	using namespace llvm;
 
-	TEST(math_formular_TFormular, Reference)
+	TEST(math_formular_TFormular, FirstTest)
 	{
-		static LLVMContext context;
-		Module m("", context);
+		TJIT jit;
 
-		int x = 5;
-		TFormular formular(&x);
-
-		EXPECT_TRUE(formular.GenerateCode(m) != NULL);
-
-		m.dump();
-	}
-
-	TEST(math_formular_TFormular, Constant_Int)
-	{
-		static LLVMContext context;
-		Module m("", context);
-		TFormular formular(5L);
-
-		EXPECT_TRUE(formular.GenerateCode(m) != NULL);
-
-		m.dump();
-	}
-
-	TEST(math_formular_TFormular, Constant_Float)
-	{
-		static LLVMContext context;
-		Module m("", context);
-		TFormular formular(5.0);
-
-		EXPECT_TRUE(formular.GenerateCode(m) != NULL);
-
-		m.dump();
-	}
-
-	TEST(math_formular_TFormular, AddTwoConstants)
-	{
-		static LLVMContext context;
-		Module m("", context);
 		TFormular formular(5);
-		formular += 10;
 
-		EXPECT_TRUE(formular.GenerateCode(m) != NULL);
+		formular += 10.0;
 
-		m.dump();
+		float x = 0.1f;
+
+		formular *= &x;
+
+		TFormular bigger_than = formular > 1.0;
+
+		TFormular less_or_equal = formular <= 4;
+
+		Function* f1 = formular.GenerateCode(jit.Module());
+		EXPECT_TRUE(f1 != NULL);
+
+		Function* f2 = bigger_than.GenerateCode(jit.Module());
+		EXPECT_TRUE(f2 != NULL);
+
+		Function* f3 = less_or_equal.GenerateCode(jit.Module());
+		EXPECT_TRUE(f3 != NULL);
+
+// 		jit.Module().dump();;
+
+		TUniquePtr<TBinary> binary = jit.Compile();
+
+		double (*F1)() = (double (*)())binary->ResolveSymbol(f1);
+		bool (*F2)() = (bool (*)())binary->ResolveSymbol(f2);
+		bool (*F3)() = (bool (*)())binary->ResolveSymbol(f3);
+
+// 		printf("%p\n%p\n%p\n", F1, F2, F3);
+
+		EXPECT_TRUE(F1() > 1.49 && F1() < 1.51);
+		EXPECT_TRUE(F2());
+		EXPECT_TRUE(F3());
+
+		x = 0.0f;
+
+		EXPECT_EQ(0.0, F1());
+		EXPECT_FALSE(F2());
+		EXPECT_TRUE(F3());
 	}
 }

@@ -26,6 +26,8 @@
 #include "error.hpp"
 #include "context.hpp"
 
+#include <stdio.h>
+
 extern "C" void free(void*) throw();
 
 namespace	cl3
@@ -154,6 +156,7 @@ namespace	cl3
 
 				inline void DecRef()
 				{
+// 					printf("%p: DecRef(%p) => %d\n", this, obj, n_refs - 1);
 					CL3_CLASS_LOGIC_ERROR(this->n_refs < 1);
 					if(compiler::AtomicSub(this->n_refs, 1U) == 1)
 					{
@@ -164,10 +167,15 @@ namespace	cl3
 
 				inline void IncRef()
 				{
+// 					printf("%p: IncRef(%p) => %d\n", this, obj, n_refs + 1);
 					compiler::AtomicAdd(this->n_refs, 1U);
 				}
 
-				inline CLASS TSharedInfo(void* obj, void (*FDelete)(void*)) : n_refs(0), obj(obj), FDelete(FDelete) {}
+				inline CLASS TSharedInfo(void* obj, void (*FDelete)(void*)) : n_refs(0), obj(obj), FDelete(FDelete)
+				{
+// 					printf("%p: TSharedInfo()\n", this);
+				}
+// 				inline CLASS ~TSharedInfo() { printf("%p: ~TSharedInfo()\n", this); }
 			};
 
 			template<typename T>
@@ -205,6 +213,16 @@ namespace	cl3
 						return *this;
 					}
 
+					inline	TSharedPtr&	operator=	(TSharedPtr&& rhs)
+					{
+						Clear();
+						this->obj = rhs.obj;
+						this->info = rhs.info;
+						rhs.obj = NULL;
+						rhs.info = NULL;
+						return *this;
+					}
+
 					template<typename TT>
 					CLASS	TSharedPtr	(TSharedPtr<TT>&& rhs) : obj(rhs.obj), info(rhs.info)
 					{
@@ -212,8 +230,19 @@ namespace	cl3
 						rhs.info = NULL;
 					}
 
+					CLASS	TSharedPtr	(TSharedPtr&& rhs) : obj(rhs.obj), info(rhs.info)
+					{
+						rhs.obj = NULL;
+						rhs.info = NULL;
+					}
+
 					template<typename TT>
 					CLASS	TSharedPtr	(const TSharedPtr<TT>& rhs) : obj(NULL), info(NULL)
+					{
+						Set(rhs.obj, rhs.info);
+					}
+
+					CLASS	TSharedPtr	(const TSharedPtr& rhs) : obj(NULL), info(NULL)
 					{
 						Set(rhs.obj, rhs.info);
 					}

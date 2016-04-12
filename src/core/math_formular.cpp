@@ -27,6 +27,7 @@
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Constants.h>
+#include <llvm/IR/Verifier.h>
 #include <llvm/Support/ManagedStatic.h>
 
 namespace	cl3
@@ -36,13 +37,12 @@ namespace	cl3
 		namespace	formular
 		{
 			using namespace io::text::string;
+			using namespace io::text::encoding;
 			using namespace system::memory;
 			using namespace node;
 			using namespace error;
 			using namespace system::types::typeinfo;
 			using namespace llvm;
-
-			static llvm_shutdown_obj __fix_the_leaks;
 
 			static Type* GetLLVMType(const TRTTI* type, LLVMContext& context)
 			{
@@ -58,58 +58,89 @@ namespace	cl3
 				CL3_NONCLASS_FAIL(TException, "unsupported datatype");
 			}
 
+			static const TRTTI* ComputeBiggerType(const TRTTI* t1, const TRTTI* t2)
+			{
+				if( (t1->is_integer && t2->is_integer) || (t1->is_float && t2->is_float) )
+					return t1->sz_bytes > t2->sz_bytes ? t1 : t2;
+				else if( (t1->is_integer && t2->is_float) || (t1->is_float && t2->is_integer) )
+					return &TCTTI<f64_t>::rtti;
+				else
+					CL3_NONCLASS_FAIL(TException, "unsupported datatype");
+			}
+
+			static Value* CheckAndBuildCast(Value* value, const TRTTI* type_source, const TRTTI* type_target, IRBuilder<>& builder)
+			{
+				Type* type_target_llvm = GetLLVMType(type_target, builder.getContext());
+
+				if(value->getType() == type_target_llvm)
+					return value;
+				else
+				{
+					if(type_source->is_integer && type_target->is_integer)
+					{
+						if(type_source->is_signed)
+							return builder.CreateCast(Instruction::SExt, value, type_target_llvm);
+						else
+							return builder.CreateCast(Instruction::ZExt, value, type_target_llvm);
+					}
+					else if(type_source->is_float && type_target->is_float)
+					{
+						return builder.CreateCast(Instruction::FPExt, value, type_target_llvm);
+					}
+					else if(type_source->is_integer && type_target->is_float)
+					{
+						if(type_source->is_signed)
+							return builder.CreateCast(Instruction::SIToFP, value, type_target_llvm);
+						else
+							return builder.CreateCast(Instruction::UIToFP, value, type_target_llvm);
+					}
+					else if(type_source->is_float && type_target->is_integer)
+					{
+						if(type_target->is_signed)
+							return builder.CreateCast(Instruction::FPToSI, value, type_target_llvm);
+						else
+							return builder.CreateCast(Instruction::FPToUI, value, type_target_llvm);
+					}
+					CL3_NONCLASS_FAIL(TException, "unsupported datatype");
+				}
+			}
+
 			namespace node
 			{
 				CLASS	INode::~INode()
 				{
 				}
 
-				llvm::Function*	TReferenceNode::GenerateCode	(llvm::Module& module) const
+				Value*	TReferenceNode::GenerateCode	(IRBuilder<>& builder) const
 				{
-					Type* type_return = GetLLVMType(this->type, module.getContext());
+					Type* type_return = GetLLVMType(this->type, builder.getContext());
 
 					CL3_CLASS_ERROR(!PointerType::isValidElementType(type_return), TException, "!isValidElementType");
 
-					ConstantInt* addr = ConstantInt::get(Type::getIntNTy(module.getContext(), sizeof(void*) * 8), reinterpret_cast<usys_t>(this->ptr));
+					ConstantInt* addr = ConstantInt::get(Type::getIntNTy(builder.getContext(), sizeof(void*) * 8), reinterpret_cast<usys_t>(this->ptr));
 					Value* value_ptr = ConstantExpr::getIntToPtr(addr, PointerType::getUnqual(type_return));
 
-					FunctionType* type_function =  FunctionType::get(
-						type_return,		//	set the return type to the type specified for the reference variable
-						ArrayRef<Type*>(),	//	function takes no parameters (empty array)
-						false	//	!isVarArg
-					);
-
-					IRBuilder<> builder(module.getContext());
-					Function* function = Function::Create(type_function, Function::PrivateLinkage, "", &module);
-					BasicBlock *bb = BasicBlock::Create(module.getContext(), "entry", function);
-					builder.SetInsertPoint(bb);
-					LoadInst* li = builder.CreateLoad(value_ptr, "");
-					builder.CreateRet(li);
-
-					return function;
+					return builder.CreateLoad(value_ptr, "");
 				}
 
-				const system::types::typeinfo::TRTTI* TReferenceNode::Decltype() const
+				const TRTTI* TReferenceNode::Decltype() const
 				{
 					return this->type;
 				}
 
-				CLASS	TReferenceNode::TReferenceNode				(const TRTTI* type, const void* ptr) : type(type), ptr(ptr) {}
-
-				llvm::Function*	TConstantNode::GenerateCode	(llvm::Module& module) const
+				CLASS	TReferenceNode::TReferenceNode				(const TRTTI* type, const void* ptr) : type(type), ptr(ptr)
 				{
-					Type* type_return = GetLLVMType(this->value.type, module.getContext());
+// 					printf("%p: TReferenceNode()\n", this);
+				}
 
-					FunctionType* type_function =  FunctionType::get(
-						type_return,		//	set the return type to the type specified for the reference variable
-						ArrayRef<Type*>(),	//	function takes no parameters (empty array)
-						false	//	!isVarArg
-					);
+				CLASS	TReferenceNode::~TReferenceNode				()
+				{
+// 					printf("%p: ~TReferenceNode()\n", this);
+				}
 
-					IRBuilder<> builder(module.getContext());
-					Function* function = Function::Create(type_function, Function::PrivateLinkage, "", &module);
-					BasicBlock *bb = BasicBlock::Create(module.getContext(), "entry", function);
-					builder.SetInsertPoint(bb);
+				Value*	TConstantNode::GenerateCode	(IRBuilder<>& builder) const
+				{
+					Type* type_return = GetLLVMType(this->value.type, builder.getContext());
 
 					Constant* c = NULL;
 					if(this->value.type->is_integer || this->value.type->is_bool)
@@ -129,133 +160,209 @@ namespace	cl3
 
 					CL3_CLASS_ERROR(c == NULL, TException, "unsupported datatype");
 
-					builder.CreateRet(c);
-
-					return function;
+					return c;
 				}
 
-				const system::types::typeinfo::TRTTI* TConstantNode::Decltype() const
+				const TRTTI* TConstantNode::Decltype() const
 				{
 					return this->value.type;
 				}
 
 				CLASS	TConstantNode::TConstantNode				(const TRTTI* type, const void* data)
 				{
+// 					printf("%p: TConstantNode()\n", this);
 					CL3_CLASS_ERROR(type->sz_bytes > sizeof(this->value.data), TException, "requested datatype too big");
 					this->value.type = type;
 					memcpy(this->value.data, data, type->sz_bytes);
 					memset(this->value.data + type->sz_bytes, 0, sizeof(this->value.data) - type->sz_bytes);
 				}
 
-				llvm::Function*	TBinaryOperatorNode::GenerateCode	(llvm::Module& module) const
+				CLASS	TConstantNode::~TConstantNode				()
 				{
-					Function* f1 = this->lhs->GenerateCode(module);
-					Function* f2 = this->rhs->GenerateCode(module);
+// 					printf("%p: ~TConstantNode()\n", this);
+				}
 
-					Type* type_return = NULL;
+				Value*	TBinaryOperatorNode::GenerateCode	(IRBuilder<>& builder) const
+				{
+					const TRTTI* type_work = ComputeBiggerType(this->lhs->Decltype(), this->rhs->Decltype());
 
-					switch(this->op)
-					{
-						case EOperation::ADD:
-							type_return = f1->getReturnType();
-							break;
-						case EOperation::SUB:
-							break;
-						case EOperation::MUL:
-							break;
-						case EOperation::DIV:
-							break;
-						case EOperation::MOD:
-							break;
-						case EOperation::POW:
-							break;
-						case EOperation::BIGGER_THAN:
-							break;
-						case EOperation::LESS_THAN:
-							break;
-						case EOperation::BIGGER_OR_EQUAL_THAN:
-							break;
-						case EOperation::LESS_OR_EQUAL_THAN:
-							break;
-						case EOperation::EQUAL:
-							break;
-						case EOperation::NOT_EQUAL:
-							break;
-					}
-
-					CL3_CLASS_ERROR(type_return == NULL, TException, "cannot determine return type");
-
-					FunctionType* type_function =  FunctionType::get(
-						type_return,		//	set the return type to the type specified for the reference variable
-						ArrayRef<Type*>(),	//	function takes no parameters (empty array)
-						false	//	!isVarArg
-					);
-
-					IRBuilder<> builder(module.getContext());
-					Function* function = Function::Create(type_function, Function::PrivateLinkage, "", &module);
-					BasicBlock *bb = BasicBlock::Create(module.getContext(), "entry", function);
-					builder.SetInsertPoint(bb);
-
-					CallInst* c1 = builder.CreateCall(f1, ArrayRef<Value*>());
-					CallInst* c2 = builder.CreateCall(f2, ArrayRef<Value*>());
+					Value* v1 = CheckAndBuildCast(this->lhs->GenerateCode(builder), this->lhs->Decltype(), type_work, builder);
+					Value* v2 = CheckAndBuildCast(this->rhs->GenerateCode(builder), this->rhs->Decltype(), type_work, builder);
 
 					Value* r = NULL;
 
 					switch(this->op)
 					{
 						case EOperation::ADD:
-							r = builder.CreateAdd(c1, c2);
+							if(type_work->is_integer)
+								r = builder.CreateAdd(v1, v2);
+							else if(type_work->is_float)
+								r = builder.CreateFAdd(v1, v2);
 							break;
 						case EOperation::SUB:
-							r = builder.CreateSub(c1, c2);
+							if(type_work->is_integer)
+								r = builder.CreateSub(v1, v2);
+							else if(type_work->is_float)
+								r = builder.CreateFSub(v1, v2);
 							break;
 						case EOperation::MUL:
+							if(type_work->is_integer)
+								r = builder.CreateMul(v1, v2);
+							else if(type_work->is_float)
+								r = builder.CreateFMul(v1, v2);
 							break;
 						case EOperation::DIV:
+							if(type_work->is_integer)
+							{
+								if(type_work->is_signed)
+									r = builder.CreateSDiv(v1, v2);
+								else
+									r = builder.CreateUDiv(v1, v2);
+							}
+							else if(type_work->is_float)
+								r = builder.CreateFAdd(v1, v2);
 							break;
 						case EOperation::MOD:
 							break;
 						case EOperation::POW:
 							break;
 						case EOperation::BIGGER_THAN:
+							if(type_work->is_integer)
+							{
+								if(type_work->is_signed)
+									r = builder.CreateICmpSGT(v1, v2);
+								else
+									r = builder.CreateICmpUGT(v1, v2);
+							}
+							else if(type_work->is_float)
+								r = builder.CreateFCmpOGT(v1, v2);
 							break;
 						case EOperation::LESS_THAN:
+							if(type_work->is_integer)
+							{
+								if(type_work->is_signed)
+									r = builder.CreateICmpSLT(v1, v2);
+								else
+									r = builder.CreateICmpULT(v1, v2);
+							}
+							else if(type_work->is_float)
+								r = builder.CreateFCmpOLT(v1, v2);
 							break;
 						case EOperation::BIGGER_OR_EQUAL_THAN:
+							if(type_work->is_integer)
+							{
+								if(type_work->is_signed)
+									r = builder.CreateICmpSGE(v1, v2);
+								else
+									r = builder.CreateICmpUGE(v1, v2);
+							}
+							else if(type_work->is_float)
+								r = builder.CreateFCmpOGE(v1, v2);
 							break;
 						case EOperation::LESS_OR_EQUAL_THAN:
+							if(type_work->is_integer)
+							{
+								if(type_work->is_signed)
+									r = builder.CreateICmpSLE(v1, v2);
+								else
+									r = builder.CreateICmpULE(v1, v2);
+							}
+							else if(type_work->is_float)
+								r = builder.CreateFCmpOLE(v1, v2);
 							break;
 						case EOperation::EQUAL:
+							if(type_work->is_integer)
+								r = builder.CreateICmpEQ(v1, v2);
+							else if(type_work->is_float)
+								r = builder.CreateFCmpOEQ(v1, v2);
 							break;
 						case EOperation::NOT_EQUAL:
+							if(type_work->is_integer)
+								r = builder.CreateICmpNE(v1, v2);
+							else if(type_work->is_float)
+								r = builder.CreateFCmpONE(v1, v2);
 							break;
 					}
 
 					CL3_CLASS_ERROR(r == NULL, TException, "unable to generate code for requested operation");
 
-					builder.CreateRet(r);
+					switch(this->op)
+					{
+						case EOperation::ADD:
+						case EOperation::SUB:
+						case EOperation::MUL:
+						case EOperation::DIV:
+						case EOperation::MOD:
+						case EOperation::POW:
+							break;
 
-					return function;
+						case EOperation::BIGGER_THAN:
+						case EOperation::LESS_THAN:
+						case EOperation::BIGGER_OR_EQUAL_THAN:
+						case EOperation::LESS_OR_EQUAL_THAN:
+						case EOperation::EQUAL:
+						case EOperation::NOT_EQUAL:
+							r = builder.CreateCast(Instruction::ZExt, r, Type::getIntNTy(builder.getContext(), 8));
+							break;
+					}
+
+					return r;
 				}
 
-				const system::types::typeinfo::TRTTI* TBinaryOperatorNode::Decltype() const
+				const TRTTI* TBinaryOperatorNode::Decltype() const
+				{
+					switch(this->op)
+					{
+						case EOperation::ADD:
+						case EOperation::SUB:
+						case EOperation::MUL:
+						case EOperation::DIV:
+						case EOperation::MOD:
+						case EOperation::POW:
+							return ComputeBiggerType(this->lhs->Decltype(), this->rhs->Decltype());
+
+						case EOperation::BIGGER_THAN:
+						case EOperation::LESS_THAN:
+						case EOperation::BIGGER_OR_EQUAL_THAN:
+						case EOperation::LESS_OR_EQUAL_THAN:
+						case EOperation::EQUAL:
+						case EOperation::NOT_EQUAL:
+							return &TCTTI<bool>::rtti;
+					}
+
+					CL3_CLASS_FAIL(TException, "unknown operation");
+				}
+
+				CLASS	TBinaryOperatorNode::TBinaryOperatorNode	(EOperation op, TSharedPtr<INode> lhs, TSharedPtr<INode> rhs) : op(op), lhs(std::move(lhs)), rhs(std::move(rhs))
+				{
+// 					printf("%p: TBinaryOperatorNode()\n", this);
+				}
+
+				CLASS	TBinaryOperatorNode::~TBinaryOperatorNode	()
+				{
+// 					printf("%p: ~TBinaryOperatorNode()\n", this);
+				}
+
+				Value*	TFunctionCallNode::GenerateCode	(IRBuilder<>& builder) const
 				{
 					CL3_NOT_IMPLEMENTED;	//	TODO
 				}
 
-				CLASS	TBinaryOperatorNode::TBinaryOperatorNode	(EOperation op, TSharedPtr<INode> lhs, TSharedPtr<INode> rhs) : op(op), lhs(lhs), rhs(rhs) {}
-
-				llvm::Function*	TFunctionCallNode::GenerateCode	(llvm::Module& module) const
-				{
-					CL3_NOT_IMPLEMENTED;	//	TODO
-				}
-
-				const system::types::typeinfo::TRTTI* TFunctionCallNode::Decltype() const
+				const TRTTI* TFunctionCallNode::Decltype() const
 				{
 					return this->type_return;
 				}
 
-				CLASS	TFunctionCallNode::TFunctionCallNode		(void* func, const system::types::typeinfo::TRTTI* type_return , const system::types::typeinfo::TRTTI* type_arg, TSharedPtr<INode*> arg) : func(func), type_return(type_return), type_arg(type_arg), arg(arg) {}
+				CLASS	TFunctionCallNode::TFunctionCallNode		(void* func, const TRTTI* type_return , const TRTTI* type_arg, TSharedPtr<INode*> arg) : func(func), type_return(type_return), type_arg(type_arg), arg(arg)
+				{
+// 					printf("%p: TFunctionCallNode()\n", this);
+				}
+
+
+				CLASS	TFunctionCallNode::~TFunctionCallNode		()
+				{
+// 					printf("%p: ~TFunctionCallNode()\n", this);
+				}
 			}
 
 			TFormular	TFormular::operator+	(const TFormular& rhs) const
@@ -355,48 +462,60 @@ namespace	cl3
 				return *this;
 			}
 
+			TFormular&	TFormular::operator=	(const TFormular& rhs)
+			{
+				this->node_root = rhs.node_root;
+				return *this;
+			}
+
+			TFormular&	TFormular::operator=	(TFormular&& rhs)
+			{
+				this->node_root = std::move(rhs.node_root);
+				return *this;
+			}
+
 			//	creates a new sub-expression which refers to the pointed-to variable
-			CLASS		TFormular::TFormular	(const f32_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, &v)))
+			CLASS		TFormular::TFormular	(const f32_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, v)))
 			{
 			}
 
-			CLASS		TFormular::TFormular	(const f64_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, &v)))
+			CLASS		TFormular::TFormular	(const f64_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, v)))
 			{
 			}
 
-			CLASS		TFormular::TFormular	(const u8_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, &v)))
+			CLASS		TFormular::TFormular	(const u8_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, v)))
 			{
 			}
 
-			CLASS		TFormular::TFormular	(const s8_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, &v)))
+			CLASS		TFormular::TFormular	(const s8_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, v)))
 			{
 			}
 
-			CLASS		TFormular::TFormular	(const u16_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, &v)))
+			CLASS		TFormular::TFormular	(const u16_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, v)))
 			{
 			}
 
-			CLASS		TFormular::TFormular	(const s16_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, &v)))
+			CLASS		TFormular::TFormular	(const s16_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, v)))
 			{
 			}
 
-			CLASS		TFormular::TFormular	(const u32_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, &v)))
+			CLASS		TFormular::TFormular	(const u32_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, v)))
 			{
 			}
 
-			CLASS		TFormular::TFormular	(const s32_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, &v)))
+			CLASS		TFormular::TFormular	(const s32_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, v)))
 			{
 			}
 
-			CLASS		TFormular::TFormular	(const u64_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, &v)))
+			CLASS		TFormular::TFormular	(const u64_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, v)))
 			{
 			}
 
-			CLASS		TFormular::TFormular	(const s64_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, &v)))
+			CLASS		TFormular::TFormular	(const s64_t* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, v)))
 			{
 			}
 
-			CLASS		TFormular::TFormular	(const bool* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, &v)))
+			CLASS		TFormular::TFormular	(const bool* v) : node_root(MakeSharedPtr(new TReferenceNode(&TCTTI<std::remove_cv<decltype(v)>::type>::rtti, v)))
 			{
 			}
 
@@ -462,12 +581,40 @@ namespace	cl3
 				CL3_NOT_IMPLEMENTED;	//	TODO
 			}
 
-			llvm::Function*	TFormular::GenerateCode	(llvm::Module& module) const
+			Function*	TFormular::GenerateCode	(Module& module) const
 			{
-				return this->node_root->GenerateCode(module);
+				char name[32];
+				snprintf(name, sizeof(name), "TFormular_%p", this);
+
+				FunctionType* type_function =  FunctionType::get(GetLLVMType(this->node_root->Decltype(), module.getContext()), ArrayRef<Type*>(), false);
+
+				IRBuilder<> builder(module.getContext());
+				Function* function = Function::Create(type_function, Function::ExternalLinkage, name, &module);
+				BasicBlock *bb = BasicBlock::Create(module.getContext(), "", function);
+				builder.SetInsertPoint(bb);
+				builder.CreateRet(this->node_root->GenerateCode(builder));
+
+				CL3_CLASS_ERROR(verifyFunction(*function, NULL), TException, "failure during verification");
+
+				return function;
 			}
 
-			const system::types::typeinfo::TRTTI*	TFormular::Decltype() const
+			Function*	TFormular::GenerateCode	(Module& module, const io::text::string::TString& name) const
+			{
+				FunctionType* type_function =  FunctionType::get(GetLLVMType(this->node_root->Decltype(), module.getContext()), ArrayRef<Type*>(), false);
+
+				IRBuilder<> builder(module.getContext());
+				Function* function = Function::Create(type_function, Function::ExternalLinkage, TCString(name, CODEC_CXX_CHAR).Chars(), &module);
+				BasicBlock *bb = BasicBlock::Create(module.getContext(), "", function);
+				builder.SetInsertPoint(bb);
+				builder.CreateRet(this->node_root->GenerateCode(builder));
+
+				CL3_CLASS_ERROR(verifyFunction(*function, NULL), TException, "failure during verification");
+
+				return function;
+			}
+
+			const TRTTI*	TFormular::Decltype() const
 			{
 				return this->node_root->Decltype();
 			}
