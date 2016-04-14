@@ -34,30 +34,6 @@ namespace	cl3
 				using namespace synchronization;
 				using namespace io::collection::list;
 
-				usys_t TAsyncEventProcessor::ProcessEvents()
-				{
-					TList<TCallback*> callbacks;
-
-					for(TCallback* p = this->callback_first; p != NULL; p = p->callback_next)
-						callbacks.Add(p);
-
-					const usys_t n_callbacks = callbacks.Count();
-
-					struct pollfd pfds[n_callbacks];
-					for(usys_t i = 0; i < n_callbacks; i++)
-						pfds[i] = callbacks[i]->waitable->__PollInfo();
-
-					int n_events;
-					CL3_CLASS_SYSERR(n_events = ::poll(pfds, n_callbacks, 0));
-
-					if(n_events > 0)
-						for(usys_t i = 0; i < n_callbacks; i++)
-							if(pfds[i].revents != 0)
-								callbacks[i]->receiver->AsyncCallback(this, callbacks[i]->waitable);
-
-							return n_events;
-				}
-
 				void TAsyncEventProcessor::TCallback::Register(TAsyncEventProcessor* aep, IWaitable* waitable, IReceiver* receiver)
 				{
 					this->Unregister();

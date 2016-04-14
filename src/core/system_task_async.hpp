@@ -21,6 +21,7 @@
 
 #include "system_compiler.hpp"
 #include "system_types.hpp"
+#include "system_time.hpp"
 
 #if (CL3_OS == CL3_OS_POSIX)
 	#include <poll.h>
@@ -83,6 +84,7 @@ namespace cl3
 					public:
 						CL3PUBF usys_t CountCallbacks() const CL3_GETTER;	//	returns the number of registered callbacks
 						CL3PUBF usys_t ProcessEvents();						//	processes all pending events
+						CL3PUBF usys_t WaitAndProcessEvents(time::TTime timeout = -1);	//	processes all pending events
 						CL3PUBF static TAsyncEventProcessor& Default();
 						CL3PUBF CLASS TAsyncEventProcessor();
 				};

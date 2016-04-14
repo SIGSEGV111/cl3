@@ -135,7 +135,7 @@ namespace	cl3
 					template<class T> const FDeserialize TImpl<T, true >::deserinst = &generic_deserinst<T>;
 
 					template<typename T, bool>
-					class CL3PUBT	is_boolean_impl;
+					struct CL3PUBT	is_boolean_impl;
 
 					template<typename T>
 					struct	is_boolean_impl<T,true>
