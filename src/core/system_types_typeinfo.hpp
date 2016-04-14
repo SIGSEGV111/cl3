@@ -20,6 +20,7 @@
 #define	_include_cl3_core_system_types_typeinfo_hpp_
 
 #include <typeinfo>
+#include <type_traits>
 #include "system_types.hpp"
 #include "system_compiler.hpp"
 #include "system_memory.hpp"
@@ -132,6 +133,21 @@ namespace	cl3
 
 					template<class T> const FDeserialize TImpl<T, false>::deserinst = NULL;
 					template<class T> const FDeserialize TImpl<T, true >::deserinst = &generic_deserinst<T>;
+
+					template<typename T, bool>
+					struct CL3PUBT	is_boolean_impl;
+
+					template<typename T>
+					struct	is_boolean_impl<T,true>
+					{
+						static const bool value = ((T)2) == ((T)1);
+					};
+
+					template<typename T>
+					struct	is_boolean_impl<T,false>
+					{
+						static const bool value = false;
+					};
 				}
 
 				namespace	features
@@ -299,17 +315,27 @@ namespace	cl3
 						public:
 							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
+
+					template<typename T>
+					class CL3PUBT	is_boolean
+					{
+						public:
+							CL3PUBF	static const bool value = _::is_boolean_impl<T, std::is_integral<T>::value && is_comparable_equal<T>::value>::value;
+					};
 				}
 
 				struct	CL3PUBT	TRTTI
 				{
 					unsigned
-						n_indirections : (sizeof(unsigned)*8-9),	//	number of indirections (references/pointers), specifies how often you would have to dereference to receive the actual value
+						n_indirections : (sizeof(unsigned)*8-12),	//	number of indirections (references/pointers), specifies how often you would have to dereference to receive the actual value
 						is_constant : 1,	//	constant?
-						is_signed : 1,	//	signed numeric type? (NOTE: floats are usually signed)
-						is_pointer : 1,	//	pointer?
+						is_signed : 1,		//	signed numeric type? (NOTE: floats are usually signed)
+						is_pointer : 1,		//	pointer?
 						is_reference : 1,	//	reference?
-						is_array : 1,	//	standard c-style array?
+						is_array : 1,		//	standard c-style array?
+						is_integer : 1,		//	regular integer?
+						is_float : 1,		//	is float?
+						is_bool : 1,		//	is boolean?
 						is_trivial_constructable : 1,	//	malloc() + memset() will do
 						is_trivial_copyable : 1,		//	malloc() + memcpy() will do
 						is_trivial_deleteable : 1,		//	free() will do
@@ -338,6 +364,9 @@ namespace	cl3
 					CL3PUBF	const static bool is_pointer = false;
 					CL3PUBF	const static bool is_reference = false;
 					CL3PUBF	const static bool is_array = false;
+					CL3PUBF	const static bool is_integer = std::is_integral<T>::value;
+					CL3PUBF	const static bool is_float = std::is_floating_point<T>::value;
+					CL3PUBF	const static bool is_bool = features::is_boolean<T>::value;
 					CL3PUBF	const static bool is_trivial_constructable = false;
 					CL3PUBF	const static bool is_trivial_copyable = false;
 					CL3PUBF	const static bool is_trivial_deleteable = false;
@@ -363,6 +392,9 @@ namespace	cl3
 					CL3PUBF	const static bool is_pointer = TCTTI<T>::is_pointer;
 					CL3PUBF	const static bool is_reference = TCTTI<T>::is_reference;
 					CL3PUBF	const static bool is_array = TCTTI<T>::is_array;
+					CL3PUBF	const static bool is_integer = TCTTI<T>::is_integer;
+					CL3PUBF	const static bool is_float = TCTTI<T>::is_float;
+					CL3PUBF	const static bool is_bool = TCTTI<T>::is_bool;
 					CL3PUBF	const static bool is_trivial_constructable = TCTTI<T>::is_trivial_constructable;
 					CL3PUBF	const static bool is_trivial_copyable = TCTTI<T>::is_trivial_copyable;
 					CL3PUBF	const static bool is_trivial_deleteable = TCTTI<T>::is_trivial_deleteable;
@@ -388,6 +420,9 @@ namespace	cl3
 					CL3PUBF	const static bool is_pointer = true;
 					CL3PUBF	const static bool is_reference = TCTTI<T>::is_reference;
 					CL3PUBF	const static bool is_array = TCTTI<T>::is_array;
+					CL3PUBF	const static bool is_integer = TCTTI<T>::is_integer;
+					CL3PUBF	const static bool is_float = TCTTI<T>::is_float;
+					CL3PUBF	const static bool is_bool = TCTTI<T>::is_bool;
 					CL3PUBF	const static bool is_trivial_constructable = true;
 					CL3PUBF	const static bool is_trivial_copyable = true;
 					CL3PUBF	const static bool is_trivial_deleteable = true;
@@ -413,6 +448,9 @@ namespace	cl3
 					CL3PUBF	const static bool is_pointer = TCTTI<T>::is_pointer;
 					CL3PUBF	const static bool is_reference = true;
 					CL3PUBF	const static bool is_array = TCTTI<T>::is_array;
+					CL3PUBF	const static bool is_integer = TCTTI<T>::is_integer;
+					CL3PUBF	const static bool is_float = TCTTI<T>::is_float;
+					CL3PUBF	const static bool is_bool = TCTTI<T>::is_bool;
 					CL3PUBF	const static bool is_trivial_constructable = TCTTI<T>::is_trivial_constructable;
 					CL3PUBF	const static bool is_trivial_copyable = TCTTI<T>::is_trivial_copyable;
 					CL3PUBF	const static bool is_trivial_deleteable = TCTTI<T>::is_trivial_deleteable;
@@ -437,7 +475,7 @@ namespace	cl3
 				template<class T> const FSerialize				TCTTI<T>::serialize				= _::TImpl<T, features::is_serializable<T>::value>::serialize;
 				template<class T> const FDeserialize			TCTTI<T>::deserialize_instance	= _::TImpl<T, features::is_deserializable_instance<T>::value>::deserinst;
 				template<class T> const FDeserialize			TCTTI<T>::deserialize_ctor		= _::TImpl<T, features::is_deserializable_ctor<T>::value>::deserctor;
-				template<class T> const TRTTI					TCTTI<T>::rtti		= { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, serialize, deserialize_instance, deserialize_ctor, sizeof(T), &typeid(T) };
+				template<class T> const TRTTI					TCTTI<T>::rtti		= { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_integer, is_float, is_bool, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, serialize, deserialize_instance, deserialize_ctor, sizeof(T), &typeid(T) };
 
 				template<class T> const FDestructor				TCTTI<const T>::dtor					= _::TImpl<T, features::is_destructible<T>::value>::dtor;
 				template<class T> const FStandardConstructor	TCTTI<const T>::ctor					= _::TImpl<T, features::is_default_constructible<T>::value>::ctor;
@@ -446,7 +484,7 @@ namespace	cl3
 				template<class T> const FSerialize				TCTTI<const T>::serialize				= _::TImpl<T, features::is_serializable<T>::value>::serialize;
 				template<class T> const FDeserialize			TCTTI<const T>::deserialize_instance	= NULL;
 				template<class T> const FDeserialize			TCTTI<const T>::deserialize_ctor		= _::TImpl<T, features::is_deserializable_ctor<T>::value>::deserctor;
-				template<class T> const TRTTI					TCTTI<const T>::rtti		= { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, serialize, deserialize_instance, deserialize_ctor, sizeof(T), &typeid(T) };
+				template<class T> const TRTTI					TCTTI<const T>::rtti		= { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_integer, is_float, is_bool, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, serialize, deserialize_instance, deserialize_ctor, sizeof(T), &typeid(T) };
 
 				template<class T> const FDestructor				TCTTI<T*>::dtor					= NULL;
 				template<class T> const FStandardConstructor	TCTTI<T*>::ctor					= NULL;
@@ -455,7 +493,7 @@ namespace	cl3
 				template<class T> const FSerialize				TCTTI<T*>::serialize			= NULL;
 				template<class T> const FDeserialize			TCTTI<T*>::deserialize_instance	= NULL;
 				template<class T> const FDeserialize			TCTTI<T*>::deserialize_ctor		= NULL;
-				template<class T> const TRTTI					TCTTI<T*>::rtti			= { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, serialize, deserialize_instance, deserialize_ctor, sizeof(T), &typeid(T) };
+				template<class T> const TRTTI					TCTTI<T*>::rtti			= { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_integer, is_float, is_bool, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, serialize, deserialize_instance, deserialize_ctor, sizeof(T), &typeid(T) };
 
 				template<class T> const FDestructor				TCTTI<T&>::dtor					= NULL;
 				template<class T> const FStandardConstructor	TCTTI<T&>::ctor					= NULL;
@@ -464,7 +502,7 @@ namespace	cl3
 				template<class T> const FSerialize				TCTTI<T&>::serialize			= NULL;
 				template<class T> const FDeserialize			TCTTI<T&>::deserialize_instance	= NULL;
 				template<class T> const FDeserialize			TCTTI<T&>::deserialize_ctor		= NULL;
-				template<class T> const TRTTI TCTTI<T&>::rtti = { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, serialize, deserialize_instance, deserialize_ctor, sizeof(T), &typeid(T) };
+				template<class T> const TRTTI TCTTI<T&>::rtti = { n_indirections, is_constant, is_signed, is_pointer, is_reference, is_array, is_integer, is_float, is_bool, is_trivial_constructable, is_trivial_copyable, is_trivial_deleteable, is_trivial_moveable, dtor, ctor, copyctor, print, serialize, deserialize_instance, deserialize_ctor, sizeof(T), &typeid(T) };
 			}
 		}
 	}

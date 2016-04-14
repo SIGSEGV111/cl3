@@ -1,0 +1,103 @@
+{
+   getElapsedWallTime/1
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:_ZN3cl36system6memoryL10cxx_mallocEm
+   fun:_ZN3cl36system6memory17TDefaultAllocator5AllocEm
+   fun:_ZN3cl36system6memory5AllocEmPKNS0_5types8typeinfo5TRTTIE
+   fun:_Znwm
+   fun:_ZL18getElapsedWallTimev
+   fun:__cxx_global_var_init
+   fun:_GLOBAL__sub_I_Process.cpp
+   fun:call_init.part.0
+   fun:_dl_init
+   obj:/lib64/ld-2.19.so
+   obj:*
+   obj:*
+}
+
+{
+   getElapsedWallTime/2
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:_ZN3cl36system6memoryL10cxx_mallocEm
+   fun:_ZN3cl36system6memory17TDefaultAllocator5AllocEm
+   fun:_ZN3cl36system6memory5AllocEmPKNS0_5types8typeinfo5TRTTIE
+   fun:_Znwm
+   fun:_ZL18getElapsedWallTimev
+   fun:__cxx_global_var_init
+   fun:_GLOBAL__sub_I_Process.cpp
+   fun:call_init.part.0
+   fun:_dl_init
+   obj:/lib64/ld-2.19.so
+}
+
+{
+	LLVM_fix_your_shit/1
+	Memcheck:Cond
+	fun:isPhysicalRegister
+}
+
+{
+	LLVM_fix_your_shit/2
+	Memcheck:Leak
+	match-leak-kinds: possible
+	fun:malloc
+	fun:_ZN3cl36system6memoryL10cxx_mallocEm
+	fun:_ZN3cl36system6memory17TDefaultAllocator5AllocEm
+	fun:_ZN3cl36system6memory5AllocEmPKNS0_5types8typeinfo5TRTTIE
+	fun:_Znwm
+	fun:allocateBuckets
+	fun:_ZN4llvm8DenseMapIPvcNS_12DenseMapInfoIS1_EEE4growEj
+	fun:grow
+	fun:_ZN4llvm12DenseMapBaseINS_8DenseMapIPvcNS_12DenseMapInfoIS2_EEEES2_cS4_E20InsertIntoBucketImplERKS2_PSt4pairIS2_cE
+	fun:InsertIntoBucket
+	fun:_ZN4llvm12DenseMapBaseINS_8DenseMapIPvcNS_12DenseMapInfoIS2_EEEES2_cS4_E6insertEOSt4pairIS2_cE
+	fun:insert
+	fun:_ZN4llvm3sys14DynamicLibrary19getPermanentLibraryEPKcPSs
+	fun:LoadLibraryPermanently
+	fun:_ZN4llvm13EngineBuilder6createEPNS_13TargetMachineE
+	fun:_ZN3cl36system8compiler3jit7TBinaryC1EPN4llvm11LLVMContextEPNS4_6ModuleE
+	fun:_ZN3cl36system8compiler3jit4TJIT7CompileEh
+}
+
+
+{
+	LLVM_fix_your_shit/3
+	Memcheck:Leak
+	match-leak-kinds: possible
+	fun:malloc
+	fun:_ZN3cl36system6memoryL10cxx_mallocEm
+	fun:_ZN3cl36system6memory17TDefaultAllocator5AllocEm
+	fun:_ZN3cl36system6memory5AllocEmPKNS0_5types8typeinfo5TRTTIE
+	fun:_Znwm
+	fun:_ZN4llvm3sys14DynamicLibrary19getPermanentLibraryEPKcPSs
+	fun:LoadLibraryPermanently
+	fun:_ZN4llvm13EngineBuilder6createEPNS_13TargetMachineE
+	fun:_ZN3cl36system8compiler3jit7TBinaryC1EPN4llvm11LLVMContextEPNS4_6ModuleE
+	fun:_ZN3cl36system8compiler3jit4TJIT7CompileEh
+}
+
+{
+	LLVM_fix_your_shit/4
+	Memcheck:Leak
+	match-leak-kinds: possible
+	fun:malloc
+	fun:_ZN3cl36system6memoryL10cxx_mallocEm
+	fun:_ZN3cl36system6memory17TDefaultAllocator5AllocEm
+	fun:_ZN3cl36system6memory5AllocEmPKNS0_5types8typeinfo5TRTTIE
+	fun:_Znwm
+	fun:_ZN4llvm3sys7process8get_selfEv
+	fun:_ZN4llvm3sys6Memory20allocateMappedMemoryEmPKNS0_11MemoryBlockEjRSt10error_code
+	fun:_ZN4llvm20SectionMemoryManager15allocateSectionERNS0_11MemoryGroupEmj
+	fun:_ZN4llvm15RuntimeDyldImpl11emitSectionERNS_11ObjectImageERKNS_6object10SectionRefEb
+	fun:_ZN4llvm15RuntimeDyldImpl17findOrEmitSectionERNS_11ObjectImageERKNS_6object10SectionRefEbRSt3mapIS4_jSt4lessIS4_ESaISt4pairIS5_jEEE
+	fun:_ZN4llvm15RuntimeDyldImpl10loadObjectEPNS_11ObjectImageE
+	fun:_ZN4llvm11RuntimeDyld10loadObjectEPNS_12ObjectBufferE
+	fun:_ZN4llvm5MCJIT21generateCodeForModuleEPNS_6ModuleE
+	fun:_ZN4llvm5MCJIT14finalizeObjectEv
+	fun:_ZN3cl36system8compiler3jit7TBinaryC1EPN4llvm11LLVMContextEPNS4_6ModuleE
+	fun:_ZN3cl36system8compiler3jit4TJIT7CompileEh
+}

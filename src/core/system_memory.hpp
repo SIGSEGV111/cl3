@@ -26,6 +26,8 @@
 #include "error.hpp"
 #include "context.hpp"
 
+#include <stdio.h>
+
 extern "C" void free(void*) throw();
 
 namespace	cl3
@@ -43,6 +45,15 @@ namespace	cl3
 		namespace	memory
 		{
 			using namespace types;
+
+			namespace _
+			{
+				template<typename T>
+				void Delete(void* obj)
+				{
+					delete reinterpret_cast<T*>(obj);
+				}
+			}
 
 			CL3PUBF	void	Free	(void*);
 			CL3PUBF	void*	Alloc	(usys_t, const typeinfo::TRTTI*) CL3_WARN_UNUSED_RESULT;	//	FIXME: Alloc() should return a TUniquePtr
@@ -137,75 +148,128 @@ namespace	cl3
 				THREADING_MULTI
 			};
 
-			template<class T, EThreading> class TSharedPtr;
-
-			template<class T, EThreading th = THREADING_MULTI>
-			class	CL3PUBT	TShared
+			struct TSharedInfo
 			{
-				friend class TSharedPtr<T,th>;
-				friend class TUniquePtr< TShared<T,th>, UPTR_OBJECT>;
-				private:
-					mutable usys_t n_refs;
-					T object;
+				unsigned n_refs;
+				void* obj;
+				void (*FDelete)(void*);
 
-					void	IncRef	() const
+				inline void DecRef()
+				{
+// 					printf("%p: DecRef(%p) => %d\n", this, obj, n_refs - 1);
+					CL3_CLASS_LOGIC_ERROR(this->n_refs < 1);
+					if(compiler::AtomicSub(this->n_refs, 1U) == 1)
 					{
-						switch(th)
-						{
-							case THREADING_SINGLE:
-								++n_refs;
-								break;
-							case THREADING_MULTI:
-								system::compiler::AtomicAdd<usys_t>(n_refs, 1);
-								break;
-						}
+						this->FDelete(this->obj);
+						delete this;
 					}
+				}
 
-					void	DecRef	() const
-					{
-						usys_t n_refs_before;
-						switch(th)
-						{
-							case THREADING_SINGLE:
-								n_refs_before = n_refs--;
-								break;
-							case THREADING_MULTI:
-								n_refs_before = system::compiler::AtomicSub<usys_t>(n_refs, 1);
-								break;
-						}
-						if(n_refs_before == 1)
-							delete this;
-					}
+				inline void IncRef()
+				{
+// 					printf("%p: IncRef(%p) => %d\n", this, obj, n_refs + 1);
+					compiler::AtomicAdd(this->n_refs, 1U);
+				}
 
-					CLASS	~TShared() {}
-					CLASS	TShared	(const TShared&);
-
-				public:
-					CLASS	TShared	() : n_refs(0), object() {}
-
-					template<typename... Args>
-					CLASS	TShared	(Args&&... args) : n_refs(0), object(std::forward<Args>(args)...) {}
+				inline CLASS TSharedInfo(void* obj, void (*FDelete)(void*)) : n_refs(0), obj(obj), FDelete(FDelete)
+				{
+// 					printf("%p: TSharedInfo()\n", this);
+				}
+// 				inline CLASS ~TSharedInfo() { printf("%p: ~TSharedInfo()\n", this); }
 			};
 
-			template<class T, EThreading th = THREADING_MULTI>
+			template<typename T>
 			class	CL3PUBT	TSharedPtr
 			{
 				protected:
-					TShared<T, th>* rcobj;
+					template<typename U>
+					friend class TSharedPtr;
+
+					T* obj;
+					TSharedInfo* info;
+
+					void Set(T* new_obj, TSharedInfo* new_info)
+					{
+						this->obj = new_obj;
+						if(this->info != new_info)
+						{
+							if(this->info != NULL)
+								this->info->DecRef();
+							this->info = new_info;
+							if(this->info)
+								this->info->IncRef();
+						}
+					}
 
 				public:
-					inline	T*			operator->	() { return &rcobj->object; }
-					inline	const T*	operator->	() const { return &rcobj->object; }
-					inline	T&			operator*	() { return rcobj->object; }
-					inline	const T&	operator*	() const { return rcobj->object; }
-					inline	TSharedPtr&	operator=	(const TSharedPtr& rhs) { if(rcobj != rhs.rcobj) { if(rcobj) rcobj->DecRef(); rcobj = rhs.rcobj; if(rcobj) rcobj->IncRef(); } return *this; }
-					inline	TSharedPtr&	operator=	(TShared<T,th>* _rcobj) { if(rcobj != _rcobj) { if(rcobj) rcobj->DecRef(); rcobj = _rcobj; if(rcobj) rcobj->IncRef(); } return *this; }
+					inline	T*			operator->	() { return this->obj; }
+					inline	const T*	operator->	() const { return this->obj; }
+					inline	T&			operator*	() { return *this->obj; }
+					inline	const T&	operator*	() const { return *this->obj; }
 
-					CLASS	TSharedPtr	(TSharedPtr&& rhs) : rcobj(rhs.rcobj)			{ rhs.rcobj = NULL; }
-					CLASS	TSharedPtr	(TShared<T,th>* rcobj = NULL) : rcobj(rcobj)	{ if(rcobj) rcobj->IncRef(); }
-					CLASS	TSharedPtr	(const TSharedPtr& rhs) : rcobj(rhs.rcobj)		{ if(rcobj) rcobj->IncRef(); }
-					CLASS	~TSharedPtr	() 												{ if(rcobj) rcobj->DecRef(); }
+					inline	TSharedPtr&	operator=	(const TSharedPtr& rhs)
+					{
+						Set(rhs.obj, rhs.info);
+						return *this;
+					}
+
+					inline	TSharedPtr&	operator=	(TSharedPtr&& rhs)
+					{
+						Clear();
+						this->obj = rhs.obj;
+						this->info = rhs.info;
+						rhs.obj = NULL;
+						rhs.info = NULL;
+						return *this;
+					}
+
+					template<typename TT>
+					CLASS	TSharedPtr	(TSharedPtr<TT>&& rhs) : obj(rhs.obj), info(rhs.info)
+					{
+						rhs.obj = NULL;
+						rhs.info = NULL;
+					}
+
+					CLASS	TSharedPtr	(TSharedPtr&& rhs) : obj(rhs.obj), info(rhs.info)
+					{
+						rhs.obj = NULL;
+						rhs.info = NULL;
+					}
+
+					template<typename TT>
+					CLASS	TSharedPtr	(const TSharedPtr<TT>& rhs) : obj(NULL), info(NULL)
+					{
+						Set(rhs.obj, rhs.info);
+					}
+
+					CLASS	TSharedPtr	(const TSharedPtr& rhs) : obj(NULL), info(NULL)
+					{
+						Set(rhs.obj, rhs.info);
+					}
+
+					void	Clear		()
+					{
+						Set(NULL,NULL);
+					}
+
+					CLASS	TSharedPtr	() : obj(NULL), info(NULL) {}
+
+					CLASS	TSharedPtr	(T* obj, TSharedInfo* info) : obj(NULL), info(NULL)
+					{
+						Set(obj, info);
+					}
+
+					CLASS	~TSharedPtr	()
+					{
+						Set(NULL,NULL);
+					}
 			};
+
+			template<typename T>
+			TSharedPtr<T>	MakeSharedPtr	(T* obj)
+			{
+				return TSharedPtr<T>(obj, new TSharedInfo(obj, &_::Delete<T>));
+			}
 
 			class	CL3PUBT	TBadAllocException : public error::TException
 			{

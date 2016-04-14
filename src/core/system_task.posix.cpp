@@ -26,6 +26,7 @@
 
 #include "system_task.hpp"
 #include "system_task_synchronization.hpp"
+#include "system_task_async.hpp"
 
 #include <string.h>
 
@@ -63,6 +64,7 @@ namespace	cl3
 			using namespace error;
 			using namespace memory;
 			using namespace time;
+			using namespace async;
 			using namespace synchronization;
 
 			/**************************************************************************************/
@@ -438,26 +440,6 @@ namespace	cl3
 				int status = 0;
 				::waitpid(this->pid, &status, 0);
 			}
-
-			usys_t TAsyncEventProcessor::ProcessEvents()
-			{
-				const usys_t n_callbacks = this->callbacks.Count();
-
-				struct pollfd pfds[n_callbacks];
-				for(usys_t i = 0; i < n_callbacks; i++)
-					pfds[i] = this->callbacks[i]->waitable->__PollInfo();
-
-				int n_events;
-				CL3_CLASS_SYSERR(n_events = ::poll(pfds, n_callbacks, 0));
-
-				if(n_events > 0)
-					for(usys_t i = 0; i < n_callbacks; i++)
-						if(pfds[i].revents != 0)
-							this->callbacks[i]->receiver->AsyncCallback(this, this->callbacks[i]->waitable);
-
-				return n_events;
-			}
-
 		}
 	}
 }

@@ -32,10 +32,4 @@ namespace
 	using namespace cl3::io::text::encoding;
 	using namespace cl3::system::compiler::jit;
 
-	TEST(system_compiler_jit, builder)
-	{
-		TModule module;
-		TFunction& func_main = module.AddFunction(&TCTTI<double>::rtti);
-		func_main.termination.SetReturn(func_main.AddAdd(module.AddLiteral(7.0), module.AddLiteral(12.4)));
-	}
 }

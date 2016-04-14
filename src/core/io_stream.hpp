@@ -23,6 +23,7 @@
 #include "system_types.hpp"
 #include "error.hpp"
 #include "event.hpp"
+#include "system_task_async.hpp"
 
 namespace	cl3
 {
@@ -146,15 +147,141 @@ namespace	cl3
 				virtual	IIn<T>*		Source	() const CL3_GETTER = 0;
 			};
 
-			template<class TIn, class TOut>
-			struct	IPullIOProcessor : virtual IIn<TIn>, virtual ISink<TOut>
+			namespace v2
 			{
-			};
+				enum class EMode
+				{
+					PASSIVE, ACTIVE, INDIFFERENT
+				};
 
-			template<class TIn, class TOut>
-			struct	IPushIOProcessor : virtual IOut<TOut>, virtual ISource<TIn>
-			{
-			};
+				template<typename T>
+				class ISource;
+
+				template<typename T>
+				class ISink;
+
+				template<typename T>
+				class ISource :
+						private system::task::async::TAsyncEventProcessor::TCallback::IReceiver,
+						private system::task::async::TAsyncEventProcessor::TCallback,
+						public stream::IIn<T>
+				{
+					private:
+						CL3PUBF void AsyncCallback(system::task::async::TAsyncEventProcessor*, system::task::synchronization::IWaitable*) final override;
+
+					protected:
+						ISink<T>* sink;
+
+						CL3PUBF CLASS explicit ISource(system::task::async::TAsyncEventProcessor* aep)
+						{
+							this->aep = aep;
+						}
+
+						virtual void OnSinkChange(ISink<T>* new_sink) {}
+
+					public:
+						CL3PUBF void Sink(ISink<T>* new_sink) CL3_SETTER
+						{
+							if(this->sink != new_sink)
+							{
+								this->OnSinkChange(new_sink);
+								this->sink = new_sink;
+								new_sink->Source(this);
+							}
+						}
+
+						CL3PUBF ISink<T>* Sink() const CL3_GETTER { return this->sink; }
+
+						virtual system::task::synchronization::IWaitable* OnSourceReady() { return NULL; }
+				};
+
+				template<typename T>
+				class ISink
+				{
+					protected:
+						ISource<T>* source;
+
+						//	called before the source is changed
+						virtual void OnSourceChange(ISource<T>* new_source) {}
+
+					public:
+						CL3PUBF void Source(ISource<T>*) CL3_SETTER;
+						CL3PUBF ISource<T>* Source() const CL3_GETTER;
+
+						//	waitable which can be used to determine if the sink can accept more data right now
+						//	NULL means the sink is always ready
+						virtual system::task::synchronization::IWaitable* OnSinkReady() { return NULL; }
+
+						//	returns the preferred call-mode
+						//	PASSIVE means that sources should use the Write() function
+						//	ACTIVE means that sources should use the ReadIn() function
+						//	INDIFFERENT means that neither implementation provides benefits
+						virtual EMode PreferredSinkMode() const CL3_GETTER { return EMode::INDIFFERENT; }
+
+						//	returns the amount of free space within the sink
+						//	-1 means infinite
+						virtual usys_t Space() const CL3_GETTER { return (usys_t)-1; }
+
+						//	instructs the sink to read data from its source
+						//	calls to ReadIn() must never block
+						virtual usys_t ReadIn(usys_t n_items_ri_max) CL3_WARN_UNUSED_RESULT = 0;
+
+						//	write actual data to the sink
+						//	calls to Write() must never block
+						virtual usys_t Write(const T* arr_items_write, usys_t n_items_write_max) CL3_WARN_UNUSED_RESULT = 0;
+				};
+
+				template<typename T>
+				void ISink<T>::Source(ISource<T>* new_source)
+				{
+					if(this->source != new_source)
+					{
+						this->OnSourceChange(new_source);
+						this->source = new_source;
+						new_source->Sink(this);
+					}
+				}
+
+				template<typename T>
+				ISource<T>* ISink<T>::Source() const
+				{
+					return this->source;
+				}
+
+				static const usys_t SZ_ACTIVE_BUFFER = 4096;
+
+				//	implements the Readin() function based on Space() and Write()
+				//	this class requires that the Space() functions returns an accurate count
+				template<typename T>
+				struct AActiveSink : public virtual ISink<T>
+				{
+					using ISink<T>::Space;
+					using ISink<T>::Write;
+
+					CL3PUBF EMode PreferredSinkMode() const final override CL3_GETTER { return EMode::PASSIVE; }
+
+					CL3PUBF usys_t ReadIn(usys_t n_items_ri_max) final override CL3_WARN_UNUSED_RESULT
+					{
+						CL3_CLASS_ERROR(this->source == NULL, error::TException, "sink must be bound to a source before calling ReadIn()");
+						usys_t n_read = 0;
+
+						const usys_t n_items_buffer = CL3_MAX(1, SZ_ACTIVE_BUFFER / sizeof(T));
+						T arr_items_buffer[n_items_buffer];
+
+						while(n_read < n_items_ri_max && this->source->Remaining() > 0)
+						{
+							const usys_t n_read_now = CL3_MIN(n_items_buffer, this->Space());
+							const usys_t n = this->source->Read(arr_items_buffer, n_read_now);
+							if(n == 0)
+								break;
+							CL3_CLASS_LOGIC_ERROR(this->Write(arr_items_buffer, n) != n);
+							n_read += n;
+						}
+
+						return n_read;
+					}
+				};
+			}
 		}
 	}
 }
