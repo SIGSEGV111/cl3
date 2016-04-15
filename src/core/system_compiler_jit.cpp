@@ -22,6 +22,8 @@
 
 #include "system_compiler_jit.hpp"
 
+#include <memory>
+
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/Module.h>
 #include <llvm/Support/TargetSelect.h>
@@ -81,13 +83,13 @@ namespace	cl3
 
 				CLASS TBinary::TBinary(llvm::LLVMContext* context, llvm::Module* module) : context(context), module(module)
 				{
-					EngineBuilder eb(module);
+					EngineBuilder eb( ( std::unique_ptr<llvm::Module>(module) ) );
 
 					std::string err;
 
 					eb.setErrorStr(&err);
 					this->tm = eb.selectTarget();
-					eb.setUseMCJIT(true);
+					//eb.setUseMCJIT(true);
 					eb.setEngineKind(EngineKind::Kind::JIT);
 					eb.setOptLevel(CodeGenOpt::Level::Default);
 					this->ee = eb.create(tm);

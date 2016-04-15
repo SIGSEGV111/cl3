@@ -111,10 +111,10 @@ namespace	cl3
 
 					public:
 						//	from IStaticCollection
-						inline system::memory::TUniquePtr<IStaticIterator<TBoolProxy> > CreateStaticIterator() CL3_WARN_UNUSED_RESULT
+						inline system::memory::TUniquePtr<IStaticIterator<TBoolProxy> > CreateStaticIterator() final override CL3_WARN_UNUSED_RESULT
 						{ return system::memory::MakeUniquePtr<IStaticIterator<TBoolProxy> >(new TIterator(this, n_bits > 0 ? 0 : (usys_t)-1)); }
 
-						inline system::memory::TUniquePtr<IStaticIterator<const TBoolProxy> > CreateStaticIterator() const CL3_WARN_UNUSED_RESULT
+						inline system::memory::TUniquePtr<IStaticIterator<const TBoolProxy> > CreateStaticIterator() const final override CL3_WARN_UNUSED_RESULT
 						{ return system::memory::MakeUniquePtr<IStaticIterator<const TBoolProxy> >(new TIterator(const_cast<TBitmask*>(this), n_bits > 0 ? 0 : (usys_t)-1)); }
 
 						CL3PUBF	usys_t	Count		() const final override CL3_GETTER;
@@ -122,8 +122,8 @@ namespace	cl3
 						CL3PUBF	bool	Contains	(const bool item) const CL3_GETTER;
 
 						//	from IBitmask
-						CL3PUBF	bool	Bit		(usys_t index) CL3_GETTER;
-						CL3PUBF	void	Bit		(usys_t index, bool value) CL3_SETTER;
+						CL3PUBF	bool	Bit		(usys_t index) final override CL3_GETTER;
+						CL3PUBF	void	Bit		(usys_t index, bool value) final override CL3_SETTER;
 
 						//	from TBitmask
 						CL3PUBF	void	Count	(usys_t new_count) CL3_SETTER;

@@ -30,6 +30,6 @@ namespace
 		const char* const data = "hello world";
 		const u64_t hash = JenkinsHash((const byte_t*)data, sizeof(data));
 
-		EXPECT_EQ(0x336BBD3102656489, hash);
+		EXPECT_EQ(0x336BBD3102656489U, hash);
 	}
 }

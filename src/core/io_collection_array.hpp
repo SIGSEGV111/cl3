@@ -223,7 +223,7 @@ namespace	cl3
 						//	from IStaticCollection<T>
 						system::memory::TUniquePtr<IStaticIterator<T> >		CreateStaticIterator	() final override CL3_WARN_UNUSED_RESULT;
 
-						T*			Claim		();
+						T*			Claim		() final override;
 
 						TArray&		operator=	(const IStaticCollection<T>& rhs);
 						TArray&		operator=	(IStaticCollection<T>&& rhs);
@@ -794,10 +794,10 @@ namespace	cl3
 						system::memory::TUniquePtr<IStaticIterator<T> >
 								CreateStaticIterator	() final override CL3_WARN_UNUSED_RESULT;
 
-						T*		Claim		() { CL3_NOT_IMPLEMENTED; }
+						T*		Claim		() final override { CL3_NOT_IMPLEMENTED; }
 
-						T&		operator[]	(ssys_t index) CL3_GETTER { return this->arr_items[this->AbsIndex(index)]; }
-						T*		ItemPtr		(ssys_t index) CL3_GETTER { return this->arr_items + this->AbsIndex(index); }
+						T&		operator[]	(ssys_t index) final override CL3_GETTER { return this->arr_items[this->AbsIndex(index)]; }
+						T*		ItemPtr		(ssys_t index) final override CL3_GETTER { return this->arr_items + this->AbsIndex(index); }
 
 						CLASS explicit TStaticArray() {}
 						CLASS explicit TStaticArray(const T* arr_items_init, usys_t n_items_init) : TStaticArray<const T, n_items>(arr_items_init, n_items_init) {}
