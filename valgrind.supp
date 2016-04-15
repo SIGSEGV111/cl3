@@ -101,3 +101,24 @@
 	fun:_ZN3cl36system8compiler3jit7TBinaryC1EPN4llvm11LLVMContextEPNS4_6ModuleE
 	fun:_ZN3cl36system8compiler3jit4TJIT7CompileEh
 }
+
+{
+   LLVM_fix_your_shit/5
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:_ZN3cl36system6memoryL10cxx_mallocEm
+   fun:_ZN3cl36system6memory17TDefaultAllocator5AllocEm
+   fun:_ZN3cl36system6memory5AllocEmPKNS0_5types8typeinfo5TRTTIE
+   fun:_Znwm
+   fun:_ZN4llvm3sys7process8get_selfEv
+   fun:_ZN4llvm3sys6Memory11AllocateRWXEmPKNS0_11MemoryBlockEPSs
+   fun:_ZN12_GLOBAL__N_123DefaultJITMemoryManager15allocateNewSlabEm
+   fun:DefaultJITMemoryManager
+   fun:_ZN4llvm16JITMemoryManager23CreateDefaultMemManagerEv
+   fun:_ZN4llvm3JITC1EPNS_6ModuleERNS_13TargetMachineERNS_13TargetJITInfoEPNS_16JITMemoryManagerEb
+   fun:_ZN4llvm3JIT9createJITEPNS_6ModuleEPSsPNS_16JITMemoryManagerEbPNS_13TargetMachineE
+   fun:_ZN4llvm13EngineBuilder6createEPNS_13TargetMachineE
+   fun:_ZN3cl36system8compiler3jit7TBinaryC1EPN4llvm11LLVMContextEPNS4_6ModuleE
+}
+
