@@ -44,7 +44,7 @@ namespace	cl3
 					bool			IsDirty	() const final override CL3_GETTER { return false; }
 
 					//	from IOut<TUTF32>
-					usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+					usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override
 					{
 						CL3_CLASS_ERROR(this->sink == NULL, TException, "Sink() must point to a valid sink");
 						if(n_items_write_min == (usys_t)-1)
@@ -53,8 +53,8 @@ namespace	cl3
 					}
 
 					//	from ISource<byte_t>
-					void	Sink	(stream::IOut<byte_t>* os) CL3_SETTER { this->sink = os; }
-					stream::IOut<byte_t>*	Sink	() const CL3_GETTER { return this->sink; }
+					void	Sink	(stream::IOut<byte_t>* os) final override CL3_SETTER { this->sink = os; }
+					stream::IOut<byte_t>*	Sink	() const final override CL3_GETTER { return this->sink; }
 				};
 
 				struct	TUTF32Decoder : IDecoder
@@ -67,7 +67,7 @@ namespace	cl3
 					bool			IsDirty	() const final override CL3_GETTER { return false; }
 
 					//	from IOut<byte_t>
-					usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+					usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override
 					{
 						CL3_CLASS_ERROR(this->sink == NULL, TException, "Sink() must point to a valid sink");
 						if(n_items_write_min == (usys_t)-1)
@@ -76,15 +76,15 @@ namespace	cl3
 					}
 
 					//	from ISource<TUTF32>
-					void	Sink	(stream::IOut<TUTF32>* os) CL3_SETTER { this->sink = os; }
-					stream::IOut<TUTF32>*	Sink	() const CL3_GETTER { return this->sink; }
+					void	Sink	(stream::IOut<TUTF32>* os) final override CL3_SETTER { this->sink = os; }
+					stream::IOut<TUTF32>*	Sink	() const final override CL3_GETTER { return this->sink; }
 				};
 
 				struct	TUTF32Codec : ICodec
 				{
-					string::TString	Name	() const { return "utf32"; }
-					system::memory::TUniquePtr<IEncoder>	CreateEncoder	() const { return system::memory::MakeUniquePtr<IEncoder>(new TUTF32Encoder()); }
-					system::memory::TUniquePtr<IDecoder>	CreateDecoder	() const { return system::memory::MakeUniquePtr<IDecoder>(new TUTF32Decoder()); }
+					string::TString	Name	() const final override { return "utf32"; }
+					system::memory::TUniquePtr<IEncoder>	CreateEncoder	() const final override { return system::memory::MakeUniquePtr<IEncoder>(new TUTF32Encoder()); }
+					system::memory::TUniquePtr<IDecoder>	CreateDecoder	() const final override { return system::memory::MakeUniquePtr<IDecoder>(new TUTF32Decoder()); }
 					CLASS	TUTF32Codec	() {}
 				};
 

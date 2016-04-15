@@ -16,17 +16,13 @@ add_dependencies (cl3-core-test cl3-db)
 target_link_libraries (cl3-core-test gtest)
 target_link_libraries (cl3-core-test gtest_main)
 target_link_libraries (cl3-core-test cl3-core)
-target_link_libraries (cl3-core-test LLVMCore)
-target_link_libraries (cl3-core-test LLVMAnalysis)
-target_link_libraries (cl3-core-test LLVMJIT)
-target_link_libraries (cl3-core-test LLVMipo)
-target_link_libraries (cl3-core-test LLVMInstCombine)
-target_link_libraries (cl3-core-test LLVMScalarOpts)
 
-# Übereinstimmungen in Binärdatei /usr/lib64/libLLVMCore.so.
-# Übereinstimmungen in Binärdatei /usr/lib64/libLLVMipo.so.
-# Übereinstimmungen in Binärdatei /usr/lib64/libLLVMJIT.so.
-
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+include_directories(${LLVM_INCLUDE_DIRS})
+add_definitions(${LLVM_DEFINITIONS})
+llvm_map_components_to_libnames(llvm_libs all)
+target_link_libraries(cl3-core-test ${llvm_libs})
 
 if (WIN32)
 	add_custom_target (cl3-core-test-run ALL "${GEN_DIR}\bin\cl3-core-test.exe" dummy1 dummy2 dummy3)

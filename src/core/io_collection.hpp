@@ -80,8 +80,8 @@ namespace	cl3
 
 					struct IIterator : _::IIteratorKeyMod<_TKey, (keygen == EKeyGeneration::USER)>
 					{
-						inline _TCValue& operator*() const CL3_GETTER	{ CL3_CLASS_ERROR(!this->IsValid(), TNoValidItemException); return *this->operator->(); }
-						inline _TValue& operator*() CL3_GETTER			{ CL3_CLASS_ERROR(!this->IsValid(), TNoValidItemException); return *this->operator->(); }
+						inline _TCValue& operator*() const CL3_GETTER	{ /*CL3_CLASS_ERROR(!this->IsValid(), TNoValidItemException);*/ return *this->operator->(); }
+						inline _TValue& operator*() CL3_GETTER			{ /*CL3_CLASS_ERROR(!this->IsValid(), TNoValidItemException);*/ return *this->operator->(); }
 
 						inline operator _TCValue*() const CL3_GETTER	{ return this->operator->(); }
 						inline operator _TValue*() CL3_GETTER			{ return this->operator->(); }
