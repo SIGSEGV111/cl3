@@ -285,6 +285,21 @@ namespace
 		EXPECT_TRUE(s == "new world abcdef");
 	}
 
+	TEST(io_text_string_TString, Find_and_Replace_recursive1)
+	{
+		TString s = "hello world foo";
+		s.Replace("hello", "hellohello");
+		EXPECT_TRUE(s == "hellohello world foo");
+	}
+
+	TEST(io_text_string_TString, Find_and_Replace_recursive2)
+	{
+		TString s = "hellllo world foo";
+		s.Replace("ll", "l");
+		EXPECT_TRUE(s == "hello world foo");
+		EXPECT_FALSE(s == "helo world foo");
+	}
+
 	TEST(io_text_string_TString, Left_Right_Slice)
 	{
 		TString s = "hello world foo";
