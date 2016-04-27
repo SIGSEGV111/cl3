@@ -315,7 +315,7 @@ namespace	cl3
 
 				usys_t		TString::Replace	(const TString& str_find, const TString& str_replace, usys_t n_times_max)
 				{
-					for(usys_t n_times = 0, idx_start = 0; n_times < n_times_max && idx_start < this->Count(); idx_start += str_find.Count(), n_times++)
+					for(usys_t n_times = 0, idx_start = 0; n_times < n_times_max && idx_start < this->Count(); idx_start += str_replace.Count(), n_times++)
 					{
 						idx_start = this->Find(str_find, idx_start, DIRECTION_FORWARD);
 						if(idx_start == (usys_t)-1)
