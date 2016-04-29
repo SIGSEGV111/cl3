@@ -241,6 +241,9 @@ namespace	cl3
 						void		Append		(const IStaticCollection<const T>& collection) final override;
 						void		Append		(const TList& list);
 
+						TList<T>	SliceSL		(ssys_t rindex_start, usys_t n_items = (usys_t)-1) const;
+						TList<T>	SliceSE		(ssys_t rindex_start, ssys_t rindex_end) const;
+
 						//	from TList
 						CLASS		TList		();
 						explicit CLASS		TList		(T* arr_items, usys_t n_items, bool claim);
@@ -818,6 +821,32 @@ namespace	cl3
 				}
 
 				template<class T>
+				TList<T>	TList<const T>::SliceSL	(ssys_t rindex_start, usys_t n_items) const
+				{
+					const usys_t idx_start = this->AbsIndex(rindex_start);
+					if(n_items == (usys_t)-1)
+						n_items = this->n_items_current - idx_start;
+
+					TList r;
+					r.Append(this->arr_items + idx_start, n_items);
+					return r;
+				}
+
+				template<class T>
+				TList<T>	TList<const T>::SliceSE	(ssys_t rindex_start, ssys_t rindex_end) const
+				{
+					const usys_t idx_start = this->AbsIndex(rindex_start);
+					const usys_t idx_end = this->AbsIndex(rindex_end);
+					TList r;
+					if(idx_start < idx_end)
+						r.Append(this->arr_items + idx_start, idx_end - idx_start);
+					else if(idx_end > idx_start)
+						for(usys_t i = idx_end; i != idx_start; i--)
+							r.Append(this->arr_items[i]);
+					return r;
+				}
+
+				template<class T>
 				void		TList<T>::Cut		(usys_t n_head, usys_t n_tail)
 				{
 					this->Remove(this->n_items_current - n_tail, n_tail);
@@ -843,7 +872,7 @@ namespace	cl3
 					n_items_prealloc = 0;
 				}
 
-				//	from TList<T>q
+				//	from TList<T>
 				template<class T>
 				CLASS		TList<const T>::TList		() : arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(false)
 				{
