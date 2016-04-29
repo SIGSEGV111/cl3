@@ -504,7 +504,7 @@ namespace	cl3
 				{
 					T l = Length();
 					if(l == 0)	*this = 0;
-					else		*this /= Length();
+					else		*this /= l;
 					return *this;
 				}
 
