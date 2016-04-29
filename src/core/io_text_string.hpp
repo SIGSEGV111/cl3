@@ -128,11 +128,13 @@ namespace	cl3
 						//	remove/append whitespace (or other characters)
 						CL3PUBF	void		Trim		(const IStaticCollection<const TUTF32>& collection = *whitespace, int position = POSITION_HEAD | POSITION_TAIL);
 						CL3PUBF	void		Pad			(EPosition position, usys_t n_pad, TUTF32 chr_pad = ' ');
+						CL3PUBF	void		Reverse		();
 
-						CL3PUBF	TString&	ToLower		();
-						CL3PUBF	TString&	ToUpper		();
+						CL3PUBF	void		ToLower		();
+						CL3PUBF	void		ToUpper		();
 						CL3PUBF	TString		Lower		() const CL3_GETTER;
 						CL3PUBF	TString		Upper		() const CL3_GETTER;
+
 
 						//	determines the actual length in characters of the string
 						//	this might differ from Count() as Length() stops at the first termination character
@@ -149,6 +151,8 @@ namespace	cl3
 						CL3PUBF	CLASS	TString	(TString&&);
 						CL3PUBF	virtual	~TString();
 				};
+
+				inline static stream::IOut<TUTF32>& operator<<(stream::IOut<TUTF32>& os, const TString& s) { os.Write(s.ItemPtr(0), s.Count()); return os; }
 
 				class	CL3PUBT	TCString : public virtual collection::list::TList<byte_t>
 				{

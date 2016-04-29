@@ -449,6 +449,17 @@ namespace	cl3
 					}
 				}
 
+				void		TString::Reverse	()
+				{
+					TUTF32 swap;
+					for(usys_t i = 0; i < this->n_items_current / 2; i++)
+					{
+						swap = this->arr_items[i];
+						this->arr_items[i] = this->arr_items[this->n_items_current - 1 - i];
+						this->arr_items[this->n_items_current - 1 - i] = swap;
+					}
+				}
+
 				TString		TString::Lower		() const	//	LCOV_EXCL_LINE
 				{
 					CL3_NOT_IMPLEMENTED;	//	LCOV_EXCL_LINE
@@ -459,12 +470,12 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;	//	LCOV_EXCL_LINE
 				}
 
-				TString&	TString::ToLower	()	//	LCOV_EXCL_LINE
+				void		TString::ToLower	()	//	LCOV_EXCL_LINE
 				{
 					CL3_NOT_IMPLEMENTED;	//	LCOV_EXCL_LINE
 				}
 
-				TString&	TString::ToUpper	()	//	LCOV_EXCL_LINE
+				void		TString::ToUpper	()	//	LCOV_EXCL_LINE
 				{
 					CL3_NOT_IMPLEMENTED;	//	LCOV_EXCL_LINE
 				}
