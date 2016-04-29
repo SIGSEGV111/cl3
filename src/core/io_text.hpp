@@ -98,8 +98,10 @@ namespace	cl3
 
 				string::TString* prefix_sign;		//	prefix to put in front of the number, even before the positive/negative symbol (can be NULL)
 				string::TString* prefix_digits;		//	prefix to put in front of the number, but after the positive/negative symbol (can be NULL)
+				string::TString* prefix_decimal;	//	prefix to put before the decimal mark
 				string::TString* postfix_digits;	//	postfix to put behind the number, but before the positive/negative symbol (can be NULL)
 				string::TString* postfix_sign;		//	postfix to put behind the number, even after the positive/negative symbol (can be NULL)
+				string::TString* postfix_decimal;	//	postfix to put behind the decimal mark
 
 				//	<prefix_sign><sign-symbol><prefix_digits><digits><postfix_digits><sign-symbol><postfix_sign>
 
@@ -122,11 +124,8 @@ namespace	cl3
 
 				u16_t grouping_length;	//	length of a group of digits (usually 3 for base 10/decimal formats)
 				u16_t integer_length_min;	//	minimum number of characters before the decimal mark
-				u16_t integer_length_max;	//	maximum number of characters before the decimal mark
 				u16_t fractional_length_min;	//	minimum number of characters after the decimal mark
 				u16_t fractional_length_max;	//	maximum number of characters after the decimal mark
-				u16_t total_length_min;	//	minimum total length
-				u16_t total_length_max;	//	maximum total length
 
 				//	some predefined commonly used formats
 				CL3PUBF const static TNumberFormat OCTAL;	//	standard octal format (base 8)

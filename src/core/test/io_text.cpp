@@ -363,6 +363,33 @@ namespace
 		EXPECT_TRUE(s == "hello world foo");
 	}
 
+	TEST(io_text_string_TString, Reverse)
+	{
+		TString s = "hello world";
+		s.Reverse();
+		EXPECT_TRUE(s == "dlrow olleh");
+
+		s = "a";
+		s.Reverse();
+		EXPECT_TRUE(s == "a");
+
+		s = "ab";
+		s.Reverse();
+		EXPECT_TRUE(s == "ba");
+
+		s = "abc";
+		s.Reverse();
+		EXPECT_TRUE(s == "cba");
+
+		s = "abcd";
+		s.Reverse();
+		EXPECT_TRUE(s == "dcba");
+
+		s = "abcde";
+		s.Reverse();
+		EXPECT_TRUE(s == "edcba");
+	}
+
 	TEST(io_text_string_TString, Operator_Add)
 	{
 		TString s;

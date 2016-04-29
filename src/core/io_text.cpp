@@ -108,7 +108,7 @@ namespace	cl3
 
 			/******************************** TNumberFormat ******************************************************/
 
-			CLASS	TNumberFormat::TNumberFormat	() : prefix_sign(NULL), prefix_digits(NULL), postfix_digits(NULL), postfix_sign(NULL), digits(&COLLECTION_DECIMAL_DIGITS), positive_mark(TUTF32::TERMINATOR), negative_mark('-'), zero_mark(TUTF32::TERMINATOR), decimal_mark('.'), grouping_mark(TUTF32::TERMINATOR), integer_padding(TUTF32::TERMINATOR), fractional_padding(TUTF32::TERMINATOR), exponential_mark('e'), positive_mark_placement(TNumberFormat::SYMBOL_PLACEMENT_BEFORE), negative_mark_placement(TNumberFormat::SYMBOL_PLACEMENT_BEFORE), zero_mark_placement(TNumberFormat::SYMBOL_PLACEMENT_BEFORE), grouping_length(0), integer_length_min(0), integer_length_max((u16_t)-1), fractional_length_min(0), fractional_length_max((u16_t)-1), total_length_min(0), total_length_max((u16_t)-1)
+			CLASS	TNumberFormat::TNumberFormat	() : prefix_sign(NULL), prefix_digits(NULL), prefix_decimal(NULL), postfix_digits(NULL), postfix_sign(NULL), postfix_decimal(NULL), digits(&COLLECTION_DECIMAL_DIGITS), positive_mark(TUTF32::TERMINATOR), negative_mark('-'), zero_mark(TUTF32::TERMINATOR), decimal_mark('.'), grouping_mark(TUTF32::TERMINATOR), integer_padding(TUTF32::TERMINATOR), fractional_padding(TUTF32::TERMINATOR), exponential_mark('e'), positive_mark_placement(TNumberFormat::SYMBOL_PLACEMENT_BEFORE), negative_mark_placement(TNumberFormat::SYMBOL_PLACEMENT_BEFORE), zero_mark_placement(TNumberFormat::SYMBOL_PLACEMENT_BEFORE), grouping_length(0), integer_length_min(0), fractional_length_min(0), fractional_length_max((u16_t)-1)
 			{
 			}
 
@@ -231,177 +231,88 @@ namespace	cl3
 
 			/******************************** ITextWriter ******************************************************/
 
-			static	void	MakeNumberHead	(TString& buffer, const TNumberFormat* format, bool sign, bool is_signed, bool is_zero)
+			static	void	PrintInteger(TString& buffer, const u64_t i, const IArray<const TUTF32>& digits)
 			{
-				if(format->prefix_sign != NULL)
-					buffer<<*format->prefix_sign;
+				const usys_t base = digits.Count();
 
-				if(is_zero && format->zero_mark_placement == TNumberFormat::SYMBOL_PLACEMENT_BEFORE && format->zero_mark != TUTF32::TERMINATOR)
-					buffer<<format->zero_mark;
-				else if(is_signed && !sign && format->negative_mark_placement == TNumberFormat::SYMBOL_PLACEMENT_BEFORE && format->negative_mark != TUTF32::TERMINATOR)
-					buffer<<format->negative_mark;
-				else if(is_signed && sign && format->positive_mark_placement == TNumberFormat::SYMBOL_PLACEMENT_BEFORE && format->positive_mark != TUTF32::TERMINATOR)
-					buffer<<format->positive_mark;
-
-				if(format->prefix_digits != NULL)
-					buffer<<*format->prefix_digits;
-			}
-
-			static	void	MakeNumberTail	(TString& buffer, const TNumberFormat* format, bool sign, bool is_signed, bool is_zero)
-			{
-				if(format->postfix_digits != NULL)
-					buffer<<*format->postfix_digits;
-
-				if(is_zero && format->zero_mark_placement == TNumberFormat::SYMBOL_PLACEMENT_AFTER && format->zero_mark != TUTF32::TERMINATOR)
-					buffer<<format->zero_mark;
-				else if(is_signed && !sign && format->negative_mark_placement == TNumberFormat::SYMBOL_PLACEMENT_AFTER && format->negative_mark != TUTF32::TERMINATOR)
-					buffer<<format->negative_mark;
-				else if(is_signed && sign && format->positive_mark_placement == TNumberFormat::SYMBOL_PLACEMENT_AFTER && format->positive_mark != TUTF32::TERMINATOR)
-					buffer<<format->positive_mark;
-
-				if(format->postfix_sign != NULL)
-					buffer<<*format->postfix_sign;
-			}
-
-			static	void	PrintNumber	(IOut<TUTF32>& os, const TNumberFormat* format, u64_t num, bool sign, bool is_signed)
-			{
-				TString buffer;
-
-				if(format == NULL)
-					format = TNumberFormat::default_format;
-
-				MakeNumberHead(buffer, format, sign, is_signed, num == 0);
-
+				if(i == 0)
 				{
-					TUTF32 arr_digits_out_tmp[64];
-					const TUTF32* arr_digits = format->digits->ItemPtr(0);
-					const usys_t n_digits = format->digits->Count();
-					usys_t n = 0;
-					u64_t v = num;
-
-					if(v == 0)
-					{
-						arr_digits_out_tmp[63] = '0';
-						n = 1;
-					}
-					else
-						while(v != 0)
-						{
-							arr_digits_out_tmp[63 - n++] = arr_digits[v % n_digits];
-							v /= n_digits;
-						}
-
-					if(n < format->integer_length_min && format->integer_padding != TUTF32::TERMINATOR)
-						buffer.Pad(POSITION_TAIL, format->integer_length_min - n, format->integer_padding);
-
-					n = CL3_MIN(n, format->integer_length_max);
-					buffer.Append(arr_digits_out_tmp + 64 - n, n);
-				}
-
-				if(format->fractional_length_min > 0 && format->fractional_padding != TUTF32::TERMINATOR)
-				{
-					buffer<<format->decimal_mark;
-					buffer.Pad(POSITION_TAIL, format->fractional_length_min, format->fractional_padding);
-				}
-
-				MakeNumberTail(buffer, format, sign, is_signed, num == 0);
-
-				os.Write(buffer.ItemPtr(0), buffer.Count());
-			}
-
-			static	void	PrintNumber	(IOut<TUTF32>& os, const TNumberFormat* format, f64_t num)
-			{
-// 				TString buffer;
-//
-// 				if(format == NULL)
-// 					format = TNumberFormat::default_format;
-//
-// 				union
-// 				{
-// 					struct
-// 					{
-// 						u64_t digits : 52;
-// 						u64_t exponent : 11, sign : 1;
-// 					};
-// 					f64_t num;
-// 				} wrapper;
-// 				wrapper.num = num;
-//
-// 				MakeNumberHead(buffer, format, wrapper.sign, true, num == 0);
-//
-// 				printf("wrapper.num      = %f\n",   wrapper.num);
-// 				printf("wrapper.digits   = %llu\n", (unsigned long long)wrapper.digits);
-// 				printf("wrapper.exponent = %llu\n", (unsigned long long)wrapper.exponent);
-// 				printf("wrapper.sign     = %llu\n", (unsigned long long)wrapper.sign);
-//
-// 				s16_t e = (s16_t)wrapper.exponent - 1023;
-// 				u64_t m = wrapper.digits | 0x10000000000000;
-//
-// // m => 53bits
-// // 10010011001100110011001011111111111111111111110110011 m (expected)
-// // 10010011001100110011001011111111111111111111110110011 m (actual)
-// // 00000111111111111111111111111111111111111111111111111 mask (expected)
-// // 00000111111111111111111111111111111111111111111111111 mask (actual)
-//
-//
-// 				u64_t mask = (0x1FFFFFFFFFFFFF >> (e+1));
-//
-// 				u64_t f = m & mask;
-// 				u64_t i = (m & ~mask) >> (52-e);
-//
-// 				printf("f = %llu\n", (unsigned long long)f);
-// 				printf("i = %llu\n", (unsigned long long)i);
-//
-// 				PrintNumber(buffer, &TNumberFormat::DECIMAL_SIMPLE, i, true, false);
-//
-// 				MakeNumberTail(buffer, format, wrapper.sign, true, num == 0);
-// 				os.Write(buffer.ItemPtr(0), buffer.Count());
-
-				TString str;
-
-				if(format == NULL)
-					format = TNumberFormat::default_format;
-
-				char buffer[128];
-				const int precision = format->fractional_length_max > 48 ? 48 : format->fractional_length_max;
-				const int len = snprintf(buffer, sizeof(buffer) / sizeof(char), "%0.*f", precision, (double)num);
-				CL3_NONCLASS_LOGIC_ERROR(len >= 128 || len < 1);
-
-				char* integer_part = buffer;
-				char* fractional_part = buffer;
-				for(; *fractional_part != '\0' && *fractional_part != '.'; fractional_part++);
-				if(*fractional_part == '.')
-				{
-					*fractional_part = '\0';
-					fractional_part++;
+					buffer.Append(digits[0]);
 				}
 				else
-					fractional_part = NULL;
-
-				const ssize_t len_integer_part = strlen(integer_part);
-				const ssize_t len_fractional_part = fractional_part == NULL ? 0 : strlen(fractional_part);
-
-				MakeNumberHead(str, format, num >= 0, true, num == 0);
-
-				if(len_integer_part < format->integer_length_min && format->integer_padding != TUTF32::TERMINATOR)
-					str.Pad(POSITION_TAIL, format->integer_length_min - len_integer_part, format->integer_padding);
-
-				str.Append(integer_part, CL3_MIN(len_integer_part, format->integer_length_max));
-
-				if(len_fractional_part > 0)
 				{
-					if(format->decimal_mark != TUTF32::TERMINATOR)
-						str.Append(format->decimal_mark);
+					unsigned n_digits_integer = 1;
+					{
+						u64_t ii = i;
+						while(ii >= base)
+						{
+							ii /= base;
+							n_digits_integer++;
+						}
+					}
 
-					str.Append(fractional_part, len_fractional_part);
-
-					if(len_fractional_part < format->fractional_length_min)
-						str.Pad(POSITION_TAIL, format->fractional_length_min - len_fractional_part, format->fractional_padding);
+					{
+						buffer.Count(buffer.Count() + n_digits_integer);
+						TUTF32* out = buffer.ItemPtr(buffer.Count()-1);
+						u64_t ii = i;
+						while(ii != 0)
+						{
+							*out-- = digits[ii % base];
+							ii /= base;
+						}
+					}
 				}
+			}
 
-				MakeNumberTail(str, format, num >= 0, true, num == 0);
+			static	void	PrintNumber	(IOut<TUTF32>& os, const bool negative, const u64_t i, const s64_t e, const TNumberFormat& f)
+			{
+				//	<+|-><pad><integer><decimal-mark><fractional><pad><+|->
 
-				os.Write(str.ItemPtr(0), str.Count());
+				CL3_NONCLASS_ERROR(f.digits == NULL, TException, "TNumberFormat::digits must be non-NULL");
+				CL3_NONCLASS_ERROR(f.digits->Count() < 2, TException, "TNumberFormat::digits must contain at least 2 digits");
+
+				TString buffer;
+
+				if(f.prefix_sign)
+					buffer<<*f.prefix_sign;
+
+				if(i != 0 && !negative && f.positive_mark != TUTF32::TERMINATOR && f.positive_mark_placement == TNumberFormat::SYMBOL_PLACEMENT_BEFORE)
+					buffer<<f.positive_mark;
+				else if(i != 0 && negative && f.negative_mark != TUTF32::TERMINATOR && f.negative_mark_placement == TNumberFormat::SYMBOL_PLACEMENT_BEFORE)
+					buffer<<f.negative_mark;
+				else if(i == 0 && f.zero_mark != TUTF32::TERMINATOR && f.zero_mark_placement == TNumberFormat::SYMBOL_PLACEMENT_BEFORE)
+					buffer<<f.zero_mark;
+
+				if(f.prefix_digits)
+					buffer<<*f.prefix_digits;
+
+				PrintInteger(buffer, i, *f.digits);
+
+				fprintf(stderr, "buffer = \"%s\"\n", TCString(buffer, encoding::CODEC_CXX_CHAR).Chars());
+
+				os<<buffer;
+			}
+
+			static	void	PrintNumber	(IOut<TUTF32>& os, const TNumberFormat& f, u64_t num, bool negative, bool is_signed)
+			{
+				PrintNumber(os, negative, num, 1, f);
+			}
+
+			static	void	PrintNumber	(IOut<TUTF32>& os, const TNumberFormat& f, f64_t num)
+			{
+				struct B
+				{
+					u64_t	s : 1,
+							e : 11,
+							m : 52;
+				};
+
+				const B& bits = *reinterpret_cast<const B*>(&num);
+
+				const s64_t e = (s64_t)bits.e - 1023;
+				const u64_t i = 1 + bits.m / (2 * 52);
+
+				PrintNumber(os, bits.s != 0, i, e, f);
 			}
 
 			ITextWriter&	ITextWriter::operator<<	(char v)
@@ -424,61 +335,61 @@ namespace	cl3
 
 			ITextWriter&	ITextWriter::operator<<	(s8_t v)
 			{
-				PrintNumber(*this, this->number_format, CL3_ABS(v), v >= 0, true);
+				PrintNumber(*this, this->number_format ? *this->number_format : *TNumberFormat::default_format, CL3_ABS(v), v < 0, true);
 				return *this;
 			}
 
 			ITextWriter&	ITextWriter::operator<<	(u8_t v)
 			{
-				PrintNumber(*this, this->number_format, v, true, false);
+				PrintNumber(*this, this->number_format ? *this->number_format : *TNumberFormat::default_format, v, false, false);
 				return *this;
 			}
 
 			ITextWriter&	ITextWriter::operator<<	(s16_t v)
 			{
-				PrintNumber(*this, this->number_format, CL3_ABS(v), v >= 0, true);
+				PrintNumber(*this, this->number_format ? *this->number_format : *TNumberFormat::default_format, CL3_ABS(v), v < 0, true);
 				return *this;
 			}
 
 			ITextWriter&	ITextWriter::operator<<	(u16_t v)
 			{
-				PrintNumber(*this, this->number_format, v, true, false);
+				PrintNumber(*this, this->number_format ? *this->number_format : *TNumberFormat::default_format, v, false, false);
 				return *this;
 			}
 
 			ITextWriter&	ITextWriter::operator<<	(s32_t v)
 			{
-				PrintNumber(*this, this->number_format, CL3_ABS(v), v >= 0, true);
+				PrintNumber(*this, this->number_format ? *this->number_format : *TNumberFormat::default_format, CL3_ABS(v), v < 0, true);
 				return *this;
 			}
 
 			ITextWriter&	ITextWriter::operator<<	(u32_t v)
 			{
-				PrintNumber(*this, this->number_format, v, true, false);
+				PrintNumber(*this, this->number_format ? *this->number_format : *TNumberFormat::default_format, v, false, false);
 				return *this;
 			}
 
 			ITextWriter&	ITextWriter::operator<<	(s64_t v)
 			{
-				PrintNumber(*this, this->number_format, CL3_ABS(v), v >= 0, true);
+				PrintNumber(*this, this->number_format ? *this->number_format : *TNumberFormat::default_format, CL3_ABS(v), v < 0, true);
 				return *this;
 			}
 
 			ITextWriter&	ITextWriter::operator<<	(u64_t v)
 			{
-				PrintNumber(*this, this->number_format, v, true, false);
+				PrintNumber(*this, this->number_format ? *this->number_format : *TNumberFormat::default_format, v, false, false);
 				return *this;
 			}
 
 			ITextWriter&	ITextWriter::operator<<	(f32_t v)
 			{
-				PrintNumber(*this, this->number_format, v);
+				PrintNumber(*this, this->number_format ? *this->number_format : *TNumberFormat::default_format, v);
 				return *this;
 			}
 
 			ITextWriter&	ITextWriter::operator<<	(f64_t v)
 			{
-				PrintNumber(*this, this->number_format, v);
+				PrintNumber(*this, this->number_format ? *this->number_format : *TNumberFormat::default_format, v);
 				return *this;
 			}
 
