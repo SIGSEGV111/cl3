@@ -26,10 +26,6 @@
 #define	CL3_CXX_MSVC	2	//	Microsoft Visual C++
 #define	CL3_CXX_CLANG	3	//	LLVM CLANG
 
-#define	CL3_ENDIANITY_LITTLE	1
-#define	CL3_ENDIANITY_BIG		2
-#define	CL3_ENDIANITY_MIXED		3
-
 #ifndef CL3_CXX
 	#ifdef _MSC_VER
 		#define	CL3_CXX CL3_CXX_MSVC

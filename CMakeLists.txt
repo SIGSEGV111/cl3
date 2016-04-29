@@ -12,8 +12,9 @@ else ()
 	set (GEN_DIR "${PROJECT_SOURCE_DIR}/gen/dbg")
 endif ()
 
-set (CXX_OPT_COMMON_LIB "-fvisibility-inlines-hidden -std=c++11 -fvisibility=hidden -fPIC -I${GEN_DIR}/include -L${GEN_DIR}/lib")
-set (CXX_OPT_COMMON_EXE "-fvisibility-inlines-hidden -std=c++11 -fvisibility=hidden -fPIE -I${GEN_DIR}/include -L${GEN_DIR}/lib")
+# -Wno-multichar workaround for GCC bug #53431 @ https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53431
+set (CXX_OPT_COMMON_LIB "-fvisibility-inlines-hidden -std=c++11 -fvisibility=hidden -fPIC -I${GEN_DIR}/include -L${GEN_DIR}/lib -Wno-multichar")
+set (CXX_OPT_COMMON_EXE "-fvisibility-inlines-hidden -std=c++11 -fvisibility=hidden -fPIE -I${GEN_DIR}/include -L${GEN_DIR}/lib -Wno-multichar")
 set (C_OPT_COMMON_LIB   "-fvisibility=hidden -fPIC -I${GEN_DIR}/include -L${GEN_DIR}/lib")
 set (C_OPT_COMMON_EXE   "-fvisibility=hidden -fPIE -I${GEN_DIR}/include -L${GEN_DIR}/lib")
 
