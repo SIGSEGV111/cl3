@@ -395,7 +395,8 @@ namespace	cl3
 
 			ITextWriter&	ITextWriter::operator<<	(const string::TString& str)
 			{
-				this->Write(str.ItemPtr(0), str.Count());
+				if(str.Count() > 0)
+					this->Write(str.ItemPtr(0), str.Count());
 				return *this;
 			}
 

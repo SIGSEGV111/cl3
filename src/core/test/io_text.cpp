@@ -917,6 +917,15 @@ namespace
 		}
 		TNumberFormat::default_format = &TNumberFormat::DECIMAL_SIMPLE;
 	}
+
+	TEST(io_text_ITextWriter, empty_string)
+	{
+		TString buffer;
+		buffer << TString("");
+		buffer << "";
+		buffer << L"";
+		EXPECT_EQ(0, buffer.Count());
+	}
 }
 
 
