@@ -40,35 +40,63 @@ namespace	cl3
 
 		namespace	text
 		{
-			namespace	parser
+			namespace	regex
 			{
-				enum	EMatchType
+				struct TMatch
 				{
-					MATCHTYPE_INCLUDE,
-					MATCHTYPE_EXCLUDE
+					usys_t index;
+					usys_t length;
 				};
 
-				class	CL3PUBT	TTokenizer
+				struct TState
+				{
+				};
+
+				typedef TMatch (*FMatch)(TState&, const string::TString&);
+
+				CL3PUBF llvm::Function* CompileRegEx(const string::TString&, system::compiler::jit::TJIT&);
+
+				class TRegEx : public stream::IOut<TUTF32>
 				{
 					protected:
-						const collection::IStaticCollection<const TUTF32>* collection;
-						stream::IIn<TUTF32>* is;
-						EMatchType mt;
-
-						TUTF32 current_termination;
-						string::TString current_token;
+						system::memory::TUniquePtr<system::compiler::jit::TJIT> jit;
+						TState state;
+						FMatch func;
 
 					public:
-						inline	TUTF32					CurrentTermination	() const CL3_GETTER { return this->current_termination; }
-						inline	const string::TString&	CurrentToken		() const CL3_GETTER { return this->current_token; }
-						inline	string::TString&		CurrentToken		() CL3_GETTER { return this->current_token; }
-
-						CL3PUBF	bool	Next		(bool fast_forward = false);
-
-						CL3PUBF	CLASS	TTokenizer	(stream::IIn<TUTF32>*, EMatchType, const collection::IStaticCollection<const TUTF32>*);
-						CL3PUBF	CLASS	TTokenizer	(const TTokenizer&);
-						CL3PUBF	CLASS	~TTokenizer	();
+						inline TMatch Match(const string::TString& str) const { state.Reset(); this->Write(str.ItemPtr(0), str.Count(), 0) }
+						CLASS TRegEx(const string::TString&);
 				};
+
+
+			}
+
+			namespace	tokenizer
+			{
+				class TToken
+				{
+					public:
+						TToken	operator||	(const TToken&) const;
+						TToken	operator&&	(const TToken&) const;
+
+						CLASS TToken(const regex::TRegEx&);
+						CLASS TToken(const string::TString&);
+						CLASS TToken(const TToken&);
+				};
+
+// 				TToken T_INTEGER = TRegEx("(\+|-)?([0-9]|[1-9][0-9]*)");
+// 				TToken T_FLOAT   = INTEGER && TRegEx("\.[0-9]+");
+// 				TToken T_NUMBER  = INTEGER || FLOAT;
+// 				TToken T_TRUE    = "true";
+// 				TToken T_FALSE   = "false";
+// 				TToken T_NULL    = "null";
+// 				TToken T_UNDEF   = "undefined";
+// 				TToken T_STRING  = TToken(TRegEx("\"([^\"\\]|\\.)*\"")) || TRegEx("'([^'\\]|\\.)*'");
+//
+// 				TParser p;
+//
+// 				p.AddToken(T_INTEGER, OnInteger);
+// 				p.AddToken(T_FLOAT, OnFloat);
 			}
 		}
 	}

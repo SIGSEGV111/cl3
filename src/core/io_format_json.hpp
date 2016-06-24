@@ -30,6 +30,73 @@ namespace	cl3
 		{
 			namespace	json
 			{
+				using namespace system::types;
+
+				struct TValue;
+				struct TMember;
+				struct TObject;
+				struct TArray;
+
+				struct TValue
+				{
+					enum class EType
+					{
+						NULLVALUE
+						UNDEFINED,
+						NUMBER,
+						STRING,
+						ARRAY,
+						OBJECT
+					};
+
+					EType type;
+
+					union
+					{
+						f64_t num;
+						io::text::string::TString* text;
+						TArray* array;
+						TObject* object;
+					};
+
+					CL3PUBF bool operator==(const TValue& other) const;
+					inline bool operator!=(const TValue& other) const { return !(*this == other); }
+					CL3PUBF TValue& operator=(const TValue&);
+					CL3PUBF TValue& operator=(TValue&&);
+
+					CL3PUBF CLASS TValue(EType type = EType::UNDEFINED);
+					CL3PUBF CLASS TValue(const io::text::string::TString& text);
+					CL3PUBF CLASS TValue(f64_t number);
+					CL3PUBF CLASS TValue(TValue&&);
+					CL3PUBF CLASS TValue(const TValue&);
+					CL3PUBF CLASS ~TValue();
+				};
+
+				struct TMember
+				{
+					io::text::string::TString name;
+					TValue value;
+
+					CL3PUBF bool operator==(const TMember&) const;
+					inline bool operator!=(const TMember& other) const { return !(*this == other); }
+				};
+
+				struct TObject
+				{
+					io::collection::list::TList<TMember> members;
+
+					CL3PUBF bool operator==(const TObject&) const;
+					inline bool operator!=(const TObject& other) const { return !(*this == other); }
+				};
+
+				struct TArray
+				{
+					io::collection::list::TList<TValue> items;
+
+					CL3PUBF bool operator==(const TArray&) const;
+					inline bool operator!=(const TArray& other) const { return !(*this == other); }
+				};
+
 				CL3PUBF void SerializeJSON(const TValue& root, io::text::ITextWriter&);
 				CL3PUBF TValue DeserializeJSON(io::text::ITextReader&);
 			}

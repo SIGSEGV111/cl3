@@ -32,21 +32,201 @@ namespace	cl3
 			{
 				using namespace text::string;
 
+				using namespace io::text::string;
+
+				bool TValue::operator==(const TValue& other) const
+				{
+					if(this->type != other.type)
+						return false;
+
+					switch(this->type)
+					{
+						case TValue::EType::NULLVALUE: return true;
+						case TValue::EType::UNDEFINED: return true;
+						case TValue::EType::NUMBER:    return this->num == other.num;
+						case TValue::EType::STRING:    return this->text == other.text || (this->text != NULL && other.text != NULL && *this->text == *other.text);
+						case TValue::EType::ARRAY:     return this->array == other.array || (this->array != NULL && other.array != NULL && *this->array == *other.array);
+						case TValue::EType::OBJECT:    return this->object == other.object || (this->object != NULL && other.object != NULL && *this->object == *other.object);
+					}
+
+					CL3_UNREACHABLE;
+					return false;
+				}
+
+				TValue& TValue::operator=(const TValue& other)
+				{
+					switch(this->type)
+					{
+						case TValue::EType::NULLVALUE:
+							break;
+						case TValue::EType::UNDEFINED:
+							break;
+
+						case TValue::EType::NUMBER:
+							this->num = other.num;
+							break;
+
+						case TValue::EType::STRING:
+							delete this->text;
+							this->text = other.text ? new TString(*other.text) : NULL;
+							break;
+
+						case TValue::EType::ARRAY:
+							delete this->array;
+							this->array = other.array ? new TArray(*other.array) : NULL;
+							break;
+
+						case TValue::EType::OBJECT:
+							delete this->object;
+							this->object = other.object ? new TObject(*other.object) : NULL;
+							break;
+					}
+
+					this->type = other.type;
+
+					return *this;
+				}
+
+				TValue& TValue::operator=(TValue&& other)
+				{
+					switch(this->type)
+					{
+						case TValue::EType::NULLVALUE:
+							break;
+						case TValue::EType::UNDEFINED:
+							break;
+
+						case TValue::EType::NUMBER:
+							this->num = other.num;
+							break;
+
+						case TValue::EType::STRING:
+						case TValue::EType::ARRAY:
+						case TValue::EType::OBJECT:
+							this->object = other.object;
+							other.object = NULL;
+							break;
+					}
+
+					this->type = other.type;
+
+					return *this;
+				}
+
+				CLASS TValue::TValue(EType type) : type(type)
+				{
+					this->num = 0;
+				}
+
+				CLASS TValue::TValue(const io::text::string::TString& text) : type(TValue::EType::STRING)
+				{
+					this->text = new TString(text);
+				}
+
+				CLASS TValue::TValue(f64_t number) : type(TValue::EType::NUMBER)
+				{
+					this->num = number;
+				}
+
+				CLASS TValue::TValue(TValue&& other) : type(other.type)
+				{
+					switch(other.type)
+					{
+						case TValue::EType::UNDEFINED:
+							break;
+
+						case TValue::EType::NUMBER:
+							this->num = other.num;
+							break;
+
+						case TValue::EType::STRING:
+						case TValue::EType::ARRAY:
+						case TValue::EType::OBJECT:
+							this->object = other.object;
+							other.object = NULL;
+							break;
+					}
+				}
+
+				CLASS TValue::TValue(const TValue& other) : type(other.type)
+				{
+					switch(other.type)
+					{
+						case TValue::EType::UNDEFINED:
+							break;
+
+						case TValue::EType::NUMBER:
+							this->num = other.num;
+							break;
+
+						case TValue::EType::STRING:
+							this->text = other.text ? new TString(*other.text) : NULL;
+							break;
+
+						case TValue::EType::ARRAY:
+							this->array = other.array ? new TArray(*other.array) : NULL;
+							break;
+
+						case TValue::EType::OBJECT:
+							this->object = other.object ? new TObject(*other.object) : NULL;
+							break;
+					}
+				}
+
+				CLASS TValue::~TValue()
+				{
+					switch(this->type)
+					{
+						case TValue::EType::UNDEFINED:
+						case TValue::EType::NUMBER:
+							break;
+
+						case TValue::EType::STRING:
+							delete this->text;
+							break;
+
+						case TValue::EType::ARRAY:
+							delete this->array;
+							break;
+
+						case TValue::EType::OBJECT:
+							delete this->object;
+							break;
+					}
+				}
+
+				bool TMember::operator==(const TMember& other) const
+				{
+					return this->name == other.name && this->value == other.value;
+				}
+
+				bool TArray::operator==(const TArray& other) const
+				{
+					if(this->items.Count() != other.items.Count())
+						return false;
+					for(usys_t i = 0; i < this->items.Count(); i++)
+						if(this->items[i] != other.items[i])
+							return false;
+						return true;
+				}
+
+				bool TObject::operator==(const TObject& other) const
+				{
+					if(this->members.Count() != other.members.Count())
+						return false;
+					for(usys_t i = 0; i < this->members.Count(); i++)
+						if(this->members[i] != other.members[i])
+							return false;
+						return true;
+				}
+
 				void SerializeJSON(const TValue& root, io::text::ITextWriter& w)
 				{
 					switch(root.type)
 					{
-						case TValue::EType::UNDEFINED: w<<"null"; break;
-						case TValue::EType::SINT8:   w<<root.s8; break;
-						case TValue::EType::SINT16:  w<<root.s16; break;
-						case TValue::EType::SINT32:  w<<root.s32; break;
-						case TValue::EType::SINT64:  w<<root.s64; break;
-						case TValue::EType::UINT8:   w<<root.u8; break;
-						case TValue::EType::UINT16:  w<<root.u16; break;
-						case TValue::EType::UINT32:  w<<root.u32; break;
-						case TValue::EType::UINT64:  w<<root.u64; break;
-						case TValue::EType::FLOAT32: w<<root.f32; break;
-						case TValue::EType::FLOAT64: w<<root.f64; break;
+						case TValue::EType::UNDEFINED: w<<"undefined"; break;
+						case TValue::EType::NUMBER:    w<<root.num; break;
+
 						case TValue::EType::STRING:
 						{
 							TString copy = root.text ? *root.text : "";
@@ -55,6 +235,7 @@ namespace	cl3
 							w<<'"'<<copy<<'"';
 							break;
 						}
+
 						case TValue::EType::ARRAY:
 							w<<'[';
 							for(usys_t i = 0; i < root.array->items.Count(); i++)
@@ -65,16 +246,24 @@ namespace	cl3
 							}
 							w<<']';
 							break;
+
 						case TValue::EType::OBJECT:
-							w<<'{';
-							for(usys_t i = 0; i < root.object->members.Count(); i++)
+							if(root.object == NULL)
 							{
-								w<<'\"'<<root.object->members[i].name<<"\":";
-								SerializeJSON(root.object->members[i].value, w);
-								if(i + 1 < root.object->members.Count())
-									w<<',';
+								w<<"null";
 							}
-							w<<'}';
+							else
+							{
+								w<<'{';
+								for(usys_t i = 0; i < root.object->members.Count(); i++)
+								{
+									w<<'\"'<<root.object->members[i].name<<"\":";
+									SerializeJSON(root.object->members[i].value, w);
+									if(i + 1 < root.object->members.Count())
+										w<<',';
+								}
+								w<<'}';
+							}
 							break;
 					}
 				}

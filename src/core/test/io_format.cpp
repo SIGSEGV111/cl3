@@ -34,20 +34,15 @@ namespace
 	TEST(io_format_json_SerializeJSON, integer)
 	{
 		TString json;
-		TValue root;
-		root.type = TValue::EType::SINT32;
-		root.s32 = 42;
+		TValue root(42);
 		SerializeJSON(root, json);
-
 		EXPECT_TRUE(json == "42");
 	}
 
 	TEST(io_format_json_SerializeJSON, floatnum)
 	{
 		TString json;
-		TValue root;
-		root.type = TValue::EType::FLOAT64;
-		root.s32 = 42.7;
+		TValue root(42.7);
 		SerializeJSON(root, json);
 
 // 		EXPECT_TRUE(json == "42.7");	//	FIXME ITextWriter
@@ -56,31 +51,21 @@ namespace
 	TEST(io_format_json_SerializeJSON, text)
 	{
 		TString json;
-		TValue root;
-		root.type = TValue::EType::STRING;
-		root.text = new TString("test123\"\\");
+		TValue root("test123\"\\");
 		SerializeJSON(root, json);
-
 		EXPECT_TRUE(json == "\"test123\\\"\\\\\"");
 	}
 
 	TEST(io_format_json_SerializeJSON, array_integer)
 	{
 		TString json;
-		TValue root;
-		root.type = TValue::EType::ARRAY;
+		TValue root(TValue::EType::ARRAY);
 		root.array = new TArray();
 
-		TValue value;
-		value.type = TValue::EType::SINT32;
-		value.s32 = 42;
-		root.array->items.Add(value);
-		value.s32 = 17;
-		root.array->items.Add(value);
-		value.s32 = 32;
-		root.array->items.Add(value);
-		value.s32 = 9;
-		root.array->items.Add(value);
+		root.array->items.Add(TValue(42));
+		root.array->items.Add(TValue(17));
+		root.array->items.Add(TValue(32));
+		root.array->items.Add(TValue(9));
 
 		SerializeJSON(root, json);
 
@@ -90,22 +75,13 @@ namespace
 	TEST(io_format_json_SerializeJSON, array_mixed)
 	{
 		TString json;
-		TValue root;
-		root.type = TValue::EType::ARRAY;
+		TValue root(TValue::EType::ARRAY);
 		root.array = new TArray();
 
-		TValue value;
-		value.type = TValue::EType::SINT32;
-		value.s32 = 42;
-		root.array->items.Add(value);
-		value.s32 = 17;
-		root.array->items.Add(value);
-		value.type = TValue::EType::FLOAT64;
-		value.f32 = 32.3;
-// 		root.array->items.Add(value);	//	FIXME ITextWriter
-		value.type = TValue::EType::STRING;
-		value.text = new TString("hello world");
-		root.array->items.Add(value);
+		root.array->items.Add(TValue(42));
+		root.array->items.Add(TValue(17));
+// 		root.array->items.Add(TValue(32.2));	//	FIXME: ITextWriter
+		root.array->items.Add(TValue("hello world"));
 
 		SerializeJSON(root, json);
 
