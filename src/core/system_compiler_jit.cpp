@@ -102,8 +102,6 @@ namespace	cl3
 				CLASS TBinary::~TBinary()
 				{
 					delete this->ee;
-// 					delete this->tm;
-// 					delete this->module;
 					delete this->context;
 				}
 

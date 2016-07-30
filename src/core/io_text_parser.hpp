@@ -21,82 +21,122 @@
 
 #include "io_text.hpp"
 #include "io_text_string.hpp"
+#include "io_collection_list.hpp"
 #include "system_memory.hpp"
+#include "system_compiler_jit.hpp"
 
 namespace	cl3
 {
 	namespace	io
 	{
-		namespace	collection
-		{
-			template<class T>	struct	IStaticCollection;
-			template<class T>	struct	IStaticIterator;
-
-			namespace	array
-			{
-				template<class T>	struct	IArray;
-			}
-		}
-
 		namespace	text
 		{
-			namespace	regex
+			namespace parser
 			{
-				struct TMatch
+// 				enum class ENodeType
+// 				{
+// 					LITERAL, RANGE, DISJUNCTION, CONJUNCTION, REPETITION, SEQUENCE, NEGATION
+// 				};
+
+				struct INode
 				{
-					usys_t index;
-					usys_t length;
+					CL3PUBF CLASS virtual ~INode();
 				};
 
-				struct TState
+				struct TDisjunction : INode
 				{
+					collection::list::TList<INode*> nodes;
+
+					CL3PUBF CLASS ~TDisjunction();
 				};
 
-				typedef TMatch (*FMatch)(TState&, const string::TString&);
+				struct TConjunction : INode
+				{
+					collection::list::TList<INode*> nodes;
 
-				CL3PUBF llvm::Function* CompileRegEx(const string::TString&, system::compiler::jit::TJIT&);
+					CL3PUBF CLASS ~TConjunction();
+				};
 
-				class TRegEx : public stream::IOut<TUTF32>
+				struct TRepetition : INode
+				{
+					system::memory::TUniquePtr<INode> node;
+					unsigned n_rep_min;
+					unsigned n_rep_max;
+
+					CL3PUBF CLASS ~TRepetition();
+				};
+
+				struct TSequence : INode
+				{
+					collection::list::TList<INode*> nodes;
+
+					CL3PUBF CLASS ~TSequence();
+				};
+
+				struct TNegation : INode
+				{
+					system::memory::TUniquePtr<INode> node;
+
+					CL3PUBF CLASS ~TNegation();
+				};
+
+				struct TLiteralMatcher : INode
+				{
+					const string::TString literal;
+
+					CL3PUBF CLASS ~TLiteralMatcher();
+				};
+
+				struct TRangeMatcher : INode
+				{
+					TUTF32 range_start;
+					TUTF32 range_end;
+
+					CL3PUBF CLASS ~TRangeMatcher();
+				};
+
+				class TParser
 				{
 					protected:
-						system::memory::TUniquePtr<system::compiler::jit::TJIT> jit;
-						TState state;
-						FMatch func;
+						system::memory::TUniquePtr<INode> node;
 
 					public:
-						inline TMatch Match(const string::TString& str) const { state.Reset(); this->Write(str.ItemPtr(0), str.Count(), 0) }
-						CLASS TRegEx(const string::TString&);
+						CL3PUBF TParser operator||(const TParser& rhs) const;
+						CL3PUBF TParser operator||(TParser&& rhs) const;
+						CL3PUBF TParser operator&&(const TParser& rhs) const;
+						CL3PUBF TParser operator&&(TParser&& rhs) const;
+						CL3PUBF TParser operator+(const TParser& rhs) const;
+						CL3PUBF TParser operator+(TParser&& rhs) const;
+						CL3PUBF TParser operator!() const;
+
+						CL3PUBF CLASS TParser(const string::TString& descr, system::memory::TUniquePtr<INode>);
+						CL3PUBF CLASS TParser(TParser&&);
+						CL3PUBF CLASS ~TParser();
+
+						CL3PUBF TParser& operator=(TParser&&);
+
+// 						CL3PUBF llvm::Function* GenerateCode(system::compiler::jit::TJIT&) const CL3_WARN_UNUSED_RESULT;
 				};
 
+				static const unsigned INFINITE = (unsigned)-1;
 
-			}
+				CL3PUBF TParser Literal(const char*) CL3_GETTER;
+				CL3PUBF TParser Literal(const string::TString&) CL3_GETTER;
+				CL3PUBF TParser Range(TUTF32 range_start, TUTF32 range_end) CL3_GETTER;
+				CL3PUBF TParser Repetition(const TParser&, unsigned rep_min, unsigned rep_max) CL3_GETTER;
+				CL3PUBF TParser Optional(const TParser&) CL3_GETTER;
 
-			namespace	tokenizer
-			{
-				class TToken
-				{
-					public:
-						TToken	operator||	(const TToken&) const;
-						TToken	operator&&	(const TToken&) const;
+				static const TParser digit_excl_zero = Range('1', '9');
+				static const TParser digit = Literal("0") || digit_excl_zero;
+				static const TParser digits = Repetition(digit, 1, INFINITE);
+				static const TParser integer = Literal("0") || (digit_excl_zero + Optional(digits));
 
-						CLASS TToken(const regex::TRegEx&);
-						CLASS TToken(const string::TString&);
-						CLASS TToken(const TToken&);
-				};
+				static const TParser modifier = (Literal("+") || Literal("-")) + integer;
+				static const TParser multiplier = integer + (Literal("x") || Literal("*"));
+				static const TParser dice_spec = integer + Literal("d") + Optional(integer);
+				static const TParser dice = Optional(multiplier) + dice_spec + Optional(modifier);
 
-// 				TToken T_INTEGER = TRegEx("(\+|-)?([0-9]|[1-9][0-9]*)");
-// 				TToken T_FLOAT   = INTEGER && TRegEx("\.[0-9]+");
-// 				TToken T_NUMBER  = INTEGER || FLOAT;
-// 				TToken T_TRUE    = "true";
-// 				TToken T_FALSE   = "false";
-// 				TToken T_NULL    = "null";
-// 				TToken T_UNDEF   = "undefined";
-// 				TToken T_STRING  = TToken(TRegEx("\"([^\"\\]|\\.)*\"")) || TRegEx("'([^'\\]|\\.)*'");
-//
-// 				TParser p;
-//
-// 				p.AddToken(T_INTEGER, OnInteger);
-// 				p.AddToken(T_FLOAT, OnFloat);
+				//	5x3d6+4
 			}
 		}
 	}

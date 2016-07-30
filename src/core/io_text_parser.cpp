@@ -8,7 +8,11 @@
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    but WITHOUT ANY WARRANTY
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+				 without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
@@ -28,6 +32,97 @@ namespace	cl3
 		{
 			namespace	parser
 			{
+				using namespace string;
+
+				CLASS INode::~INode()
+				{
+				}
+
+				CLASS TDisjunction::~TDisjunction()
+				{
+					for(usys_t i = 0; i < this->nodes.Count(); i++)
+						delete this->nodes[i];
+				}
+
+				CLASS TConjunction::~TConjunction()
+				{
+					for(usys_t i = 0; i < this->nodes.Count(); i++)
+						delete this->nodes[i];
+				}
+
+				CLASS TRepetition::~TRepetition()
+				{
+				}
+
+				CLASS TSequence::~TSequence()
+				{
+					for(usys_t i = 0; i < this->nodes.Count(); i++)
+						delete this->nodes[i];
+				}
+
+				CLASS TNegation::~TNegation()
+				{
+				}
+
+				CLASS TLiteralMatcher::~TLiteralMatcher()
+				{
+				}
+
+				CLASS TRangeMatcher::~TRangeMatcher()
+				{
+				}
+
+				TParser TParser::operator||(const TParser& rhs) const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				TParser TParser::operator&&(const TParser& rhs) const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				TParser TParser::operator+(const TParser& rhs) const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				TParser TParser::operator!() const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				
+
+				CLASS TParser::~TParser()
+				{
+				}
+
+				TParser Literal(const char* cstr)
+				{
+					const TString str = cstr;
+					return TParser(TString("the literal string \"") + str + TString("\""), str);
+				}
+
+				TParser Literal(const string::TString& str)
+				{
+					return TParser(TString("the literal string \"") + str + TString("\""), str);
+				}
+
+				TParser Range(TUTF32 range_start, TUTF32 range_end)
+				{
+					return TParser( TString("unicode characters in the range between '") + range_start + "' and '" + range_end + "'", range_start, range_end );
+				}
+
+				TParser Repetition(const TParser& p, unsigned rep_min, unsigned rep_max)
+				{
+					return TParser(p, rep_min, rep_max);
+				}
+
+				TParser Optional(const TParser& p)
+				{
+					return TParser(p, 0, 1);
+				}
 
 			}
 		}

@@ -221,12 +221,7 @@ namespace	cl3
 
 			ITextReader&	ITextReader::operator>>	(string::TString& v)
 			{
-				parser::TTokenizer tokenizer(this, parser::MATCHTYPE_EXCLUDE, newline_markers);
-
-				tokenizer.Next();
-				v = system::def::move(tokenizer.CurrentToken());
-
-				return *this;
+				CL3_NOT_IMPLEMENTED;
 			}
 
 			/******************************** ITextWriter ******************************************************/

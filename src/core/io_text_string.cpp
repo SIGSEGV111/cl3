@@ -490,6 +490,11 @@ namespace	cl3
 					//	nothing else to do
 				}
 
+				CLASS	TString::TString	(TUTF32 chr)
+				{
+					this->Append(chr);
+				}
+
 				CLASS	TString::TString	(const char*    str, usys_t maxlen) : TList<TUTF32>()
 				{
 					CL3_CLASS_ERROR(str == NULL, TException, "invalid source string pointer");

@@ -144,6 +144,7 @@ namespace	cl3
 						CL3PUBF	usys_t		Length		() const CL3_GETTER;
 
 						CL3PUBF	CLASS	TString	();
+						CL3PUBF	CLASS	TString	(TUTF32);
 						CL3PUBF	CLASS	TString	(const char*    cstr, usys_t maxlen = (usys_t)-1);
 						CL3PUBF	CLASS	TString	(const wchar_t* wstr, usys_t maxlen = (usys_t)-1);
 						CL3PUBF	CLASS	TString	(const TUTF32*  ustr, usys_t maxlen = (usys_t)-1);

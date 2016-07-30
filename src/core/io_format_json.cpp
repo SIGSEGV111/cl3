@@ -132,6 +132,9 @@ namespace	cl3
 				{
 					switch(other.type)
 					{
+						case TValue::EType::NULLVALUE:
+							break;
+
 						case TValue::EType::UNDEFINED:
 							break;
 
@@ -152,6 +155,8 @@ namespace	cl3
 				{
 					switch(other.type)
 					{
+						case TValue::EType::NULLVALUE:
+							break;
 						case TValue::EType::UNDEFINED:
 							break;
 
@@ -177,6 +182,9 @@ namespace	cl3
 				{
 					switch(this->type)
 					{
+						case TValue::EType::NULLVALUE:
+							break;
+
 						case TValue::EType::UNDEFINED:
 						case TValue::EType::NUMBER:
 							break;
@@ -224,6 +232,8 @@ namespace	cl3
 				{
 					switch(root.type)
 					{
+						case TValue::EType::NULLVALUE:
+							break;
 						case TValue::EType::UNDEFINED: w<<"undefined"; break;
 						case TValue::EType::NUMBER:    w<<root.num; break;
 

@@ -41,7 +41,7 @@ namespace	cl3
 				{
 					enum class EType
 					{
-						NULLVALUE
+						NULLVALUE,
 						UNDEFINED,
 						NUMBER,
 						STRING,

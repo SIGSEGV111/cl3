@@ -44,20 +44,24 @@ namespace	cl3
 
 		namespace input
 		{
-			enum	EKeyState
+
+			class IDevice
 			{
-				KEYSTATE_DOWN = 0,
-				KEYSTATE_UP = 1
+			};
+
+			class TEnclosure
+			{
+				protected:
+					io::collection::list::TList<IDevice*> devices;
 			};
 
 			struct	TOnInputEventData
 			{
-				system::time::TTime ts;	//	the timestamp of the client system, which is sending the input, at the time the key was pressed (this can be based on any monotonic clock on the client system)
 			};
 
 			struct	TOnKeyPressData : TOnInputEventData
 			{
-				EKeyState state;	//	the current state of the key (down/up)
+// 				EKeyState state;	//	the current state of the key (down/up)
 				u32_t key;			//	the actual "keyboard" (or mouse, or touchscreen, or similar device) key pressed
 				io::text::TUTF32 chr;	//	keycode including modifier keys translated into a unicode character if applicable, TUTF32::TERMINATOR otherwise
 			};
@@ -71,158 +75,113 @@ namespace	cl3
 			{
 			};
 
-			enum	EFocus
+			enum class EFocus
 			{
 				FOCUS_ACQUIRED,
 				FOCUS_LOST
 			};
-
-// 			struct	TDragDropData
-// 			{
-// 			};
-//
-// 			struct	TOnDragData : TOnInputEventData
-// 			{
-// 				TDragDropData ddd;
-// 			};
-//
-// 			struct	TOnDropData : TOnInputEventData
-// 			{
-// 				TDragDropData ddd;
-// 			};
 
 			struct	TOnFocusChangeData : TOnInputEventData
 			{
 				EFocus state;
 			};
 
-// 			typedef	event::TEvent<elements::IElement, TOnDragData&>			TOnDragEvent;
-// 			typedef	event::TEvent<elements::IElement, TOnDropData&>			TOnDropEvent;
 			typedef	event::TEvent<elements::IElement, TOnFocusChangeData&>	TOnFocusChangeEvent;
-
 			typedef	event::TEvent<elements::IElement, TOnPointerMoveData&>	TOnPointerMoveEvent;
 			typedef	event::TEvent<elements::IElement, TOnKeyPressData&>		TOnKeyPressEvent;
-			typedef	event::TEvent<elements::IElement, TOnClickData&>		TOnClickEvent;
 		}
 
-		namespace	elements
+		class	CL3PUBT	IElement;
+		class	CL3PUBT	TButton;
+		class	CL3PUBT	TOptionBox;
+		class	CL3PUBT	TListBox;
+		class	CL3PUBT	TCheckBox;
+		class	CL3PUBT	TTextBox;
+
+		class	IElement
 		{
-			class	CL3PUBT	IElement;
-			class	CL3PUBT	TButton;
-			class	CL3PUBT	TOptionBox;
-			class	CL3PUBT	TListBox;
-			class	CL3PUBT	TCheckBox;
-			class	CL3PUBT	TTextBox;
+			public:
+				CL3PUBF	const input::TOnPointerMoveEvent&	OnPointerMove	() const CL3_GETTER;
+				CL3PUBF	const input::TOnKeyPressEvent&		OnKeyPress		() const CL3_GETTER;
+				CL3PUBF	const input::TOnFocusChangeEvent&	OnFocusChange	() const CL3_GETTER;
 
-			class	IElement
-			{
-				public:
-					CL3PUBF	const input::TOnPointerMoveEvent&	OnPointerMove	() const CL3_GETTER;
-					CL3PUBF	const input::TOnKeyPressEvent&		OnKeyPress		() const CL3_GETTER;
-					CL3PUBF	const input::TOnFocusChangeEvent&	OnFocusChange	() const CL3_GETTER;
+				CL3PUBF	bool	Enabled	() const CL3_GETTER;
+				CL3PUBF	void	Enabled	(bool) CL3_SETTER;
 
-					CL3PUBF	bool	Enabled	() const CL3_GETTER;
-					CL3PUBF	void	Enabled	(bool) CL3_SETTER;
+				CL3PUBF	CLASS	IElement	(io::text::string::TString id);
+				CL3PUBF	virtual	~IElement	();
+		};
 
-					CL3PUBF	CLASS	IElement	(io::text::string::TString id);
-					CL3PUBF	virtual	~IElement	();
-			};
-
-			class	TButton : public IElement
-			{
-				public:
-					CL3PUBF	const io::text::string::TString&
-									Text	() const CL3_GETTER;
-					CL3PUBF	void	Text	(io::text::string::TString) CL3_SETTER;
-
-					CL3PUBF	CLASS	TButton	(io::text::string::TString id);
-					CL3PUBF	CLASS	~TButton();
-			};
-
-			class	TOptionBox : public IElement
-			{
-				public:
-					typedef io::collection::list::TList<TOptionBox*> TOptionGroup;
-
-					CL3PUBF	const io::text::string::TString&
-									Text	() const CL3_GETTER;
-					CL3PUBF	void	Text	(io::text::string::TString) CL3_SETTER;
-
-					CL3PUBF	CLASS	TOptionBox	(io::text::string::TString id, TOptionGroup*);
-					CL3PUBF	CLASS	~TOptionBox	();
-			};
-
-			class	TListBox : public IElement
-			{
-				protected:
-					io::collection::IStaticCollection<IElement*>* collection;
-
-				public:
-					CL3PUBF	io::collection::IStaticCollection<IElement*>*
-									Collection	() const CL3_GETTER;
-					CL3PUBF	void	Collection	(io::collection::IStaticCollection<IElement*>*) CL3_SETTER;
-
-					CL3PUBF	CLASS	TListBox	(io::text::string::TString id);
-					CL3PUBF	CLASS	~TListBox	();
-			};
-
-			class	TPictureBox : public IElement
-			{
-				public:
-					CL3PUBF	const io::text::string::TString&
-									AlternateText	() const CL3_GETTER;
-					CL3PUBF	void	AlternateText	(io::text::string::TString) CL3_SETTER;
-			};
-
-			class	TCheckBox : public IElement
-			{
-				public:
-					CL3PUBF	const io::text::string::TString&
-									Text	() const CL3_GETTER;
-					CL3PUBF	void	Text	(io::text::string::TString) CL3_SETTER;
-
-					CL3PUBF	bool	State	() const CL3_GETTER;
-					CL3PUBF	void	State	(bool) CL3_SETTER;
-
-					CL3PUBF	CLASS	TCheckBox	(io::text::string::TString id);
-					CL3PUBF	CLASS	~TCheckBox	();
-			};
-
-			class	TTextBox : public IElement
-			{
-				public:
-					CL3PUBF	const io::text::string::TString&
-									Text	() const CL3_GETTER;
-					CL3PUBF	void	Text	(io::text::string::TString) CL3_SETTER;
-
-					CL3PUBF	CLASS	TTextBox	(io::text::string::TString id);
-					CL3PUBF	CLASS	~TTextBox	();
-			};
-		}
-
-		namespace	layout
+		class	TButton : public IElement
 		{
-			class	TElement
-			{
-				protected:
-					elements::IElement* element;
+			public:
+				CL3PUBF	const io::text::string::TString&
+								Text	() const CL3_GETTER;
+				CL3PUBF	void	Text	(io::text::string::TString) CL3_SETTER;
 
-				public:
-			};
+				CL3PUBF	CLASS	TButton	(io::text::string::TString id);
+				CL3PUBF	CLASS	~TButton();
+		};
 
-			class	TFrame : public TElement
-			{
-				protected:
-					io::collection::list::TList<TElement*> elements;
+		class	TOptionBox : public IElement
+		{
+			public:
+				typedef io::collection::list::TList<TOptionBox*> TOptionGroup;
 
-				public:
-					CL3PUBF	io::collection::list::TList<TElement*>&	Elements	() CL3_GETTER;
-			};
+				CL3PUBF	const io::text::string::TString&
+								Text	() const CL3_GETTER;
+				CL3PUBF	void	Text	(io::text::string::TString) CL3_SETTER;
 
-			class	TLayout
-			{
-			};
-		}
+				CL3PUBF	CLASS	TOptionBox	(io::text::string::TString id, TOptionGroup*);
+				CL3PUBF	CLASS	~TOptionBox	();
+		};
+
+		class	TListBox : public IElement
+		{
+			protected:
+				io::collection::IStaticCollection<IElement*>* collection;
+
+			public:
+				CL3PUBF	io::collection::IStaticCollection<IElement*>*
+								Collection	() const CL3_GETTER;
+				CL3PUBF	void	Collection	(io::collection::IStaticCollection<IElement*>*) CL3_SETTER;
+
+				CL3PUBF	CLASS	TListBox	(io::text::string::TString id);
+				CL3PUBF	CLASS	~TListBox	();
+		};
+
+		class	TPictureBox : public IElement
+		{
+			public:
+				CL3PUBF	const io::text::string::TString&
+								AlternateText	() const CL3_GETTER;
+				CL3PUBF	void	AlternateText	(io::text::string::TString) CL3_SETTER;
+		};
+
+		class	TCheckBox : public IElement
+		{
+			public:
+				CL3PUBF	const io::text::string::TString&
+								Text	() const CL3_GETTER;
+				CL3PUBF	void	Text	(io::text::string::TString) CL3_SETTER;
+
+				CL3PUBF	bool	State	() const CL3_GETTER;
+				CL3PUBF	void	State	(bool) CL3_SETTER;
+
+				CL3PUBF	CLASS	TCheckBox	(io::text::string::TString id);
+				CL3PUBF	CLASS	~TCheckBox	();
+		};
+
+		class	TTextBox : public IElement
+		{
+			public:
+				CL3PUBF	const io::text::string::TString&
+								Text	() const CL3_GETTER;
+				CL3PUBF	void	Text	(io::text::string::TString) CL3_SETTER;
+
+				CL3PUBF	CLASS	TTextBox	(io::text::string::TString id);
+				CL3PUBF	CLASS	~TTextBox	();
+		};
 
 		class	CL3PUBT	TView
 		{
@@ -231,20 +190,14 @@ namespace	cl3
 				TView& operator=(const TView&) = delete;
 
 			protected:
-				io::collection::list::TList<elements::IElement*> elements;
+				io::collection::list::TList<IElement*> elements;
 
 			public:
-				CL3PUBF	io::collection::list::TList<elements::IElement*>&
+				CL3PUBF	io::collection::list::TList<IElement*>&
 						Elements() CL3_GETTER;
 
 				CL3PUBF	CLASS	TView	(io::text::string::TString id);
 				CL3PUBF	CLASS	~TView	();
-		};
-
-		struct	CL3PUBT	IUI : public virtual io::collection::IDynamicCollection<TView*>
-		{
-			virtual	void	CurrentView	(TView*) CL3_SETTER = 0;
-			virtual	TView*	CurrentView	() const CL3_GETTER = 0;
 		};
 	}
 }
