@@ -145,6 +145,16 @@ namespace	cl3
 
 						CL3PUBF	CLASS	TString	();
 						CL3PUBF	CLASS	TString	(TUTF32);
+						CL3PUBF	CLASS	TString	(f32_t num, const TNumberFormat& format = *TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	(f64_t num, const TNumberFormat& format = *TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	(u8_t num, const TNumberFormat& format = *TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	(s8_t num, const TNumberFormat& format = *TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	(u16_t num, const TNumberFormat& format = *TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	(s16_t num, const TNumberFormat& format = *TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	(u32_t num, const TNumberFormat& format = *TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	(s32_t num, const TNumberFormat& format = *TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	(u64_t num, const TNumberFormat& format = *TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	(s64_t num, const TNumberFormat& format = *TNumberFormat::default_format);
 						CL3PUBF	CLASS	TString	(const char*    cstr, usys_t maxlen = (usys_t)-1);
 						CL3PUBF	CLASS	TString	(const wchar_t* wstr, usys_t maxlen = (usys_t)-1);
 						CL3PUBF	CLASS	TString	(const TUTF32*  ustr, usys_t maxlen = (usys_t)-1);

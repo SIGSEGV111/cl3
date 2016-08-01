@@ -40,6 +40,7 @@ namespace
 	using namespace cl3::system::types;
 	using namespace cl3::system::memory;
 	using namespace cl3::io::text;
+	using namespace cl3::io::text::parser;
 	using namespace cl3::io::text::string;
 	using namespace cl3::io::text::encoding;
 	using namespace cl3::io::text::encoding::utf8;
@@ -925,6 +926,21 @@ namespace
 		buffer << "";
 		buffer << L"";
 		EXPECT_EQ(0, buffer.Count());
+	}
+
+	TEST(io_text_parser, DiceSpec)
+	{
+		TParser digit_excl_zero = parser::Range('1', '9');
+		TParser digit = Literal("0") || digit_excl_zero;
+		TParser digits = Repetition(digit, 1, INFINITE);
+		TParser integer = Literal("0") || (digit_excl_zero + Optional(digits));
+
+		TParser modifier = (Literal("+") || Literal("-")) + integer;
+		TParser multiplier = integer + (Literal("x") || Literal("*"));
+		TParser dice_spec = integer + Literal("d") + Optional(integer);
+		TParser dice = Optional(multiplier) + dice_spec + Optional(modifier);
+
+		//	5x3d6+4
 	}
 }
 

@@ -45,38 +45,46 @@ namespace	cl3
 
 				struct TDisjunction : INode
 				{
-					collection::list::TList<INode*> nodes;
+					system::memory::TSharedPtr<INode> lhs;
+					system::memory::TSharedPtr<INode> rhs;
 
+					CL3PUBF CLASS TDisjunction(system::memory::TSharedPtr<INode> lhs, system::memory::TSharedPtr<INode> rhs);
 					CL3PUBF CLASS ~TDisjunction();
 				};
 
 				struct TConjunction : INode
 				{
-					collection::list::TList<INode*> nodes;
+					system::memory::TSharedPtr<INode> lhs;
+					system::memory::TSharedPtr<INode> rhs;
 
+					CL3PUBF CLASS TConjunction(system::memory::TSharedPtr<INode> lhs, system::memory::TSharedPtr<INode> rhs);
 					CL3PUBF CLASS ~TConjunction();
 				};
 
 				struct TRepetition : INode
 				{
-					system::memory::TUniquePtr<INode> node;
+					system::memory::TSharedPtr<INode> node;
 					unsigned n_rep_min;
 					unsigned n_rep_max;
 
+					CL3PUBF CLASS TRepetition(system::memory::TSharedPtr<INode> node, unsigned n_rep_min, unsigned n_rep_max);
 					CL3PUBF CLASS ~TRepetition();
 				};
 
 				struct TSequence : INode
 				{
-					collection::list::TList<INode*> nodes;
+					system::memory::TSharedPtr<INode> lhs;
+					system::memory::TSharedPtr<INode> rhs;
 
+					CL3PUBF CLASS TSequence(system::memory::TSharedPtr<INode> lhs, system::memory::TSharedPtr<INode> rhs);
 					CL3PUBF CLASS ~TSequence();
 				};
 
 				struct TNegation : INode
 				{
-					system::memory::TUniquePtr<INode> node;
+					system::memory::TSharedPtr<INode> node;
 
+					CL3PUBF CLASS TNegation(system::memory::TSharedPtr<INode> node);
 					CL3PUBF CLASS ~TNegation();
 				};
 
@@ -84,6 +92,7 @@ namespace	cl3
 				{
 					const string::TString literal;
 
+					CL3PUBF CLASS TLiteralMatcher(const string::TString&);
 					CL3PUBF CLASS ~TLiteralMatcher();
 				};
 
@@ -92,25 +101,25 @@ namespace	cl3
 					TUTF32 range_start;
 					TUTF32 range_end;
 
+					CL3PUBF CLASS TRangeMatcher(TUTF32 range_start, TUTF32 range_end);
 					CL3PUBF CLASS ~TRangeMatcher();
 				};
 
 				class TParser
 				{
 					protected:
-						system::memory::TUniquePtr<INode> node;
+						system::memory::TSharedPtr<INode> node;
 
 					public:
+						inline system::memory::TSharedPtr<INode> Node() const CL3_GETTER { return this->node; }
+
 						CL3PUBF TParser operator||(const TParser& rhs) const;
-						CL3PUBF TParser operator||(TParser&& rhs) const;
 						CL3PUBF TParser operator&&(const TParser& rhs) const;
-						CL3PUBF TParser operator&&(TParser&& rhs) const;
 						CL3PUBF TParser operator+(const TParser& rhs) const;
-						CL3PUBF TParser operator+(TParser&& rhs) const;
 						CL3PUBF TParser operator!() const;
 
-						CL3PUBF CLASS TParser(const string::TString& descr, system::memory::TUniquePtr<INode>);
-						CL3PUBF CLASS TParser(TParser&&);
+						CL3PUBF CLASS TParser(system::memory::TSharedPtr<INode>);
+						CL3PUBF CLASS TParser(const TParser&);
 						CL3PUBF CLASS ~TParser();
 
 						CL3PUBF TParser& operator=(TParser&&);
@@ -120,23 +129,10 @@ namespace	cl3
 
 				static const unsigned INFINITE = (unsigned)-1;
 
-				CL3PUBF TParser Literal(const char*) CL3_GETTER;
 				CL3PUBF TParser Literal(const string::TString&) CL3_GETTER;
 				CL3PUBF TParser Range(TUTF32 range_start, TUTF32 range_end) CL3_GETTER;
 				CL3PUBF TParser Repetition(const TParser&, unsigned rep_min, unsigned rep_max) CL3_GETTER;
 				CL3PUBF TParser Optional(const TParser&) CL3_GETTER;
-
-				static const TParser digit_excl_zero = Range('1', '9');
-				static const TParser digit = Literal("0") || digit_excl_zero;
-				static const TParser digits = Repetition(digit, 1, INFINITE);
-				static const TParser integer = Literal("0") || (digit_excl_zero + Optional(digits));
-
-				static const TParser modifier = (Literal("+") || Literal("-")) + integer;
-				static const TParser multiplier = integer + (Literal("x") || Literal("*"));
-				static const TParser dice_spec = integer + Literal("d") + Optional(integer);
-				static const TParser dice = Optional(multiplier) + dice_spec + Optional(modifier);
-
-				//	5x3d6+4
 			}
 		}
 	}

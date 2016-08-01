@@ -495,6 +495,56 @@ namespace	cl3
 					this->Append(chr);
 				}
 
+				CLASS	TString::TString	(f32_t num, const TNumberFormat& format)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS	TString::TString	(f64_t num, const TNumberFormat& format)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS	TString::TString	(u8_t num, const TNumberFormat& format)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS	TString::TString	(s8_t num, const TNumberFormat& format)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS	TString::TString	(u16_t num, const TNumberFormat& format)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS	TString::TString	(s16_t num, const TNumberFormat& format)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS	TString::TString	(u32_t num, const TNumberFormat& format)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS	TString::TString	(s32_t num, const TNumberFormat& format)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS	TString::TString	(u64_t num, const TNumberFormat& format)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS	TString::TString	(s64_t num, const TNumberFormat& format)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
 				CLASS	TString::TString	(const char*    str, usys_t maxlen) : TList<TUTF32>()
 				{
 					CL3_CLASS_ERROR(str == NULL, TException, "invalid source string pointer");
