@@ -95,54 +95,83 @@ namespace	cl3
 				{
 				}
 
-				TParser TParser::operator||(const TParser& rhs) const
+				TParserDef TParserDef::operator||(const TParserDef& rhs) const
 				{
-					return TParser(MakeSharedPtr<INode>(new TDisjunction(this->node, rhs.node)));
+					return TParserDef(MakeSharedPtr<INode>(new TDisjunction(this->node, rhs.node)));
 				}
 
-				TParser TParser::operator&&(const TParser& rhs) const
+				TParserDef TParserDef::operator&&(const TParserDef& rhs) const
 				{
-					return TParser(MakeSharedPtr<INode>(new TConjunction(this->node, rhs.node)));
+					return TParserDef(MakeSharedPtr<INode>(new TConjunction(this->node, rhs.node)));
 				}
 
-				TParser TParser::operator+(const TParser& rhs) const
+				TParserDef TParserDef::operator+(const TParserDef& rhs) const
 				{
-					return TParser(MakeSharedPtr<INode>(new TSequence(this->node, rhs.node)));
+					return TParserDef(MakeSharedPtr<INode>(new TSequence(this->node, rhs.node)));
 				}
 
-				TParser TParser::operator!() const
+				TParserDef TParserDef::operator!() const
 				{
-					return TParser(MakeSharedPtr<INode>(new TNegation(this->node)));
+					return TParserDef(MakeSharedPtr<INode>(new TNegation(this->node)));
 				}
 
-				CLASS TParser::TParser(system::memory::TSharedPtr<INode> node) : node(node)
-				{
-				}
-
-				CLASS TParser::~TParser()
+				CLASS TParserDef::TParserDef(system::memory::TSharedPtr<INode> node) : node(node)
 				{
 				}
 
-				TParser Literal(const string::TString& str)
+				CLASS TParserDef::~TParserDef()
 				{
-					return TParser(MakeSharedPtr<INode>(new TLiteralMatcher(str)));
 				}
 
-				TParser Range(TUTF32 range_start, TUTF32 range_end)
+				TParserDef Literal(const string::TString& str)
 				{
-					return TParser(MakeSharedPtr<INode>(new TRangeMatcher(range_start, range_end)));
+					return TParserDef(MakeSharedPtr<INode>(new TLiteralMatcher(str)));
 				}
 
-				TParser Repetition(const TParser& p, unsigned rep_min, unsigned rep_max)
+				TParserDef Range(TUTF32 range_start, TUTF32 range_end)
 				{
-					return TParser(MakeSharedPtr<INode>(new TRepetition(p.Node(), rep_min, rep_max)));
+					return TParserDef(MakeSharedPtr<INode>(new TRangeMatcher(range_start, range_end)));
 				}
 
-				TParser Optional(const TParser& p)
+				TParserDef Repetition(const TParserDef& p, unsigned rep_min, unsigned rep_max)
 				{
-					return TParser(MakeSharedPtr<INode>(new TRepetition(p.Node(), 0, 1)));
+					return TParserDef(MakeSharedPtr<INode>(new TRepetition(p.Node(), rep_min, rep_max)));
 				}
 
+				TParserDef Optional(const TParserDef& p)
+				{
+					return TParserDef(MakeSharedPtr<INode>(new TRepetition(p.Node(), 0, 1)));
+				}
+
+				void	TParserInstance::Flush	()
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				usys_t	TParserInstance::Space	() const
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				usys_t	TParserInstance::Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS TParserInstance::TParserInstance(const TParserInstance&)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS TParserInstance::TParserInstance(const TParserDef& def)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS TParserInstance::~TParserInstance()
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
 			}
 		}
 	}

@@ -105,7 +105,7 @@ namespace	cl3
 					CL3PUBF CLASS ~TRangeMatcher();
 				};
 
-				class TParser
+				class TParserDef
 				{
 					protected:
 						system::memory::TSharedPtr<INode> node;
@@ -113,26 +113,44 @@ namespace	cl3
 					public:
 						inline system::memory::TSharedPtr<INode> Node() const CL3_GETTER { return this->node; }
 
-						CL3PUBF TParser operator||(const TParser& rhs) const;
-						CL3PUBF TParser operator&&(const TParser& rhs) const;
-						CL3PUBF TParser operator+(const TParser& rhs) const;
-						CL3PUBF TParser operator!() const;
+						CL3PUBF TParserDef operator||(const TParserDef& rhs) const;
+						CL3PUBF TParserDef operator&&(const TParserDef& rhs) const;
+						CL3PUBF TParserDef operator+(const TParserDef& rhs) const;
+						CL3PUBF TParserDef operator!() const;
 
-						CL3PUBF CLASS TParser(system::memory::TSharedPtr<INode>);
-						CL3PUBF CLASS TParser(const TParser&);
-						CL3PUBF CLASS ~TParser();
+						CL3PUBF CLASS TParserDef(system::memory::TSharedPtr<INode>);
+						CL3PUBF CLASS TParserDef(const TParserDef&);
+						CL3PUBF CLASS ~TParserDef();
 
-						CL3PUBF TParser& operator=(TParser&&);
+						CL3PUBF TParserDef& operator=(TParserDef&&);
 
 // 						CL3PUBF llvm::Function* GenerateCode(system::compiler::jit::TJIT&) const CL3_WARN_UNUSED_RESULT;
 				};
 
+				class TParserInstance : public stream::IOut<TUTF32>
+				{
+					protected:
+						collection::list::TList<TUTF32> buffer;
+						system::memory::TSharedPtr<INode> node;
+
+					public:
+						//	from IOut
+						using stream::IOut<TUTF32>::Write;
+						CL3PUBF void	Flush	();
+						CL3PUBF usys_t	Space	() const CL3_GETTER;
+						CL3PUBF usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+
+						CL3PUBF CLASS TParserInstance(const TParserInstance&);
+						CL3PUBF CLASS TParserInstance(const TParserDef& def);
+						CL3PUBF CLASS ~TParserInstance();
+				};
+
 				static const unsigned INFINITE = (unsigned)-1;
 
-				CL3PUBF TParser Literal(const string::TString&) CL3_GETTER;
-				CL3PUBF TParser Range(TUTF32 range_start, TUTF32 range_end) CL3_GETTER;
-				CL3PUBF TParser Repetition(const TParser&, unsigned rep_min, unsigned rep_max) CL3_GETTER;
-				CL3PUBF TParser Optional(const TParser&) CL3_GETTER;
+				CL3PUBF TParserDef Literal(const string::TString&) CL3_GETTER;
+				CL3PUBF TParserDef Range(TUTF32 range_start, TUTF32 range_end) CL3_GETTER;
+				CL3PUBF TParserDef Repetition(const TParserDef&, unsigned rep_min, unsigned rep_max) CL3_GETTER;
+				CL3PUBF TParserDef Optional(const TParserDef&) CL3_GETTER;
 			}
 		}
 	}

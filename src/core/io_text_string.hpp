@@ -55,6 +55,7 @@ namespace	cl3
 						using collection::list::TList<TUTF32>::Append;
 						using collection::list::TList<TUTF32>::Find;
 						using collection::list::TList<TUTF32>::Contains;
+// 						using collection::list::TList<TUTF32>::ItemPtr;
 
 						CL3PUBF	void		Prepend		(const char& item_append);
 						CL3PUBF	void		Prepend		(const char* arr_items_append, usys_t n_items_append = (usys_t)-1);
