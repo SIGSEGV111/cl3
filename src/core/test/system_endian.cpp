@@ -47,13 +47,13 @@ namespace
 		{
 			const s32_t& big = *(const s32_t*)"\xAA\xBB\xCC\xDD";
 			const s32_t c = ConvertBigEndianToNative(big);
-			EXPECT_EQ((s32_t)0xAABBCCDD, c);
+			EXPECT_EQ((s32_t)0xAABBCCDDL, c);
 		}
 
 		{
 			const s64_t& big = *(const s64_t*)"\xAA\xBB\xCC\xDD\xEE\xFF\xCC\x00";
 			const s64_t c = ConvertBigEndianToNative(big);
-			EXPECT_EQ((s64_t)0xAABBCCDDEEFF00, c);
+			EXPECT_EQ((s64_t)0xAABBCCDDEEFFCC00LL, c);
 		}
 	}
 }

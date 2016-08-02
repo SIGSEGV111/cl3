@@ -925,7 +925,7 @@ namespace
 		buffer << TString("");
 		buffer << "";
 		buffer << L"";
-		EXPECT_EQ(0, buffer.Count());
+		EXPECT_EQ(0UL, buffer.Count());
 	}
 
 	TEST(io_text_parser, DiceSpec)

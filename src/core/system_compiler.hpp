@@ -216,6 +216,14 @@ namespace	cl3
 				inline static int FindLastSet(u32_t v) { return 32 - CountLeadingZeroes(v); }
 				inline static int FindLastSet(u64_t v) { return 64 - CountLeadingZeroes(v); }
 
+				#if (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+					#define	CL3_IS_LITTLE_ENDIAN	1
+					#define	CL3_IS_BIG_ENDIAN		0
+				#else
+					#define	CL3_IS_LITTLE_ENDIAN	0
+					#define	CL3_IS_BIG_ENDIAN		1
+				#endif
+
 			#endif
 
 

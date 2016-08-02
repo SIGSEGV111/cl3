@@ -21,9 +21,6 @@
 
 #include "system_types.hpp"
 
-#define	CL3_ENDIANITY_LITTLE	1
-#define	CL3_ENDIANITY_BIG		2
-
 namespace cl3
 {
 	namespace system
@@ -34,12 +31,8 @@ namespace cl3
 
 			//	there are only two endianness: BIG and LITTLE, and my bet is that in a few years from now there will only be one: LITTLE
 
-			#pragma GCC diagnostic push
-			#pragma GCC diagnostic ignored "-Wmultichar"
-			static const bool IS_BIG_ENDIAN = '\x00\x00\x00\x01' == 1L;
-			#pragma GCC diagnostic pop
-
-			static const bool IS_LITTLE_ENDIAN = !IS_BIG_ENDIAN;
+			static const bool IS_LITTLE_ENDIAN = CL3_IS_LITTLE_ENDIAN;
+			static const bool IS_BIG_ENDIAN = CL3_IS_BIG_ENDIAN;
 
 			namespace _
 			{
@@ -51,22 +44,24 @@ namespace cl3
 						case 1:
 							return value;
 						case 2:
-							return	(value & 0xff00) >> 8 |
-							(value & 0x00ff) << 8;
+							return	(((u16_t)value & (u16_t)0xff00U) >> 8) |
+									(((u16_t)value & (u16_t)0x00ffU) << 8);
 						case 4:
-							return	(value & 0xff000000) >> 24 |
-							(value & 0x00ff0000) >>  8 |
-							(value & 0x0000ff00) <<  8 |
-							(value & 0x000000ff) << 24;
+							return	(((u32_t)value & (u32_t)0xff000000UL) >> 24) |
+									(((u32_t)value & (u32_t)0x00ff0000UL) >>  8) |
+									(((u32_t)value & (u32_t)0x0000ff00UL) <<  8) |
+									(((u32_t)value & (u32_t)0x000000ffUL) << 24);
 						case 8:
-							return	(value & 0xff00000000000000) >> 56 |
-							(value & 0x00ff000000000000) >> 40 |
-							(value & 0x0000ff0000000000) >> 24 |
-							(value & 0x000000ff00000000) >>  8 |
-							(value & 0x00000000ff000000) <<  8 |
-							(value & 0x0000000000ff0000) << 24 |
-							(value & 0x000000000000ff00) >> 40 |
-							(value & 0x00000000000000ff) << 56;
+							return	(((u64_t)value & (u64_t)0xff00000000000000ULL) >> 56) |
+									(((u64_t)value & (u64_t)0x00ff000000000000ULL) >> 40) |
+									(((u64_t)value & (u64_t)0x0000ff0000000000ULL) >> 24) |
+									(((u64_t)value & (u64_t)0x000000ff00000000ULL) >>  8) |
+									(((u64_t)value & (u64_t)0x00000000ff000000ULL) <<  8) |
+									(((u64_t)value & (u64_t)0x0000000000ff0000ULL) << 24) |
+									(((u64_t)value & (u64_t)0x000000000000ff00ULL) << 40) |
+									(((u64_t)value & (u64_t)0x00000000000000ffULL) << 56);
+						default:
+							throw;
 					}
 				}
 
