@@ -181,6 +181,47 @@ namespace	cl3
 					CL3PUBF io::text::string::TString ToString() const CL3_GETTER;
 			};
 		}
+
+		namespace formular_v2
+		{
+			struct IExpression;
+
+			typedef double value_t;
+
+			struct TOnChageData
+			{
+			};
+
+			typedef event::TEvent<IExpression,TOnChageData> TOnChangeEvent;
+
+			//	expressions are immutable; once created they cannot be changed anymore; their result value can vary however depending on their internal implementation and input data
+			class IExpression : protected TOnChangeEvent::IReceiver
+			{
+				protected:
+					TOnChangeEvent on_change;
+
+					CL3PUBF virtual void OnRaise(TOnChangeEvent& event, IExpression& sender, TOnChageData data);
+
+				public:
+					struct TParameter
+					{
+						io::text::string::TString name;
+						io::text::string::TString descr;
+						system::memory::TSharedPtr<IExpression> expr;
+					};
+
+					inline const TOnChangeEvent& OnChange() const CL3_GETTER { return this->on_change; }
+					CL3PUBF bool IsConstant() const CL3_GETTER;	//	true if the this and the entire tree of parameter expressions are pure
+					virtual bool IsPure() const CL3_GETTER = 0;	//	true if expression only depends on parameters and no other factors
+					virtual io::collection::list::TList<TParameter> Parameters() const CL3_GETTER = 0;
+					virtual io::text::string::TString Text() const CL3_GETTER = 0;
+					virtual value_t Value() const CL3_GETTER = 0;
+					virtual llvm::Value* GenerateCode(llvm::IRBuilder<>&) const CL3_WARN_UNUSED_RESULT = 0;
+					CL3PUBF llvm::Function* GenerateCode(llvm::Module&) const CL3_WARN_UNUSED_RESULT;
+					CL3PUBF llvm::Function* GenerateCode(llvm::Module&, const io::text::string::TString& name) const CL3_WARN_UNUSED_RESULT;
+					CL3PUBF virtual ~IExpression();
+			};
+		}
 	}
 }
 
