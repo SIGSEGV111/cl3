@@ -39,12 +39,22 @@ namespace	cl3
 				{
 				}
 
+				EStatus TDisjunction::Parse(const TUTF32*& pos, usys_t length)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
 				CLASS TDisjunction::TDisjunction(system::memory::TSharedPtr<INode> lhs, system::memory::TSharedPtr<INode> rhs) : lhs(lhs), rhs(rhs)
 				{
 				}
 
 				CLASS TDisjunction::~TDisjunction()
 				{
+				}
+
+				EStatus TConjunction::Parse(const TUTF32*& pos, usys_t length)
+				{
+					CL3_NOT_IMPLEMENTED;
 				}
 
 				CLASS TConjunction::TConjunction(system::memory::TSharedPtr<INode> lhs, system::memory::TSharedPtr<INode> rhs) : lhs(lhs), rhs(rhs)
@@ -55,12 +65,22 @@ namespace	cl3
 				{
 				}
 
+				EStatus TRepetition::Parse(const TUTF32*& pos, usys_t length)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
 				CLASS TRepetition::TRepetition(system::memory::TSharedPtr<INode> node, unsigned n_rep_min, unsigned n_rep_max) : node(node), n_rep_min(n_rep_min), n_rep_max(n_rep_max)
 				{
 				}
 
 				CLASS TRepetition::~TRepetition()
 				{
+				}
+
+				EStatus TSequence::Parse(const TUTF32*& pos, usys_t length)
+				{
+					CL3_NOT_IMPLEMENTED;
 				}
 
 				CLASS TSequence::TSequence(system::memory::TSharedPtr<INode> lhs, system::memory::TSharedPtr<INode> rhs) : lhs(lhs), rhs(rhs)
@@ -71,12 +91,22 @@ namespace	cl3
 				{
 				}
 
+				EStatus TNegation::Parse(const TUTF32*& pos, usys_t length)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
 				CLASS TNegation::TNegation(system::memory::TSharedPtr<INode> node) : node(node)
 				{
 				}
 
 				CLASS TNegation::~TNegation()
 				{
+				}
+
+				EStatus TLiteralMatcher::Parse(const TUTF32*& pos, usys_t length)
+				{
+					CL3_NOT_IMPLEMENTED;
 				}
 
 				CLASS TLiteralMatcher::TLiteralMatcher(const string::TString& literal) : literal(literal)
@@ -87,6 +117,11 @@ namespace	cl3
 				{
 				}
 
+				EStatus TRangeMatcher::Parse(const TUTF32*& pos, usys_t length)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
 				CLASS TRangeMatcher::TRangeMatcher(TUTF32 range_start, TUTF32 range_end) : range_start(range_start), range_end(range_end)
 				{
 				}
@@ -95,80 +130,80 @@ namespace	cl3
 				{
 				}
 
-				TParserDef TParserDef::operator||(const TParserDef& rhs) const
+				TParserSpec TParserSpec::operator||(const TParserSpec& rhs) const
 				{
-					return TParserDef(MakeSharedPtr<INode>(new TDisjunction(this->node, rhs.node)));
+					return TParserSpec(MakeSharedPtr<INode>(new TDisjunction(this->node, rhs.node)));
 				}
 
-				TParserDef TParserDef::operator&&(const TParserDef& rhs) const
+				TParserSpec TParserSpec::operator&&(const TParserSpec& rhs) const
 				{
-					return TParserDef(MakeSharedPtr<INode>(new TConjunction(this->node, rhs.node)));
+					return TParserSpec(MakeSharedPtr<INode>(new TConjunction(this->node, rhs.node)));
 				}
 
-				TParserDef TParserDef::operator+(const TParserDef& rhs) const
+				TParserSpec TParserSpec::operator+(const TParserSpec& rhs) const
 				{
-					return TParserDef(MakeSharedPtr<INode>(new TSequence(this->node, rhs.node)));
+					return TParserSpec(MakeSharedPtr<INode>(new TSequence(this->node, rhs.node)));
 				}
 
-				TParserDef TParserDef::operator!() const
+				TParserSpec TParserSpec::operator!() const
 				{
-					return TParserDef(MakeSharedPtr<INode>(new TNegation(this->node)));
+					return TParserSpec(MakeSharedPtr<INode>(new TNegation(this->node)));
 				}
 
-				CLASS TParserDef::TParserDef(system::memory::TSharedPtr<INode> node) : node(node)
-				{
-				}
-
-				CLASS TParserDef::~TParserDef()
+				CLASS TParserSpec::TParserSpec(system::memory::TSharedPtr<INode> node) : node(node)
 				{
 				}
 
-				TParserDef Literal(const string::TString& str)
+				CLASS TParserSpec::~TParserSpec()
 				{
-					return TParserDef(MakeSharedPtr<INode>(new TLiteralMatcher(str)));
 				}
 
-				TParserDef Range(TUTF32 range_start, TUTF32 range_end)
+				TParserSpec Literal(const string::TString& str)
 				{
-					return TParserDef(MakeSharedPtr<INode>(new TRangeMatcher(range_start, range_end)));
+					return TParserSpec(MakeSharedPtr<INode>(new TLiteralMatcher(str)));
 				}
 
-				TParserDef Repetition(const TParserDef& p, unsigned rep_min, unsigned rep_max)
+				TParserSpec Range(TUTF32 range_start, TUTF32 range_end)
 				{
-					return TParserDef(MakeSharedPtr<INode>(new TRepetition(p.Node(), rep_min, rep_max)));
+					return TParserSpec(MakeSharedPtr<INode>(new TRangeMatcher(range_start, range_end)));
 				}
 
-				TParserDef Optional(const TParserDef& p)
+				TParserSpec Repetition(const TParserSpec& p, unsigned rep_min, unsigned rep_max)
 				{
-					return TParserDef(MakeSharedPtr<INode>(new TRepetition(p.Node(), 0, 1)));
+					return TParserSpec(MakeSharedPtr<INode>(new TRepetition(p.Node(), rep_min, rep_max)));
 				}
 
-				void	TParserInstance::Flush	()
+				TParserSpec Optional(const TParserSpec& p)
 				{
-					CL3_NOT_IMPLEMENTED;
+					return TParserSpec(MakeSharedPtr<INode>(new TRepetition(p.Node(), 0, 1)));
 				}
 
-				usys_t	TParserInstance::Space	() const
+				void	TParser::Flush	()
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				usys_t	TParserInstance::Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t	TParser::Space	() const
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS TParserInstance::TParserInstance(const TParserInstance&)
+				usys_t	TParser::Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS TParserInstance::TParserInstance(const TParserDef& def)
+				CLASS TParser::TParser(const TParser&)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS TParserInstance::~TParserInstance()
+				CLASS TParser::TParser(const TParserSpec& def)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
+
+				CLASS TParser::~TParser()
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

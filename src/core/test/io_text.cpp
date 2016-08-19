@@ -930,17 +930,17 @@ namespace
 
 	TEST(io_text_parser, DiceSpec)
 	{
-		TParserDef digit_excl_zero = parser::Range('1', '9');
-		TParserDef digit = Literal("0") || digit_excl_zero;
-		TParserDef digits = Repetition(digit, 1, INFINITE);
-		TParserDef integer = Literal("0") || (digit_excl_zero + Optional(digits));
+		TParserSpec digit_excl_zero = parser::Range('1', '9');
+		TParserSpec digit = Literal("0") || digit_excl_zero;
+		TParserSpec digits = Repetition(digit, 1, INFINITE);
+		TParserSpec integer = Literal("0") || (digit_excl_zero + Optional(digits));
 
-		TParserDef modifier = (Literal("+") || Literal("-")) + integer;
-		TParserDef multiplier = integer + (Literal("x") || Literal("*"));
-		TParserDef dice_spec = integer + Literal("d") + Optional(integer);
-		TParserDef dice = Optional(multiplier) + dice_spec + Optional(modifier);
+		TParserSpec modifier = (Literal("+") || Literal("-")) + integer;
+		TParserSpec multiplier = integer + (Literal("x") || Literal("*"));
+		TParserSpec dice_spec = integer + Literal("d") + Optional(integer);
+		TParserSpec dice = Optional(multiplier) + dice_spec + Optional(modifier);
 
-		TParserInstance p = dice;
+		TParser p = dice;
 
 		TString str = "5x3d6+4";
 		p.Write(str.ItemPtr(0), str.Count());
