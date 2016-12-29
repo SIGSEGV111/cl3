@@ -449,6 +449,26 @@ namespace	cl3
 					}
 				}
 
+				void		TString::PadTo		(EPosition position, usys_t n_target_length, TUTF32 chr_pad)
+				{
+					const usys_t n_pad = this->Count() < n_target_length ? n_target_length - this->Count() : 0;
+					this->Pad(position, n_pad, chr_pad);
+				}
+
+				TString		TString::Padded		(EPosition position, usys_t n_pad, TUTF32 chr_pad) const
+				{
+					TString tmp = *this;
+					tmp.Pad(position, n_pad, chr_pad);
+					return tmp;
+				}
+
+				TString		TString::PaddedTo	(EPosition position, usys_t n_target_length, TUTF32 chr_pad) const
+				{
+					TString tmp = *this;
+					tmp.PadTo(position, n_target_length, chr_pad);
+					return tmp;
+				}
+
 				void		TString::Reverse	()
 				{
 					TUTF32 swap;

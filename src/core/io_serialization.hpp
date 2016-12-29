@@ -48,7 +48,7 @@ namespace	cl3
 
 					+ looks perfect in json
 					+ looks good in xml
-					/ acceptable in cl3ss (bloated)
+					/ acceptable in cl3ss (bloated / names get dropped)
 
 					requires:
 						solution for how to easily encode arrays (BeginArray/EndArray???)
@@ -84,108 +84,105 @@ namespace	cl3
 			class	CL3PUBT	IDeserializer;
 			class	CL3PUBT	ISerializable;
 
-			class	CL3PUBT	IArraySerializer;
-			class	CL3PUBT	IArrayDeserializer;
-
 			class ISerializable
 			{
 				public:
 					virtual	void	Serialize	(ISerializer&) const = 0;
+			};
+
+			class IDeserializable
+			{
+				public:
 					virtual	void	Deserialize	(IDeserializer&) = 0;
 			};
 
 			class ISerializer
 			{
 				public:
-					CL3PUBF	virtual	void	Push		(const char* name, u8_t value) = 0;
-					CL3PUBF	virtual	void	Push		(const char* name, s8_t value) = 0;
-					CL3PUBF	virtual	void	Push		(const char* name, u16_t value) = 0;
-					CL3PUBF	virtual	void	Push		(const char* name, s16_t value) = 0;
-					CL3PUBF	virtual	void	Push		(const char* name, u32_t value) = 0;
-					CL3PUBF	virtual	void	Push		(const char* name, s32_t value) = 0;
-					CL3PUBF	virtual	void	Push		(const char* name, u64_t value) = 0;
-					CL3PUBF	virtual	void	Push		(const char* name, s64_t value) = 0;
-					CL3PUBF	virtual	void	Push		(const char* name, f32_t value) = 0;
-					CL3PUBF	virtual	void	Push		(const char* name, f64_t value) = 0;
-					CL3PUBF	virtual	void	Push		(const char* name, const char* value) = 0;
-					CL3PUBF	virtual	void	Push		(const char* name, const wchar_t* value) = 0;
-					CL3PUBF	virtual	void	Push		(const char* name, const text::string::TString& value) = 0;
-					CL3PUBF	virtual	void	Push		(const char* name, const ISerializable& value) = 0;
-					CL3PUBF	virtual	system::memory::TUniquePtr<IArraySerializer>
-											PushArray	(const char* name) = 0;
+					template<typename T>
+					void Push(const char* name, const T& value)
+					{
+						struct TProxy : public ISerializable
+						{
+							const T* obj;
 
-					CL3PUBF	virtual	CLASS	~ISerializer	();
-			};
+							void Serialize(ISerializer& s) const final override
+							{
+								obj->Serialize(s);
+							}
 
-			class	IArraySerializer
-			{
-				public:
-					CL3PUBF	virtual	void	Push		(u8_t value) = 0;
-					CL3PUBF	virtual	void	Push		(s8_t value) = 0;
-					CL3PUBF	virtual	void	Push		(u16_t value) = 0;
-					CL3PUBF	virtual	void	Push		(s16_t value) = 0;
-					CL3PUBF	virtual	void	Push		(u32_t value) = 0;
-					CL3PUBF	virtual	void	Push		(s32_t value) = 0;
-					CL3PUBF	virtual	void	Push		(u64_t value) = 0;
-					CL3PUBF	virtual	void	Push		(s64_t value) = 0;
-					CL3PUBF	virtual	void	Push		(f32_t value) = 0;
-					CL3PUBF	virtual	void	Push		(f64_t value) = 0;
-					CL3PUBF	virtual	void	Push		(const char* value) = 0;
-					CL3PUBF	virtual	void	Push		(const wchar_t* value) = 0;
-					CL3PUBF	virtual	void	Push		(const text::string::TString& value) = 0;
-					CL3PUBF	virtual	void	Push		(const ISerializable& value) = 0;
-					CL3PUBF	virtual	system::memory::TUniquePtr<IArraySerializer>
-											PushArray	() = 0;
+							CLASS TProxy(const T* obj) : obj(obj) {}
+						};
 
-					CL3PUBF	virtual	CLASS	~IArraySerializer	();
+						TProxy proxy(&value);
+
+						this->Push(name, (ISerializable&)proxy);
+					}
+
+					virtual	void Push(const char* name, u8_t  value) = 0;
+					virtual	void Push(const char* name, s8_t  value) = 0;
+					virtual	void Push(const char* name, u16_t value) = 0;
+					virtual	void Push(const char* name, s16_t value) = 0;
+					virtual	void Push(const char* name, u32_t value) = 0;
+					virtual	void Push(const char* name, s32_t value) = 0;
+					virtual	void Push(const char* name, u64_t value) = 0;
+					virtual	void Push(const char* name, s64_t value) = 0;
+					virtual	void Push(const char* name, f32_t value) = 0;
+					virtual	void Push(const char* name, f64_t value) = 0;
+					virtual	void Push(const char* name, const ISerializable& value) = 0;
 			};
 
 			class IDeserializer
 			{
+				protected:
+					virtual void EnterObject() = 0;
+					virtual void LeaveObject() = 0;
+
 				public:
-					CL3PUBF	virtual	void	Pop			(const char* name, u8_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(const char* name, s8_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(const char* name, u16_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(const char* name, s16_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(const char* name, u32_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(const char* name, s32_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(const char* name, u64_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(const char* name, s64_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(const char* name, f32_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(const char* name, f64_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(const char* name, const char*& value) = 0;
-					CL3PUBF	virtual	void	Pop			(const char* name, const wchar_t*& value) = 0;
-					CL3PUBF	virtual	void	Pop			(const char* name, text::string::TString& value) = 0;
-					CL3PUBF	virtual	void	Pop			(const char* name, ISerializable& value) = 0;
-					CL3PUBF	virtual	system::memory::TUniquePtr<IArrayDeserializer>
-											PopArray	(const char* name) = 0;
-					CL3PUBF	virtual	void	Pop			(const char* name, void* object, const system::types::typeinfo::TRTTI& rtti) = 0;
+					template<typename T>
+					void Pop(const char* name, T& value)
+					{
+						struct TProxy : public IDeserializable
+						{
+							T* obj;
 
-					CL3PUBF	virtual	CLASS	~IDeserializer	();
-			};
+							void Deserialize(IDeserializer& ds) final override
+							{
+								obj->Deserialize(ds);
+							}
 
-			class	IArrayDeserializer
-			{
-				public:
-					CL3PUBF	virtual	void	Pop			(u8_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(s8_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(u16_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(s16_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(u32_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(s32_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(u64_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(s64_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(f32_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(f64_t& value) = 0;
-					CL3PUBF	virtual	void	Pop			(const char*& value) = 0;
-					CL3PUBF	virtual	void	Pop			(const wchar_t*& value) = 0;
-					CL3PUBF	virtual	void	Pop			(text::string::TString& value) = 0;
-					CL3PUBF	virtual	void	Pop			(ISerializable& value) = 0;
-					CL3PUBF	virtual	system::memory::TUniquePtr<IArrayDeserializer>
-											PopArray	() = 0;
-					CL3PUBF	virtual	void	Pop			(void* object, const system::types::typeinfo::TRTTI& rtti) = 0;
+							CLASS TProxy(T* obj) : obj(obj) {}
+						};
 
-					CL3PUBF	virtual	CLASS	~IArrayDeserializer	();
+						TProxy proxy(&value);
+
+						this->Pop(name, (IDeserializable&)proxy);
+					}
+
+					virtual	void Pop(const char* name, u8_t&  value) = 0;
+					virtual	void Pop(const char* name, s8_t&  value) = 0;
+					virtual	void Pop(const char* name, u16_t& value) = 0;
+					virtual	void Pop(const char* name, s16_t& value) = 0;
+					virtual	void Pop(const char* name, u32_t& value) = 0;
+					virtual	void Pop(const char* name, s32_t& value) = 0;
+					virtual	void Pop(const char* name, u64_t& value) = 0;
+					virtual	void Pop(const char* name, s64_t& value) = 0;
+					virtual	void Pop(const char* name, f32_t& value) = 0;
+					virtual	void Pop(const char* name, f64_t& value) = 0;
+					virtual	void Pop(const char* name, IDeserializable& value) = 0;
+
+					struct TObjectPopper
+					{
+						IDeserializer* const ds;
+						inline operator IDeserializer&() const { return *this->ds; }
+
+						CLASS TObjectPopper(IDeserializer* ds) : ds(ds) { ds->EnterObject(); }
+						CLASS ~TObjectPopper() { ds->LeaveObject(); }
+						CLASS TObjectPopper(const TObjectPopper&) = delete;
+						CLASS TObjectPopper(TObjectPopper&&) = default;
+					};
+
+					virtual TObjectPopper&& PopObject(const char* name) = 0;
 			};
 		}
 	}

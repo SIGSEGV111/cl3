@@ -21,6 +21,7 @@
 #endif
 
 #include "system_time.hpp"
+#include "io_serialization.hpp"
 
 namespace cl3
 {
@@ -315,6 +316,18 @@ namespace cl3
 			CLASS	TTime::TTime		(struct timeval tv) : sec((s64_t)tv.tv_sec), asec((s64_t)tv.tv_usec * (s64_t)1000000000000LL)
 			{
 				Normalize();
+			}
+
+			void TTime::Serialize(io::serialization::ISerializer& s) const
+			{
+				s.Push("seconds", this->sec);
+				s.Push("attoseconds", this->asec);
+			}
+
+			void TTime::Deserialize(io::serialization::IDeserializer& ds)
+			{
+				ds.Pop("seconds", this->sec);
+				ds.Pop("attoseconds", this->asec);
 			}
 		}
 	}

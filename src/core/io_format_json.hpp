@@ -21,6 +21,7 @@
 
 #include "system_types.hpp"
 #include "io_format.hpp"
+#include "io_serialization.hpp"
 
 namespace	cl3
 {
@@ -41,8 +42,9 @@ namespace	cl3
 				{
 					enum class EType
 					{
-						NULLVALUE,
 						UNDEFINED,
+						NULLVALUE,
+						BOOL,
 						NUMBER,
 						STRING,
 						ARRAY,
@@ -53,10 +55,11 @@ namespace	cl3
 
 					union
 					{
-						f64_t num;
-						io::text::string::TString* text;
-						TArray* array;
-						TObject* object;
+						bool b;
+						f64_t n;
+						io::text::string::TString* s;
+						TArray* a;
+						TObject* o;
 					};
 
 					CL3PUBF bool operator==(const TValue& other) const;
@@ -69,36 +72,31 @@ namespace	cl3
 					CL3PUBF CLASS TValue(f64_t number);
 					CL3PUBF CLASS TValue(TValue&&);
 					CL3PUBF CLASS TValue(const TValue&);
+					CL3PUBF CLASS TValue(serialization::IDeserializer& ds);
 					CL3PUBF CLASS ~TValue();
 				};
 
-				struct TMember
+				struct TObject : serialization::ISerializable, serialization::IDeserializable
 				{
-					io::text::string::TString name;
-					TValue value;
+					struct TMember
+					{
+						io::text::string::TString name;
+						TValue value;
+					};
 
-					CL3PUBF bool operator==(const TMember&) const;
-					inline bool operator!=(const TMember& other) const { return !(*this == other); }
+					io::collection::list::TList<TMember> members;	//	FIXME: use map
+
+					CL3PUBF void Serialize(serialization::ISerializer& s) const final override;
+					CL3PUBF void Deserialize(serialization::IDeserializer& ds) final override;
 				};
 
-				struct TObject
-				{
-					io::collection::list::TList<TMember> members;
-
-					CL3PUBF bool operator==(const TObject&) const;
-					inline bool operator!=(const TObject& other) const { return !(*this == other); }
-				};
-
-				struct TArray
+				struct TArray : serialization::ISerializable, serialization::IDeserializable
 				{
 					io::collection::list::TList<TValue> items;
 
-					CL3PUBF bool operator==(const TArray&) const;
-					inline bool operator!=(const TArray& other) const { return !(*this == other); }
+					CL3PUBF void Serialize(serialization::ISerializer& s) const final override;
+					CL3PUBF void Deserialize(serialization::IDeserializer& ds) final override;
 				};
-
-				CL3PUBF void SerializeJSON(const TValue& root, io::text::ITextWriter&);
-				CL3PUBF TValue DeserializeJSON(io::text::ITextReader&);
 			}
 		}
 	}

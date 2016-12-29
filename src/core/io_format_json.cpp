@@ -178,6 +178,11 @@ namespace	cl3
 					}
 				}
 
+				CLASS TValue::TValue(serialization::IDeserializer& ds) : type(EType.UNDEFINED)
+				{
+					this->Deserialize(ds);
+				}
+
 				CLASS TValue::~TValue()
 				{
 					switch(this->type)
@@ -201,86 +206,6 @@ namespace	cl3
 							delete this->object;
 							break;
 					}
-				}
-
-				bool TMember::operator==(const TMember& other) const
-				{
-					return this->name == other.name && this->value == other.value;
-				}
-
-				bool TArray::operator==(const TArray& other) const
-				{
-					if(this->items.Count() != other.items.Count())
-						return false;
-					for(usys_t i = 0; i < this->items.Count(); i++)
-						if(this->items[i] != other.items[i])
-							return false;
-						return true;
-				}
-
-				bool TObject::operator==(const TObject& other) const
-				{
-					if(this->members.Count() != other.members.Count())
-						return false;
-					for(usys_t i = 0; i < this->members.Count(); i++)
-						if(this->members[i] != other.members[i])
-							return false;
-						return true;
-				}
-
-				void SerializeJSON(const TValue& root, io::text::ITextWriter& w)
-				{
-					switch(root.type)
-					{
-						case TValue::EType::NULLVALUE:
-							break;
-						case TValue::EType::UNDEFINED: w<<"undefined"; break;
-						case TValue::EType::NUMBER:    w<<root.num; break;
-
-						case TValue::EType::STRING:
-						{
-							TString copy = root.text ? *root.text : "";
-							copy.Replace("\\", "\\\\");
-							copy.Replace("\"", "\\\"");
-							w<<'"'<<copy<<'"';
-							break;
-						}
-
-						case TValue::EType::ARRAY:
-							w<<'[';
-							for(usys_t i = 0; i < root.array->items.Count(); i++)
-							{
-								SerializeJSON(root.array->items[i], w);
-								if(i + 1 < root.array->items.Count())
-									w<<',';
-							}
-							w<<']';
-							break;
-
-						case TValue::EType::OBJECT:
-							if(root.object == NULL)
-							{
-								w<<"null";
-							}
-							else
-							{
-								w<<'{';
-								for(usys_t i = 0; i < root.object->members.Count(); i++)
-								{
-									w<<'\"'<<root.object->members[i].name<<"\":";
-									SerializeJSON(root.object->members[i].value, w);
-									if(i + 1 < root.object->members.Count())
-										w<<',';
-								}
-								w<<'}';
-							}
-							break;
-					}
-				}
-
-				TValue DeserializeJSON(io::text::ITextReader&)
-				{
-					CL3_NOT_IMPLEMENTED;
 				}
 			}
 		}

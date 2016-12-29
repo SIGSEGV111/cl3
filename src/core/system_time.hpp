@@ -42,6 +42,15 @@ namespace	cl3
 {
 	using namespace system::types;
 
+	namespace io
+	{
+		namespace serialization
+		{
+			class ISerializer;
+			class IDeserializer;
+		}
+	}
+
 	namespace	system
 	{
 		namespace	time
@@ -126,6 +135,9 @@ namespace	cl3
 // 					inline	CLASS	TTime	(s64_t seconds) : sec(seconds), asec(0) {}
 					CL3PUBF	CLASS	TTime	(struct timespec ts);
 					CL3PUBF	CLASS	TTime	(struct timeval tv);
+
+					void Serialize(io::serialization::ISerializer&) const;
+					void Deserialize(io::serialization::IDeserializer&);
 			};
 
 // 			class	CL3PUBT	TTime64

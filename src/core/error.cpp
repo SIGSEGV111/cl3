@@ -118,5 +118,14 @@ namespace	cl3
 		CLASS	TLogicException::~TLogicException	()
 		{
 		}
+
+		CLASS TInvalidArgumentException::TInvalidArgumentException	(const char* argname) : TException("an invalid value was passed as argument"), argname(util::mkstrcpy(argname).Claim())
+		{
+		}
+
+		CLASS TInvalidArgumentException::~TInvalidArgumentException	()
+		{
+			Free(this->argname);
+		}
 	}
 }

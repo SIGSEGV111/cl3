@@ -32,104 +32,213 @@ namespace	cl3
 			{
 				namespace _
 				{
-					template<typename TValue, bool byref>
-					struct MakeRef;
+					template<typename T> struct base_type { typedef T type; };
+					template<typename T> struct base_type<T&> { typedef T type; };
+					template<typename T> struct base_type<T&&> { typedef T type; };
+					template<typename T> struct base_type<const T> { typedef T type; };
+					template<typename T> struct base_type<const T&> { typedef T type; };
+					template<typename T> struct base_type<const T&&> { typedef T type; };
 
-					template<typename TValue>
-					struct MakeRef<TValue, true> { typedef TValue& TDef; typedef const TValue& TCDef; };
-
-					template<typename TValue>
-					struct MakeRef<TValue, false> { typedef TValue TDef; typedef TValue TCDef; };
-
-					template<typename _TKey, bool>
-					struct IIteratorKeyMod;
-
-					template<typename _TKey>
-					struct IIteratorKeyMod<_TKey, true> { virtual _TKey& Key() CL3_GETTER = 0; };
-
-					template<typename _TKey>
-					struct IIteratorKeyMod<_TKey, false> {};
+					template<typename T, bool use_byref> struct select_byref_byvalue;
+					template<typename T> struct select_byref_byvalue<T, true>  { typedef T& type; };
+					template<typename T> struct select_byref_byvalue<T, false> { typedef T  type; };
 				}
 
-				enum class	EKeyGeneration
+				namespace list
 				{
-					COLLECTION,	//	the collection implementation chooses they key for new elements
-					USER		//	the user specifies the key for new elements along with the values
+					template<typename TItem>
+					class TList;
 				};
 
-				enum class	EValueStyle
+				namespace array
 				{
-					BYREF,
-					BYVALUE
+					template<typename TItem>
+					class TArray;
 				};
 
-				struct TNoValidItemException : error::TException
+				enum class EKeyGeneration
+				{
+					USER,
+					COLLECTION,
+					OPTIONAL
+				};
+
+				template<typename TKey, typename TValue>
+				struct TPair
+				{
+					TKey key;
+					TValue value;
+				};
+
+				template<typename TKey, typename TValue>
+				struct IStaticCollection;
+
+				template<typename TKey, typename TValue, EKeyGeneration keygen>
+				struct IDynamicCollection;
+
+				/********************************************************************************/
+
+				/*
+				 * it->MoveHead();
+				 * while(it->MoveNext())
+				 *		it->->...
+				 */
+				template<typename TValue>
+				struct IBasicIterator
+				{
+					virtual TValue* operator->() const CL3_GETTER = 0;
+					virtual TValue& operator* () const CL3_GETTER = 0;
+
+					virtual bool MoveNext () CL3_WARN_UNUSED_RESULT = 0;	//	moves to the next vald item, retuns false if there is none and remains on the current position
+					virtual bool MovePrev () CL3_WARN_UNUSED_RESULT = 0;	//	moves to the previous vald item, retuns false if there is none and remains on the current position
+					virtual bool MoveFirst() CL3_WARN_UNUSED_RESULT = 0;	//	moves to the last vald item, retuns false if there is none and remains on the current position
+					virtual bool MoveLast () CL3_WARN_UNUSED_RESULT = 0;	//	moves to the first vald item, retuns false if there is none and remains on the current position
+					virtual void MoveHead() = 0;							//	moves to the virtual invald item at the beginning of the collection, always succeedes, the next item from this position will be he first valid item (if it exists)
+					virtual bool IsValid() const CL3_GETTER = 0;			//	checks if the iterator is placed on a valid item
+				};
+
+				template<typename TValue>
+				struct IBasicCollection
+				{
+					virtual IBasicIterator<TValue>* CreateIterator() const CL3_WARN_UNUSED_RESULT = 0;
+					virtual	usys_t	Count		() const CL3_GETTER = 0;
+					virtual	bool	CountMin	(usys_t count_min) const CL3_GETTER { return Count() >= count_min; }
+					virtual	bool	CountMax	(usys_t count_max) const CL3_GETTER { return Count() <= count_max; }
+				};
+
+				/********************************************************************************/
+
+				template<typename TKey, typename TValue>
+				struct IStaticCollection<TKey, const TValue> :
+					public virtual IBasicCollection<const TValue>
+				{
+					typedef typename _::select_byref_byvalue<typename _::base_type<TKey>::type, (sizeof(TKey) > 2*sizeof(void*))>::type TKeyS;
+
+					virtual const TValue& operator[](const TKeyS) const CL3_GETTER = 0;
+				};
+
+				template<typename TKey, typename TValue>
+				struct IStaticCollection :
+					public virtual IStaticCollection<TKey, const TValue>,
+					public virtual IBasicCollection<TValue>
+				{
+					using typename IStaticCollection<TKey, const TValue>::TKeyS;
+					using IStaticCollection<TKey, const TValue>::operator[];
+
+					virtual TValue& operator[](const TKeyS) const CL3_GETTER = 0;
+				};
+
+				/********************************************************************************/
+
+				template<typename TKey, typename TValue, EKeyGeneration keygen>
+				struct IKeyGenerationFeatures;
+
+				template<typename TKey, typename TValue>
+				struct IKeyGenerationFeatures<TKey, TValue, EKeyGeneration::USER> :
+					public virtual IStaticCollection<TKey, const TValue>
+				{
+					using typename IStaticCollection<TKey, const TValue>::TKeyS;
+
+					virtual void Insert(const TKeyS, const TValue&) = 0;
+					virtual void Insert(const IBasicCollection<const TPair<TKeyS, TValue> >&) = 0;
+					virtual void Insert(std::initializer_list<TPair<TKey, TValue> >) = 0;
+				};
+
+				template<typename TKey, typename TValue>
+				struct IKeyGenerationFeatures<TKey, TValue, EKeyGeneration::COLLECTION> :
+					public virtual IStaticCollection<TKey, const TValue>
+				{
+					using typename IStaticCollection<TKey, const TValue>::TKeyS;
+
+					virtual TKeyS Add(const TValue&) = 0;
+					virtual array::TArray<TKey> Add(const IBasicCollection<const TValue>&) = 0;
+					virtual array::TArray<TKey> Add(std::initializer_list<TValue>) = 0;
+				};
+
+				template<typename TKey, typename TValue>
+				struct IKeyGenerationFeatures<TKey, TValue, EKeyGeneration::OPTIONAL> :
+					public virtual IKeyGenerationFeatures<TKey, TValue, EKeyGeneration::USER>,
+					public virtual IKeyGenerationFeatures<TKey, TValue, EKeyGeneration::COLLECTION>
 				{
 				};
 
-				struct TNoSuchKeyException : error::TException
+				/********************************************************************************/
+
+				template<typename TKey, typename TValue, EKeyGeneration keygen>
+				struct IDynamicCollection<TKey, const TValue, keygen> :
+					public virtual IStaticCollection<TKey, const TValue>,
+					public virtual IKeyGenerationFeatures<TKey, const TValue, keygen>
+				{
+					using typename IStaticCollection<TKey, const TValue>::TKeyS;
+
+					virtual void Remove(const TKeyS) = 0;
+					virtual void Remove(const IBasicCollection<const TKey>&) = 0;
+					virtual void Remove(std::initializer_list<TKey>) = 0;
+				};
+
+				template<typename TKey, typename TValue, EKeyGeneration keygen>
+				struct IDynamicCollection :
+					public virtual IDynamicCollection<TKey, const TValue, keygen>,
+					public virtual IStaticCollection<TKey, TValue>,
+					public virtual IKeyGenerationFeatures<TKey, TValue, keygen>
 				{
 				};
 
-				template<typename TKey, typename TValue, EKeyGeneration keygen, EValueStyle retval>
-				struct	IStaticCollection
+				/********************************************************************************/
+
+				template<typename TKey, typename TValue>
+				struct IIndex
 				{
-					typedef typename _::MakeRef<TValue, (retval == EValueStyle::BYREF)>::TDef	_TValue;	//	defines "_TValue" to be either "TValue" or "TValue&"
-					typedef typename _::MakeRef<TValue, (retval == EValueStyle::BYREF)>::TCDef	_TCValue;	//	defines "_TCValue" to be either "TValue" or "const TValue&"
-					typedef typename _::MakeRef<TKey, (sizeof(TKey) > sizeof(void*))>::TDef		_TKey;		//	defines "_TKey" to be either "TKey" or "TKey&"; if "TKey" is small enough to fit into a register (sizeof(void*)) then the key is passed by-value, otherwise it is passed by-ref; this purely a performance optimization
-
-					struct IIterator : _::IIteratorKeyMod<_TKey, (keygen == EKeyGeneration::USER)>
-					{
-						inline _TCValue& operator*() const CL3_GETTER	{ /*CL3_CLASS_ERROR(!this->IsValid(), TNoValidItemException);*/ return *this->operator->(); }
-						inline _TValue& operator*() CL3_GETTER			{ /*CL3_CLASS_ERROR(!this->IsValid(), TNoValidItemException);*/ return *this->operator->(); }
-
-						inline operator _TCValue*() const CL3_GETTER	{ return this->operator->(); }
-						inline operator _TValue*() CL3_GETTER			{ return this->operator->(); }
-
-						inline bool IsValid() const CL3_GETTER			{ return this->operator->() != NULL; }
-
-						virtual _TCValue* operator->() const CL3_GETTER = 0;	//	returns NULL if the iterator is not placed on a valid item
-						virtual _TValue* operator->() CL3_GETTER = 0;			//	returns NULL if the iterator is not placed on a valid item
-
-						virtual bool GotoFirst() const = 0;	//	goto first valid element; returns false if the collection is empty
-						virtual bool GotoLast() const = 0;	//	goto last valid element; returns false if the collection is empty
-						virtual bool GotoNext() const = 0;	//	goto next valid element; returns false if there is no next element
-						virtual bool GotoPrev() const = 0;	//	goto previous valid element; returns false if there is no previous element
-
-						virtual void GotoTail() const = 0;	//	"tail" always exists (it is the position after the last valid item)
-						virtual void Goto(const _TKey) const = 0;	//	throws TNoSuchKeyException if the key does not already exists
-
-						virtual const _TKey Key() const CL3_GETTER = 0;	//	returns the key for the current item
-						//virtual _TKey& Key() CL3_GETTER = 0;			//	only defined if EKeyGeneration::USER
-
-						virtual ~IIterator() {};
-					};
-
-					virtual system::memory::TUniquePtr<const IIterator> CreateStaticIterator() const CL3_WARN_UNUSED_RESULT = 0;
-					virtual system::memory::TUniquePtr<IIterator> CreateStaticIterator() CL3_WARN_UNUSED_RESULT = 0;
-
-					virtual usys_t Count() const CL3_GETTER = 0;
-					virtual _TCValue operator[](const _TKey) const CL3_GETTER = 0;
-					virtual _TValue operator[](const _TKey) CL3_GETTER = 0;
+					IStaticCollection<TKey, TValue>* source;
+					IDynamicCollection<usys_t, TKey, EKeyGeneration::COLLECTION>* index;
 				};
 
-				struct	IDynamicCollection;
+				/********************************************************************************/
 
 				//	linear integer key
-				struct	IArray;
-				struct	IStaticArray;
-				struct	IDynamicArray;
-				struct	IEmbeddedArray;
-				struct	IList;	//	IDynamicArray
+				struct IArray;
+				struct IStaticArray;
+				struct IDynamicArray;
+				struct IEmbeddedArray;
+				struct IList;
 
 				//	custom key
-				struct	IMap;
+				struct IMap;
 
 				//	pointer key
-				struct	IChain;
+				struct IChain;
+				struct IUnion;
 
-				struct	IUnion;
-				struct	IIndex;
+				namespace array
+				{
+					template<typename TItem>
+					class IArray;
+
+					template<typename TItem>
+					class IArray<const TItem> :
+						public virtual IStaticCollection<usys_t, const TItem>
+					{
+						protected:
+							TItem* arr_items;
+							usys_t n_items;
+
+						public:
+							virtual IBasicIterator<const TItem>* CreateIterator() const CL3_WARN_UNUSED_RESULT = 0;
+							virtual void Count(usys_t, const TItem&) = 0;
+							inline usys_t Count() const CL3_GETTER { return this->n_items; }
+							inline const TItem& operator[](const usys_t index) const CL3_GETTER { return this->arr_items[index]; }
+					};
+
+					template<typename TItem>
+					class IArray :
+						public virtual IArray<const TItem>,
+						public virtual IStaticCollection<usys_t, TItem>
+					{
+						public:
+							virtual IBasicIterator<TItem>* CreateIterator() const CL3_WARN_UNUSED_RESULT = 0;
+							inline TItem& operator[](const usys_t index) const CL3_GETTER { return this->arr_items[index]; }
+					};
+				}
 			}
 
 			namespace	bitmask
@@ -223,7 +332,7 @@ namespace	cl3
 
 			/************************************************************************/
 
-			template<class T>
+			template<typename T>
 			struct	CL3PUBT	IStaticCollection<const T> : virtual event::IObservable
 			{
 				virtual	system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT = 0;

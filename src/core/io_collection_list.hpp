@@ -72,6 +72,13 @@ namespace	cl3
 				struct	CL3PUBT	IList<const T> : virtual IDynamicCollection<const T>, virtual array::IArray<const T>
 				{
 					inline	IList<const T>&	operator+=	(const IStaticCollection<const T>& rhs) { Append(rhs); return *this; }
+					inline	IList<const T>&	operator+=	(std::initializer_list<T> l)
+					{
+// 						this->Prealloc(l.size());
+						for(usys_t i = 0; i < l.size(); i++)
+							this->Append(l.begin()[i]);
+						return *this;
+					}
 
 					virtual	void	Grow		(usys_t n_items_grow, const T& item_init) = 0;
 
@@ -97,10 +104,12 @@ namespace	cl3
 					using IDynamicCollection<T>::Remove;
 					using stream::IOut<T>::Write;
 					using array::IArray<T>::Read;
+					using IList<const T>::operator+=;
 
-					inline	IList&	operator+=	(const IStaticCollection<T>& rhs) { Append(rhs); return *this; }
+// 					inline	IList&	operator+=	(const IStaticCollection<T>& rhs) { Append(rhs); return *this; }
 					virtual	IList&	operator=	(const IStaticCollection<T>& rhs) = 0;
 					virtual	IList&	operator=	(IStaticCollection<T>&& rhs) = 0;
+					virtual	IList&	operator=	(std::initializer_list<T>) = 0;
 
 					virtual	void	Count		(usys_t new_count, const T& item_init = T()) CL3_SETTER = 0;	//	reallocates the list to the specified size, removing items at the end when shrinking and appending new items when enlarging (new items get initialized by copy-constructor from "item_init")
 					virtual	T*		Claim		() = 0;	//	takes control of the internal memory of the list
@@ -251,6 +260,7 @@ namespace	cl3
 						explicit CLASS		TList		(const IStaticCollection<const T>&);
 						explicit CLASS		TList		(const TList&);
 						explicit CLASS		TList		(TList&&);
+						CLASS		TList		(std::initializer_list<T>);
 						explicit CLASS		TList		(serialization::IDeserializer&);
 						virtual		~TList		();
 				};
@@ -302,6 +312,7 @@ namespace	cl3
 						//	from IList
 						TList<T>&	operator=	(const IStaticCollection<T>& rhs) final override;
 						TList<T>&	operator=	(IStaticCollection<T>&& rhs) final override;
+						TList<T>&	operator=	(std::initializer_list<T>) final override;
 						T&			operator[]	(ssys_t rindex) final override CL3_GETTER;
 
 						T*			Claim		() final override;
@@ -324,6 +335,7 @@ namespace	cl3
 						CLASS		TList		(const IStaticCollection<const T>&);
 						CLASS		TList		(const TList&);
 						CLASS		TList		(TList&&);
+						CLASS		TList		(std::initializer_list<T>);
 						virtual		~TList		();
 				};
 
@@ -342,7 +354,7 @@ namespace	cl3
 								as->Push(this->arr_items[i]);
 						}
 
-						void		Deserialize	(serialization::IDeserializer& ds) final override
+						void		Deserialize	(serialization::IDeserializer& ds) // final override
 						{
 							usys_t n;
 							ds.Pop("count", n);
@@ -922,6 +934,14 @@ namespace	cl3
 				}
 
 				template<class T>
+				CLASS		TList<const T>::TList		(std::initializer_list<T> l) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(false)
+				{
+					this->Prealloc(l.size());
+					for(usys_t i = 0; i < l.size(); i++)
+						this->Append(l.begin()[i]);
+				}
+
+				template<class T>
 				CLASS		TList<const T>::~TList	()
 				{
 					InternalClear();
@@ -976,6 +996,15 @@ namespace	cl3
 						Append(rhs);
 					}
 					return *this;
+				}
+
+				template<class T>
+				TList<T>&	TList<T>::operator=	(std::initializer_list<T> l)
+				{
+					this->Clear();
+					this->Prealloc(l.size());
+					for(usys_t i = 0; i < l.size(); i++)
+						this->Append(l.begin()[i]);
 				}
 
 				template<class T>
@@ -1136,6 +1165,14 @@ namespace	cl3
 				template<class T>
 				CLASS		TList<T>::TList		(TList&& other) : TList<const T>(other)
 				{
+				}
+
+				template<class T>
+				CLASS		TList<T>::TList		(std::initializer_list<T> l) : TList()
+				{
+					this->Prealloc(l.size());
+					for(usys_t i = 0; i < l.size(); i++)
+						this->Append(l.begin()[i]);
 				}
 
 				template<class T>

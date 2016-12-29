@@ -92,6 +92,16 @@ namespace	cl3
 				CL3PUBF	virtual	~TLogicException();
 		};
 
+		class CL3PUBT TInvalidArgumentException : public TException
+		{
+			public:
+				char* const argname;
+
+				CL3PUBF	CLASS	TInvalidArgumentException	(const char* argname);
+				CLASS	TInvalidArgumentException	(TInvalidArgumentException&&) = default;
+				CL3PUBF	virtual	~TInvalidArgumentException	();
+		};
+
 		#define	CL3_CLASS_LOGIC_ERROR(expression)	do \
 			{ \
 				if(CL3_UNLIKELY( (expression) )) \
