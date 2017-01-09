@@ -84,13 +84,39 @@ namespace	cl3
 			class	CL3PUBT	IDeserializer;
 			class	CL3PUBT	ISerializable;
 
+			enum class EDatatype : u8_t
+			{
+				BOOL = 0,
+				S8   = 1,
+				U8   = 2,
+				S16  = 3,
+				U16  = 4,
+				S32  = 5,
+				U32  = 6,
+				S64  = 7,
+				U64  = 8,
+				F32  = 9,
+				F64  = 10,
+				OBJECT = 11	//	ISerializable
+			};
+
+			struct TFormat
+			{
+				const char* codename;	//	e.g. "json" or "xml"
+				const char* longname;	//	e.g. "JavaScript Object Notation (JSON)"
+				const char* url;		//	e.g. "https://en.wikipedia.org/wiki/JSON"
+				const system::types::typeinfo::TRTTI* typemap[12];	//	contains NULL for types where the storage type is not detectable during deserialization
+				bool stores_names;		//	whether or not the format stores the names of the variables
+				bool derived_types;		//	whether or not the format stores the derived type or just ISerializable for objects (only relevant if the format stores object types at all)
+			};
+
 			class ISerializable
 			{
 				public:
 					virtual	void	Serialize	(ISerializer&) const = 0;
 			};
 
-			class IDeserializable
+			class IDeserializable : public ISerializable
 			{
 				public:
 					virtual	void	Deserialize	(IDeserializer&) = 0;
@@ -130,6 +156,8 @@ namespace	cl3
 					virtual	void Push(const char* name, f32_t value) = 0;
 					virtual	void Push(const char* name, f64_t value) = 0;
 					virtual	void Push(const char* name, const ISerializable& value) = 0;
+
+					virtual const TFormat& Format() const CL3_GETTER = 0;
 			};
 
 			class IDeserializer
@@ -183,6 +211,10 @@ namespace	cl3
 					};
 
 					virtual TObjectPopper&& PopObject(const char* name) = 0;
+
+					virtual const TFormat& Format() const CL3_GETTER = 0;
+					virtual const system::types::typeinfo::TRTTI* NextType() const CL3_GETTER = 0;
+					virtual text::string::TString NextName() const CL3_GETTER = 0;
 			};
 		}
 	}

@@ -43,10 +43,11 @@ namespace	cl3
 					{
 						case TValue::EType::NULLVALUE: return true;
 						case TValue::EType::UNDEFINED: return true;
-						case TValue::EType::NUMBER:    return this->num == other.num;
-						case TValue::EType::STRING:    return this->text == other.text || (this->text != NULL && other.text != NULL && *this->text == *other.text);
+						case TValue::EType::BOOL:      return this->b == other.b;
+						case TValue::EType::NUMBER:    return this->n == other.n;
+						case TValue::EType::STRING:    return this->s == other.s || (this->s != NULL && other.s != NULL && *this->s == *other.s);
 						case TValue::EType::ARRAY:     return this->array == other.array || (this->array != NULL && other.array != NULL && *this->array == *other.array);
-						case TValue::EType::OBJECT:    return this->object == other.object || (this->object != NULL && other.object != NULL && *this->object == *other.object);
+						case TValue::EType::OBJECT:    return this->o == other.o || (this->o != NULL && other.o != NULL && *this->o == *other.o);
 					}
 
 					CL3_UNREACHABLE;
@@ -58,17 +59,20 @@ namespace	cl3
 					switch(this->type)
 					{
 						case TValue::EType::NULLVALUE:
-							break;
 						case TValue::EType::UNDEFINED:
 							break;
 
+						case TValue::EType::BOOL:
+							this->b = other.b;
+							break;
+
 						case TValue::EType::NUMBER:
-							this->num = other.num;
+							this->n = other.n;
 							break;
 
 						case TValue::EType::STRING:
-							delete this->text;
-							this->text = other.text ? new TString(*other.text) : NULL;
+							delete this->s;
+							this->s = other.s ? new TString(*other.s) : NULL;
 							break;
 
 						case TValue::EType::ARRAY:
@@ -77,8 +81,8 @@ namespace	cl3
 							break;
 
 						case TValue::EType::OBJECT:
-							delete this->object;
-							this->object = other.object ? new TObject(*other.object) : NULL;
+							delete this->o;
+							this->o = other.o ? new TObject(*other.o) : NULL;
 							break;
 					}
 
@@ -92,19 +96,22 @@ namespace	cl3
 					switch(this->type)
 					{
 						case TValue::EType::NULLVALUE:
-							break;
 						case TValue::EType::UNDEFINED:
 							break;
 
+						case TValue::EType::BOOL:
+							this->b = other.b;
+							break;
+
 						case TValue::EType::NUMBER:
-							this->num = other.num;
+							this->n = other.n;
 							break;
 
 						case TValue::EType::STRING:
 						case TValue::EType::ARRAY:
 						case TValue::EType::OBJECT:
-							this->object = other.object;
-							other.object = NULL;
+							this->o = other.o;
+							other.o = NULL;
 							break;
 					}
 
@@ -115,17 +122,22 @@ namespace	cl3
 
 				CLASS TValue::TValue(EType type) : type(type)
 				{
-					this->num = 0;
+					this->n = 0;
 				}
 
 				CLASS TValue::TValue(const io::text::string::TString& text) : type(TValue::EType::STRING)
 				{
-					this->text = new TString(text);
+					this->s = new TString(text);
+				}
+
+				CLASS TValue::TValue(bool b) : type(TValue::EType.BOOL)
+				{
+					this->b = b;
 				}
 
 				CLASS TValue::TValue(f64_t number) : type(TValue::EType::NUMBER)
 				{
-					this->num = number;
+					this->n = number;
 				}
 
 				CLASS TValue::TValue(TValue&& other) : type(other.type)
@@ -138,15 +150,19 @@ namespace	cl3
 						case TValue::EType::UNDEFINED:
 							break;
 
+						case TValue::EType::BOOL:
+							this->b = other.b;
+							break;
+
 						case TValue::EType::NUMBER:
-							this->num = other.num;
+							this->n = other.n;
 							break;
 
 						case TValue::EType::STRING:
 						case TValue::EType::ARRAY:
 						case TValue::EType::OBJECT:
-							this->object = other.object;
-							other.object = NULL;
+							this->o = other.o;
+							other.o = NULL;
 							break;
 					}
 				}
@@ -156,31 +172,29 @@ namespace	cl3
 					switch(other.type)
 					{
 						case TValue::EType::NULLVALUE:
-							break;
 						case TValue::EType::UNDEFINED:
 							break;
 
+						case TValue::EType::BOOL:
+							this->b = other.b;
+							break;
+
 						case TValue::EType::NUMBER:
-							this->num = other.num;
+							this->n = other.n;
 							break;
 
 						case TValue::EType::STRING:
-							this->text = other.text ? new TString(*other.text) : NULL;
+							this->s = other.s ? new TString(*other.s) : NULL;
 							break;
 
 						case TValue::EType::ARRAY:
-							this->array = other.array ? new TArray(*other.array) : NULL;
+							this->a = other.a ? new TArray(*other.a) : NULL;
 							break;
 
 						case TValue::EType::OBJECT:
-							this->object = other.object ? new TObject(*other.object) : NULL;
+							this->o = other.o ? new TObject(*other.o) : NULL;
 							break;
 					}
-				}
-
-				CLASS TValue::TValue(serialization::IDeserializer& ds) : type(EType.UNDEFINED)
-				{
-					this->Deserialize(ds);
 				}
 
 				CLASS TValue::~TValue()
@@ -188,14 +202,13 @@ namespace	cl3
 					switch(this->type)
 					{
 						case TValue::EType::NULLVALUE:
-							break;
-
 						case TValue::EType::UNDEFINED:
+						case TValue::EType::BOOL:
 						case TValue::EType::NUMBER:
 							break;
 
 						case TValue::EType::STRING:
-							delete this->text;
+							delete this->s;
 							break;
 
 						case TValue::EType::ARRAY:
@@ -203,9 +216,37 @@ namespace	cl3
 							break;
 
 						case TValue::EType::OBJECT:
-							delete this->object;
+							delete this->o;
 							break;
 					}
+				}
+
+				static serialization::EDatatype Map2SerializationType(TValue::Etype json_type)
+				{
+				}
+
+				static bool IsExplicitTypeInfoRequired(const TFormat& f)
+				{
+				}
+
+				void TObject::Serialize(serialization::ISerializer& s) const
+				{
+					const bool requires_explicit_ti = IsExplicitTypeInfoRequired(s.Format());
+
+					for(usys_t i = 0; i < this->members.Count(); i++)
+
+				}
+
+				void TObject::Deserialize(serialization::IDeserializer& ds)
+				{
+				}
+
+				void TArray::Serialize(serialization::ISerializer& s) const
+				{
+				}
+
+				void TArray::Deserialize(serialization::IDeserializer& ds)
+				{
 				}
 			}
 		}

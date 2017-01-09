@@ -69,6 +69,7 @@ namespace	cl3
 
 					CL3PUBF CLASS TValue(EType type = EType::UNDEFINED);
 					CL3PUBF CLASS TValue(const io::text::string::TString& text);
+					CL3PUBF CLASS TValue(bool b);
 					CL3PUBF CLASS TValue(f64_t number);
 					CL3PUBF CLASS TValue(TValue&&);
 					CL3PUBF CLASS TValue(const TValue&);
