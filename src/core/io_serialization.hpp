@@ -29,10 +29,18 @@ namespace	cl3
 	{
 		namespace	text
 		{
+			struct TUTF32;
+
 			namespace	string
 			{
 				class	TString;
 			}
+		}
+
+		namespace collection
+		{
+			template<typename T>
+			class IStaticCollection;
 		}
 
 		namespace	serialization
@@ -48,7 +56,7 @@ namespace	cl3
 
 					+ looks perfect in json
 					+ looks good in xml
-					/ acceptable in cl3ss (bloated / names get dropped)
+					/ acceptable in cl3ss (bloated)
 
 					requires:
 						solution for how to easily encode arrays (BeginArray/EndArray???)
@@ -84,31 +92,8 @@ namespace	cl3
 			class	CL3PUBT	IDeserializer;
 			class	CL3PUBT	ISerializable;
 
-			enum class EDatatype : u8_t
-			{
-				BOOL = 0,
-				S8   = 1,
-				U8   = 2,
-				S16  = 3,
-				U16  = 4,
-				S32  = 5,
-				U32  = 6,
-				S64  = 7,
-				U64  = 8,
-				F32  = 9,
-				F64  = 10,
-				OBJECT = 11	//	ISerializable
-			};
-
-			struct TFormat
-			{
-				const char* codename;	//	e.g. "json" or "xml"
-				const char* longname;	//	e.g. "JavaScript Object Notation (JSON)"
-				const char* url;		//	e.g. "https://en.wikipedia.org/wiki/JSON"
-				const system::types::typeinfo::TRTTI* typemap[12];	//	contains NULL for types where the storage type is not detectable during deserialization
-				bool stores_names;		//	whether or not the format stores the names of the variables
-				bool derived_types;		//	whether or not the format stores the derived type or just ISerializable for objects (only relevant if the format stores object types at all)
-			};
+			class	CL3PUBT	IArraySerializer;
+			class	CL3PUBT	IArrayDeserializer;
 
 			class ISerializable
 			{
@@ -124,97 +109,175 @@ namespace	cl3
 
 			class ISerializer
 			{
+				protected:
+					virtual void EnterObject(const char* name, const system::types::typeinfo::TRTTI* rtti) = 0;
+					virtual void LeaveObject() = 0;
+
 				public:
+					virtual void Push(const char* name, u8_t  value) = 0;
+					virtual void Push(const char* name, s8_t  value) = 0;
+					virtual void Push(const char* name, u16_t value) = 0;
+					virtual void Push(const char* name, s16_t value) = 0;
+					virtual void Push(const char* name, u32_t value) = 0;
+					virtual void Push(const char* name, s32_t value) = 0;
+					virtual void Push(const char* name, u64_t value) = 0;
+					virtual void Push(const char* name, s64_t value) = 0;
+					virtual void Push(const char* name, f32_t value) = 0;
+					virtual void Push(const char* name, f64_t value) = 0;
+					virtual void Push(const char* name, const char* value) = 0;
+					virtual void Push(const char* name, const wchar_t* value) = 0;
+					virtual void Push(const char* name, const collection::IStaticCollection<const text::TUTF32>& value) = 0;
+
 					template<typename T>
-					void Push(const char* name, const T& value)
+					void Push(const char* name, const T& obj)
 					{
-						struct TProxy : public ISerializable
-						{
-							const T* obj;
+						// this is to make sure that the type has a deserializing constructor
+						system::types::typeinfo::FDeserialize dserctor = system::types::typeinfo::_::generic_deserctor<T>;
 
-							void Serialize(ISerializer& s) const final override
-							{
-								obj->Serialize(s);
-							}
-
-							CLASS TProxy(const T* obj) : obj(obj) {}
-						};
-
-						TProxy proxy(&value);
-
-						this->Push(name, (ISerializable&)proxy);
+						this->EnterObject(name, &system::types::typeinfo::TCTTI<T>::rtti);
+						obj.Serialize(*this);
+						this->LeaveObject();
 					}
 
-					virtual	void Push(const char* name, u8_t  value) = 0;
-					virtual	void Push(const char* name, s8_t  value) = 0;
-					virtual	void Push(const char* name, u16_t value) = 0;
-					virtual	void Push(const char* name, s16_t value) = 0;
-					virtual	void Push(const char* name, u32_t value) = 0;
-					virtual	void Push(const char* name, s32_t value) = 0;
-					virtual	void Push(const char* name, u64_t value) = 0;
-					virtual	void Push(const char* name, s64_t value) = 0;
-					virtual	void Push(const char* name, f32_t value) = 0;
-					virtual	void Push(const char* name, f64_t value) = 0;
-					virtual	void Push(const char* name, const ISerializable& value) = 0;
+					virtual	system::memory::TUniquePtr<IArraySerializer>
+								PushArray(const char* name, usys_t n_items) = 0;
 
-					virtual const TFormat& Format() const CL3_GETTER = 0;
+					virtual CLASS ~ISerializer();
+			};
+
+			class	IArraySerializer
+			{
+				protected:
+					virtual void EnterObject(const system::types::typeinfo::TRTTI* rtti) = 0;
+					virtual void LeaveObject() = 0;
+
+				public:
+					virtual void Push(u8_t  value) = 0;
+					virtual void Push(s8_t  value) = 0;
+					virtual void Push(u16_t value) = 0;
+					virtual void Push(s16_t value) = 0;
+					virtual void Push(u32_t value) = 0;
+					virtual void Push(s32_t value) = 0;
+					virtual void Push(u64_t value) = 0;
+					virtual void Push(s64_t value) = 0;
+					virtual void Push(f32_t value) = 0;
+					virtual void Push(f64_t value) = 0;
+					virtual void Push(const char* value) = 0;
+					virtual void Push(const wchar_t* value) = 0;
+					virtual void Push(const collection::IStaticCollection<const text::TUTF32>& value) = 0;
+					virtual void Push(const ISerializable& value) = 0;
+
+					template<typename T>
+					void Push(const T& obj)
+					{
+						// this is to make sure that the type has a deserializing constructor
+						system::types::typeinfo::FDeserialize dserctor = system::types::typeinfo::_::generic_deserctor<T>;
+
+						this->EnterObject(&system::types::typeinfo::TCTTI<T>::rtti);
+						obj.Serialize(*this);
+						this->LeaveObject();
+					}
+
+					virtual system::memory::TUniquePtr<IArraySerializer>
+								PushArray(usys_t n_items) = 0;
+
+					virtual CLASS ~IArraySerializer	();
 			};
 
 			class IDeserializer
 			{
 				protected:
-					virtual void EnterObject() = 0;
+					virtual void EnterObject(const char* name, const system::types::typeinfo::TRTTI* rtti) = 0;
 					virtual void LeaveObject() = 0;
 
 				public:
+					virtual void Pop(const char* name, u8_t&  value) = 0;
+					virtual void Pop(const char* name, s8_t&  value) = 0;
+					virtual void Pop(const char* name, u16_t& value) = 0;
+					virtual void Pop(const char* name, s16_t& value) = 0;
+					virtual void Pop(const char* name, u32_t& value) = 0;
+					virtual void Pop(const char* name, s32_t& value) = 0;
+					virtual void Pop(const char* name, u64_t& value) = 0;
+					virtual void Pop(const char* name, s64_t& value) = 0;
+					virtual void Pop(const char* name, f32_t& value) = 0;
+					virtual void Pop(const char* name, f64_t& value) = 0;
+					virtual void Pop(const char* name, const char*& value) = 0;
+					virtual void Pop(const char* name, const wchar_t*& value) = 0;
+					virtual void Pop(const char* name, text::string::TString& value) = 0;
+					virtual void Pop(const char* name, IDeserializable&) = 0;
+
 					template<typename T>
-					void Pop(const char* name, T& value)
+					void Pop(const char* name, T& obj)
 					{
-						struct TProxy : public IDeserializable
-						{
-							T* obj;
-
-							void Deserialize(IDeserializer& ds) final override
-							{
-								obj->Deserialize(ds);
-							}
-
-							CLASS TProxy(T* obj) : obj(obj) {}
-						};
-
-						TProxy proxy(&value);
-
-						this->Pop(name, (IDeserializable&)proxy);
+						this->EnterObject(name, &system::types::typeinfo::TCTTI<T>::rtti);
+						obj.Deserialize(*this);
+						this->LeaveObject();
 					}
 
-					virtual	void Pop(const char* name, u8_t&  value) = 0;
-					virtual	void Pop(const char* name, s8_t&  value) = 0;
-					virtual	void Pop(const char* name, u16_t& value) = 0;
-					virtual	void Pop(const char* name, s16_t& value) = 0;
-					virtual	void Pop(const char* name, u32_t& value) = 0;
-					virtual	void Pop(const char* name, s32_t& value) = 0;
-					virtual	void Pop(const char* name, u64_t& value) = 0;
-					virtual	void Pop(const char* name, s64_t& value) = 0;
-					virtual	void Pop(const char* name, f32_t& value) = 0;
-					virtual	void Pop(const char* name, f64_t& value) = 0;
-					virtual	void Pop(const char* name, IDeserializable& value) = 0;
-
-					struct TObjectPopper
+					struct TPopper
 					{
-						IDeserializer* const ds;
-						inline operator IDeserializer&() const { return *this->ds; }
+						IDeserializer* ds;
 
-						CLASS TObjectPopper(IDeserializer* ds) : ds(ds) { ds->EnterObject(); }
-						CLASS ~TObjectPopper() { ds->LeaveObject(); }
-						CLASS TObjectPopper(const TObjectPopper&) = delete;
-						CLASS TObjectPopper(TObjectPopper&&) = default;
+						CLASS TPopper(IDeserializer* ds, const char* name, const system::types::typeinfo::TRTTI* rtti) : ds(ds) { ds->EnterObject(name, rtti); };
+						CLASS TPopper(TPopper&& other) : ds(other.ds) { other.ds = NULL; }
+						CLASS ~TPopper() { if(this->ds) this->ds->LeaveObject(); }
 					};
 
-					virtual TObjectPopper&& PopObject(const char* name) = 0;
+					template<typename T>
+					TPopper PopCtor(const char* name)
+					{
+						return TPopper(this, name, &system::types::typeinfo::TCTTI<T>::rtti);
+					}
 
-					virtual const TFormat& Format() const CL3_GETTER = 0;
-					virtual const system::types::typeinfo::TRTTI* NextType() const CL3_GETTER = 0;
-					virtual text::string::TString NextName() const CL3_GETTER = 0;
+					virtual system::memory::TUniquePtr<IArrayDeserializer>
+									PopArray(const char* name) = 0;
+
+					virtual CLASS ~IDeserializer();
+			};
+
+			class	IArrayDeserializer
+			{
+				protected:
+					virtual void EnterObject(const system::types::typeinfo::TRTTI* rtti) = 0;
+					virtual void LeaveObject() = 0;
+
+				public:
+					virtual usys_t CountRemaining() const = 0;
+
+					virtual void Pop(u8_t&  value) = 0;
+					virtual void Pop(s8_t&  value) = 0;
+					virtual void Pop(u16_t& value) = 0;
+					virtual void Pop(s16_t& value) = 0;
+					virtual void Pop(u32_t& value) = 0;
+					virtual void Pop(s32_t& value) = 0;
+					virtual void Pop(u64_t& value) = 0;
+					virtual void Pop(s64_t& value) = 0;
+					virtual void Pop(f32_t& value) = 0;
+					virtual void Pop(f64_t& value) = 0;
+					virtual void Pop(const char*& value) = 0;
+					virtual void Pop(const wchar_t*& value) = 0;
+					virtual void Pop(text::string::TString& value) = 0;
+					virtual void Pop(const char* name, IDeserializable&) = 0;
+
+					struct TPopper
+					{
+						IArrayDeserializer* ds;
+
+						CLASS TPopper(IArrayDeserializer* ds, const system::types::typeinfo::TRTTI* rtti) : ds(ds) { ds->EnterObject(rtti); };
+						CLASS TPopper(TPopper&& other) : ds(other.ds) { other.ds = NULL; }
+						CLASS ~TPopper() { if(this->ds) this->ds->LeaveObject(); }
+					};
+
+					template<typename T>
+					TPopper PopCtor(const char* name)
+					{
+						return TPopper(this, &system::types::typeinfo::TCTTI<T>::rtti);
+					}
+
+					virtual system::memory::TUniquePtr<IArrayDeserializer>
+									PopArray() = 0;
+
+					virtual	CLASS ~IArrayDeserializer();
 			};
 		}
 	}

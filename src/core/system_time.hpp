@@ -135,6 +135,7 @@ namespace	cl3
 // 					inline	CLASS	TTime	(s64_t seconds) : sec(seconds), asec(0) {}
 					CL3PUBF	CLASS	TTime	(struct timespec ts);
 					CL3PUBF	CLASS	TTime	(struct timeval tv);
+					CL3PUBF	CLASS	TTime	(io::serialization::IDeserializer&);
 
 					void Serialize(io::serialization::ISerializer&) const;
 					void Deserialize(io::serialization::IDeserializer&);

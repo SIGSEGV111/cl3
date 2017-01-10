@@ -348,23 +348,23 @@ namespace	cl3
 						//	from ISerializable
 						void		Serialize	(serialization::ISerializer& s) const final override
 						{
-							s.Push("count", this->n_items_current);
-							system::memory::TUniquePtr<serialization::IArraySerializer> as = s.PushArray("items");
+// 							s.Push("count", this->n_items_current);
+							system::memory::TUniquePtr<serialization::IArraySerializer> as = s.PushArray("items", this->n_items_current);
 							for(usys_t i = 0; i < this->n_items_current; i++)
 								as->Push(this->arr_items[i]);
 						}
 
 						void		Deserialize	(serialization::IDeserializer& ds) // final override
 						{
-							usys_t n;
-							ds.Pop("count", n);
-
 							this->Clear();
-							this->Prealloc(n);
 
 							system::memory::TUniquePtr<serialization::IArrayDeserializer> ads = ds.PopArray("items");
+							const usys_t n = ads->CountRemaining();
+
+							this->Prealloc(n);
+
 							for(usys_t i = 0; i < n; i++)
-								ads->Pop(this->arr_items + i, system::types::typeinfo::TCTTI<T>::rtti);
+								new (this->arr_items + i) T(ads->PopCtor(&system::types::typeinfo::TCTTI<T>::rtti));
 
 							this->n_items_current = n;
 							this->n_items_prealloc -= n;
@@ -1005,6 +1005,7 @@ namespace	cl3
 					this->Prealloc(l.size());
 					for(usys_t i = 0; i < l.size(); i++)
 						this->Append(l.begin()[i]);
+					return *this;
 				}
 
 				template<class T>

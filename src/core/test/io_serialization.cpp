@@ -49,7 +49,7 @@ namespace
 			s.Push("z", z);
 			s.Push("str", str);
 
-			TUniquePtr<IArraySerializer> as = s.PushArray("array_of_ints");
+			TUniquePtr<IArraySerializer> as = s.PushArray("array_of_ints", 4);
 			as->Push(array_of_ints[0]);
 			as->Push(array_of_ints[1]);
 			as->Push(array_of_ints[2]);
@@ -64,6 +64,7 @@ namespace
 			ds.Pop("str", str);
 
 			TUniquePtr<IArrayDeserializer> ads = ds.PopArray("array_of_ints");
+			// TODO: check CountRemaining()
 			ads->Pop(array_of_ints[0]);
 			ads->Pop(array_of_ints[1]);
 			ads->Pop(array_of_ints[2]);

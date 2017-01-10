@@ -30,6 +30,9 @@ namespace	cl3
 		{
 			CLASS	ISerializer::~ISerializer		() {}
 			CLASS	IDeserializer::~IDeserializer	() {}
+
+			CLASS	IArraySerializer::~IArraySerializer		() {}
+			CLASS	IArrayDeserializer::~IArrayDeserializer	() {}
 		}
 	}
 }

@@ -53,7 +53,6 @@ namespace	cl3
 
 					virtual llvm::Value* GenerateCode(llvm::IRBuilder<>&) const CL3_WARN_UNUSED_RESULT = 0;
 					virtual const system::types::typeinfo::TRTTI* Decltype() const CL3_WARN_UNUSED_RESULT = 0;
-					virtual io::text::string::TString ToString() const CL3_GETTER = 0;
 
 					CL3PUBF virtual ~INode();
 				};
@@ -65,21 +64,19 @@ namespace	cl3
 
 					CL3PUBF	llvm::Value* GenerateCode(llvm::IRBuilder<>&) const final override CL3_WARN_UNUSED_RESULT;
 					CL3PUBF	const system::types::typeinfo::TRTTI* Decltype() const final override CL3_WARN_UNUSED_RESULT;
-					CL3PUBF io::text::string::TString ToString() const override CL3_GETTER;
 
-					CL3PUBF	CLASS	TReferenceNode	(const system::types::typeinfo::TRTTI* type, const void* ptr, io::text::string::TString name);
+					CL3PUBF	CLASS	TReferenceNode	(const system::types::typeinfo::TRTTI* type, const void* ptr);
 					CL3PUBF	CLASS	~TReferenceNode	();
 				};
 
 				struct TConstantNode : INode
 				{
-					const TValue value;
+					TValue value;
 
 					CL3PUBF	llvm::Value* GenerateCode(llvm::IRBuilder<>&) const final override CL3_WARN_UNUSED_RESULT;
 					CL3PUBF	const system::types::typeinfo::TRTTI* Decltype() const final override CL3_WARN_UNUSED_RESULT;
-					CL3PUBF io::text::string::TString ToString() const override CL3_GETTER;
 
-					CL3PUBF	CLASS	TConstantNode	(const system::types::typeinfo::TRTTI* type, const void* data, io::text::string::TString name);
+					CL3PUBF	CLASS	TConstantNode	(const system::types::typeinfo::TRTTI* type, const void* data);
 					CL3PUBF	CLASS	~TConstantNode	();
 				};
 
@@ -96,7 +93,6 @@ namespace	cl3
 
 					CL3PUBF	llvm::Value* GenerateCode(llvm::IRBuilder<>&) const final override CL3_WARN_UNUSED_RESULT;
 					CL3PUBF	const system::types::typeinfo::TRTTI* Decltype() const final override CL3_WARN_UNUSED_RESULT;
-					CL3PUBF io::text::string::TString ToString() const override CL3_GETTER;
 
 					CL3PUBF	CLASS	TBinaryOperatorNode	(EOperation op, TSharedPtr<INode> lhs, TSharedPtr<INode> rhs);
 					CL3PUBF	CLASS	~TBinaryOperatorNode();
@@ -111,7 +107,6 @@ namespace	cl3
 
 					CL3PUBF	llvm::Value* GenerateCode(llvm::IRBuilder<>&) const final override CL3_WARN_UNUSED_RESULT;
 					CL3PUBF	const system::types::typeinfo::TRTTI* Decltype() const final override CL3_WARN_UNUSED_RESULT;
-					CL3PUBF io::text::string::TString ToString() const override CL3_GETTER;
 
 					CL3PUBF	CLASS	TFunctionCallNode	(void* func, const system::types::typeinfo::TRTTI* type_return , const system::types::typeinfo::TRTTI* type_arg, TSharedPtr<INode*> arg);
 					CL3PUBF	CLASS	~TFunctionCallNode	();

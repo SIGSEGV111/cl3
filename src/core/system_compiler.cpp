@@ -27,7 +27,7 @@ using namespace cl3::system::memory;
 
 namespace	std
 {
-	const nothrow_t nothrow;
+	extern const nothrow_t nothrow;
 }
 
 void* operator new(size_t sz) { return Alloc(sz, NULL); }

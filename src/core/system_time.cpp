@@ -308,6 +308,12 @@ namespace cl3
 // 				Normalize();
 // 			}
 
+			CLASS	TTime::TTime		(io::serialization::IDeserializer& ds)
+			{
+				ds.Pop("seconds", this->sec);
+				ds.Pop("attoseconds", this->asec);
+			}
+
 			CLASS	TTime::TTime		(struct timespec ts) : sec((s64_t)ts.tv_sec), asec((s64_t)ts.tv_nsec * (s64_t)1000000000LL)
 			{
 				Normalize();
