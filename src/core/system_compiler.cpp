@@ -20,15 +20,13 @@
 #error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
 #endif
 
+#include <new>
+
 #include "system_compiler.hpp"
 #include "system_memory.hpp"
 
 using namespace cl3::system::memory;
 
-namespace	std
-{
-	extern const nothrow_t nothrow;
-}
 
 void* operator new(size_t sz) { return Alloc(sz, NULL); }
 void* operator new[](size_t sz) { return Alloc(sz, NULL); }

@@ -95,7 +95,7 @@ static bool UsingGDB()
 
 static void cl3_init(int argc, char* argv[], char* envv[])
 {
-	if(p_cl3_init == NULL) throw;	//	p_cl3_main is never NULL; and the compiler knows; thus he will optimize this away, but he will not complain about an unused variable
+	if(p_cl3_init == NULL) throw;	//	prevent warning about unused variable
 
 	const usys_t len_progname_current = strlen(argv[0]);
 
@@ -103,7 +103,7 @@ static void cl3_init(int argc, char* argv[], char* envv[])
 	{
 		if(len_progname_current < len_progname_want - 1)
 		{
-// 			puts("*** now performing black magic ... ");
+			puts("*** now performing black magic ... ");
 
 			//	enlarge the program-name buffer
 			//	this works by execvpe()'ing ourself with a larger (padded) program-name as argv[0], we will have to remove that padding later again
@@ -129,12 +129,12 @@ static void cl3_init(int argc, char* argv[], char* envv[])
 		}
 		else
 		{
-// 			puts("*** black magic succeeded!");
+			puts("*** black magic succeeded!");
 
 			//	fix the program-name buffer, we have to assume it is as messed up as we wanted it to be when we called execvpe()
 			for(char* p = argv[0]; *p != 0; p++)
 				if(*p == chr_pad)
-					*p = 0;
+					*p = ' ';
 		}
 	}
 

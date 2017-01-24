@@ -341,38 +341,6 @@ namespace	cl3
 
 				/**************************************************************/
 
-				template<class T>
-				class	TSerializableList : public TList<T>, public serialization::ISerializable
-				{
-					public:
-						//	from ISerializable
-						void		Serialize	(serialization::ISerializer& s) const final override
-						{
-// 							s.Push("count", this->n_items_current);
-							system::memory::TUniquePtr<serialization::IArraySerializer> as = s.PushArray("items", this->n_items_current);
-							for(usys_t i = 0; i < this->n_items_current; i++)
-								as->Push(this->arr_items[i]);
-						}
-
-						void		Deserialize	(serialization::IDeserializer& ds) // final override
-						{
-							this->Clear();
-
-							system::memory::TUniquePtr<serialization::IArrayDeserializer> ads = ds.PopArray("items");
-							const usys_t n = ads->CountRemaining();
-
-							this->Prealloc(n);
-
-							for(usys_t i = 0; i < n; i++)
-								new (this->arr_items + i) T(ads->PopCtor(&system::types::typeinfo::TCTTI<T>::rtti));
-
-							this->n_items_current = n;
-							this->n_items_prealloc -= n;
-						}
-				};
-
-				/**************************************************************/
-
 				//	from IStaticIterator<const T>
 				template<class T>
 				bool	TIterator<const T>::IsValid	() const

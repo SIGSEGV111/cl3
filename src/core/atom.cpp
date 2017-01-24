@@ -26,14 +26,6 @@ namespace cl3
 {
 	namespace atom
 	{
-		bool IAtom::Dispose()
-		{
-			if(this->n_refs > 0)
-				return false;
-			this->manager->Unload(this);
-			return true;
-		}
-
 		void IAtom::Serialize(io::serialization::ISerializer& s) const
 		{
 			s.Push("id", id.u64);
@@ -49,7 +41,11 @@ namespace cl3
 		void IAtom::DecRef() const
 		{
 			if(system::compiler::AtomicSub(this->n_refs, (usys_t)1) == 0)
-				this->manager->Unload(const_cast<IAtom*>(this));
+			{
+				if(this->id.id != 0)
+					this->Save();
+				delete this;
+			}
 		}
 
 		atom_id_t IAtom::AtomID() const
@@ -114,11 +110,6 @@ namespace cl3
 		}
 
 		system::time::TTime TManager::BirthdateOf(atom_id_t id)
-		{
-			CL3_NOT_IMPLEMENTED;
-		}
-
-		void TManager::Unload(IAtom* a)
 		{
 			CL3_NOT_IMPLEMENTED;
 		}

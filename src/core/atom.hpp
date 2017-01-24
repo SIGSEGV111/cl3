@@ -26,22 +26,6 @@
 
 namespace cl3
 {
-	namespace system
-	{
-		namespace memory
-		{
-			struct IManager
-			{
-			};
-
-			class IManaged
-			{
-				friend class IManager;
-				virtual bool Dispose() = 0;
-			};
-		}
-	}
-
 	namespace atom
 	{
 		using namespace system::types;
@@ -94,7 +78,7 @@ namespace cl3
 			virtual void Delete(atom_id_t) = 0;			//	deletes the atom from the store; can be a NO-OP
 			virtual atom_id_t ParentOf(atom_id_t) = 0;	//	returns the parent atom of the specified atom - if any
 			virtual system::time::TTime BirthdateOf(atom_id_t) = 0;	//	return the time the atom was saved to the store, if the atom if currently in memory it returns TTime::TTime(0x7FFFFFFFFFFFFFFF, 0x7FFFFFFFFFFFFFFF)
-			virtual void Unload(IAtom*) = 0;			//	deletes the specified atom from memory (calls operator delete())
+// 			virtual void Unload(IAtom*) = 0;			//	deletes the specified atom from memory (calls operator delete())	//	FIXME: that should be handled by the memory management (ref-counting)
 		};
 
 		/*********************************************************************/
@@ -125,7 +109,6 @@ namespace cl3
 				CL3PUBF void Delete(atom_id_t) final override;
 				CL3PUBF atom_id_t ParentOf(atom_id_t) final override;
 				CL3PUBF system::time::TTime BirthdateOf(atom_id_t) final override;
-				CL3PUBF void Unload(IAtom*) final override;
 
 				CL3PUBF CLASS  TManager(const io::collection::IStaticCollection<io::file::TFile*>& data_files, io::file::TFile* index_file);
 				CL3PUBF CLASS  TManager(const TManager&) = delete;
@@ -136,8 +119,7 @@ namespace cl3
 		/*********************************************************************/
 
 		class CL3PUBT IAtom :
-			protected virtual io::serialization::ISerializable,
-			public virtual system::memory::IManaged
+			protected virtual io::serialization::ISerializable
 		{
 			friend class IManager;
 			private:
@@ -146,12 +128,10 @@ namespace cl3
 				mutable atom_id_t id_parent;	//	flag == 0 means fork (copy), flag == 1 means override (new version)
 				mutable usys_t n_refs;
 
-				CL3PUBF bool Dispose() final override;	//	called by memory manager (GC) before destruction
-
 			protected:
 
 			public:
-				virtual void Serialize(io::serialization::ISerializer&) const;
+				void Serialize(io::serialization::ISerializer&) const final override;
 
 				inline void IncRef() const;
 				inline void DecRef() const;

@@ -166,11 +166,6 @@ namespace	cl3
 				PREFETCH_WRITE
 			};
 
-
-
-
-
-
 			#if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_CLANG)
 				#define	CL3_THREAD	__thread
 				#define	CL3_FCONST	__attribute__((const))

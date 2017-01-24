@@ -1,0 +1,35 @@
+Atom Manager:
+	- atom ID always increment without holes
+	- atom IDs are 63 bits (LSB is reserved for: copy/override flag on disk and loaded/unloaded flag in RAM)
+	- atoms are immutable on disk and cannot be deleted (truncate is the only case where atoms may be deleted)
+	- atoms get an unique ID uppon creation
+	- atoms get a new ID when saved; the old ID is used for the disk version; the new ID is assigned to the in-memory version
+	- there are two types of files on disk: atom-db and atom-map
+	- atom-db are append-only and store the serialized atom data
+	- atom-map are append-only and store the on-disk byte-offsets for each atom aswell as the ID of the next override; they have an atom-id offset in their header (for truncated maps)
+	- each atom knows its parent which it either overrides or was forked from (also on disk)
+	- all data stored in the atom-map is also stored in the atom-db; the map may be regenerated from the atom-db if it gets corrupted
+
+	Truncate:
+		- truncate will remove all atoms before a specific atom ID (the "truncate barrier")
+		- since atom IDs strictly increment they can be thought of like a timestamp
+		- the dependencies for all newer atoms are computed
+		- dependency atoms which are older than the truncate barrier, will be copied to new atom IDs - they will themself have no longer a parent atom
+		- afterwards the map and the database are written from scratch, excluding those atoms which were older than the barrier
+
+Indexes:
+	- Indexes are stored as pointered binary-tree (in-place updates) ordered by value and reference the atoms which contain the value
+	- they may also contain a byte-offset into the serialized atom data where the value can be found for comparison whithout deserialization
+	- to speed-up lookups in the tree the top-level tree nodes are all stored close together (maybe the top 10 levels? 2^10 nodes => 1024 nodes * 16 bytes each => 16KiB) thus improving disk-cache and memory-cache hit-ratio
+
+Atom-DB:
+	64bit Atom-ID
+	64bit Parent-ID
+	32bit Type-ID
+	32bit Size in bytes
+
+	=> 24byte
+
+Atom-Index:
+	64bit Atom-ID
+	64bit Offset
