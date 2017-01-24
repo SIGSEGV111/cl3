@@ -340,20 +340,25 @@ namespace	cl3
 
 					CL3_CLASS_ERROR(idx_start >= this->Count(), TIndexOutOfBoundsException, idx_start, this->Count());
 
-					const usys_t n = this->Count() - str_find.Count();
 					switch(direction)
 					{
 						case DIRECTION_FORWARD:
+						{
+							const usys_t n = this->Count() - str_find.Count();
 							for(usys_t i = idx_start; i <= n; i++)
 								if(memcmp(this->ItemPtr(i), str_find.ItemPtr(0), str_find.Count() * 4) == 0)
 									return i;
 							return (usys_t)-1;
+						}
 
 						case DIRECTION_BACKWARD:
+						{
+							idx_start -= (str_find.Count() - 1);
 							for(usys_t i = idx_start; i != (usys_t)-1 ; i--)
 								if(memcmp(this->ItemPtr(i), str_find.ItemPtr(0), str_find.Count() * 4) == 0)
 									return i;
 							return (usys_t)-1;
+						}
 					}
 					CL3_UNREACHABLE; //LCOV_EXCL_LINE
 				}
