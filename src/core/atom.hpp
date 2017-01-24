@@ -75,7 +75,12 @@ namespace cl3
 			}
 
 			CLASS atom_id_t(u64_t v) : u64(v) {}
-			CLASS atom_id_t(u64_t id, bool flag) : id(id), flag(flag ? 1 : 0) {}
+
+			#ifdef CL3_IS_LITTLE_ENDIAN
+				CLASS atom_id_t(u64_t id, bool flag) : flag(flag ? 1 : 0), id(id) {}
+			#else
+				CLASS atom_id_t(u64_t id, bool flag) : id(id), flag(flag ? 1 : 0) {}
+			#endif
 		};
 
 		/*********************************************************************/

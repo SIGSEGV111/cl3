@@ -205,7 +205,7 @@ namespace	cl3
 
 				CLASS TParser::~TParser()
 				{
-					CL3_NOT_IMPLEMENTED;
+					//CL3_NOT_IMPLEMENTED;
 				}
 			}
 		}

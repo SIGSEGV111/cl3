@@ -131,9 +131,6 @@ namespace	cl3
 					template<typename T>
 					void Push(const char* name, const T& obj)
 					{
-						// this is to make sure that the type has a deserializing constructor
-						system::types::typeinfo::FDeserialize dserctor = system::types::typeinfo::_::generic_deserctor<T>;
-
 						this->EnterObject(name, &system::types::typeinfo::TCTTI<T>::rtti);
 						obj.Serialize(*this);
 						this->LeaveObject();

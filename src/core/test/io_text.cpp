@@ -457,23 +457,6 @@ namespace
 		EXPECT_TRUE(strcmp(cstr3.Chars(), "hällö wörld") == 0);
 	}
 
-	TEST(io_text_string, Stringify)
-	{
-		EXPECT_TRUE(cl3::system::types::typeinfo::features::is_printable<int>::value);
-
-		struct T { int x,y,z; } t = {0,0,0};
-		EXPECT_TRUE(Stringify(TCTTI<T>::print, &t) == "<unprintable>");
-
-		const int i = 1234567;
-		EXPECT_TRUE(Stringify(TCTTI<int>::print, &i) == "1234567");
-
-		const double f = 18.39999961853;
-		EXPECT_TRUE(Stringify(TCTTI<double>::print, &f) == "18.399999618529999878546732361428439617156982421875");
-
-		const TString s = "hello";
-		EXPECT_TRUE(Stringify(TCTTI<TString>::print, &s) == "hello");
-	}
-
 	TEST(io_text_encoding_utf8, LimitedSink_Encode)
 	{
 		const TString s = "hällä wörld";
@@ -938,9 +921,9 @@ namespace
 		TParserSpec modifier = (Literal("+") || Literal("-")) + integer;
 		TParserSpec multiplier = integer + (Literal("x") || Literal("*"));
 		TParserSpec dice_spec = integer + Literal("d") + Optional(integer);
-		TParserSpec dice = Optional(multiplier) + dice_spec + Optional(modifier);
+		TParserSpec dice_cmd_spec = Optional(multiplier) + dice_spec + Optional(modifier);
 
-		TParser p = dice;
+		TParser p(dice_cmd_spec);
 
 		TString str = "5x3d6+4";
 		p.Write(str.ItemPtr(0), str.Count());

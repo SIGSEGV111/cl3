@@ -114,7 +114,7 @@ namespace	cl3
 			{
 				if(this->arr_items != NULL && this->arr_items != (byte_t*)-1L)
 				{
-					CL3_CLASS_SYSERR(::munmap(this->arr_items, this->n_items));
+					::munmap(this->arr_items, this->n_items);
 					Claim();
 				}
 			}
@@ -416,7 +416,7 @@ namespace	cl3
 			CLASS	TFile::~TFile	()
 			{
 				if(this->fd != -1)
-					CL3_CLASS_SYSERR(::close(this->fd));
+					::close(this->fd);
 			}
 
 			/**********************************************************************/
@@ -498,7 +498,7 @@ namespace	cl3
 			CLASS	TDirectoryBrowser::~TDirectoryBrowser	()
 			{
 				if(this->fd != -1)
-					CL3_CLASS_SYSERR(::close(this->fd));
+					::close(this->fd);
 			}
 
 			static CL3_THREAD TDirectoryBrowser* browser_thread = NULL;

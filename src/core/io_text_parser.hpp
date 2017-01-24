@@ -170,7 +170,7 @@ namespace	cl3
 						CL3PUBF usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
 
 						CL3PUBF CLASS TParser(const TParser&);
-						CL3PUBF CLASS TParser(const TParserSpec& def);
+						CL3PUBF explicit CLASS TParser(const TParserSpec& def);
 						CL3PUBF CLASS ~TParser();
 				};
 

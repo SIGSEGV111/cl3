@@ -190,8 +190,6 @@ namespace	cl3
 						CL3PUBF	CLASS explicit TCString	(const TCString&);
 						CL3PUBF	CLASS explicit TCString	(TCString&&);
 				};
-
-				CL3PUBF	TString	Stringify	(FPrint print, const void* object);
 			}
 		}
 	}

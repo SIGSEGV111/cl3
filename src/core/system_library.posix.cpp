@@ -71,7 +71,7 @@ namespace	cl3
 
 			CLASS	TLibrary::~TLibrary		()
 			{
-				CL3_CLASS_ERROR(dlclose(this->handle) != 0, TException, dlerror());
+				dlclose(this->handle);
 			}
 
 			void*	TLibrary::ResolveSymbol	(const io::text::string::TString& name)

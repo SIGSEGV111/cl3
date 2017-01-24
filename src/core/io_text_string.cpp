@@ -665,20 +665,6 @@ namespace	cl3
 					this->n_items_prealloc = other.n_items_prealloc;
 					other.n_items_prealloc = 0;
 				}
-
-				TString	Stringify	(FPrint print, const void* object)
-				{
-					if(print)
-					{
-						TString ret;
-						print(ret, object);
-						return ret;
-					}
-					else
-					{
-						return "<unprintable>";
-					}
-				}
 			}
 		}
 	}

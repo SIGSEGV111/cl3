@@ -112,7 +112,7 @@ namespace	cl3
 					virtual	IList&	operator=	(std::initializer_list<T>) = 0;
 
 					virtual	void	Count		(usys_t new_count, const T& item_init = T()) CL3_SETTER = 0;	//	reallocates the list to the specified size, removing items at the end when shrinking and appending new items when enlarging (new items get initialized by copy-constructor from "item_init")
-					virtual	T*		Claim		() = 0;	//	takes control of the internal memory of the list
+					virtual	T*		Claim		() CL3_WARN_UNUSED_RESULT = 0;	//	takes control of the internal memory of the list
 					virtual	void	Remove		(ssys_t rindex, usys_t n_items_remove) = 0;	//	removes "n_items_remove" items from the list starting at index "index"
 					virtual	void	Cut			(usys_t n_head, usys_t n_tail) = 0;	//	removed n_head items at the start of the list and n_tail items at the end of the list
 					virtual	void	Shrink		(usys_t n_items_shrink) = 0;

@@ -119,6 +119,6 @@ namespace
 		auto& env = TLocalProcess::Self()->Environment();
 
 		EXPECT_TRUE(env.Count() > 2);
-		EXPECT_EQ(env["PWD"], cl3::io::file::TDirectoryBrowser::ProcessCurrentWorkingDirectory().AbsolutePath());
+// 		EXPECT_EQ(env["PWD"], cl3::io::file::TDirectoryBrowser::ProcessCurrentWorkingDirectory().AbsolutePath());	//	won't work when a path component is symlinked
 	}
 }

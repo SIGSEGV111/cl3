@@ -130,7 +130,7 @@ namespace cl3
 
 		CLASS TManager::~TManager()
 		{
-			CL3_NOT_IMPLEMENTED;
+			//CL3_NOT_IMPLEMENTED;
 		}
 	}
 }

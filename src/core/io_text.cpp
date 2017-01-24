@@ -221,7 +221,19 @@ namespace	cl3
 
 			ITextReader&	ITextReader::operator>>	(string::TString& v)
 			{
-				CL3_NOT_IMPLEMENTED;
+				TUTF32 chr;
+				v.Clear();
+				while(this->Read(&chr, 1, 0) != 0)
+				{
+					if(chr == '\n')
+					{
+						if(v.Count() > 0 && v[-1] == TUTF32(10U))
+							v.Cut(0,-1);
+						break;
+					}
+					v += chr;
+				}
+				return *this;
 			}
 
 			/******************************** ITextWriter ******************************************************/

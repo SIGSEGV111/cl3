@@ -36,49 +36,49 @@ namespace
 	using namespace cl3::system::memory;
 	using namespace cl3::io::collection::list;
 
-	struct	TTest : ISerializable, IDeserializable
-	{
-		int x,y,z;
-		const char* str;
-		int array_of_ints[4];
-
-		void	Serialize	(ISerializer& s) const final override
-		{
-			s.Push("x", x);
-			s.Push("y", y);
-			s.Push("z", z);
-			s.Push("str", str);
-
-			TUniquePtr<IArraySerializer> as = s.PushArray("array_of_ints", 4);
-			as->Push(array_of_ints[0]);
-			as->Push(array_of_ints[1]);
-			as->Push(array_of_ints[2]);
-			as->Push(array_of_ints[3]);
-		}
-
-		void	Deserialize	(IDeserializer& ds) final override
-		{
-			ds.Pop("x", x);
-			ds.Pop("y", y);
-			ds.Pop("z", z);
-			ds.Pop("str", str);
-
-			TUniquePtr<IArrayDeserializer> ads = ds.PopArray("array_of_ints");
-			// TODO: check CountRemaining()
-			ads->Pop(array_of_ints[0]);
-			ads->Pop(array_of_ints[1]);
-			ads->Pop(array_of_ints[2]);
-			ads->Pop(array_of_ints[3]);
-		}
-
-		CLASS	TTest	() : x(10), y(20), z(30), str("test")
-		{
-			array_of_ints[0] = 0;
-			array_of_ints[1] = 1;
-			array_of_ints[2] = 2;
-			array_of_ints[3] = 3;
-		}
-	};
+// 	struct	TTest : ISerializable, IDeserializable
+// 	{
+// 		int x,y,z;
+// 		const char* str;
+// 		int array_of_ints[4];
+//
+// 		void	Serialize	(ISerializer& s) const final override
+// 		{
+// 			s.Push("x", x);
+// 			s.Push("y", y);
+// 			s.Push("z", z);
+// 			s.Push("str", str);
+//
+// 			TUniquePtr<IArraySerializer> as = s.PushArray("array_of_ints", 4);
+// 			as->Push(array_of_ints[0]);
+// 			as->Push(array_of_ints[1]);
+// 			as->Push(array_of_ints[2]);
+// 			as->Push(array_of_ints[3]);
+// 		}
+//
+// 		void	Deserialize	(IDeserializer& ds) final override
+// 		{
+// 			ds.Pop("x", x);
+// 			ds.Pop("y", y);
+// 			ds.Pop("z", z);
+// 			ds.Pop("str", str);
+//
+// 			TUniquePtr<IArrayDeserializer> ads = ds.PopArray("array_of_ints");
+// 			// TODO: check CountRemaining()
+// 			ads->Pop(array_of_ints[0]);
+// 			ads->Pop(array_of_ints[1]);
+// 			ads->Pop(array_of_ints[2]);
+// 			ads->Pop(array_of_ints[3]);
+// 		}
+//
+// 		CLASS	TTest	() : x(10), y(20), z(30), str("test")
+// 		{
+// 			array_of_ints[0] = 0;
+// 			array_of_ints[1] = 1;
+// 			array_of_ints[2] = 2;
+// 			array_of_ints[3] = 3;
+// 		}
+// 	};
 
 // 	TEST(io_serialization_json, Object_pretty)
 // 	{
