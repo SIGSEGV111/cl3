@@ -161,7 +161,6 @@ namespace	cl3
 
 						collection::list::TList<TUTF32> buffer;
 
-
 					public:
 						//	from IOut
 						using stream::IOut<TUTF32>::Write;
