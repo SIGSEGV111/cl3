@@ -486,7 +486,7 @@ namespace	cl3
 
 				//	from IOut<T>
 				template<class T>
-				usys_t	TIterator<T>::Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t	TIterator<T>::Write			(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
