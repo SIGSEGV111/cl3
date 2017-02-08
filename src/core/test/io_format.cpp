@@ -47,7 +47,7 @@ namespace
 		TString json;
 		TValue root;
 		root.type = TValue::EType::FLOAT64;
-		root.s32 = 42.7;
+		root.f32 = 42.7;
 		SerializeJSON(root, json);
 
 // 		EXPECT_TRUE(json == "42.7");	//	FIXME ITextWriter
