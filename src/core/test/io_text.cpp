@@ -911,33 +911,114 @@ namespace
 		EXPECT_EQ(0UL, buffer.Count());
 	}
 
-	TEST(io_text_parser, DiceSpec)
+	TEST(io_text_string_TString, Split_csv)
 	{
-		TParserSpec digit_excl_zero = parser::Range('1', '9');
-		TParserSpec digit = Literal("0") || digit_excl_zero;
-		TParserSpec digits = Repetition(digit, 1, INFINITE);
-		TParserSpec integer = Literal("0") || (digit_excl_zero + Optional(digits));
+		TString str = "hello;world;foo;bar;123";
+		auto fields = str.Split(";");
+		EXPECT_EQ(5, fields.Count());
+		EXPECT_EQ(TString("hello"), fields[0]);
+		EXPECT_EQ(TString("world"), fields[1]);
+		EXPECT_EQ(TString("foo"), fields[2]);
+		EXPECT_EQ(TString("bar"), fields[3]);
+		EXPECT_EQ(TString("123"), fields[4]);
+	}
 
-		TParserSpec modifier = (Literal("+") || Literal("-")) + integer;
-		TParserSpec multiplier = integer + (Literal("x") || Literal("*"));
-		TParserSpec dice_spec = integer + Literal("d") + Optional(integer);
-		TParserSpec dice_cmd_spec = Optional(multiplier) + dice_spec + Optional(modifier);
+	TEST(io_text_string_TString, Split_multichar_delimiter)
+	{
+		TString str = "hello DELIMITER world DELIMITER test";
+		auto fields = str.Split(" DELIMITER ");
+		EXPECT_EQ(3, fields.Count());
+		EXPECT_EQ(TString("hello"), fields[0]);
+		EXPECT_EQ(TString("world"), fields[1]);
+		EXPECT_EQ(TString("test"), fields[2]);
+	}
 
-		TParser p(dice_cmd_spec);
+	TEST(io_text_string_TString, Split_empty_fields)
+	{
+		{
+			TString str = "hello;;foo;bar;123";
+			auto fields = str.Split(";");
+			EXPECT_EQ(5, fields.Count());
+			EXPECT_EQ(TString("hello"), fields[0]);
+			EXPECT_EQ(TString(""), fields[1]);
+			EXPECT_EQ(TString("foo"), fields[2]);
+			EXPECT_EQ(TString("bar"), fields[3]);
+			EXPECT_EQ(TString("123"), fields[4]);
+		}
+		{
+			TString str = ";world;foo;bar;123";
+			auto fields = str.Split(";");
+			EXPECT_EQ(5, fields.Count());
+			EXPECT_EQ(TString(""), fields[0]);
+			EXPECT_EQ(TString("world"), fields[1]);
+			EXPECT_EQ(TString("foo"), fields[2]);
+			EXPECT_EQ(TString("bar"), fields[3]);
+			EXPECT_EQ(TString("123"), fields[4]);
+		}
+		{
+			TString str = "hello;world;foo;bar;";
+			auto fields = str.Split(";");
+			EXPECT_EQ(5, fields.Count());
+			EXPECT_EQ(TString("hello"), fields[0]);
+			EXPECT_EQ(TString("world"), fields[1]);
+			EXPECT_EQ(TString("foo"), fields[2]);
+			EXPECT_EQ(TString("bar"), fields[3]);
+			EXPECT_EQ(TString(""), fields[4]);
+		}
+		{
+			TString str = " DELIMITER world DELIMITER ";
+			auto fields = str.Split(" DELIMITER ");
+			EXPECT_EQ(3, fields.Count());
+			EXPECT_EQ(TString(""), fields[0]);
+			EXPECT_EQ(TString("world"), fields[1]);
+			EXPECT_EQ(TString(""), fields[2]);
+		}
+	}
 
-		TString str = "5x3d6+4";
-		p.Write(str.ItemPtr(0), str.Count());
+	TEST(io_text_string_TString, Join_empty)
+	{
+		const TList<const TString> list;
+		const TString str = TString::Join(list, ";");
+		EXPECT_EQ(TString(""), str);
+	}
+
+	TEST(io_text_string_TString, Join_one_field)
+	{
+		const TList<const TString> list = { "hello" };
+		const TString str = TString::Join(list, ";");
+		EXPECT_EQ(TString("hello"), str);
+	}
+
+	TEST(io_text_string_TString, Join_csv)
+	{
+		const TList<const TString> list = { "hello", "world", "foo", "bar" };
+		const TString str = TString::Join(list, ";");
+		EXPECT_EQ(TString("hello;world;foo;bar"), str);
+	}
+
+	TEST(io_text_string_TString, Join_empty_fields)
+	{
+		{
+			const TList<const TString> list = { "hello", "", "foo", "bar" };
+			const TString str = TString::Join(list, ";");
+			EXPECT_EQ(TString("hello;;foo;bar"), str);
+		}
+		{
+			const TList<const TString> list = { "", "world", "foo", "bar" };
+			const TString str = TString::Join(list, ";");
+			EXPECT_EQ(TString(";world;foo;bar"), str);
+		}
+		{
+			const TList<const TString> list = { "hello", "world", "foo", "" };
+			const TString str = TString::Join(list, ";");
+			EXPECT_EQ(TString("hello;world;foo;"), str);
+		}
+	}
+
+	TEST(io_text_string_TString, Join_multichar_delimiter)
+	{
+		const TList<const TString> list = { "hello", "world", "foo", "bar" };
+		const TString str = TString::Join(list, " DELIMITER ");
+		EXPECT_EQ(TString("hello DELIMITER world DELIMITER foo DELIMITER bar"), str);
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -397,6 +397,45 @@ namespace	cl3
 					return r;
 				}
 
+				io::collection::list::TList<TString> TString::Split(const TString& delimiter) const
+				{
+					io::collection::list::TList<TString> list;
+					usys_t start = 0;
+
+					while(start < this->Count())
+					{
+						const usys_t end = this->Find(delimiter, start);
+						if(end != -1)
+						{
+							list.Append(this->Slice(start, end - start));
+							start = end + delimiter.Count();
+						}
+						else
+							break;
+					}
+
+					list.Append(this->Slice(start, this->Count() - start));
+
+					return list;
+				}
+
+				TString		TString::Join		(const io::collection::IStaticCollection<const TString>& collection, const TString& delimiter)
+				{
+					auto it = collection.CreateStaticIterator();
+
+					if(it->MoveFirst())
+					{
+						TString r = it->Item();
+
+						while(it->MoveNext())
+							r += delimiter + it->Item();
+
+						return r;
+					}
+					else
+						return TString();
+				}
+
 				void		TString::Trim		(const IStaticCollection<const TUTF32>& collection, int position)
 				{
 					TUniquePtr<collection::IStaticIterator<const TUTF32> > it = collection.CreateStaticIterator();

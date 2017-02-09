@@ -117,7 +117,7 @@ namespace	cl3
 
 						//	find substring
 						CL3PUBF	usys_t		Find		(const TString& str_find) const CL3_GETTER;
-						CL3PUBF	usys_t		Find		(const TString& str_find, usys_t idx_start, collection::EDirection direction) const CL3_GETTER;
+						CL3PUBF	usys_t		Find		(const TString& str_find, usys_t idx_start, collection::EDirection direction = collection::DIRECTION_FORWARD) const CL3_GETTER;
 
 						inline	bool		Contains	(const TString& str_contains) const { return this->Find(str_contains) != (usys_t)-1; }
 
@@ -125,6 +125,12 @@ namespace	cl3
 						CL3PUBF	TString		Left		(usys_t n_chars) const CL3_GETTER;
 						CL3PUBF	TString		Right		(usys_t n_chars) const CL3_GETTER;
 						CL3PUBF	TString		Slice		(usys_t index, usys_t n_chars = (usys_t)-1) const CL3_GETTER;
+
+						//	split / combine strings
+						CL3PUBF	io::collection::list::TList<TString>
+											Split		(const TString& delimiter) const CL3_GETTER;
+
+						CL3PUBF static TString Join		(const io::collection::IStaticCollection<const TString>& collection, const TString& delimiter) CL3_GETTER;
 
 						//	remove/append whitespace (or other characters)
 						CL3PUBF	void		Trim		(const IStaticCollection<const TUTF32>& collection = *whitespace, int position = POSITION_HEAD | POSITION_TAIL);
