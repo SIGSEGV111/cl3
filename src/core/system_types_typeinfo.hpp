@@ -156,6 +156,20 @@ namespace	cl3
 					struct no  { char value[sizeof(yes)+1]; };
 
 					template<typename T>
+					class is_class
+					{
+						private:
+							template<typename U>
+							static decltype( (reinterpret_cast<U*>(_::DUMMY).*reinterpret_cast<void (U::*)()>(_::DUMMY))(), yes()) test(int);
+
+							template<typename>
+							static no test(...);
+
+						public:
+							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+					};
+
+					template<typename T>
 					class CL3PUBT	is_default_constructible
 					{
 						private:

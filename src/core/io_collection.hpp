@@ -21,6 +21,7 @@
 
 #include "io_stream.hpp"
 #include "event.hpp"
+#include "system_types_typeinfo.hpp"
 
 namespace	cl3
 {
@@ -241,6 +242,64 @@ namespace	cl3
 				}
 			}
 
+			template<class T>
+			struct	CL3PUBT	IStaticCollection;
+
+			namespace _
+			{
+				template<typename T, bool x>
+				struct TApplyMemberFunction_impl;
+
+				template<typename T>
+				struct TApplyMemberFunction_impl<T, true>
+				{
+					virtual void Apply(void (T::*member_func)())
+					{
+						auto it = static_cast<IStaticCollection<T>>(this)->CreateStaticIterator();
+						it->MoveHead();
+						while(it->MoveNext())
+							(it->Item().*member_func)();
+					}
+
+					typedef const T __CT;
+
+					virtual void Apply(T (__CT::*member_func)())
+					{
+						auto it = static_cast<IStaticCollection<T>>(this)->CreateStaticIterator();
+						it->MoveHead();
+						while(it->MoveNext())
+							it->Item() = (it->Item().*member_func)();
+					}
+				};
+
+				template<typename T>
+				struct TApplyMemberFunction_impl<T, false>
+				{
+				};
+
+
+				template<typename T, bool x>
+				struct TApplyFunctionByValue;
+
+				template<typename T>
+				struct TApplyFunctionByValue<T, true>
+				{
+					template<typename T>
+					void IStaticCollection<T>::Apply(T (*func)(T))
+					{
+						auto it = this->CreateStaticIterator();
+						it->MoveHead();
+						while(it->MoveNext())
+							it->Item() = func(it->Item());
+					}
+				};
+
+				template<typename T>
+				struct TApplyFunctionByValue<T, false>
+				{
+				};
+			}
+
 			namespace	bitmask
 			{
 				class	CL3PUBT	TBitmask;
@@ -345,11 +404,18 @@ namespace	cl3
 			};
 
 			template<class T>
-			struct	CL3PUBT	IStaticCollection : virtual IStaticCollection<const T>
+			struct	CL3PUBT	IStaticCollection :
+				virtual IStaticCollection<const T>,
+				_::TApplyMemberFunction_impl<T, system::types::typeinfo::features::is_class<T>::value>,
+				_::TApplyFunctionByValue<T, system::types::typeinfo::features::is_copy_constructible<T>::value>
 			{
 				using IStaticCollection<const T>::CreateStaticIterator;
 
 				virtual	system::memory::TUniquePtr<IStaticIterator<T> >			CreateStaticIterator	() CL3_WARN_UNUSED_RESULT = 0;
+
+
+				virtual void Apply(T (*func)(const T&));
+				virtual void Apply(void (*func)(T&));
 			};
 
 			/************************************************************************/
@@ -384,6 +450,26 @@ namespace	cl3
 					virtual	void	Clear	() = 0;	//	removes all items from the collection
 					virtual	bool	Remove	(const T& item_remove) = 0;	//	removes the specified item from the collection, the reference is free to point to any valid item - the item needs not to be a member of the collection, if however so, then exactly the specified item is removed, if not, one item which compares equal to the specified item is removed - if multiple items compare equal to the specified item, the implementation is free to choose one among them, if no matching item is found false is returned
 			};
+
+			/************************************************************************/
+
+			template<typename T>
+			void IStaticCollection<T>::Apply(T (*func)(const T&))
+			{
+				auto it = this->CreateStaticIterator();
+				it->MoveHead();
+				while(it->MoveNext())
+					it->Item() = func(it->Item());
+			}
+
+			template<typename T>
+			void IStaticCollection<T>::Apply(void (*func)(T&))
+			{
+				auto it = this->CreateStaticIterator();
+				it->MoveHead();
+				while(it->MoveNext())
+					func(it->Item());
+			}
 		}
 	}
 }

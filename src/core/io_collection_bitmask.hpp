@@ -46,6 +46,7 @@ namespace	cl3
 						inline operator bool() const;
 						inline TBoolProxy& operator=(bool);
 
+						CLASS	TBoolProxy	(const TBoolProxy&) = default;
 						CLASS	TBoolProxy	(TBitmask* bm, usys_t index) : bm(bm), index(index) {}
 						CLASS	TBoolProxy	() : bm(NULL), index(0) {}
 				};
