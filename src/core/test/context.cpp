@@ -25,8 +25,6 @@ namespace
 {
 	using namespace cl3::context;
 
-
-
 	namespace	some_namespace
 	{
 		CL3_CONTEXT_VARIABLE_DECL(int, my_int_stack);
