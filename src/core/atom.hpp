@@ -20,6 +20,7 @@
 
 #include "system_endian.hpp"
 #include "system_time.hpp"
+#include "system_memory.hpp"
 #include "io_serialization.hpp"
 #include "io_collection_list.hpp"
 #include "io_file.hpp"
@@ -119,22 +120,22 @@ namespace cl3
 		/*********************************************************************/
 
 		class CL3PUBT IAtom :
-			protected virtual io::serialization::ISerializable
+			protected virtual io::serialization::ISerializable,
+			public system::memory::IManaged
 		{
 			friend struct IManager;
 			private:
 				IManager* const manager;
 				mutable atom_id_t id;
 				mutable atom_id_t id_parent;	//	flag == 0 means fork (copy), flag == 1 means override (new version)
-				mutable usys_t n_refs;
 
 			protected:
+				CL3PUBF virtual void AtomSerialize(io::serialization::ISerializer&) const;
 
 			public:
 				void Serialize(io::serialization::ISerializer&) const final override;
 
-				inline void IncRef() const;
-				inline void DecRef() const;
+				CL3PUBF bool BeforeDispose();
 
 				CL3PUBF atom_id_t AtomID() const CL3_GETTER;
 				CL3PUBF void Save() const;
@@ -200,7 +201,6 @@ namespace cl3
 				const IAtom* const a = this->obj;
 				this->id = a->AtomID();
 				this->id.flag = 1;
-				a->DecRef();
 			}
 		}
 

@@ -26,26 +26,18 @@ namespace cl3
 {
 	namespace atom
 	{
+		bool IAtom::BeforeDispose()
+		{
+			if(this->id.id != 0)
+				this->Save();
+			return true;
+		}
+
 		void IAtom::Serialize(io::serialization::ISerializer& s) const
 		{
-			s.Push("id", id.u64);
-			s.Push("id_parent", id_parent.u64);
-			s.Push("ts_birthdate", system::time::TTime::Now(system::time::TIME_CLOCK_REALTIME));
-		}
-
-		void IAtom::IncRef() const
-		{
-			system::compiler::AtomicAdd(this->n_refs, (usys_t)1);
-		}
-
-		void IAtom::DecRef() const
-		{
-			if(system::compiler::AtomicSub(this->n_refs, (usys_t)1) == 0)
-			{
-				if(this->id.id != 0)
-					this->Save();
-				delete this;
-			}
+			//	this the serializer which gets called when sombody wants to serialize a atom
+			//	thus we only store the ID here
+			s.Push("id", this->AtomID().id);
 		}
 
 		atom_id_t IAtom::AtomID() const
@@ -60,21 +52,31 @@ namespace cl3
 			this->manager->Save(const_cast<IAtom*>(this));
 		}
 
-		CLASS IAtom::IAtom(IManager* manager) : manager(manager), id(0), id_parent(0), n_refs(0)
+		CLASS IAtom::IAtom(IManager* manager) : manager(manager), id(0), id_parent(0)
 		{
 			CL3_CLASS_ERROR(manager == NULL, error::TInvalidArgumentException, "manager");
 		}
 
-		CLASS IAtom::IAtom(io::serialization::IDeserializer& ds) : manager(NULL), id(0), id_parent(0), n_refs(0)
+		void IAtom::AtomSerialize(io::serialization::ISerializer& s) const
 		{
-			ds.Pop("id", id);
-			ds.Pop("id_parent", id_parent);
-
-			system::time::TTime ts_birthdate;
-			ds.Pop("ts_birthdate", ts_birthdate);
+			s.Push("id", this->AtomID().id);
+			s.Push("id_parent", id_parent.id);
+			s.Push("ts_save", system::time::TTime::Now(system::time::TIME_CLOCK_REALTIME));
 		}
 
-		CLASS IAtom::IAtom(const IAtom& other) : manager(other.manager), id(0), id_parent(other.AtomID()), n_refs(0)
+		CLASS IAtom::IAtom(io::serialization::IDeserializer& ds) : manager(NULL), id(0), id_parent(0)
+		{
+			//	this is the deserializer which gets called when an atom was loaded from disk it has to match AtomSerialize()
+			//	it gets called by the derived classes constructor with a derserializer for the actual data portion
+
+			ds.Pop("id", id.u64);
+			ds.Pop("id_parent", id_parent.u64);
+
+			system::time::TTime ts_save;
+			ds.Pop("ts_save", ts_save);
+		}
+
+		CLASS IAtom::IAtom(const IAtom& other) : manager(other.manager), id(0), id_parent(other.AtomID())
 		{
 		}
 
