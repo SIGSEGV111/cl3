@@ -174,12 +174,12 @@ namespace	cl3
 					}
 				}
 
-				usys_t	ACharEncoder::Read		(char* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
+				usys_t	ACharEncoder::Read		(char* /*arr_items_read*/, usys_t /*n_items_read_max*/, usys_t /*n_items_read_min*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				usys_t	AWCharEncoder::Read		(wchar_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
+				usys_t	AWCharEncoder::Read		(wchar_t* /*arr_items_read*/, usys_t /*n_items_read_max*/, usys_t /*n_items_read_min*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

@@ -66,12 +66,12 @@ namespace	cl3
 				using namespace system::memory;
 				using namespace llvm;
 
-				void* TBinary::ResolveSymbol(const io::text::string::TString& name)
+				void* TBinary::ResolveSymbol(const io::text::string::TString&)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				void* TBinary::ResolveSymbol(const char* name)
+				void* TBinary::ResolveSymbol(const char*)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -81,7 +81,7 @@ namespace	cl3
 					return this->ee->getPointerToFunction(function);
 				}
 
-				CLASS TBinary::TBinary(llvm::LLVMContext* context, llvm::Module* module) : context(context), module(module)
+				CLASS TBinary::TBinary(llvm::LLVMContext* context, llvm::Module* module, u8_t /*optlvl*/) : context(context), module(module)
 				{
 					EngineBuilder eb((std::unique_ptr<llvm::Module>(module)));
 
@@ -109,7 +109,7 @@ namespace	cl3
 
 				TUniquePtr<TBinary> TJIT::Compile(u8_t optlvl)
 				{
-					TUniquePtr<TBinary> binary = MakeUniquePtr(new TBinary(this->context, this->module));
+					TUniquePtr<TBinary> binary = MakeUniquePtr(new TBinary(this->context, this->module, optlvl));
 
 					this->context = new LLVMContext();
 					this->module = new llvm::Module("", *this->context);

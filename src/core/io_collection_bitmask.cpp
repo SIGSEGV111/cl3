@@ -123,22 +123,22 @@ namespace	cl3
 					return *this;
 				}
 
-				usys_t		TIterator::Write	(const TBoolProxy* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t		TIterator::Write	(const TBoolProxy* /*arr_items_write*/, usys_t /*n_items_write_max*/, usys_t /*n_items_write_min*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				usys_t		TIterator::Read		(TBoolProxy* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t		TIterator::Read		(TBoolProxy* /*arr_items_write*/, usys_t /*n_items_write_max*/, usys_t /*n_items_write_min*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				usys_t		TIterator::Write	(const bool* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t		TIterator::Write	(const bool* /*arr_items_write*/, usys_t /*n_items_write_max*/, usys_t /*n_items_write_min*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				usys_t		TIterator::Read		(bool* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t		TIterator::Read		(bool* /*arr_items_write*/, usys_t /*n_items_write_max*/, usys_t /*n_items_write_min*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -168,12 +168,12 @@ namespace	cl3
 					n_bits = new_count;
 				}
 
-				bool		TBitmask::Contains	(const TBoolProxy& item) const
+				bool		TBitmask::Contains	(const TBoolProxy&) const
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				bool		TBitmask::Contains	(const bool item) const
+				bool		TBitmask::Contains	(const bool) const
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

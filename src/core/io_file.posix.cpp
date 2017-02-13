@@ -100,7 +100,7 @@ namespace	cl3
 				other.arr_items = NULL;
 			}
 
-			CLASS	TMapping::TMapping	(TMapping& other, ESharing sharing) : TArray<const byte_t>(NULL,0), TArray<byte_t>(NULL,0), file(other.file), index(other.index)
+			CLASS	TMapping::TMapping	(TMapping& other, ESharing /*sharing*/) : TArray<const byte_t>(NULL,0), TArray<byte_t>(NULL,0), file(other.file), index(other.index)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
@@ -352,7 +352,7 @@ namespace	cl3
 				*/
 			}
 
-			bool	TFile::Contains	(const byte_t& item) const
+			bool	TFile::Contains	(const byte_t&) const
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
@@ -480,7 +480,7 @@ namespace	cl3
 				#endif
 			}
 
-			CLASS	TDirectoryBrowser::TDirectoryBrowser	(const text::string::TString& path) : fd(-1)
+			CLASS	TDirectoryBrowser::TDirectoryBrowser	(const text::string::TString&) : fd(-1)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}

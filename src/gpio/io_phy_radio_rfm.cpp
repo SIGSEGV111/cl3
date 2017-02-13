@@ -230,7 +230,7 @@ namespace	cl3
 						CL3_NOT_IMPLEMENTED;
 					}
 
-					usys_t		TRFM::Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+					usys_t		TRFM::Write		(const byte_t* /*arr_items_write*/, usys_t /*n_items_write_max*/, usys_t /*n_items_write_min*/)
 					{
 						CL3_NOT_IMPLEMENTED;
 					}
@@ -361,8 +361,9 @@ namespace	cl3
 						}
 					}
 
-					void	TRFM::ParseGPIOCfg	(const byte_t* p_cfg, usys_t sz_cfg)
+					void	TRFM::ParseGPIOCfg	(const byte_t* p_cfg, usys_t /*sz_cfg*/)
 					{
+						//	FIXME: what is sz_cfg goofd for?
 						for(unsigned i = 0; i < 6; i++)
 						{
 							TPin* const pin = static_cast<TPin*>(pins[i]);

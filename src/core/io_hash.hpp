@@ -36,25 +36,7 @@ namespace cl3
 				virtual T Hash() const CL3_GETTER = 0;
 			};
 
-			extern "C" void hashlittle2(const void *key, size_t length, u32_t *pc, u32_t *pb);
-
-			static u64_t JenkinsHash(const byte_t* arr_items, usys_t n_items)
-			{
-				union
-				{
-					struct
-					{
-						u32_t l,h;
-					};
-					u64_t qw;
-				} a;
-
-				a.qw = 0;
-
-				hashlittle2(arr_items, n_items, &a.l, &a.h);
-
-				return a.qw;
-			}
+			CL3PUBF u64_t JenkinsHash(const byte_t* arr_items, usys_t n_items);
 
 			class CL3PUBT TMurMur32Hash : public IHash<u32_t>
 			{

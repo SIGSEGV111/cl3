@@ -182,13 +182,13 @@ namespace	cl3
 				}
 
 				template<class TKey, class TValue>
-				void			TStdMap<const TKey, const TValue>::Add		(const TPair<TKey, TValue>* arr_items_add, usys_t n_items_add)
+				void			TStdMap<const TKey, const TValue>::Add		(const TPair<TKey, TValue>* /*arr_items_add*/, usys_t /*n_items_add*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
 				template<class TKey, class TValue>
-				void			TStdMap<const TKey, const TValue>::Add		(const IStaticCollection<const TPair<TKey, TValue>>& collection)
+				void			TStdMap<const TKey, const TValue>::Add		(const IStaticCollection<const TPair<TKey, TValue>>& /*collection*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -207,7 +207,7 @@ namespace	cl3
 				}
 
 				template<class TKey, class TValue>
-				bool			TStdMap<const TKey, const TValue>::Contains	(const TPair<TKey, TValue>& item) const
+				bool			TStdMap<const TKey, const TValue>::Contains	(const TPair<TKey, TValue>&) const
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -220,7 +220,7 @@ namespace	cl3
 				}
 
 				template<class TKey, class TValue>
-				usys_t			TStdMap<const TKey, const TValue>::Write	(const TPair<TKey, TValue>* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t			TStdMap<const TKey, const TValue>::Write	(const TPair<TKey, TValue>* /*arr_items_write*/, usys_t /*n_items_write_max*/, usys_t /*n_items_write_min*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -277,7 +277,7 @@ namespace	cl3
 				}
 
 				template<class TKey, class TValue>
-				bool	TStdMap<TKey, TValue>::Remove	(const TPair<TKey, TValue>& item_remove)
+				bool	TStdMap<TKey, TValue>::Remove	(const TPair<TKey, TValue>&)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -303,7 +303,7 @@ namespace	cl3
 				}
 
 				template<class TKey, class TValue>
-				usys_t	TStdMap<TKey, TValue>::Read		(TPair<TKey, TValue>* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
+				usys_t	TStdMap<TKey, TValue>::Read		(TPair<TKey, TValue>* /*arr_items_read*/, usys_t /*n_items_read_max*/, usys_t /*n_items_read_min*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

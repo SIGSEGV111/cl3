@@ -222,7 +222,9 @@ namespace
 		v = TCTTI<TT_public_dtor>::print;
 		EXPECT_TRUE(v == NULL);
 
-		EXPECT_THROW(TCTTI<TT_POD>::print(*reinterpret_cast<cl3::io::text::ITextWriter*>(NULL), NULL), TTestException);
+		TString s;
+
+		EXPECT_THROW(TCTTI<TT_POD>::print(s, NULL), TTestException);
 	}
 
 	//	*************************************************

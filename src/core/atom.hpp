@@ -121,7 +121,7 @@ namespace cl3
 		class CL3PUBT IAtom :
 			protected virtual io::serialization::ISerializable
 		{
-			friend class IManager;
+			friend struct IManager;
 			private:
 				IManager* const manager;
 				mutable atom_id_t id;

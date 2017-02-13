@@ -37,7 +37,7 @@ namespace	cl3
 				using namespace encoding;
 				using namespace stream;
 
-				usys_t	TTerminal::Read		(char* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
+				usys_t	TTerminal::Read		(char* /*arr_items_read*/, usys_t /*n_items_read_max*/, usys_t /*n_items_read_min*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -47,7 +47,7 @@ namespace	cl3
 					return this->os->Write((const byte_t*)arr_items_write, n_items_write_max, n_items_write_min);
 				}
 
-				usys_t	TTerminal::Read		(TUTF32* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min)
+				usys_t	TTerminal::Read		(TUTF32* /*arr_items_read*/, usys_t /*n_items_read_max*/, usys_t /*n_items_read_min*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

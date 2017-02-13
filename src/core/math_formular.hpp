@@ -184,7 +184,7 @@ namespace	cl3
 
 		namespace formular_v2
 		{
-			struct IExpression;
+			class IExpression;
 
 			typedef double value_t;
 

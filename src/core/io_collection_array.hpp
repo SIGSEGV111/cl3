@@ -404,14 +404,14 @@ namespace	cl3
 				}
 
 				template<class T>
-				void	TIterator<const T>::Index		(usys_t new_index)
+				void	TIterator<const T>::Index		(usys_t /*new_index*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
 				//	from IIn<T>
 				template<class T>
-				usys_t	TIterator<const T>::Read		(T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t	TIterator<const T>::Read		(T* /*arr_items_write*/, usys_t /*n_items_write_max*/, usys_t /*n_items_write_min*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -434,7 +434,7 @@ namespace	cl3
 
 				//	from IOut<T>
 				template<class T>
-				usys_t	TIterator<T>::Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t	TIterator<T>::Write		(const T* /*arr_items_write*/, usys_t /*n_items_write_max*/, usys_t /*n_items_write_min*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -487,7 +487,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				TArray<const T>&	TArray<const T>::operator=	(const IStaticCollection<const T>& rhs)
+				TArray<const T>&	TArray<const T>::operator=	(const IStaticCollection<const T>& /*rhs*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 // 					this->arr_items = rhs.arr_items;
@@ -496,7 +496,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				TArray<const T>&	TArray<const T>::operator=	(IStaticCollection<const T>&& rhs)
+				TArray<const T>&	TArray<const T>::operator=	(IStaticCollection<const T>&& /*rhs*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 // 					this->arr_items = rhs.arr_items;
@@ -610,7 +610,7 @@ namespace	cl3
 					}
 
 					template<class T>
-					usys_t	TIndexOf_impl<T, false>::IndexOf	(const T* arr_items, usys_t n_items, const T& item_find, usys_t idx_start, EDirection dir, bool is_sorted)
+					usys_t	TIndexOf_impl<T, false>::IndexOf	(const T* arr_items, usys_t n_items, const T& item_find, usys_t idx_start, EDirection dir, bool /*is_sorted*/)
 					{
 						usys_t high = n_items;
 						usys_t low = idx_start;
@@ -666,7 +666,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				TArray<T>&	TArray<T>::operator=	(const IStaticCollection<T>& rhs)
+				TArray<T>&	TArray<T>::operator=	(const IStaticCollection<T>&)
 				{
 					CL3_NOT_IMPLEMENTED;
 // 					this->arr_items = rhs.arr_items;
@@ -675,7 +675,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				TArray<T>&	TArray<T>::operator=	(IStaticCollection<T>&& rhs)
+				TArray<T>&	TArray<T>::operator=	(IStaticCollection<T>&&)
 				{
 					CL3_NOT_IMPLEMENTED;
 // 					this->arr_items = rhs.arr_items;
@@ -757,7 +757,7 @@ namespace	cl3
 						system::memory::TUniquePtr<IStaticIterator<const T> >
 								CreateStaticIterator	() const final override CL3_WARN_UNUSED_RESULT;
 						usys_t	Count					() const final override CL3_GETTER { return n_items; }
-						bool	Contains				(const T& item) const final override CL3_GETTER { CL3_NOT_IMPLEMENTED; }
+						bool	Contains				(const T&) const final override CL3_GETTER { CL3_NOT_IMPLEMENTED; }
 
 						bool		IsSorted	() const final override CL3_GETTER { return false; }
 						const T&	operator[]	(ssys_t index) const final override CL3_GETTER { return this->arr_items[this->AbsIndex(index)]; }

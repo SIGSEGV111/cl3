@@ -69,7 +69,7 @@ namespace	cl3
 					this->Insert(0, tmp);
 				}
 
-				void		TString::Prepend		(const IStaticCollection<const char>& collection)
+				void		TString::Prepend		(const IStaticCollection<const char>& /*collection*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -79,12 +79,12 @@ namespace	cl3
 					this->Insert(0, TUTF32(item_prepend));
 				}
 
-				void		TString::Prepend		(const wchar_t* arr_items_prepend, usys_t n_items_prepend)
+				void		TString::Prepend		(const wchar_t* /*arr_items_prepend*/, usys_t /*n_items_prepend*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				void		TString::Prepend		(const IStaticCollection<const wchar_t>& collection)
+				void		TString::Prepend		(const IStaticCollection<const wchar_t>& /*collection*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -405,7 +405,7 @@ namespace	cl3
 					while(start < this->Count())
 					{
 						const usys_t end = this->Find(delimiter, start);
-						if(end != -1)
+						if(end != (usys_t)-1)
 						{
 							list.Append(this->Slice(start, end - start));
 							start = end + delimiter.Count();
@@ -559,52 +559,52 @@ namespace	cl3
 					this->Append(chr);
 				}
 
-				CLASS	TString::TString	(f32_t num, const TNumberFormat& format)
+				CLASS	TString::TString	(f32_t /*num*/, const TNumberFormat& /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(f64_t num, const TNumberFormat& format)
+				CLASS	TString::TString	(f64_t /*num*/, const TNumberFormat& /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(u8_t num, const TNumberFormat& format)
+				CLASS	TString::TString	(u8_t /*num*/, const TNumberFormat& /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(s8_t num, const TNumberFormat& format)
+				CLASS	TString::TString	(s8_t /*num*/, const TNumberFormat& /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(u16_t num, const TNumberFormat& format)
+				CLASS	TString::TString	(u16_t /*num*/, const TNumberFormat& /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(s16_t num, const TNumberFormat& format)
+				CLASS	TString::TString	(s16_t /*num*/, const TNumberFormat& /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(u32_t num, const TNumberFormat& format)
+				CLASS	TString::TString	(u32_t /*num*/, const TNumberFormat& /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(s32_t num, const TNumberFormat& format)
+				CLASS	TString::TString	(s32_t /*num*/, const TNumberFormat& /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(u64_t num, const TNumberFormat& format)
+				CLASS	TString::TString	(u64_t /*num*/, const TNumberFormat& /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(s64_t num, const TNumberFormat& format)
+				CLASS	TString::TString	(s64_t /*num*/, const TNumberFormat& /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

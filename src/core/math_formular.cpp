@@ -343,7 +343,7 @@ namespace	cl3
 // 					printf("%p: ~TBinaryOperatorNode()\n", this);
 				}
 
-				Value*	TFunctionCallNode::GenerateCode	(IRBuilder<>& builder) const
+				Value*	TFunctionCallNode::GenerateCode	(IRBuilder<>&) const
 				{
 					CL3_NOT_IMPLEMENTED;	//	TODO
 				}

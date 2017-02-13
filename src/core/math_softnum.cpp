@@ -47,7 +47,7 @@ namespace cl3
 					return this->digits.SliceSL(this->idx_start_fractional);
 			}
 
-			void TSoftNum::Base(unsigned new_base)
+			void TSoftNum::Base(unsigned)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
@@ -93,72 +93,72 @@ namespace cl3
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			TSoftNum& TSoftNum::operator+=(const TSoftNum& other)
+			TSoftNum& TSoftNum::operator+=(const TSoftNum&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			TSoftNum& TSoftNum::operator-=(const TSoftNum& other)
+			TSoftNum& TSoftNum::operator-=(const TSoftNum&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			TSoftNum& TSoftNum::operator*=(const TSoftNum& other)
+			TSoftNum& TSoftNum::operator*=(const TSoftNum&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			TSoftNum& TSoftNum::operator/=(const TSoftNum& other)
+			TSoftNum& TSoftNum::operator/=(const TSoftNum&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			TSoftNum& TSoftNum::operator%=(const TSoftNum& other)
+			TSoftNum& TSoftNum::operator%=(const TSoftNum&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			TSoftNum& TSoftNum::operator>>=(const TSoftNum& other)
+			TSoftNum& TSoftNum::operator>>=(const TSoftNum&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			TSoftNum& TSoftNum::operator<<=(const TSoftNum& other)
+			TSoftNum& TSoftNum::operator<<=(const TSoftNum&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			TSoftNum  TSoftNum::operator+ (const TSoftNum& other)
+			TSoftNum  TSoftNum::operator+ (const TSoftNum&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			TSoftNum  TSoftNum::operator- (const TSoftNum& other)
+			TSoftNum  TSoftNum::operator- (const TSoftNum&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			TSoftNum  TSoftNum::operator* (const TSoftNum& other)
+			TSoftNum  TSoftNum::operator* (const TSoftNum&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			TSoftNum  TSoftNum::operator/ (const TSoftNum& other)
+			TSoftNum  TSoftNum::operator/ (const TSoftNum&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			TSoftNum  TSoftNum::operator% (const TSoftNum& other)
+			TSoftNum  TSoftNum::operator% (const TSoftNum&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			TSoftNum  TSoftNum::operator>>(const TSoftNum& other)
+			TSoftNum  TSoftNum::operator>>(const TSoftNum&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			TSoftNum  TSoftNum::operator<<(const TSoftNum& other)
+			TSoftNum  TSoftNum::operator<<(const TSoftNum&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
@@ -193,27 +193,27 @@ namespace cl3
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			TSoftNum& TSoftNum::operator=(const TSoftNum& other)
+			TSoftNum& TSoftNum::operator=(const TSoftNum&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			TSoftNum& TSoftNum::operator=(TSoftNum&& other)
+			TSoftNum& TSoftNum::operator=(TSoftNum&&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			CLASS TSoftNum::TSoftNum(const TSoftNum& other)
+			CLASS TSoftNum::TSoftNum(const TSoftNum&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			CLASS TSoftNum::TSoftNum(const TSoftNum& other, unsigned base)
+			CLASS TSoftNum::TSoftNum(const TSoftNum&, unsigned)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			CLASS TSoftNum::TSoftNum(TSoftNum&& other)
+			CLASS TSoftNum::TSoftNum(TSoftNum&&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
@@ -225,7 +225,7 @@ namespace cl3
 				digits.Append(reinterpret_cast<const digit_t*>(&value), sizeof(value) / sizeof(digit_t));
 			}
 
-			static void SetBinaryFloat(TList<digit_t>& digits, f64_t value)
+			static void SetBinaryFloat(TList<digit_t>&, f64_t)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}

@@ -130,13 +130,13 @@ namespace	cl3
 			/******************************** ITextReader ******************************************************/
 
 			template<bool b_signed, class T>
-			static	void	ParseInteger	(IIn<TUTF32>& is, const TNumberFormat* format, T& v)
+			static	void	ParseInteger	(IIn<TUTF32>&, const TNumberFormat*, T&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
 
 			template<class T>
-			static	void	ParseFloat		(IIn<TUTF32>& is, const TNumberFormat* format, T& v)
+			static	void	ParseFloat		(IIn<TUTF32>&, const TNumberFormat*, T&)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}
@@ -271,7 +271,7 @@ namespace	cl3
 				}
 			}
 
-			static	void	PrintNumber	(IOut<TUTF32>& os, const bool negative, const u64_t i, const s64_t e, const TNumberFormat& f)
+			static	void	PrintNumber	(IOut<TUTF32>& os, const bool negative, const u64_t i, const s64_t, const TNumberFormat& f)
 			{
 				//	<+|-><pad><integer><decimal-mark><fractional><pad><+|->
 
@@ -300,7 +300,7 @@ namespace	cl3
 				os<<buffer;
 			}
 
-			static	void	PrintNumber	(IOut<TUTF32>& os, const TNumberFormat& f, u64_t num, bool negative, bool is_signed)
+			static	void	PrintNumber	(IOut<TUTF32>& os, const TNumberFormat& f, u64_t num, bool negative, bool /*is_signed*/)
 			{
 				PrintNumber(os, negative, num, 1, f);
 			}

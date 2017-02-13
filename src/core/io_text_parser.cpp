@@ -39,7 +39,7 @@ namespace	cl3
 				{
 				}
 
-				EStatus TDisjunction::Parse(const TUTF32*& pos, usys_t length)
+				EStatus TDisjunction::Parse(const TUTF32*& /*pos*/, usys_t /*length*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -52,7 +52,7 @@ namespace	cl3
 				{
 				}
 
-				EStatus TConjunction::Parse(const TUTF32*& pos, usys_t length)
+				EStatus TConjunction::Parse(const TUTF32*& /*pos*/, usys_t /*length*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -65,7 +65,7 @@ namespace	cl3
 				{
 				}
 
-				EStatus TRepetition::Parse(const TUTF32*& pos, usys_t length)
+				EStatus TRepetition::Parse(const TUTF32*& /*pos*/, usys_t /*length*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -78,7 +78,7 @@ namespace	cl3
 				{
 				}
 
-				EStatus TSequence::Parse(const TUTF32*& pos, usys_t length)
+				EStatus TSequence::Parse(const TUTF32*& /*pos*/, usys_t /*length*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -91,7 +91,7 @@ namespace	cl3
 				{
 				}
 
-				EStatus TNegation::Parse(const TUTF32*& pos, usys_t length)
+				EStatus TNegation::Parse(const TUTF32*& /*pos*/, usys_t /*length*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -104,7 +104,7 @@ namespace	cl3
 				{
 				}
 
-				EStatus TLiteralMatcher::Parse(const TUTF32*& pos, usys_t length)
+				EStatus TLiteralMatcher::Parse(const TUTF32*& /*pos*/, usys_t /*length*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -117,7 +117,7 @@ namespace	cl3
 				{
 				}
 
-				EStatus TRangeMatcher::Parse(const TUTF32*& pos, usys_t length)
+				EStatus TRangeMatcher::Parse(const TUTF32*& /*pos*/, usys_t /*length*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -188,7 +188,7 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				usys_t	TParser::Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t	TParser::Write	(const TUTF32* /*arr_items_write*/, usys_t /*n_items_write_max*/, usys_t /*n_items_write_min*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -198,7 +198,7 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS TParser::TParser(const TParserSpec& def)
+				CLASS TParser::TParser(const TParserSpec&)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

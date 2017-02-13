@@ -288,7 +288,7 @@ namespace	cl3
 					memset(this, 0, sizeof(TSoftPT2272::TOnDataData));
 				}
 
-				usys_t	TSoftPT2272::Write			(const bool* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t	TSoftPT2272::Write			(const bool* arr_items_write, usys_t n_items_write_max, usys_t)
 				{
 					const usys_t n_packs = n_items_write_max / 24;
 // 					const usys_t n_items_accept = n_packs * 24;

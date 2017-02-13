@@ -49,7 +49,7 @@ namespace	cl3
 				{
 					#if (CL3_OS == CL3_OS_POSIX)
 						virtual struct ::pollfd __PollInfo() const CL3_GETTER = 0;
-						virtual void __PollResult(short revents) {}
+						virtual void __PollResult(short /*revents*/) {}
 					#elif (CL3_OS == CL3_OS_WINDOWS)
 						virtual HANDLE __Handle() const CL3_GETTER = 0;
 					#else

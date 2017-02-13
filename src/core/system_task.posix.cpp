@@ -270,7 +270,7 @@ namespace	cl3
 			{
 			}
 
-			void TChildProcess::AsyncCallback(TAsyncEventProcessor* aep, synchronization::IWaitable* waitable)
+			void TChildProcess::AsyncCallback(TAsyncEventProcessor*, synchronization::IWaitable* waitable)
 			{
 				byte_t buffer[4096];
 

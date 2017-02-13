@@ -177,7 +177,7 @@ namespace	cl3
 							this->aep = aep;
 						}
 
-						virtual void OnSinkChange(ISink<T>* new_sink) {}
+						virtual void OnSinkChange(ISink<T>*) {}
 
 					public:
 						CL3PUBF void Sink(ISink<T>* new_sink) CL3_SETTER
@@ -202,7 +202,7 @@ namespace	cl3
 						ISource<T>* source;
 
 						//	called before the source is changed
-						virtual void OnSourceChange(ISource<T>* new_source) {}
+						virtual void OnSourceChange(ISource<T>*) {}
 
 					public:
 						CL3PUBF void Source(ISource<T>*) CL3_SETTER;

@@ -456,27 +456,27 @@ namespace	cl3
 
 				//	from IDynamicIterator<T>
 				template<class T>
-				void	TIterator<const T>::Insert	(const T& item_insert)
+				void	TIterator<const T>::Insert	(const T& /*item_insert*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
 				template<class T>
-				void	TIterator<const T>::Insert	(const T* arr_items_insert, usys_t n_items_insert)
+				void	TIterator<const T>::Insert	(const T* /*arr_items_insert*/, usys_t /*n_items_insert*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
 				//	from IOut<T>
 				template<class T>
-				usys_t	TIterator<T>::Write			(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t	TIterator<T>::Write			(const T* /*arr_items_write*/, usys_t /*n_items_write_max*/, usys_t /*n_items_write_min*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
 				//	from IIn<T>
 				template<class T>
-				usys_t	TIterator<const T>::Read		(T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t	TIterator<const T>::Read		(T* /*arr_items_write*/, usys_t /*n_items_write_max*/, usys_t /*n_items_write_min*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -631,7 +631,7 @@ namespace	cl3
 
 				//	from IOut
 				template<class T>
-				usys_t	TList<const T>::Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t	TList<const T>::Write		(const T* arr_items_write, usys_t n_items_write_max, usys_t)
 				{
 					Append(arr_items_write, n_items_write_max);
 					return n_items_write_max;
@@ -932,7 +932,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				usys_t	TList<T>::Write		(uoff_t index, const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
+				usys_t	TList<T>::Write		(uoff_t /*index*/, const T* /*arr_items_write*/, usys_t /*n_items_write_max*/, usys_t /*n_items_write_min*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

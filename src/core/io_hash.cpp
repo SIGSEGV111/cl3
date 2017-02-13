@@ -26,6 +26,29 @@ namespace cl3
 	{
 		namespace hash
 		{
+			namespace _
+			{
+				extern "C" void hashlittle2(const void *key, size_t length, u32_t *pc, u32_t *pb);
+			}
+
+			u64_t JenkinsHash(const byte_t* arr_items, usys_t n_items)
+			{
+				union
+				{
+					struct
+					{
+						u32_t l,h;
+					};
+					u64_t qw;
+				} a;
+
+				a.qw = 0;
+
+				_::hashlittle2(arr_items, n_items, &a.l, &a.h);
+
+				return a.qw;
+			}
+
 			static const u32_t MURMUR_M = 0x5bd1e995;
 
 			void	TMurMur32Hash::Flush()

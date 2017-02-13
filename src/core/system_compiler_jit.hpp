@@ -50,7 +50,7 @@ namespace	cl3
 						llvm::ExecutionEngine* ee;
 
 						CLASS TBinary(const TBinary&) = delete;
-						CL3PUBF CLASS TBinary(llvm::LLVMContext* context, llvm::Module* module);
+						CL3PUBF CLASS TBinary(llvm::LLVMContext* context, llvm::Module* module, u8_t optlvl);
 
 					public:
 						CL3PUBF void* ResolveSymbol(const io::text::string::TString& name) final override CL3_WARN_UNUSED_RESULT;

@@ -41,7 +41,7 @@ namespace	cl3
 				static const u8_t days_of_month_normal[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 				static const u8_t days_of_month_leap[]   = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
-				void	TJulianDate::Set	(s32_t _year, s32_t _month, s32_t _day, s32_t _hour, s32_t _minute, s32_t _second, s64_t _attosecond)
+				void	TJulianDate::Set	(s32_t /*_year*/, s32_t /*_month*/, s32_t /*_day*/, s32_t /*_hour*/, s32_t /*_minute*/, s32_t /*_second*/, s64_t /*_attosecond*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
@@ -84,12 +84,12 @@ namespace	cl3
 
 				/**********************************************************/
 
-				void	TGregorianDate::Set	(s32_t _year, s32_t _month, s32_t _day, s32_t _hour, s32_t _minute, s32_t _second, s64_t _attosecond)
+				void	TGregorianDate::Set	(s32_t /*_year*/, s32_t /*_month*/, s32_t /*_day*/, s32_t /*_hour*/, s32_t /*_minute*/, s32_t /*_second*/, s64_t /*_attosecond*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				TGregorianDate&	TGregorianDate::operator=	(TTime time)
+				TGregorianDate&	TGregorianDate::operator=	(TTime)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

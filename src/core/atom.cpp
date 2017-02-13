@@ -84,32 +84,32 @@ namespace cl3
 
 		/*********************************************************************/
 
-		IAtom* TManager::Load(atom_id_t id, bool copy_orig)
+		IAtom* TManager::Load(atom_id_t, bool /*copy_orig*/)
 		{
 			CL3_NOT_IMPLEMENTED;
 		}
 
-		void TManager::Save(IAtom* a)
+		void TManager::Save(IAtom*)
 		{
 			CL3_NOT_IMPLEMENTED;
 		}
 
-		void TManager::New(IAtom* a)
+		void TManager::New(IAtom*)
 		{
 			CL3_NOT_IMPLEMENTED;
 		}
 
-		void TManager::Delete(atom_id_t id)
+		void TManager::Delete(atom_id_t)
 		{
 			CL3_NOT_IMPLEMENTED;
 		}
 
-		atom_id_t TManager::ParentOf(atom_id_t id)
+		atom_id_t TManager::ParentOf(atom_id_t)
 		{
 			CL3_NOT_IMPLEMENTED;
 		}
 
-		system::time::TTime TManager::BirthdateOf(atom_id_t id)
+		system::time::TTime TManager::BirthdateOf(atom_id_t)
 		{
 			CL3_NOT_IMPLEMENTED;
 		}

@@ -782,7 +782,7 @@ namespace
 	{
 		TString str = "hello;world;foo;bar;123";
 		auto fields = str.Split(";");
-		EXPECT_EQ(5, fields.Count());
+		EXPECT_EQ(5U, fields.Count());
 		EXPECT_EQ(TString("hello"), fields[0]);
 		EXPECT_EQ(TString("world"), fields[1]);
 		EXPECT_EQ(TString("foo"), fields[2]);
@@ -794,7 +794,7 @@ namespace
 	{
 		TString str = "hello DELIMITER world DELIMITER test";
 		auto fields = str.Split(" DELIMITER ");
-		EXPECT_EQ(3, fields.Count());
+		EXPECT_EQ(3U, fields.Count());
 		EXPECT_EQ(TString("hello"), fields[0]);
 		EXPECT_EQ(TString("world"), fields[1]);
 		EXPECT_EQ(TString("test"), fields[2]);
@@ -805,7 +805,7 @@ namespace
 		{
 			TString str = "hello;;foo;bar;123";
 			auto fields = str.Split(";");
-			EXPECT_EQ(5, fields.Count());
+			EXPECT_EQ(5U, fields.Count());
 			EXPECT_EQ(TString("hello"), fields[0]);
 			EXPECT_EQ(TString(""), fields[1]);
 			EXPECT_EQ(TString("foo"), fields[2]);
@@ -815,7 +815,7 @@ namespace
 		{
 			TString str = ";world;foo;bar;123";
 			auto fields = str.Split(";");
-			EXPECT_EQ(5, fields.Count());
+			EXPECT_EQ(5U, fields.Count());
 			EXPECT_EQ(TString(""), fields[0]);
 			EXPECT_EQ(TString("world"), fields[1]);
 			EXPECT_EQ(TString("foo"), fields[2]);
@@ -825,7 +825,7 @@ namespace
 		{
 			TString str = "hello;world;foo;bar;";
 			auto fields = str.Split(";");
-			EXPECT_EQ(5, fields.Count());
+			EXPECT_EQ(5U, fields.Count());
 			EXPECT_EQ(TString("hello"), fields[0]);
 			EXPECT_EQ(TString("world"), fields[1]);
 			EXPECT_EQ(TString("foo"), fields[2]);
@@ -835,7 +835,7 @@ namespace
 		{
 			TString str = " DELIMITER world DELIMITER ";
 			auto fields = str.Split(" DELIMITER ");
-			EXPECT_EQ(3, fields.Count());
+			EXPECT_EQ(3U, fields.Count());
 			EXPECT_EQ(TString(""), fields[0]);
 			EXPECT_EQ(TString("world"), fields[1]);
 			EXPECT_EQ(TString(""), fields[2]);

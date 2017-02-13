@@ -15,8 +15,8 @@ endif ()
 # -Wno-multichar workaround for GCC bug #53431 @ https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53431
 set (CXX_OPT_COMMON_LIB "-Wno-unused-command-line-argument -Wno-unused-parameter -fvisibility-inlines-hidden -std=c++11 -fvisibility=hidden -Wno-unused-function -fPIC -I${GEN_DIR}/include -L${GEN_DIR}/lib -Wno-multichar")
 set (CXX_OPT_COMMON_EXE "-Wno-unused-command-line-argument -Wno-unused-parameter -fvisibility-inlines-hidden -std=c++11 -fvisibility=hidden -Wno-unused-function -fPIE -I${GEN_DIR}/include -L${GEN_DIR}/lib -Wno-multichar")
-set (C_OPT_COMMON_LIB   "-fvisibility=hidden -fPIC -I${GEN_DIR}/include -L${GEN_DIR}/lib")
-set (C_OPT_COMMON_EXE   "-fvisibility=hidden -fPIE -I${GEN_DIR}/include -L${GEN_DIR}/lib")
+set (C_OPT_COMMON_LIB   "-fvisibility=hidden -fPIC -I${GEN_DIR}/include")
+set (C_OPT_COMMON_EXE   "-fvisibility=hidden -fPIE -I${GEN_DIR}/include")
 
 if (${BUILD_TYPE} STREQUAL "release")
 	set (CMAKE_CXX_FLAGS_INT_LIB "${CXX_OPT_COMMON_LIB} -g -O3 -DCL3_RELEASE -DINSIDE_CL3")

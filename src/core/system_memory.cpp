@@ -79,7 +79,7 @@ namespace	cl3
 					cxx_free(p_mem);
 				}
 
-				void*	Realloc	(void* p_mem, usys_t sz_bytes_new, bool inplace)
+				void*	Realloc	(void* p_mem, usys_t sz_bytes_new, bool /*inplace*/)
 				{
 					return cxx_realloc(p_mem, sz_bytes_new);
 				}
