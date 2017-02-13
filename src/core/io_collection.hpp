@@ -242,76 +242,21 @@ namespace	cl3
 				}
 			}
 
-			template<class T>
-			struct	CL3PUBT	IStaticCollection;
-
-			namespace _
-			{
-				template<typename T, bool x>
-				struct TApplyMemberFunction_impl;
-
-				template<typename T>
-				struct TApplyMemberFunction_impl<T, true>
-				{
-					virtual void Apply(void (T::*member_func)())
-					{
-						auto it = static_cast<IStaticCollection<T>>(this)->CreateStaticIterator();
-						it->MoveHead();
-						while(it->MoveNext())
-							(it->Item().*member_func)();
-					}
-
-					typedef const T __CT;
-
-					virtual void Apply(T (__CT::*member_func)())
-					{
-						auto it = static_cast<IStaticCollection<T>>(this)->CreateStaticIterator();
-						it->MoveHead();
-						while(it->MoveNext())
-							it->Item() = (it->Item().*member_func)();
-					}
-				};
-
-				template<typename T>
-				struct TApplyMemberFunction_impl<T, false>
-				{
-				};
-
-
-				template<typename T, bool x>
-				struct TApplyFunctionByValue;
-
-				template<typename T>
-				struct TApplyFunctionByValue<T, true>
-				{
-					template<typename T>
-					void IStaticCollection<T>::Apply(T (*func)(T))
-					{
-						auto it = this->CreateStaticIterator();
-						it->MoveHead();
-						while(it->MoveNext())
-							it->Item() = func(it->Item());
-					}
-				};
-
-				template<typename T>
-				struct TApplyFunctionByValue<T, false>
-				{
-				};
-			}
+			template<typename T>
+			struct	IStaticCollection;
 
 			namespace	bitmask
 			{
-				class	CL3PUBT	TBitmask;
+				class	TBitmask;
 			}
 
 			namespace	list
 			{
-				template<class T>	struct	CL3PUBT	IList;
-				template<class T>	class	CL3PUBT	TList;
+				template<typename T>	struct	IList;
+				template<typename T>	class	TList;
 			}
 
-			class	CL3PUBT	TIndexOutOfBoundsException : public virtual error::TException
+			class CL3PUBT TIndexOutOfBoundsException : public virtual error::TException
 			{
 				public:
 					ssys_t index;
@@ -328,10 +273,10 @@ namespace	cl3
 				DIRECTION_BACKWARD
 			};
 
-			template<class T>	struct	IStaticIterator;
-			template<class T>	struct	IDynamicIterator;
-			template<class T>	struct	IStaticCollection;
-			template<class T>	class	IDynamicCollection;
+			template<typename T>	struct	IStaticIterator;
+			template<typename T>	struct	IDynamicIterator;
+			template<typename T>	struct	IStaticCollection;
+			template<typename T>	class	IDynamicCollection;
 
 			enum	EAction
 			{
@@ -339,7 +284,7 @@ namespace	cl3
 				ACTION_REMOVE
 			};
 
-			template<class T>
+			template<typename T>
 			struct	TOnActionData
 			{
 				EAction action;
@@ -350,8 +295,8 @@ namespace	cl3
 
 			/************************************************************************/
 
-			template<class T>
-			struct	CL3PUBT	IStaticIterator<const T> : virtual stream::IIn<T>
+			template<typename T>
+			struct	IStaticIterator<const T> : virtual stream::IIn<T>
 			{
 				virtual	bool	IsValid		() const CL3_GETTER = 0;	//	returns whether the iterator is placed on a valid item (not on head or tail)
 				virtual	const T& Item		() const CL3_GETTER = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
@@ -364,8 +309,8 @@ namespace	cl3
 				virtual	CLASS	~IStaticIterator	() {}
 			};
 
-			template<class T>
-			struct	CL3PUBT	IStaticIterator : virtual IStaticIterator<const T>, virtual stream::IOut<T>
+			template<typename T>
+			struct	IStaticIterator : virtual IStaticIterator<const T>, virtual stream::IOut<T>
 			{
 				using IStaticIterator<const T>::Item;
 				virtual	T&		Item				() CL3_GETTER = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
@@ -374,16 +319,16 @@ namespace	cl3
 
 			/************************************************************************/
 
-			template<class T>
-			struct	CL3PUBT	IDynamicIterator<const T> : virtual IStaticIterator<const T>
+			template<typename T>
+			struct	IDynamicIterator<const T> : virtual IStaticIterator<const T>
 			{
 				virtual	void	Insert	(const T& item_insert) = 0;	//	inserts an item before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to it
 				virtual	void	Insert	(const T* arr_items_insert, usys_t n_items_insert) = 0;	//	inserts items before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to the first of the inserted items
 				virtual	CLASS	~IDynamicIterator	() {}
 			};
 
-			template<class T>
-			struct	CL3PUBT	IDynamicIterator : virtual IDynamicIterator<const T>, virtual IStaticIterator<T>
+			template<typename T>
+			struct	IDynamicIterator : virtual IDynamicIterator<const T>, virtual IStaticIterator<T>
 			{
 				virtual	void	Remove	() = 0;	//	removes the current item and moves to the first item after the removed (if the collection supports ordering, or at a implementation choosen position otherwise - avoiding head/tail until the last item gets removed)
 				virtual	CLASS	~IDynamicIterator	() {}
@@ -392,7 +337,7 @@ namespace	cl3
 			/************************************************************************/
 
 			template<typename T>
-			struct	CL3PUBT	IStaticCollection<const T> : virtual event::IObservable
+			struct	IStaticCollection<const T> : virtual event::IObservable
 			{
 				virtual	system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT = 0;
 
@@ -403,25 +348,28 @@ namespace	cl3
 				virtual	bool	Contains	(const T& item) const CL3_GETTER = 0;
 			};
 
-			template<class T>
-			struct	CL3PUBT	IStaticCollection :
-				virtual IStaticCollection<const T>,
-				_::TApplyMemberFunction_impl<T, system::types::typeinfo::features::is_class<T>::value>,
-				_::TApplyFunctionByValue<T, system::types::typeinfo::features::is_copy_constructible<T>::value>
+			template<typename T>
+			struct	IStaticCollection :
+				virtual IStaticCollection<const T>
 			{
 				using IStaticCollection<const T>::CreateStaticIterator;
 
 				virtual	system::memory::TUniquePtr<IStaticIterator<T> >			CreateStaticIterator	() CL3_WARN_UNUSED_RESULT = 0;
 
-
-				virtual void Apply(T (*func)(const T&));
-				virtual void Apply(void (*func)(T&));
+				template<typename F>
+				void Apply(F f)
+				{
+					auto it = this->CreateStaticIterator();
+					it->MoveHead();
+					while(it->MoveNext())
+						f(it->Item());
+				}
 			};
 
 			/************************************************************************/
 
-			template<class T>
-			class	CL3PUBT	IDynamicCollection<const T> : public virtual IStaticCollection<const T>, public virtual stream::IOut<T>, public event::TEvent< IDynamicCollection<const T>, TOnActionData<const T> >
+			template<typename T>
+			class	IDynamicCollection<const T> : public virtual IStaticCollection<const T>, public virtual stream::IOut<T>, public event::TEvent< IDynamicCollection<const T>, TOnActionData<const T> >
 			{
 				public:
 					typedef event::TEvent< const IDynamicCollection<const T>, const TOnActionData<const T>& > TOnActionEvent;
@@ -441,8 +389,8 @@ namespace	cl3
 
 			};
 
-			template<class T>
-			class	CL3PUBT	IDynamicCollection : public virtual IDynamicCollection<const T>, public virtual IStaticCollection<T>, public virtual stream::IIn<T>
+			template<typename T>
+			class	IDynamicCollection : public virtual IDynamicCollection<const T>, public virtual IStaticCollection<T>, public virtual stream::IIn<T>
 			{
 				public:
 					using IDynamicCollection<const T>::CreateDynamicIterator;
@@ -453,23 +401,14 @@ namespace	cl3
 
 			/************************************************************************/
 
-			template<typename T>
-			void IStaticCollection<T>::Apply(T (*func)(const T&))
-			{
-				auto it = this->CreateStaticIterator();
-				it->MoveHead();
-				while(it->MoveNext())
-					it->Item() = func(it->Item());
-			}
-
-			template<typename T>
-			void IStaticCollection<T>::Apply(void (*func)(T&))
-			{
-				auto it = this->CreateStaticIterator();
-				it->MoveHead();
-				while(it->MoveNext())
-					func(it->Item());
-			}
+// 			template<typename T, typename F>
+// 			void IStaticCollection<T>::Apply(F f)
+// 			{
+// 				auto it = this->CreateStaticIterator();
+// 				it->MoveHead();
+// 				while(it->MoveNext())
+// 					f(it->Item());
+// 			}
 		}
 	}
 }

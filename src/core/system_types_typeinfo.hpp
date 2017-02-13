@@ -159,8 +159,9 @@ namespace	cl3
 					class is_class
 					{
 						private:
+							//	test if we can define a member-function pointer
 							template<typename U>
-							static decltype( (reinterpret_cast<U*>(_::DUMMY).*reinterpret_cast<void (U::*)()>(_::DUMMY))(), yes()) test(int);
+							static decltype( ((((U*)NULL)->*((void (U::*)())NULL))()), yes() ) test(int);
 
 							template<typename>
 							static no test(...);

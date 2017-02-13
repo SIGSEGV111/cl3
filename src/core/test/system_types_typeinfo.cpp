@@ -288,4 +288,30 @@ namespace
 		//printf("hash = %08x\n", TCTTI<int>::rtti.Hash());
 		EXPECT_TRUE(TCTTI<int>::rtti.Hash() == 0xe333d759);
 	}
+
+	TEST(system_types_typeinfo_features, is_class)
+	{
+		EXPECT_TRUE(features::is_class<TT_Nothing>::value);
+		EXPECT_TRUE(features::is_class<TT_POD>::value);
+		EXPECT_FALSE(features::is_class<void>::value);
+		EXPECT_FALSE(features::is_class<int>::value);
+		EXPECT_FALSE(features::is_class<long>::value);
+		EXPECT_FALSE(features::is_class<short>::value);
+		EXPECT_FALSE(features::is_class<bool>::value);
+
+		EXPECT_FALSE(features::is_class<TT_Nothing*>::value);
+		EXPECT_FALSE(features::is_class<TT_POD*>::value);
+		EXPECT_FALSE(features::is_class<void*>::value);
+		EXPECT_FALSE(features::is_class<int*>::value);
+		EXPECT_FALSE(features::is_class<long*>::value);
+		EXPECT_FALSE(features::is_class<short*>::value);
+		EXPECT_FALSE(features::is_class<bool*>::value);
+
+		EXPECT_FALSE(features::is_class<TT_Nothing&>::value);
+		EXPECT_FALSE(features::is_class<TT_POD&>::value);
+		EXPECT_FALSE(features::is_class<int&>::value);
+		EXPECT_FALSE(features::is_class<long&>::value);
+		EXPECT_FALSE(features::is_class<short&>::value);
+		EXPECT_FALSE(features::is_class<bool&>::value);
+	}
 }
