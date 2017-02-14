@@ -27,7 +27,6 @@
 
 using namespace cl3::system::memory;
 
-
 void* operator new(size_t sz) { return Alloc(sz, NULL); }
 void* operator new[](size_t sz) { return Alloc(sz, NULL); }
 void* operator new(size_t sz, const std::nothrow_t&) throw() { try { return Alloc(sz, NULL); } catch(...) { return NULL; } }

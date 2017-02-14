@@ -30,8 +30,6 @@ namespace	cl3
 		{
 			namespace	json
 			{
-				using namespace text::string;
-				using namespace io::text::string;
 			}
 		}
 	}
