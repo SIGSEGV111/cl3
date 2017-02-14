@@ -21,6 +21,7 @@
 
 #include "io_stream.hpp"
 #include "event.hpp"
+#include "system_types_typeinfo.hpp"
 
 namespace	cl3
 {
@@ -241,18 +242,21 @@ namespace	cl3
 				}
 			}
 
+			template<typename T>
+			struct	IStaticCollection;
+
 			namespace	bitmask
 			{
-				class	CL3PUBT	TBitmask;
+				class	TBitmask;
 			}
 
 			namespace	list
 			{
-				template<class T>	struct	CL3PUBT	IList;
-				template<class T>	class	CL3PUBT	TList;
+				template<typename T>	struct	IList;
+				template<typename T>	class	TList;
 			}
 
-			class	CL3PUBT	TIndexOutOfBoundsException : public virtual error::TException
+			class CL3PUBT TIndexOutOfBoundsException : public virtual error::TException
 			{
 				public:
 					ssys_t index;
@@ -269,10 +273,10 @@ namespace	cl3
 				DIRECTION_BACKWARD
 			};
 
-			template<class T>	struct	IStaticIterator;
-			template<class T>	struct	IDynamicIterator;
-			template<class T>	struct	IStaticCollection;
-			template<class T>	class	IDynamicCollection;
+			template<typename T>	struct	IStaticIterator;
+			template<typename T>	struct	IDynamicIterator;
+			template<typename T>	struct	IStaticCollection;
+			template<typename T>	class	IDynamicCollection;
 
 			enum	EAction
 			{
@@ -280,7 +284,7 @@ namespace	cl3
 				ACTION_REMOVE
 			};
 
-			template<class T>
+			template<typename T>
 			struct	TOnActionData
 			{
 				EAction action;
@@ -291,8 +295,8 @@ namespace	cl3
 
 			/************************************************************************/
 
-			template<class T>
-			struct	CL3PUBT	IStaticIterator<const T> : virtual stream::IIn<T>
+			template<typename T>
+			struct	IStaticIterator<const T> : virtual stream::IIn<T>
 			{
 				virtual	bool	IsValid		() const CL3_GETTER = 0;	//	returns whether the iterator is placed on a valid item (not on head or tail)
 				virtual	const T& Item		() const CL3_GETTER = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
@@ -305,8 +309,8 @@ namespace	cl3
 				virtual	CLASS	~IStaticIterator	() {}
 			};
 
-			template<class T>
-			struct	CL3PUBT	IStaticIterator : virtual IStaticIterator<const T>, virtual stream::IOut<T>
+			template<typename T>
+			struct	IStaticIterator : virtual IStaticIterator<const T>, virtual stream::IOut<T>
 			{
 				using IStaticIterator<const T>::Item;
 				virtual	T&		Item				() CL3_GETTER = 0;	//	returns the current item (throws an exception if the iterator is on head or tail)
@@ -315,16 +319,16 @@ namespace	cl3
 
 			/************************************************************************/
 
-			template<class T>
-			struct	CL3PUBT	IDynamicIterator<const T> : virtual IStaticIterator<const T>
+			template<typename T>
+			struct	IDynamicIterator<const T> : virtual IStaticIterator<const T>
 			{
 				virtual	void	Insert	(const T& item_insert) = 0;	//	inserts an item before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to it
 				virtual	void	Insert	(const T* arr_items_insert, usys_t n_items_insert) = 0;	//	inserts items before the current item (if the collection supports ordering, or at a implementation choosen position otherwise) and moves to the first of the inserted items
 				virtual	CLASS	~IDynamicIterator	() {}
 			};
 
-			template<class T>
-			struct	CL3PUBT	IDynamicIterator : virtual IDynamicIterator<const T>, virtual IStaticIterator<T>
+			template<typename T>
+			struct	IDynamicIterator : virtual IDynamicIterator<const T>, virtual IStaticIterator<T>
 			{
 				virtual	void	Remove	() = 0;	//	removes the current item and moves to the first item after the removed (if the collection supports ordering, or at a implementation choosen position otherwise - avoiding head/tail until the last item gets removed)
 				virtual	CLASS	~IDynamicIterator	() {}
@@ -333,7 +337,7 @@ namespace	cl3
 			/************************************************************************/
 
 			template<typename T>
-			struct	CL3PUBT	IStaticCollection<const T> : virtual event::IObservable
+			struct	IStaticCollection<const T> : virtual event::IObservable
 			{
 				virtual	system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT = 0;
 
@@ -344,18 +348,28 @@ namespace	cl3
 				virtual	bool	Contains	(const T& item) const CL3_GETTER = 0;
 			};
 
-			template<class T>
-			struct	CL3PUBT	IStaticCollection : virtual IStaticCollection<const T>
+			template<typename T>
+			struct	IStaticCollection :
+				virtual IStaticCollection<const T>
 			{
 				using IStaticCollection<const T>::CreateStaticIterator;
 
 				virtual	system::memory::TUniquePtr<IStaticIterator<T> >			CreateStaticIterator	() CL3_WARN_UNUSED_RESULT = 0;
+
+				template<typename F>
+				void Apply(F f)
+				{
+					auto it = this->CreateStaticIterator();
+					it->MoveHead();
+					while(it->MoveNext())
+						f(it->Item());
+				}
 			};
 
 			/************************************************************************/
 
-			template<class T>
-			class	CL3PUBT	IDynamicCollection<const T> : public virtual IStaticCollection<const T>, public virtual stream::IOut<T>, public event::TEvent< IDynamicCollection<const T>, TOnActionData<const T> >
+			template<typename T>
+			class	IDynamicCollection<const T> : public virtual IStaticCollection<const T>, public virtual stream::IOut<T>, public event::TEvent< IDynamicCollection<const T>, TOnActionData<const T> >
 			{
 				public:
 					typedef event::TEvent< const IDynamicCollection<const T>, const TOnActionData<const T>& > TOnActionEvent;
@@ -375,8 +389,8 @@ namespace	cl3
 
 			};
 
-			template<class T>
-			class	CL3PUBT	IDynamicCollection : public virtual IDynamicCollection<const T>, public virtual IStaticCollection<T>, public virtual stream::IIn<T>
+			template<typename T>
+			class	IDynamicCollection : public virtual IDynamicCollection<const T>, public virtual IStaticCollection<T>, public virtual stream::IIn<T>
 			{
 				public:
 					using IDynamicCollection<const T>::CreateDynamicIterator;
@@ -384,6 +398,17 @@ namespace	cl3
 					virtual	void	Clear	() = 0;	//	removes all items from the collection
 					virtual	bool	Remove	(const T& item_remove) = 0;	//	removes the specified item from the collection, the reference is free to point to any valid item - the item needs not to be a member of the collection, if however so, then exactly the specified item is removed, if not, one item which compares equal to the specified item is removed - if multiple items compare equal to the specified item, the implementation is free to choose one among them, if no matching item is found false is returned
 			};
+
+			/************************************************************************/
+
+// 			template<typename T, typename F>
+// 			void IStaticCollection<T>::Apply(F f)
+// 			{
+// 				auto it = this->CreateStaticIterator();
+// 				it->MoveHead();
+// 				while(it->MoveNext())
+// 					f(it->Item());
+// 			}
 		}
 	}
 }

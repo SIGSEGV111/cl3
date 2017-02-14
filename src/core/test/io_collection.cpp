@@ -21,6 +21,7 @@
 #include <cl3/core/io_collection.hpp>
 #include <cl3/core/io_collection_bitmask.hpp>
 #include <cl3/core/io_collection_list.hpp>
+#include <cl3/core/io_text_string.hpp>
 
 using namespace ::testing;
 
@@ -855,52 +856,22 @@ namespace
 	}
 }
 
-// 	TEST(io_collection_list_TList, Find_first)
-// 	{
-// 		for(usys_t n = 0; n <= 1000; n += 97)
-// 		{
-// 			TList<usys_t> list;
-// 			for(usys_t i = 0; i < n; i++)
-// 				list.Add(i/3);
-//
-// 			for(usys_t i = 0; i < n/3; i++)
-// 				EXPECT_EQ(i*3, *list.Find(i, 0, DIRECTION_FORWARD));
-//
-// // 			list.Sorted(true);
-// //
-// // 			for(usys_t i = 0; i < n/3; i++)
-// // 				EXPECT_EQ(i*3, list.Find(i, 0, DIRECTION_FORWARD));
-// 		}
-// 	}
-//
-// 	TEST(io_collection_list_TList, Find_last)
-// 	{
-// 		for(usys_t n = 0; n <= 1000; n += 97)
-// 		{
-// 			TList<usys_t> list;
-// 			for(usys_t i = 0; i < n; i++)
-// 				list.Add(i/3);
-//
-// 			for(usys_t i = 0; i < n/3; i++)
-// 				EXPECT_EQ(i*3+2, *list.Find(i, 0, DIRECTION_BACKWARD));
-//
-// // 			list.Sorted(true);
-// //
-// // 			for(usys_t i = 0; i < n/3; i++)
-// // 				EXPECT_EQ(i*3+2, list.Find(i, 0, DIRECTION_BACKWARD));
-// 		}
-// 	}
+namespace
+{
+	using namespace cl3::io::collection;
+	using namespace cl3::io::collection::list;
+	using namespace cl3::system::types;
+	using namespace cl3::unittest_support;
+	using namespace cl3::io::text::string;
+	using namespace cl3::io::text;
 
+	TEST(io_collection_list_TList, Apply)
+	{
+		TList<TString> strlst = { "test   ", "  foo", "  bbbbar  " };
+		strlst.Apply([](TString& e){ e.Trim(); });
 
-
-
-
-
-
-
-
-
-
-
-
-
+		EXPECT_EQ(TString("test"), strlst[0]);
+		EXPECT_EQ(TString("foo"), strlst[1]);
+		EXPECT_EQ(TString("bbbbar"), strlst[2]);
+	}
+}

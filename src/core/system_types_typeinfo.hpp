@@ -156,6 +156,21 @@ namespace	cl3
 					struct no  { char value[sizeof(yes)+1]; };
 
 					template<typename T>
+					class is_class
+					{
+						private:
+							//	test if we can define a member-function pointer
+							template<typename U>
+							static decltype( ((((U*)NULL)->*((void (U::*)())NULL))()), yes() ) test(int);
+
+							template<typename>
+							static no test(...);
+
+						public:
+							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+					};
+
+					template<typename T>
 					class CL3PUBT	is_default_constructible
 					{
 						private:
