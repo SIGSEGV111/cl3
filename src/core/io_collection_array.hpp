@@ -200,6 +200,7 @@ namespace	cl3
 						const T&	operator[]	(ssys_t rindex) const final override CL3_GETTER;
 						const T*	ItemPtr		(ssys_t rindex) const final override CL3_GETTER;
 
+						CLASS		TArray		(usys_t n_items);
 						CLASS		TArray		(const T* arr_items, usys_t n_items, bool b_claim = true);
 						CLASS		TArray		(const TArray&);
 						CLASS		TArray		(TArray&&);
@@ -231,6 +232,7 @@ namespace	cl3
 						T&			operator[]	(ssys_t rindex) final override CL3_GETTER;
 						T*			ItemPtr		(ssys_t rindex) final override CL3_GETTER;
 
+						CLASS		TArray		(usys_t n_items);
 						CLASS		TArray		(T* arr_items, usys_t n_items, bool b_claim = true);
 						CLASS		TArray		(const TArray&);
 						CLASS		TArray		(TArray&&);
@@ -523,6 +525,13 @@ namespace	cl3
 				}
 
 				template<class T>
+				CLASS		TArray<const T>::TArray		(usys_t n_items) : arr_items((T*)system::memory::Alloc(n_items, &system::types::typeinfo::TCTTI<T>::rtti)), n_items(n_items), b_claim(true), is_sorted(false)
+				{
+					for(usys_t i = 0; i < n_items; i++)
+						new (arr_items + i) T();
+				}
+
+				template<class T>
 				CLASS		TArray<const T>::TArray		(const T* arr_items, usys_t n_items, bool b_claim) : arr_items((T*)arr_items), n_items(n_items), b_claim(b_claim), is_sorted(false)
 				{
 				}
@@ -698,6 +707,11 @@ namespace	cl3
 					const usys_t index = this->AbsIndex(rindex);
 					CL3_CLASS_ERROR(index >= n_items, TIndexOutOfBoundsException, index, n_items);
 					return arr_items[index];
+				}
+
+				template<class T>
+				CLASS		TArray<T>::TArray		(usys_t n_items) : TArray<const T>(n_items)
+				{
 				}
 
 				template<class T>

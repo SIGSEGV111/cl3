@@ -14,7 +14,7 @@ namespace	cl3
 				TArray<T> array;
 				usys_t index;
 
-				CLASS	TLimitedBuffer	(usys_t n_items) : array(n_items ? new T[n_items] : NULL, n_items), index(0) {}
+				CLASS	TLimitedBuffer	(usys_t n_items) : array(n_items), index(0) {}
 				CLASS	~TLimitedBuffer	() {}
 				TLimitedBuffer(const TLimitedBuffer&) = delete;
 				TLimitedBuffer&	operator=(const TLimitedBuffer&) = delete;
