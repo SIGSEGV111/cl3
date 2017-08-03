@@ -22,6 +22,7 @@
 #include <cl3/core/system_memory.hpp>
 #include <cl3/core/util.hpp>
 #include <gtest/gtest.h>
+#include <valgrind/valgrind.h>
 
 using namespace ::testing;
 
@@ -76,6 +77,10 @@ namespace
 
 	TEST(system_memory, New_Delete)
 	{
+		//	valgrind overloads operator new() and thus our allocator won't get called. This here is *NOT* a proper fix, more a workaround until a better solution is available
+		if(RUNNING_ON_VALGRIND != 0)
+			return;
+
 		//	fails if the libcl3-core is linked after libstdc++ (then the wrong operator new() implemention is used)
 		int* x = new int(17);
 		int* y = new int(56);
@@ -137,6 +142,10 @@ namespace
 
 	TEST(system_memory_TRestrictAllocator, accounting)
 	{
+		//	valgrind overloads operator new() and thus our allocator won't get called. This here is *NOT* a proper fix, more a workaround until a better solution is available
+		if(RUNNING_ON_VALGRIND != 0)
+			return;
+
 		//	this test could get influenced by gtest's own memory allocations (currently gtest does not seem to allocates additional memory during test execution)
 		const usys_t sz_limit = 0x10000;
 		usys_t sz_alloc_before = 0;
