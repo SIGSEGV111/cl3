@@ -96,32 +96,28 @@ namespace
 		TRestrictAllocator ra(allocator_generic(), sz_limit);
 		CL3_CONTEXT_VARIABLE_PUSH(allocator_generic, &ra);
 
-		int* x = new int(1);
-		int* y = new int(2);
-		int* z = new int(3);
-
-		EXPECT_TRUE(*x == 1);
-		EXPECT_TRUE(*y == 2);
-		EXPECT_TRUE(*z == 3);
+		int* x = Alloc<int>(1);
+		int* y = Alloc<int>(1);
+		int* z = Alloc<int>(1);
 
 		byte_t* array = NULL;
 
 		//	request one byte more than the limit (this must fail)
-		EXPECT_THROW(array = new byte_t[sz_limit-sizeof(int)*3+1], TBadAllocException);
+		EXPECT_THROW(array = Alloc<byte_t>(sz_limit-sizeof(int)*3+1), TBadAllocException);
 
-		//	if the above succeeded (which it should not, but anyway), we have to delete[] array again
-		//	if the above did not succeeded (as it should), we can safely delete[] a NULL-pointer
-		delete[] array;
+		//	if the above succeeded (which it should not, but anyway), we have to Free() array again
+		//	if the above did not succeeded (as it should), we can safely Free() a NULL-pointer
+		Free(array);
 
 		//	this should work (-256 because of alignment and padding which might be required)
-		array = new byte_t[sz_limit-sizeof(int)*3-256];
+		array = Alloc<byte_t>(sz_limit-sizeof(int)*3-256);
 
 		EXPECT_TRUE(SizeOf(array) >= sz_limit-sizeof(int)*3-256);
 
-		delete[] array;
-		delete x;
-		delete y;
-		delete z;
+		Free(array);
+		Free(x);
+		Free(y);
+		Free(z);
 	}
 
 	TEST(system_memory_TRestrictAllocator, Realloc)

@@ -39,6 +39,9 @@ namespace	cl3
 			namespace	typeinfo
 			{
 				struct	TRTTI;
+
+				template<typename T>
+				struct	TCTTI;
 			}
 		}
 
@@ -64,6 +67,12 @@ namespace	cl3
 			CL3PUBF	void*	Alloc	(usys_t, const typeinfo::TRTTI*) CL3_WARN_UNUSED_RESULT;	//	FIXME: Alloc() should return a TUniquePtr
 			CL3PUBF	void*	Realloc	(void* p_mem, usys_t n_items_new, const typeinfo::TRTTI* rtti, bool inplace) CL3_WARN_UNUSED_RESULT;
 			CL3PUBF	usys_t	SizeOf	(void*) CL3_GETTER;
+
+			template<typename T>
+			T*	Alloc	(usys_t n_items)
+			{
+				return reinterpret_cast<T*>(Alloc(n_items, &types::typeinfo::TCTTI<T>::rtti));
+			}
 
 			enum	EUnqiuePtrType
 			{
