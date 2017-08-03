@@ -295,7 +295,7 @@ namespace	cl3
 
 				PrintInteger(buffer, i, *f.digits);
 
-				fprintf(stderr, "buffer = \"%s\"\n", TCString(buffer, encoding::CODEC_CXX_CHAR).Chars());
+//				fprintf(stderr, "buffer = \"%s\"\n", TCString(buffer, encoding::CODEC_CXX_CHAR).Chars());
 
 				os<<buffer;
 			}
