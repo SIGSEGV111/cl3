@@ -22,7 +22,6 @@
 #include <cl3/core/system_memory.hpp>
 #include <cl3/core/util.hpp>
 #include <gtest/gtest.h>
-#include <valgrind/valgrind.h>
 
 using namespace ::testing;
 
@@ -77,10 +76,6 @@ namespace
 
 	TEST(system_memory, New_Delete)
 	{
-		//	valgrind overloads operator new() and thus our allocator won't get called. This here is *NOT* a proper fix, more a workaround until a better solution is available
-		if(RUNNING_ON_VALGRIND != 0)
-			return;
-
 		//	fails if the libcl3-core is linked after libstdc++ (then the wrong operator new() implemention is used)
 		int* x = new int(17);
 		int* y = new int(56);
@@ -88,8 +83,13 @@ namespace
 		EXPECT_TRUE(*x == 17);
 		EXPECT_TRUE(*y == 56);
 		EXPECT_TRUE(*z == 36);
+
+        //  this is not standard conforming, but required for the allocator framework to function, so we test for it
+        //  hypothetically new() might add own data structures or padding between the allocated memory block start and the returned useable memory region
+        //  we assume there is no such additional offset and assume that our allocator pointer is stored right before the returned usable memory region
 		IDynamicAllocator** p = reinterpret_cast<IDynamicAllocator**>(x)-1;
 		EXPECT_TRUE(*p == allocator_generic());
+
 		delete x;
 		delete y;
 		delete z;
@@ -142,10 +142,6 @@ namespace
 
 	TEST(system_memory_TRestrictAllocator, accounting)
 	{
-		//	valgrind overloads operator new() and thus our allocator won't get called. This here is *NOT* a proper fix, more a workaround until a better solution is available
-		if(RUNNING_ON_VALGRIND != 0)
-			return;
-
 		//	this test could get influenced by gtest's own memory allocations (currently gtest does not seem to allocates additional memory during test execution)
 		const usys_t sz_limit = 0x10000;
 		usys_t sz_alloc_before = 0;
