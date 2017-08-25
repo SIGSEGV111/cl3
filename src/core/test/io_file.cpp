@@ -101,19 +101,27 @@ namespace
 
 	TEST(io_file_TFile, tempfile)
 	{
+		fprintf(stderr, "<1>\n");
 		TFile tmpfile;
+		fprintf(stderr, "<2>\n");
 
 		{
+			fprintf(stderr, "<3>\n");
 			TStream stream(&tmpfile);
+			fprintf(stderr, "<4>\n");
 			stream.Write((const byte_t*)"hello world\n", 12);
+			fprintf(stderr, "<5>\n");
 		}
 
 		{
+			fprintf(stderr, "<6>\n");
 			TStream stream(&tmpfile);
+			fprintf(stderr, "<7>\n");
 			byte_t buffer[16];
 			stream.Read(buffer, 12);
+			fprintf(stderr, "<8>\n");
 			EXPECT_TRUE(memcmp(buffer, "hello world\n", 12) == 0);
+			fprintf(stderr, "<9>\n");
 		}
-
 	}
 }

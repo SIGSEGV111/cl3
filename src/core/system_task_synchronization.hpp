@@ -45,16 +45,17 @@ namespace	cl3
 		{
 			namespace	synchronization
 			{
+				#if (CL3_OS == CL3_OS_POSIX)
+					typedef struct ::pollfd waitinfo_t;
+				#elif (CL3_OS == CL3_OS_WINDOWS)
+					typedef HANDLE waitinfo_t;
+				#else
+					#error
+				#endif
+
 				struct IWaitable
 				{
-					#if (CL3_OS == CL3_OS_POSIX)
-						virtual struct ::pollfd __PollInfo() const CL3_GETTER = 0;
-						virtual void __PollResult(short /*revents*/) {}
-					#elif (CL3_OS == CL3_OS_WINDOWS)
-						virtual HANDLE __Handle() const CL3_GETTER = 0;
-					#else
-						#error
-					#endif
+					virtual waitinfo_t WaitInfo() const CL3_GETTER = 0;
 
 					CL3PUBF bool WaitFor(time::TTime timeout) CL3_WARN_UNUSED_RESULT;
 					inline void WaitFor() { CL3_CLASS_LOGIC_ERROR(!this->WaitFor(time::TTime(-1))); }

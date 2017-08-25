@@ -43,13 +43,7 @@ namespace	cl3
 						bool output;
 						bool error;
 
-						#if (CL3_OS == CL3_OS_POSIX)
-							struct ::pollfd __PollInfo() const final override CL3_GETTER;
-						#elif (CL3_OS == CL3_OS_WINDOWS)
-							HANDLE __Handle() const final override CL3_GETTER;
-						#else
-							#error
-						#endif
+						system::task::synchronization::waitinfo_t WaitInfo() const final override CL3_GETTER;
 
 					public:
 						CL3PUBF CLASS TWaitable();

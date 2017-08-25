@@ -263,7 +263,7 @@ namespace	cl3
 				{
 				}
 
-				struct ::pollfd TWaitable::__PollInfo() const
+				system::task::synchronization::waitinfo_t TWaitable::WaitInfo() const
 				{
 					struct ::pollfd pfd = {
 						this->fd,

@@ -55,7 +55,7 @@ namespace	cl3
 
 					struct pollfd pfds[n_callbacks];
 					for(usys_t i = 0; i < n_callbacks; i++)
-						pfds[i] = callbacks[i]->waitable->__PollInfo();
+						pfds[i] = callbacks[i]->waitable->WaitInfo();
 
 					int n_events;
 					CL3_CLASS_SYSERR(n_events = ::poll(pfds, n_callbacks, timeout.ConvertToI(TIME_UNIT_MILLISECONDS)));

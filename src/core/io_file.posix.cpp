@@ -343,13 +343,6 @@ namespace	cl3
 				struct ::stat s;
 				CL3_CLASS_SYSERR(::fstat(this->fd, &s));
 				return (usys_t)s.st_size;
-
-				/*
-				off64_t off_end, off_current;
-				CL3_CLASS_SYSERR(off_current = lseek64(this->fd, 0, SEEK_CUR));
-				CL3_CLASS_SYSERR(off_end = lseek64(this->fd, 0, SEEK_END));
-				CL3_CLASS_SYSERR(lseek64(this->fd, off_current, SEEK_SET));
-				*/
 			}
 
 			bool	TFile::Contains	(const byte_t&) const
