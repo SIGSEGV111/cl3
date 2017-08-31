@@ -127,8 +127,8 @@ namespace	cl3
 						inline CLASS TValue(bool boolean) : element(system::memory::MakeUniquePtr<IElement>(new TBoolean(boolean))) {}
 						inline CLASS TValue(f64_t number) : element(system::memory::MakeUniquePtr<IElement>(new TNumber(number))) {}
 						inline CLASS TValue(text::string::TString text) : element(system::memory::MakeUniquePtr<IElement>(new TText(text))) {}
-						CL3PUBF CLASS TValue(std::initializer_list<TValue> array);
-						CL3PUBF CLASS TValue(std::initializer_list<TMember> object);
+// 						CL3PUBF CLASS TValue(std::initializer_list<TValue> array);
+// 						CL3PUBF CLASS TValue(std::initializer_list<TMember> object);
 					};
 
 					struct TMember
@@ -142,8 +142,8 @@ namespace	cl3
 						inline CLASS TMember(text::string::TString key, bool boolean) : key(key), value(boolean) {}
 						inline CLASS TMember(text::string::TString key, f64_t number) : key(key), value(number) {}
 						inline CLASS TMember(text::string::TString key, text::string::TString text) : key(key), value(text) {}
-						inline CLASS TMember(text::string::TString key, std::initializer_list<TValue> array) : key(key), value(array) {}
-						inline CLASS TMember(text::string::TString key, std::initializer_list<TMember> object) : key(key), value(object) {}
+// 						inline CLASS TMember(text::string::TString key, std::initializer_list<TValue> array) : key(key), value(array) {}
+// 						inline CLASS TMember(text::string::TString key, std::initializer_list<TMember> object) : key(key), value(object) {}
 					};
 
 					TValue root;
@@ -154,8 +154,8 @@ namespace	cl3
 					inline CLASS TBuilder(bool boolean) : root(boolean) {}
 					inline CLASS TBuilder(f64_t number) : root(number) {}
 					inline CLASS TBuilder(text::string::TString text) : root(text) {}
-					inline CLASS TBuilder(std::initializer_list<TValue> array) : root(array) {}
-					inline CLASS TBuilder(std::initializer_list<TMember> object) : root(object) {}
+// 					inline CLASS TBuilder(std::initializer_list<TValue> array) : root(array) {}
+// 					inline CLASS TBuilder(std::initializer_list<TMember> object) : root(object) {}
 				};
 
 				CL3PUBF void Stringify(const IElement&, text::ITextWriter&);

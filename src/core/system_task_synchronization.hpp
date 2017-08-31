@@ -26,15 +26,6 @@
 #include "io_collection_list.hpp"
 #include "event.hpp"
 
-#if (CL3_OS == CL3_OS_POSIX)
-	#include <pthread.h>
-	#include <poll.h>
-#elif (CL3_OS == CL3_OS_WINDOWS)
-	#include <windows.h>
-#else
-	#error
-#endif
-
 namespace	cl3
 {
 	using namespace system::types;
@@ -45,13 +36,12 @@ namespace	cl3
 		{
 			namespace	synchronization
 			{
-				#if (CL3_OS == CL3_OS_POSIX)
-					typedef struct ::pollfd waitinfo_t;
-				#elif (CL3_OS == CL3_OS_WINDOWS)
-					typedef HANDLE waitinfo_t;
-				#else
-					#error
-				#endif
+				struct waitinfo_t
+				{
+					fd_t fd;
+					short events;
+					short revents;
+				};
 
 				struct IWaitable
 				{

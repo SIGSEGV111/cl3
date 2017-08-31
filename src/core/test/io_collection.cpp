@@ -848,7 +848,11 @@ namespace
 
 	TEST(io_collection_array_TStaticArray, With_TUniquePtr)
 	{
-		TStaticArray<TUniquePtr<int>, 3> array( MakeUniquePtr(new int(0)), MakeUniquePtr(new int(1)), MakeUniquePtr(new int(2)) );
+		TStaticArray<TUniquePtr<int>, 3> array = {
+			cl3::system::def::move(MakeUniquePtr(new int(0))),
+			cl3::system::def::move(MakeUniquePtr(new int(1))),
+			cl3::system::def::move(MakeUniquePtr(new int(2)))
+		};
 
 		EXPECT_EQ(0, *array[0]);
 		EXPECT_EQ(1, *array[1]);
@@ -867,7 +871,10 @@ namespace
 
 	TEST(io_collection_list_TList, Apply)
 	{
-		TList<TString> strlst = { "test   ", "  foo", "  bbbbar  " };
+		TList<TString> strlst;
+		strlst.Append("test   ");
+		strlst.Append("  foo");
+		strlst.Append("  bbbbar  ");
 		strlst.Apply([](TString& e){ e.Trim(); });
 
 		EXPECT_EQ(TString("test"), strlst[0]);

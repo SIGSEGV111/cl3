@@ -149,7 +149,7 @@ namespace	cl3
 
 						CLASS	TBasicList	(const TBasicList& other)
 						{
-							arr_items = Alloc(sizeof(T) * other.n_items);
+							arr_items = system::memory::Alloc(sizeof(T) * other.n_items, NULL);
 							n_items = other.n_items;
 							n_prealloc = 0;
 						}

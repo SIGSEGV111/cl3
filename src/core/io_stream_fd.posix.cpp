@@ -265,7 +265,7 @@ namespace	cl3
 
 				system::task::synchronization::waitinfo_t TWaitable::WaitInfo() const
 				{
-					struct ::pollfd pfd = {
+					system::task::synchronization::waitinfo_t wi = {
 						this->fd,
 						(short)(
 							(this->input ? POLLIN|POLLPRI : 0) |
@@ -274,7 +274,7 @@ namespace	cl3
 						),
 						0
 					};
-					return pfd;
+					return wi;
 				}
 			}
 		}

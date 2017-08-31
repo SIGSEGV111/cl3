@@ -13,14 +13,15 @@ target_link_libraries (cl3-core pthread)
 target_link_libraries (cl3-core cl3-extlib)
 target_link_libraries (cl3-core dl)
 
-
 find_package(LLVM REQUIRED CONFIG)
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 include_directories(${LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
-llvm_map_components_to_libnames(llvm_libs all)
-target_link_libraries(cl3-core ${llvm_libs})
+llvm_map_components_to_libnames(llvm_libs native LLVM${LLVM_NATIVE_ARCH}CodeGen)
+message(STATUS "LLVM libs: ${llvm_libs}")
+target_link_libraries(cl3-core ${llvm_libs} LLVMSupport LLVMCodeGen LLVMExecutionEngine LLVMMCJIT)
+# target_link_libraries(cl3-core LLVM)
 
 add_subdirectory (test)

@@ -14,37 +14,21 @@ export SHELL="$ROOT_DIR/util/clean-term.sh"
 
 mkdir -p gen/{dbg,rel}/{lib,include,bin} tmp/{dbg,rel} gen/dbg/coverage
 
-GTEST_V="1.7.0"
-CPPCHECK_V="1.66"
+GTEST_V="1.8.0"
 
 if ! test -L "tmp/gtest/build"; then
 	echo -n "building google-test framework ... "
 	rm -rf "tmp/gtest"
 	mkdir -p "tmp/gtest"
 	cd "tmp/gtest"
-	unzip "../../util/gtest-$GTEST_V.zip" >/dev/null
-	cd "gtest-$GTEST_V"
-	CXXFLAGS="-fno-lto" ./configure >/dev/null
-	make -s -j $PJOBS >/dev/null
+	tar -xf "../../util/gtest-$GTEST_V.tar.gz"
+	cd "googletest-release-$GTEST_V"
+	cmake . && make -j $PJOBS
 	cd ..
-	ln -nsf "gtest-$GTEST_V" build
+	ln -nsf "googletest-release-$GTEST_V" build
 	echo "done"
 	cd "$ROOT_DIR"
 fi
-
-# if ! test -L "tmp/cppcheck/build"; then
-# 	echo -n "building cppcheck ... "
-# 	rm -rf "tmp/cppcheck"
-# 	mkdir -p "tmp/cppcheck"
-# 	cd "tmp/cppcheck"
-# 	tar -jxf "../../util/cppcheck-$CPPCHECK_V.tar.bz2"
-# 	cd "cppcheck-$CPPCHECK_V"
-# 	make -s -j $PJOBS SRCDIR=build CFGDIR="$ROOT_DIR/util/cppcheck-$CPPCHECK_V/cfg" HAVE_RULES=yes CXX="$(which g++)" >/dev/null
-# 	cd ..
-# 	ln -nsf "cppcheck-$CPPCHECK_V" build
-# 	echo "done"
-# 	cd "$ROOT_DIR"
-# fi
 
 for m in dbg rel; do
 	mkdir -p gen/$m/include/cl3
@@ -54,9 +38,9 @@ for m in dbg rel; do
 		ln -nfs ../../../../src/$f gen/$m/include/cl3/$f
 		ln -nfs ../../../tmp/$m/src/$f/test/cl3-$f-test gen/$m/bin/
 	done
-	ln -nfs ../../../tmp/gtest/build/include/gtest gen/$m/include/gtest
+	ln -nfs ../../../tmp/gtest/build/googletest/include/gtest gen/$m/include/gtest
 
-	for f in tmp/gtest/build/lib/.libs/*; do
+	for f in tmp/gtest/build/googlemock/gtest/*; do
 		ln -nfs ../../../"$f" gen/$m/lib/
 	done
 done

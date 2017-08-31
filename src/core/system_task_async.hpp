@@ -23,13 +23,6 @@
 #include "system_types.hpp"
 #include "system_time.hpp"
 
-#if (CL3_OS == CL3_OS_POSIX)
-	#include <poll.h>
-	#include <pthread.h>
-#elif (CL3_OS == CL3_OS_WINDOWS)
-	#include <windows.h>
-#endif
-
 namespace cl3
 {
 	using namespace system::types;

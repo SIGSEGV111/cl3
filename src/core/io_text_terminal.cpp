@@ -69,6 +69,7 @@ namespace	cl3
 				}
 
 				static system::memory::TUniquePtr<TTerminal> terminal;
+				static system::memory::TUniquePtr<TTerminal> stderr;
 
 				TTerminal& Terminal	()
 				{
@@ -79,6 +80,17 @@ namespace	cl3
 							delete t;
 					}
 					return *terminal.Object();
+				}
+
+				TTerminal& StdErr()
+				{
+					if(stderr == NULL)
+					{
+						TTerminal* t = new TTerminal(&system::task::TLocalProcess::StdErr(), NULL);
+						if(stderr.AtomicSwap(NULL, t) != NULL)
+							delete t;
+					}
+					return *stderr.Object();
 				}
 			}
 		}

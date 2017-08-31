@@ -82,7 +82,7 @@ namespace	cl3
 
 		void	TException::Print	() const
 		{
-			io::text::terminal::Terminal()<<*this;
+			io::text::terminal::StdErr()<<*this;
 		}
 
 		io::text::ITextWriter&	operator<<	(io::text::ITextWriter& tw, const TException& ex)

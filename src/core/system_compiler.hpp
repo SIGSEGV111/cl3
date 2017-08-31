@@ -41,7 +41,7 @@
 #endif
 
 #if ((CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_CLANG) && CL3_OS == CL3_OS_POSIX)
-	#include <alloca.h>
+ 	#include <stddef.h>
 	#include <limits.h>
 #endif
 
@@ -68,7 +68,7 @@
 					typedef	unsigned int	u32_t;
 					typedef	signed int		s32_t;
 				#else
-				#error
+					#error
 				#endif
 
 				#if (ULONG_MAX == 18446744073709551615ULL)
@@ -166,10 +166,19 @@ namespace	cl3
 				PREFETCH_WRITE
 			};
 
-			#if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_CLANG)
-				#define	CL3_THREAD	__thread
+			#if (CL3_CXX == CL3_CXX_GCC)
 				#define	CL3_FCONST	__attribute__((const))
 				#define	CL3_FPURE	__attribute__((pure))
+			#endif
+
+			#if (CL3_CXX == CL3_CXX_CLANG)
+				#define	CL3_FCONST
+				#define	CL3_FPURE
+			#endif
+
+			#if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_CLANG)
+				#define	CL3_THREAD	__thread
+
 
 				#define	CL3_CXX_EXPORT_FUNC	__attribute__ ((visibility("default")))
 				#define	CL3_CXX_IMPORT_FUNC	__attribute__ ((visibility("default")))
@@ -342,17 +351,22 @@ namespace	cl3
 	}
 }
 
+#define _INITIALIZER_LIST
 
-#include <new>
+namespace std
+{
+	template<class T>
+	struct initializer_list
+	{
+		const T* p;
+		size_t l;
 
-CL3PUBF	void* operator new(size_t sz);
-CL3PUBF	void* operator new[](size_t sz);
-CL3PUBF	void* operator new(size_t sz, const std::nothrow_t&) throw();
-CL3PUBF	void* operator new[](size_t sz, const std::nothrow_t&) throw();
+		size_t size() const { return l; }
+		const T* begin() const { return p; }
+		const T* end() const { return p + l; }
 
-CL3PUBF	void  operator delete(void* p_mem) throw();
-CL3PUBF	void  operator delete[](void* p_mem) throw();
-CL3PUBF	void  operator delete(void* p_mem, const std::nothrow_t&) throw();
-CL3PUBF	void  operator delete[](void* p_mem, const std::nothrow_t&) throw();
+		constexpr initializer_list(const T* p, size_t l) : p(p), l(l) {}
+	};
+}
 
 #endif

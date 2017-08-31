@@ -1,0 +1,6 @@
+{
+	"generator" : {
+		"docker_file" : "infrabox/@/Dockerfile"
+	},
+	"version":1
+}

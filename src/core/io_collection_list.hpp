@@ -19,8 +19,6 @@
 #ifndef	_include_cl3_core_io_collection_list_hpp_
 #define	_include_cl3_core_io_collection_list_hpp_
 
-// #include <stdio.h>
-
 #include "io_collection.hpp"
 #include "io_collection_array.hpp"
 #include "error.hpp"
@@ -72,13 +70,13 @@ namespace	cl3
 				struct	CL3PUBT	IList<const T> : virtual IDynamicCollection<const T>, virtual array::IArray<const T>
 				{
 					inline	IList<const T>&	operator+=	(const IStaticCollection<const T>& rhs) { Append(rhs); return *this; }
-					inline	IList<const T>&	operator+=	(std::initializer_list<T> l)
-					{
-// 						this->Prealloc(l.size());
-						for(usys_t i = 0; i < l.size(); i++)
-							this->Append(l.begin()[i]);
-						return *this;
-					}
+// 					inline	IList<const T>&	operator+=	(std::initializer_list<T> l)
+// 					{
+// // 						this->Prealloc(l.size());
+// 						for(usys_t i = 0; i < l.size(); i++)
+// 							this->Append(l.begin()[i]);
+// 						return *this;
+// 					}
 
 					virtual	void	Grow		(usys_t n_items_grow, const T& item_init) = 0;
 
@@ -109,7 +107,7 @@ namespace	cl3
 // 					inline	IList&	operator+=	(const IStaticCollection<T>& rhs) { Append(rhs); return *this; }
 					virtual	IList&	operator=	(const IStaticCollection<T>& rhs) = 0;
 					virtual	IList&	operator=	(IStaticCollection<T>&& rhs) = 0;
-					virtual	IList&	operator=	(std::initializer_list<T>) = 0;
+ 					virtual	IList&	operator=	(std::initializer_list<T>) = 0;
 
 					virtual	void	Count		(usys_t new_count, const T& item_init = T()) CL3_SETTER = 0;	//	reallocates the list to the specified size, removing items at the end when shrinking and appending new items when enlarging (new items get initialized by copy-constructor from "item_init")
 					virtual	T*		Claim		() CL3_WARN_UNUSED_RESULT = 0;	//	takes control of the internal memory of the list
@@ -260,8 +258,8 @@ namespace	cl3
 						explicit CLASS		TList		(const IStaticCollection<const T>&);
 						explicit CLASS		TList		(const TList&);
 						explicit CLASS		TList		(TList&&);
-						CLASS		TList		(std::initializer_list<T>);
 						explicit CLASS		TList		(serialization::IDeserializer&);
+								 CLASS		TList		(std::initializer_list<T>);
 						virtual		~TList		();
 				};
 
@@ -312,7 +310,7 @@ namespace	cl3
 						//	from IList
 						TList<T>&	operator=	(const IStaticCollection<T>& rhs) final override;
 						TList<T>&	operator=	(IStaticCollection<T>&& rhs) final override;
-						TList<T>&	operator=	(std::initializer_list<T>) final override;
+ 						TList<T>&	operator=	(std::initializer_list<T>) final override;
 						T&			operator[]	(ssys_t rindex) final override CL3_GETTER;
 
 						T*			Claim		() final override;
@@ -335,7 +333,7 @@ namespace	cl3
 						CLASS		TList		(const IStaticCollection<const T>&);
 						CLASS		TList		(const TList&);
 						CLASS		TList		(TList&&);
-						CLASS		TList		(std::initializer_list<T>);
+ 						CLASS		TList		(std::initializer_list<T>);
 						virtual		~TList		();
 				};
 
@@ -541,10 +539,13 @@ namespace	cl3
 
 					if((n_items_prealloc < n_items_prealloc_min) || (n_items_prealloc - n_items_prealloc_min > 2 * n_items_prealloc_ideal))
 					{
-						T* arr_items_new = (T*)system::memory::Realloc(arr_items, (n_items_current + n_items_prealloc_ideal + n_items_prealloc_min) * sizeof(T), NULL, true);
+						T* arr_items_new = NULL;
+// 						try { arr_items_new = (T*)system::memory::Realloc(arr_items, (n_items_current + n_items_prealloc_ideal + n_items_prealloc_min) * sizeof(T), NULL, true); }
+// 						catch(const error::TException&) {}	//	FIXME, should be TBadAllocException
+
 						if(!arr_items_new)
 						{
-							arr_items_new = (T*)system::memory::Alloc(n_items_current + n_items_prealloc_ideal + n_items_prealloc_min, NULL);
+							arr_items_new = (T*)system::memory::Alloc((n_items_current + n_items_prealloc_ideal + n_items_prealloc_min) * sizeof(T), NULL);
 
 							usys_t n_items_copied = 0;
 							try

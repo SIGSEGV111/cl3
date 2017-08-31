@@ -167,11 +167,14 @@ namespace	cl3
 							static no test(...);
 
 						public:
-							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+							static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
 
 					template<typename T>
-					class CL3PUBT	is_default_constructible
+					const bool is_class<T>::value;
+
+					template<typename T>
+					class is_default_constructible
 					{
 						private:
 							template<typename U>
@@ -181,11 +184,14 @@ namespace	cl3
 							static no test(...);
 
 						public:
-							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+							static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
 
 					template<typename T>
-					class CL3PUBT	is_copy_constructible
+					const bool is_default_constructible<T>::value;
+
+					template<typename T>
+					class is_copy_constructible
 					{
 						private:
 							template<typename U>
@@ -195,11 +201,14 @@ namespace	cl3
 							static no test(...);
 
 						public:
-							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+							static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
 
 					template<typename T>
-					class CL3PUBT	is_destructible
+					const bool is_copy_constructible<T>::value;
+
+					template<typename T>
+					class is_destructible
 					{
 						private:
 							template<typename U>
@@ -209,11 +218,14 @@ namespace	cl3
 							static no test(...);
 
 						public:
-							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+							static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
 
 					template<typename T>
-					class CL3PUBT	is_serializable
+					const bool is_destructible<T>::value;
+
+					template<typename T>
+					class is_serializable
 					{
 						private:
 							template<typename U>
@@ -223,11 +235,14 @@ namespace	cl3
 							static no test(...);
 
 						public:
-							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+							static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
 
 					template<typename T>
-					class CL3PUBT	is_deserializable_instance
+					const bool is_serializable<T>::value;
+
+					template<typename T>
+					class is_deserializable_instance
 					{
 						private:
 							template<typename U>
@@ -237,11 +252,14 @@ namespace	cl3
 							static no test(...);
 
 						public:
-							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+							static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
 
 					template<typename T>
-					class CL3PUBT	is_deserializable_ctor
+					const bool is_deserializable_instance<T>::value;
+
+					template<typename T>
+					class is_deserializable_ctor
 					{
 						private:
 							template<typename U>
@@ -251,11 +269,14 @@ namespace	cl3
 							static no test(...);
 
 						public:
-							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+							static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
 
 					template<typename T>
-					class CL3PUBT	is_printable
+					const bool is_deserializable_ctor<T>::value;
+
+					template<typename T>
+					class is_printable
 					{
 						private:
 							template<typename U>
@@ -265,11 +286,14 @@ namespace	cl3
 							static no test(...);
 
 						public:
-							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+							static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
 
 					template<typename T>
-					class CL3PUBT	is_comparable_lessthan
+					const bool is_printable<T>::value;
+
+					template<typename T>
+					class is_comparable_lessthan
 					{
 						private:
 							template<typename U>
@@ -279,11 +303,14 @@ namespace	cl3
 							static no test(...);
 
 						public:
-							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+							static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
 
 					template<typename T>
-					class CL3PUBT	is_comparable_biggerthan
+					const bool is_comparable_lessthan<T>::value;
+
+					template<typename T>
+					class is_comparable_biggerthan
 					{
 						private:
 							template<typename U>
@@ -293,11 +320,14 @@ namespace	cl3
 							static no test(...);
 
 						public:
-							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+							static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
 
 					template<typename T>
-					class CL3PUBT	is_comparable_equal
+					const bool is_comparable_biggerthan<T>::value;
+
+					template<typename T>
+					class is_comparable_equal
 					{
 						private:
 							template<typename U>
@@ -307,18 +337,24 @@ namespace	cl3
 							static no test(...);
 
 						public:
-							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+							static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
 
 					template<typename T>
-					class CL3PUBT	is_comparable
+					const bool is_comparable_equal<T>::value;
+
+					template<typename T>
+					class is_comparable
 					{
 						public:
-							CL3PUBF	static const bool value = is_comparable_biggerthan<T>::value && is_comparable_lessthan<T>::value && is_comparable_equal<T>::value;
+							static const bool value = is_comparable_biggerthan<T>::value && is_comparable_lessthan<T>::value && is_comparable_equal<T>::value;
 					};
 
 					template<typename T>
-					class CL3PUBT	is_assignable
+					const bool is_comparable<T>::value;
+
+					template<typename T>
+					class is_assignable
 					{
 						private:
 							template<typename U>
@@ -328,15 +364,21 @@ namespace	cl3
 							static no test(...);
 
 						public:
-							CL3PUBF	static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+							static const bool value = sizeof(test<T>(0)) == sizeof(yes);
 					};
 
 					template<typename T>
-					class CL3PUBT	is_boolean
+					const bool is_assignable<T>::value;
+
+					template<typename T>
+					class is_boolean
 					{
 						public:
-							CL3PUBF	static const bool value = _::is_boolean_impl<T, std::is_integral<T>::value && is_comparable_equal<T>::value>::value;
+							static const bool value = _::is_boolean_impl<T, std::is_integral<T>::value && is_comparable_equal<T>::value>::value;
 					};
+
+					template<typename T>
+					const bool is_boolean<T>::value;
 				}
 
 				struct	CL3PUBT	TRTTI

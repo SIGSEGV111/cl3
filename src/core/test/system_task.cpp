@@ -22,6 +22,7 @@
 #include <cl3/core/system_memory.hpp>
 #include <cl3/core/io_collection_list.hpp>
 #include <cl3/core/io_text.hpp>
+#include <cl3/core/io_text_terminal.hpp>
 #include <cl3/core/io_file.hpp>
 #include <cl3/core/io_text_string.hpp>
 #include <cl3/core/io_text_encoding.hpp>
@@ -95,12 +96,15 @@ namespace
 
 		input.Append((const byte_t*)"a\nz\ne\nx\n", 8);
 
-		TChildProcess cp("/bin/sort", args, TLocalProcess::Self()->Environment(), &input, &output);
+		TChildProcess cp("/usr/bin/sort", args, TLocalProcess::Self()->Environment(), &input, &output);
 
 		//	FIXME: TAsyncEventProcessor should not be used like this
 		//	WARNING: below code is plain out wrong and WIP
 		while(TAsyncEventProcessor::Default().CountCallbacks() > 0)
 			TAsyncEventProcessor::Default().ProcessEvents();
+
+		fprintf(stderr, "output.Count() = %zu\n", output.Count());
+		cl3::util::Hexdump(output.ItemPtr(0), output.Count(), cl3::io::text::terminal::Terminal());
 
 		EXPECT_TRUE(output.Count() == 8 && memcmp(output.ItemPtr(0), "a\ne\nx\nz\n", 8) == 0);
 	}

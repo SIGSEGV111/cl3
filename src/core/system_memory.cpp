@@ -22,7 +22,11 @@
 
 #include "system_memory.hpp"
 #include "system_types_typeinfo.hpp"
-#include <malloc.h>
+
+#include <sys/mman.h>
+#include <string.h>
+
+using namespace cl3::system::types;
 
 namespace	cl3
 {
@@ -38,56 +42,53 @@ namespace	cl3
 
 			/*******************************************************/
 
-			static	void	cxx_free	(void* p_mem)
-			{
-				::free(p_mem);
-			}
-
-			static	void*	cxx_malloc	(usys_t sz_bytes)
-			{
-				//	malloc() will not be called when sz_bytes == 0, so p must be initilized to NULL
-				void* p = NULL;
-				CL3_NONCLASS_ERROR(sz_bytes != 0 && (p = ::malloc(sz_bytes)) == NULL, TBadAllocException, sz_bytes);
-				return p;
-			}
-
-			static	void*	cxx_realloc	(void* p_mem, usys_t sz_bytes)
-			{
-				//	realloc() will not be called when sz_bytes == 0, so p must be initilized to NULL
-				void* p = NULL;
-				CL3_NONCLASS_ERROR(sz_bytes != 0 && (p = ::realloc(p_mem, sz_bytes)) == NULL, TBadAllocException, sz_bytes);
-				return p;
-			}
-
-			static	usys_t	cxx_sizeof	(void* p_mem)
-			{
-				//	FIXME: this is linux specific
-				return ::malloc_usable_size(p_mem);
-			}
-
-			/*******************************************************/
-
 			struct	TDefaultAllocator : IDynamicAllocator
 			{
 				void*	Alloc	(usys_t sz_bytes)
 				{
-					return cxx_malloc(sz_bytes);
+					sz_bytes += sizeof(usys_t);
+					usys_t* p;
+
+					if( (sz_bytes % def::CL3_OPT__PAGE_SIZE) != 0 )
+						sz_bytes = ((sz_bytes / def::CL3_OPT__PAGE_SIZE)+1) * def::CL3_OPT__PAGE_SIZE;
+
+					CL3_CLASS_SYSERR(p = (usys_t*)mmap(NULL, sz_bytes, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0));
+					*p++ = sz_bytes;
+					return p;
 				}
 
 				void	Free	(void* p_mem)
 				{
-					cxx_free(p_mem);
+					usys_t* p = (usys_t*)p_mem;
+					p--;
+					CL3_CLASS_SYSERR(munmap(p, *p));
 				}
 
-				void*	Realloc	(void* p_mem, usys_t sz_bytes_new, bool /*inplace*/)
+				void*	Realloc	(void* p_mem, usys_t sz_bytes_new, bool inplace)
 				{
-					return cxx_realloc(p_mem, sz_bytes_new);
+					usys_t* p = (usys_t*)p_mem;
+					p--;
+					sz_bytes_new += sizeof(usys_t);
+
+					if( (sz_bytes_new % def::CL3_OPT__PAGE_SIZE) != 0 )
+						sz_bytes_new = ((sz_bytes_new / def::CL3_OPT__PAGE_SIZE)+1) * def::CL3_OPT__PAGE_SIZE;
+
+					if(*p == sz_bytes_new)
+						return p+1;
+
+					CL3_CLASS_SYSERR(p = (usys_t*)mremap(p, *p, sz_bytes_new, inplace ? 0 : MREMAP_MAYMOVE));
+					*p++ = sz_bytes_new;
+					return p;
 				}
 
 				usys_t	SizeOf	(void* p_mem) const
 				{
 					if(p_mem)
-						return cxx_sizeof(p_mem);
+					{
+						usys_t* p = (usys_t*)p_mem;
+						p--;
+						return *p;
+					}
 					else
 						return 0;	//	LCOV_EXCL_LINE
 				}
@@ -225,4 +226,74 @@ namespace	cl3
 			}
 		}
 	}
+}
+
+extern "C"
+{
+	void* malloc(usys_t sz_bytes) throw()
+	{
+		void* v = NULL;
+		try { v = cl3::system::memory::Alloc(sz_bytes, NULL); } catch(...) {}
+		return v;
+	}
+
+	void* realloc(void* p, usys_t sz_bytes_new) throw()
+	{
+		void* v = NULL;
+		try { v = cl3::system::memory::Realloc(p, sz_bytes_new, NULL, false); } catch(...) {}
+		return v;
+	}
+
+	void free(void* p) throw()
+	{
+		try { cl3::system::memory::Free(p); } catch(...) {}
+	}
+
+	void *calloc(usys_t n_items, size_t sz_item) throw()
+	{
+		const usys_t sz_bytes = n_items * sz_item;
+		void* v = malloc(sz_bytes);
+		if(v != NULL)
+			memset(v, 0, sz_bytes);
+		return v;
+	}
+};
+
+void* operator new(size_t sz)
+{
+	void* v;
+	CL3_NONCLASS_ERROR((v = malloc(sz)) == NULL, cl3::system::memory::TBadAllocException, sz);
+	return v;
+}
+
+void* operator new[](size_t sz)
+{
+	void* v;
+	CL3_NONCLASS_ERROR((v = malloc(sz)) == NULL, cl3::system::memory::TBadAllocException, sz);
+	return v;
+}
+
+void* operator new(size_t, void* p) throw()
+{
+	return p;
+}
+
+void* operator new(size_t sz, const std::nothrow_t&) throw()
+{
+	return malloc(sz);
+}
+
+void* operator new[](size_t sz, const std::nothrow_t&) throw()
+{
+	return malloc(sz);
+}
+
+void operator delete(void* p) throw()
+{
+	free(p);
+}
+
+void operator delete[](void* p) throw()
+{
+	free(p);
 }

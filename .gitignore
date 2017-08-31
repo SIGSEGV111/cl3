@@ -23,3 +23,6 @@ test/coverage/libcl3-mm.txt
 test/coverage/libcl3-db.txt
 tmp
 gen
+
+.infrabox/
+.infrabox/

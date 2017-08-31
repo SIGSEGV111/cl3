@@ -19,8 +19,6 @@
 #ifndef	_include_cl3_core_io_collection_array_hpp_
 #define	_include_cl3_core_io_collection_array_hpp_
 
-#include <utility>
-
 #include "io_collection.hpp"
 #include "system_types_typeinfo.hpp"
 
@@ -200,8 +198,9 @@ namespace	cl3
 						const T&	operator[]	(ssys_t rindex) const final override CL3_GETTER;
 						const T*	ItemPtr		(ssys_t rindex) const final override CL3_GETTER;
 
-						CLASS		TArray		(usys_t n_items);
-						CLASS		TArray		(const T* arr_items, usys_t n_items, bool b_claim = true);
+						explicit	CLASS		TArray		(usys_t n_items);
+						constexpr	CLASS		TArray		(const T* arr_items, usys_t n_items, bool b_claim = true);
+
 						CLASS		TArray		(const TArray&);
 						CLASS		TArray		(TArray&&);
 						CLASS		~TArray		();
@@ -232,8 +231,9 @@ namespace	cl3
 						T&			operator[]	(ssys_t rindex) final override CL3_GETTER;
 						T*			ItemPtr		(ssys_t rindex) final override CL3_GETTER;
 
-						CLASS		TArray		(usys_t n_items);
-						CLASS		TArray		(T* arr_items, usys_t n_items, bool b_claim = true);
+						explicit	CLASS		TArray		(usys_t n_items);
+						constexpr	CLASS		TArray		(T* arr_items, usys_t n_items, bool b_claim = true);
+
 						CLASS		TArray		(const TArray&);
 						CLASS		TArray		(TArray&&);
 						CLASS		~TArray		();
@@ -532,7 +532,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TArray<const T>::TArray		(const T* arr_items, usys_t n_items, bool b_claim) : arr_items((T*)arr_items), n_items(n_items), b_claim(b_claim), is_sorted(false)
+				constexpr CLASS		TArray<const T>::TArray		(const T* arr_items, usys_t n_items, bool b_claim) : arr_items((T*)arr_items), n_items(n_items), b_claim(b_claim), is_sorted(false)
 				{
 				}
 
@@ -608,11 +608,13 @@ namespace	cl3
 								for(usys_t i = 0; i < high-low; i++)
 									if(item_find == arr_items[low+i])
 										return low+i;
+								break;
 
 							case DIRECTION_BACKWARD:
 								for(usys_t i = 0; i < high-low; i++)
 									if(item_find == arr_items[high-1-i])
 										return high-1-i;
+								break;
 						}
 
 						return (usys_t)-1;
@@ -632,11 +634,13 @@ namespace	cl3
 								for(usys_t i = 0; i < high-low; i++)
 									if(item_find == arr_items[low+i])
 										return low+i;
+								break;
 
 							case DIRECTION_BACKWARD:
 								for(usys_t i = 0; i < high-low; i++)
 									if(item_find == arr_items[high-1-i])
 										return high-1-i;
+								break;
 						}
 
 						return (usys_t)-1;
@@ -715,7 +719,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TArray<T>::TArray		(T* arr_items, usys_t n_items, bool b_claim) : TArray<const T>(arr_items, n_items, b_claim)
+				constexpr CLASS		TArray<T>::TArray		(T* arr_items, usys_t n_items, bool b_claim) : TArray<const T>(arr_items, n_items, b_claim)
 				{
 				}
 
@@ -752,19 +756,19 @@ namespace	cl3
 						void RecursiveInitItems(usys_t index, const T& a0, const Args&... args)
 						{
 							this->arr_items[index] = a0;
-							this->RecursiveInitItems(index + 1, args...);
+							this->RecursiveInitItems(index + 1, system::def::forward<const Args&>(args)...);
 						}
 
 						void RecursiveInitItems(usys_t index, T&& a0)
 						{
-							this->arr_items[index] = std::move(a0);
+							this->arr_items[index] = system::def::move(a0);
 						}
 
 						template<typename... Args>
 						void RecursiveInitItems(usys_t index, T&& a0, Args&&... args)
 						{
-							this->arr_items[index] = std::move(a0);
-							this->RecursiveInitItems(index + 1, std::forward<Args>(args)...);
+							this->arr_items[index] = system::def::move(a0);
+							this->RecursiveInitItems(index + 1, system::def::move(args)...);
 						}
 
 					public:
@@ -778,22 +782,22 @@ namespace	cl3
 						const T*	ItemPtr		(ssys_t index) const final override CL3_GETTER { return this->arr_items + this->AbsIndex(index); }
 
 						CLASS explicit TStaticArray() {}
-						CLASS explicit TStaticArray(const T* arr_items_init, usys_t n_items_init);
+						CLASS TStaticArray(const T* arr_items_init, usys_t n_items_init);
 
 						template<typename... Args>
-						CLASS explicit TStaticArray(const T& a0, const Args&... args)
+						CLASS TStaticArray(const T& a0, const Args&... args)
 						{
 							static_assert(sizeof...(Args) == n_items-1, "number of args must match n_items");
 							this->arr_items[0] = a0;
-							this->RecursiveInitItems(1, args...);
+							this->RecursiveInitItems(1, system::def::forward<const Args&>(args)...);
 						}
 
 						template<typename... Args>
-						CLASS explicit TStaticArray(T&& a0, Args&&... args)
+						CLASS TStaticArray(T&& a0, Args&&... args)
 						{
 							static_assert(sizeof...(Args) == n_items-1, "number of args must match n_items");
-							this->arr_items[0] = std::move(a0);
-							this->RecursiveInitItems(1, std::forward<Args>(args)...);
+							this->arr_items[0] = system::def::move(a0);
+							this->RecursiveInitItems(1, system::def::move(args)...);
 						}
 				};
 
@@ -814,13 +818,13 @@ namespace	cl3
 						T*		ItemPtr		(ssys_t index) final override CL3_GETTER { return this->arr_items + this->AbsIndex(index); }
 
 						CLASS explicit TStaticArray() {}
-						CLASS explicit TStaticArray(const T* arr_items_init, usys_t n_items_init) : TStaticArray<const T, n_items>(arr_items_init, n_items_init) {}
+						CLASS TStaticArray(const T* arr_items_init, usys_t n_items_init) : TStaticArray<const T, n_items>(arr_items_init, n_items_init) {}
 
 						template<typename... Args>
-						CLASS explicit TStaticArray(const T& a0, const Args&... args) : TStaticArray<const T, n_items>(a0, args...) {}
+						CLASS TStaticArray(const T& a0, const Args&... args) : TStaticArray<const T, n_items>(system::def::forward<const T&>(a0), system::def::forward<const Args&>(args)...) {}
 
 						template<typename... Args>
-						CLASS explicit TStaticArray(T&& a0, Args&&... args) : TStaticArray<const T, n_items>(std::forward<T>(a0), std::forward<Args>(args)...) {}
+						CLASS TStaticArray(T&& a0, Args&&... args) : TStaticArray<const T, n_items>(system::def::move(a0), system::def::move(args)...) {}
 				};
 
 				template<class T, usys_t n_items>

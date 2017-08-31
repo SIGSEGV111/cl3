@@ -19,16 +19,40 @@
 #ifndef	_include_cl3_core_system_memory_hpp_
 #define	_include_cl3_core_system_memory_hpp_
 
-#include <utility>
+// #include <utility>
 
 #include "system_compiler.hpp"
 #include "system_types.hpp"
 #include "error.hpp"
 #include "context.hpp"
 
-#include <stdio.h>
+extern "C"
+{
+	CL3PUBF void* malloc(cl3::system::types::usys_t sz_bytes) throw();
+	CL3PUBF void* realloc(void* p, cl3::system::types::usys_t sz_bytes_new) throw();
+	CL3PUBF void free(void* p) throw();
+	CL3PUBF void *calloc(cl3::system::types::usys_t n_items, cl3::system::types::usys_t sz_item) throw();
+};
 
-extern "C" void free(void*) throw();
+namespace std
+{
+	struct nothrow_t;
+}
+
+CL3PUBF void* operator new(size_t sz);
+CL3PUBF void* operator new[](size_t sz);
+CL3PUBF void* operator new(size_t sz, void* p) throw();
+CL3PUBF void* operator new(size_t sz, const std::nothrow_t&) throw();
+CL3PUBF void* operator new[](size_t sz, const std::nothrow_t&) throw();
+
+CL3PUBF void* operator new(unsigned long sz);
+CL3PUBF void* operator new[](unsigned long sz);
+CL3PUBF void* operator new(unsigned long sz, void* p) throw();
+CL3PUBF void* operator new(unsigned long sz, const std::nothrow_t&) throw();
+CL3PUBF void* operator new[](unsigned long sz, const std::nothrow_t&) throw();
+
+CL3PUBF void operator delete(void* p) throw();
+CL3PUBF void operator delete[](void* p) throw();
 
 namespace	cl3
 {
@@ -110,11 +134,15 @@ namespace	cl3
 								::free((void*)object);
 								break;
 						};
+
+						this->object = (T*)0xDEADBEAF;
 					}
 
 				public:
 					TUniquePtr&	operator=	(TUniquePtr&& rhs)
 					{
+						CL3_CLASS_LOGIC_ERROR(this == &rhs);
+						CL3_CLASS_LOGIC_ERROR(this->object != NULL && this->object == rhs.object);
 						this->Release();
 						this->object = rhs.object;
 						rhs.object = NULL;
@@ -123,6 +151,7 @@ namespace	cl3
 
 					void		Object		(T* new_object) CL3_SETTER
 					{
+						CL3_CLASS_LOGIC_ERROR(this->object != NULL && this->object == new_object);
 						this->Release();
 						this->object = new_object;
 					}
@@ -148,13 +177,29 @@ namespace	cl3
 						return compiler::AtomicSwap(this->object, (T*)compare, new_value);
 					}
 
-					CLASS	TUniquePtr	() throw() : object(NULL) {}
-					CLASS	TUniquePtr	(TUniquePtr&& rhs) throw() : object(rhs.object) { rhs.object = NULL; }
+					CLASS	TUniquePtr	() throw() : object(NULL)
+					{
+					}
+
+					CLASS	TUniquePtr	(TUniquePtr&& rhs) throw() : object(rhs.object)
+					{
+						rhs.object = NULL;
+					}
+
 					CLASS	~TUniquePtr	() { this->Release(); }
 			};
 
-			template<class T> CL3_GETTER static TUniquePtr<T, UPTR_OBJECT> MakeUniquePtr(T* object) { TUniquePtr<T, UPTR_OBJECT> uptr; uptr.Object(object); return uptr; }
-			template<EUnqiuePtrType type, class T> CL3_GETTER static TUniquePtr<T, type> MakeUniquePtr(T* object) { TUniquePtr<T, type> uptr; uptr.Object(object); return uptr; }
+			template<class T> CL3_GETTER static TUniquePtr<T, UPTR_OBJECT> MakeUniquePtr(T* object)
+			{
+				TUniquePtr<T, UPTR_OBJECT> uptr;
+				uptr.Object(object);
+				return system::def::move(uptr);
+			}
+
+			template<EUnqiuePtrType type, class T> CL3_GETTER static TUniquePtr<T, type> MakeUniquePtr(T* object)
+			{
+				TUniquePtr<T, type> uptr; uptr.Object(object); return uptr;
+			}
 
 			enum	EThreading
 			{
@@ -170,7 +215,6 @@ namespace	cl3
 
 				inline void DecRef()
 				{
-// 					printf("%p: DecRef(%p) => %d\n", this, obj, n_refs - 1);
 					CL3_CLASS_LOGIC_ERROR(this->n_refs < 1);
 					if(compiler::AtomicSub(this->n_refs, 1U) == 1)
 					{
@@ -181,15 +225,12 @@ namespace	cl3
 
 				inline void IncRef()
 				{
-// 					printf("%p: IncRef(%p) => %d\n", this, obj, n_refs + 1);
 					compiler::AtomicAdd(this->n_refs, 1U);
 				}
 
 				inline CLASS TSharedInfo(void* obj, void (*FDelete)(void*)) : n_refs(0), obj(obj), FDelete(FDelete)
 				{
-// 					printf("%p: TSharedInfo()\n", this);
 				}
-// 				inline CLASS ~TSharedInfo() { printf("%p: ~TSharedInfo()\n", this); }
 			};
 
 			template<typename T>

@@ -27,6 +27,8 @@
 #include "system_task_synchronization.hpp"
 #include "io_collection_list.hpp"
 
+#include <poll.h>
+
 namespace	cl3
 {
 	namespace	system
@@ -53,12 +55,12 @@ namespace	cl3
 
 					const usys_t n_callbacks = callbacks.Count();
 
-					struct pollfd pfds[n_callbacks];
+					waitinfo_t pfds[n_callbacks];
 					for(usys_t i = 0; i < n_callbacks; i++)
 						pfds[i] = callbacks[i]->waitable->WaitInfo();
 
 					int n_events;
-					CL3_CLASS_SYSERR(n_events = ::poll(pfds, n_callbacks, timeout.ConvertToI(TIME_UNIT_MILLISECONDS)));
+					CL3_CLASS_SYSERR(n_events = ::poll((struct pollfd*)pfds, n_callbacks, timeout.ConvertToI(TIME_UNIT_MILLISECONDS)));
 
 					if(n_events > 0)
 						for(usys_t i = 0; i < n_callbacks; i++)

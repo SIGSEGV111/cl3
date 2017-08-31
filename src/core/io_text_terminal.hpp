@@ -56,6 +56,7 @@ namespace	cl3
 				};
 
 				CL3PUBF TTerminal& Terminal	() CL3_GETTER;
+				CL3PUBF TTerminal& StdErr	() CL3_GETTER;
 			}
 		}
 	}

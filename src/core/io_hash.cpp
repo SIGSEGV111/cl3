@@ -124,9 +124,9 @@ namespace cl3
 
 				switch(this->n_partial)
 				{
-					case 3: h_local ^= this->arr_partial[2] << 16;
-					case 2: h_local ^= this->arr_partial[1] << 8;
-					case 1: h_local ^= this->arr_partial[0];
+					case 3: h_local ^= this->arr_partial[2] << 16; break;
+					case 2: h_local ^= this->arr_partial[1] << 8; break;
+					case 1: h_local ^= this->arr_partial[0]; break;
 				   h_local *= MURMUR_M;
 				};
 

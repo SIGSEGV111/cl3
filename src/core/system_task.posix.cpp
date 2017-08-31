@@ -392,10 +392,11 @@ namespace	cl3
 								env_cstr[i] = (char*)TCString(it->Item().key + "=" + it->Item().value, CODEC_CXX_CHAR).Claim();
 						}
 
-						::execvpe(args_cstr[0], (char**)args_cstr.ItemPtr(0), (char**)env_cstr.ItemPtr(0));
+						CL3_NONCLASS_SYSERR(::execvpe(args_cstr[0], (char**)args_cstr.ItemPtr(0), (char**)env_cstr.ItemPtr(0)));
 					}
-					catch(...)
+					catch(const TException& e)
 					{
+						e.Print();
 					}
 					::_exit(1);
 					CL3_NONCLASS_LOGIC_ERROR(true);

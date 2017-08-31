@@ -135,7 +135,7 @@ namespace cl3
 			public:
 				void Serialize(io::serialization::ISerializer&) const final override;
 
-				CL3PUBF bool BeforeDispose();
+				CL3PUBF bool BeforeDispose() override;
 
 				CL3PUBF atom_id_t AtomID() const CL3_GETTER;
 				CL3PUBF void Save() const;

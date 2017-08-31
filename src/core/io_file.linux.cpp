@@ -59,14 +59,20 @@ namespace	cl3
 				this->fd = open(TCString(cwd.AbsolutePath(), CODEC_CXX_CHAR).Chars(), flags, mode);
 				if(this->fd == -1)
 				{
-					if(errno == EOPNOTSUPP || errno == EINVAL)
+					::system("mount; echo; pwd; echo; df -h .");
+
+					if(errno == EOPNOTSUPP || errno == EINVAL || errno == EISDIR)
 					{
+						perror("O_TMPFILE not supported by kernel/filesystem");
 						const TCString tmpfile_name(cwd.AbsolutePath() + L"/.cl3tmp-XXXXXX", CODEC_CXX_CHAR);
 						CL3_CLASS_SYSERR(this->fd = mkostemp((char*)tmpfile_name.Chars(), O_CLOEXEC|O_NOCTTY|O_LARGEFILE|O_RDWR));
 						CL3_CLASS_SYSERR(::unlink(tmpfile_name.Chars()));
 					}
 					else
+					{
+						perror("open call failed with unhandled error code");
 						CL3_CLASS_FAIL(TSyscallException, errno);
+					}
 				}
 			}
 

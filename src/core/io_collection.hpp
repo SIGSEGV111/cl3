@@ -142,7 +142,7 @@ namespace	cl3
 
 					virtual void Insert(const TKeyS, const TValue&) = 0;
 					virtual void Insert(const IBasicCollection<const TPair<TKeyS, TValue> >&) = 0;
-					virtual void Insert(std::initializer_list<TPair<TKey, TValue> >) = 0;
+// 					virtual void Insert(std::initializer_list<TPair<TKey, TValue> >) = 0;
 				};
 
 				template<typename TKey, typename TValue>
@@ -153,7 +153,7 @@ namespace	cl3
 
 					virtual TKeyS Add(const TValue&) = 0;
 					virtual array::TArray<TKey> Add(const IBasicCollection<const TValue>&) = 0;
-					virtual array::TArray<TKey> Add(std::initializer_list<TValue>) = 0;
+// 					virtual array::TArray<TKey> Add(std::initializer_list<TValue>) = 0;
 				};
 
 				template<typename TKey, typename TValue>
@@ -174,7 +174,7 @@ namespace	cl3
 
 					virtual void Remove(const TKeyS) = 0;
 					virtual void Remove(const IBasicCollection<const TKey>&) = 0;
-					virtual void Remove(std::initializer_list<TKey>) = 0;
+// 					virtual void Remove(std::initializer_list<TKey>) = 0;
 				};
 
 				template<typename TKey, typename TValue, EKeyGeneration keygen>
