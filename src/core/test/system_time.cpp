@@ -442,10 +442,10 @@ namespace
 				const TTime ts = TTime::Now(TIME_CLOCK_REALTIME);
 				::usleep(10000L);	// sleep 10ms
 				const TTime te = TTime::Now(TIME_CLOCK_REALTIME);
-				EXPECT_TRUE(ts <= te);
+				EXPECT_TRUE(ts < te);
 				const TTime td_out = te - ts;
-				const TTime td_min(0LL, 9000000000000000LL);	//  9ms
-				const TTime td_max(0LL,50000000000000000LL);	// 50ms
+				const TTime td_min(0LL,  9000000000000000LL);	//   9ms
+				const TTime td_max(0LL,500000000000000000LL);	// 500ms
 				EXPECT_TRUE(td_out > td_min);
 				EXPECT_TRUE(td_out < td_max);
 			}
@@ -455,10 +455,10 @@ namespace
 				const TTime ts = TTime::Now(TIME_CLOCK_MONOTONIC);
 				::usleep(10000L);	// sleep 10ms
 				const TTime te = TTime::Now(TIME_CLOCK_MONOTONIC);
-				EXPECT_TRUE(ts <= te);
+				EXPECT_TRUE(ts < te);
 				const TTime td_out = te - ts;
-				const TTime td_min(0LL, 9000000000000000LL);	//  9ms
-				const TTime td_max(0LL,50000000000000000LL);	// 50ms
+				const TTime td_min(0LL,  9000000000000000LL);	//   9ms
+				const TTime td_max(0LL,500000000000000000LL);	// 500ms
 				EXPECT_TRUE(td_out > td_min);
 				EXPECT_TRUE(td_out < td_max);
 			}
@@ -468,10 +468,10 @@ namespace
 				const TTime ts = TTime::Now(TIME_CLOCK_TAI);
 				::usleep(10000L);	// sleep 10ms
 				const TTime te = TTime::Now(TIME_CLOCK_TAI);
-				EXPECT_TRUE(ts <= te);
+				EXPECT_TRUE(ts < te);
 				const TTime td_out = te - ts;
-				const TTime td_min(0LL, 9000000000000000LL);	//  9ms
-				const TTime td_max(0LL,50000000000000000LL);	// 50ms
+				const TTime td_min(0LL,  9000000000000000LL);	//   9ms
+				const TTime td_max(0LL,500000000000000000LL);	// 500ms
 				EXPECT_TRUE(td_out > td_min);
 				EXPECT_TRUE(td_out < td_max);
 			}
@@ -479,66 +479,66 @@ namespace
 			TEST(system_time_TTime, Now_CPU_Process)
 			{
 				const TTime ts = TTime::Now(TIME_CLOCK_PROCESS);
-				for(int i = 0; i < 100; i++) ::usleep(100L);
+				for(volatile unsigned i = 0; i < 0xfffff; i++);
 				const TTime te = TTime::Now(TIME_CLOCK_PROCESS);
-				EXPECT_TRUE(ts <= te);
+				EXPECT_TRUE(ts < te);
 				const TTime td_out = te - ts;
-				const TTime td_max(0LL,50000000000000000LL);	// 50ms
+				const TTime td_max(0LL,500000000000000000LL);	// 500ms
 				EXPECT_TRUE(td_out < td_max);
 			}
 
 			TEST(system_time_TTime, Now_CPU_Thread)
 			{
 				const TTime ts = TTime::Now(TIME_CLOCK_THREAD);
-				for(int i = 0; i < 100; i++) ::usleep(100L);
+				for(volatile unsigned i = 0; i < 0xfffff; i++);
 				const TTime te = TTime::Now(TIME_CLOCK_THREAD);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
-				const TTime td_max(0LL,50000000000000000LL);	// 50ms
+				const TTime td_max(0LL,500000000000000000LL);	// 500ms
 				EXPECT_TRUE(td_out < td_max);
 			}
 
 			TEST(system_time_TTime, Now_CPU_Process_User)
 			{
 				const TTime ts = TTime::Now(TIME_CLOCK_PROCESS_USER);
-				for(int i = 0; i < 100; i++) ::usleep(100L);
+				for(volatile unsigned i = 0; i < 0xfffff; i++);
 				const TTime te = TTime::Now(TIME_CLOCK_PROCESS_USER);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
-				const TTime td_max(0LL,50000000000000000LL);	// 50ms
+				const TTime td_max(0LL,500000000000000000LL);	// 500ms
 				EXPECT_TRUE(td_out < td_max);
 			}
 
 			TEST(system_time_TTime, Now_CPU_Process_Sys)
 			{
 				const TTime ts = TTime::Now(TIME_CLOCK_PROCESS_SYS);
-				for(int i = 0; i < 100; i++) ::usleep(100L);
+				for(unsigned i = 0; i < 1000; i++) ::usleep(1L);
 				const TTime te = TTime::Now(TIME_CLOCK_PROCESS_SYS);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
-				const TTime td_max(0LL,50000000000000000LL);	// 50ms
+				const TTime td_max(0LL,500000000000000000LL);	// 500ms
 				EXPECT_TRUE(td_out < td_max);
 			}
 
 			TEST(system_time_TTime, Now_CPU_Thread_User)
 			{
 				const TTime ts = TTime::Now(TIME_CLOCK_THREAD_USER);
-				for(int i = 0; i < 100; i++) ::usleep(100L);
+				for(volatile unsigned i = 0; i < 0xfffff; i++);
 				const TTime te = TTime::Now(TIME_CLOCK_THREAD_USER);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
-				const TTime td_max(0LL,50000000000000000LL);	// 50ms
+				const TTime td_max(0LL,500000000000000000LL);	// 500ms
 				EXPECT_TRUE(td_out < td_max);
 			}
 
 			TEST(system_time_TTime, Now_CPU_Thread_Sys)
 			{
 				const TTime ts = TTime::Now(TIME_CLOCK_THREAD_SYS);
-				for(int i = 0; i < 100; i++) ::usleep(100L);
+				for(unsigned i = 0; i < 1000; i++) ::usleep(1L);
 				const TTime te = TTime::Now(TIME_CLOCK_THREAD_SYS);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
-				const TTime td_max(0LL,50000000000000000LL);	// 50ms
+				const TTime td_max(0LL,500000000000000000LL);	// 500ms
 				EXPECT_TRUE(td_out < td_max);
 			}
 		}
