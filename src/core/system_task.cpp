@@ -62,6 +62,58 @@ namespace	cl3
 			CLASS TLocalThread::TLocalThread()
 			{
 			}
+
+			void TChildProcess::AsyncCallback(TAsyncEventProcessor*, synchronization::IWaitable* waitable)
+			{
+				byte_t buffer[4096];
+
+				if(waitable == &this->w_stdin)
+				{
+					if(fds_stdin.Space() > 0 && this->is_stdin->Remaining() > 0)
+					{
+						const usys_t n = this->is_stdin->Read(buffer, sizeof(buffer), 0);
+						this->fds_stdin.Write(buffer, n);
+					}
+					else
+					{
+						//	no more data (child closed stdout)
+						this->callback_stdin.Unregister();
+						this->fds_stdin.Close();
+					}
+				}
+				else if(waitable == &this->w_stdout)
+				{
+					if(fds_stdout.Remaining() > 0)
+					{
+						const usys_t n = this->fds_stdout.Read(buffer, sizeof(buffer), 1);
+						this->os_stdout->Write(buffer, n);
+					}
+					else
+					{
+						//	no more data (child closed stdout)
+						this->callback_stdout.Unregister();
+						this->fds_stdout.Close();
+						this->os_stdout->Flush();
+					}
+				}
+				else if(waitable == &this->w_stderr)
+				{
+					if(fds_stderr.Remaining() > 0)
+					{
+						const usys_t n = this->fds_stderr.Read(buffer, sizeof(buffer), 1);
+						this->os_stderr->Write(buffer, n);
+					}
+					else
+					{
+						//	no more data (child closed stderr)
+						this->callback_stderr.Unregister();
+						this->fds_stderr.Close();
+						this->os_stderr->Flush();
+					}
+				}
+				else
+					CL3_CLASS_LOGIC_ERROR(true);
+			}
 		}
 	}
 }

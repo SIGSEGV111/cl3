@@ -41,12 +41,7 @@ namespace	cl3
 				using namespace io::collection::list;
 				using namespace time;
 
-				usys_t TAsyncEventProcessor::ProcessEvents()
-				{
-					return this->WaitAndProcessEvents(0);
-				}
-
-				usys_t TAsyncEventProcessor::WaitAndProcessEvents(time::TTime timeout)
+				bool TAsyncEventProcessor::ProcessEvents(time::TTime timeout)
 				{
 					TList<TCallback*> callbacks;
 
@@ -54,20 +49,23 @@ namespace	cl3
 						callbacks.Add(p);
 
 					const usys_t n_callbacks = callbacks.Count();
-
-					waitinfo_t pfds[n_callbacks];
-					for(usys_t i = 0; i < n_callbacks; i++)
-						pfds[i] = callbacks[i]->waitable->WaitInfo();
-
-					int n_events;
-					CL3_CLASS_SYSERR(n_events = ::poll((struct pollfd*)pfds, n_callbacks, timeout.ConvertToI(TIME_UNIT_MILLISECONDS)));
-
-					if(n_events > 0)
+					if(n_callbacks > 0)
+					{
+						waitinfo_t pfds[n_callbacks];
 						for(usys_t i = 0; i < n_callbacks; i++)
-							if(pfds[i].revents != 0)
-								callbacks[i]->receiver->AsyncCallback(this, callbacks[i]->waitable);
+							pfds[i] = callbacks[i]->waitable->WaitInfo();
 
-					return n_events;
+						int n_events;
+						CL3_CLASS_SYSERR(n_events = ::poll((struct pollfd*)pfds, n_callbacks, timeout.ConvertToI(TIME_UNIT_MILLISECONDS)));
+
+						if(n_events > 0)
+							for(usys_t i = 0; i < n_callbacks; i++)
+								if(pfds[i].revents != 0)
+									callbacks[i]->receiver->AsyncCallback(this, callbacks[i]->waitable);
+					}
+
+					//	n_callbacks could be outdated => return the up-to-date value
+					return callbacks.Count() > 0;
 				}
 			}
 		}

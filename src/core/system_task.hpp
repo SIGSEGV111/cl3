@@ -114,6 +114,8 @@ namespace cl3
 					CL3PUBF void Kill();		//	hard kill process (SIGKILL on POSIX)
 					CL3PUBF synchronization::IWaitable& OnTerminate();
 
+					CL3PUBF bool IsAlive() const;
+
 					CLASS explicit TProcess(pid_t pid);
 			};
 

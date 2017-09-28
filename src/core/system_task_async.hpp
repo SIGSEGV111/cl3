@@ -76,8 +76,7 @@ namespace cl3
 
 					public:
 						CL3PUBF usys_t CountCallbacks() const CL3_GETTER;	//	returns the number of registered callbacks
-						CL3PUBF usys_t ProcessEvents();						//	processes all pending events
-						CL3PUBF usys_t WaitAndProcessEvents(time::TTime timeout = -1);	//	processes all pending events
+						CL3PUBF bool ProcessEvents(time::TTime timeout = -1);	//	processes all pending events
 						CL3PUBF static TAsyncEventProcessor& Default();
 						CL3PUBF CLASS TAsyncEventProcessor();
 				};

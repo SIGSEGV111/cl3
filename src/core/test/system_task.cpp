@@ -78,10 +78,7 @@ namespace
 
 		TChildProcess cp("/bin/bash", args, env, NULL, &decoder);
 
-		//	FIXME: TAsyncEventProcessor should not be used like this
-		//	WARNING: below code is plain out wrong and WIP
-		while(TAsyncEventProcessor::Default().CountCallbacks() > 0)
-			TAsyncEventProcessor::Default().ProcessEvents();
+		while(TAsyncEventProcessor::Default().ProcessEvents() && cp.IsAlive());
 
 		//	see if "export -p" printed out the injected environment variable
 		EXPECT_TRUE(output.Contains("declare -x foo=\"bar\"\n"));
@@ -98,10 +95,7 @@ namespace
 
 		TChildProcess cp("/usr/bin/sort", args, TLocalProcess::Self()->Environment(), &input, &output);
 
-		//	FIXME: TAsyncEventProcessor should not be used like this
-		//	WARNING: below code is plain out wrong and WIP
-		while(TAsyncEventProcessor::Default().CountCallbacks() > 0)
-			TAsyncEventProcessor::Default().ProcessEvents();
+		while(TAsyncEventProcessor::Default().ProcessEvents() && cp.IsAlive());
 
 		fprintf(stderr, "output.Count() = %zu\n", output.Count());
 		cl3::util::Hexdump(output.ItemPtr(0), output.Count(), cl3::io::text::terminal::Terminal());

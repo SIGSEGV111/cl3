@@ -26,7 +26,6 @@
 
 #include "system_task.hpp"
 #include "system_task_synchronization.hpp"
-#include "system_task_async.hpp"
 
 #include <string.h>
 
@@ -172,6 +171,19 @@ namespace	cl3
 // 				CL3_NOT_IMPLEMENTED;
 			}
 
+			bool TProcess::IsAlive() const
+			{
+				const int status = kill(this->pid, 0);
+				if(status == -1)
+				{
+					if(errno == ESRCH)
+						return false;
+					CL3_CLASS_FAIL(error::TSyscallException, errno);
+				}
+				else
+					return true;
+			}
+
 			/**************************************************************************************/
 
 			static TFDStream fds_stdin(STDIN_FILENO);
@@ -270,58 +282,6 @@ namespace	cl3
 			{
 			}
 
-			void TChildProcess::AsyncCallback(TAsyncEventProcessor*, synchronization::IWaitable* waitable)
-			{
-				byte_t buffer[4096];
-
-				if(waitable == &this->w_stdin)
-				{
-					if(fds_stdin.Space() > 0 && this->is_stdin->Remaining() > 0)
-					{
-						const usys_t n = this->is_stdin->Read(buffer, sizeof(buffer), 0);
-						this->fds_stdin.Write(buffer, n);
-					}
-					else
-					{
-						//	no more data (child closed stdout)
-						this->callback_stdin.Unregister();
-						this->fds_stdin.Close();
-					}
-				}
-				else if(waitable == &this->w_stdout)
-				{
-					if(fds_stdout.Remaining() > 0)
-					{
-						const usys_t n = this->fds_stdout.Read(buffer, sizeof(buffer), 1);
-						this->os_stdout->Write(buffer, n);
-					}
-					else
-					{
-						//	no more data (child closed stdout)
-						this->callback_stdout.Unregister();
-						this->fds_stdout.Close();
-						this->os_stdout->Flush();
-					}
-				}
-				else if(waitable == &this->w_stderr)
-				{
-					if(fds_stderr.Remaining() > 0)
-					{
-						const usys_t n = this->fds_stderr.Read(buffer, sizeof(buffer), 1);
-						this->os_stderr->Write(buffer, n);
-					}
-					else
-					{
-						//	no more data (child closed stderr)
-						this->callback_stderr.Unregister();
-						this->fds_stderr.Close();
-						this->os_stderr->Flush();
-					}
-				}
-				else
-					CL3_CLASS_LOGIC_ERROR(true);
-			}
-
 			CLASS TChildProcess::TChildProcess(const io::text::string::TString& exe,
 												const io::collection::list::TList<const io::text::string::TString>& args,
 												const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& env,
@@ -339,9 +299,9 @@ namespace	cl3
 
 				if(pid_child == 0)
 				{
+					//	child
 					try
 					{
-						//	child
 						if(pipe_stdin != NULL)
 						{
 							pipe_stdin->CloseWrite();
