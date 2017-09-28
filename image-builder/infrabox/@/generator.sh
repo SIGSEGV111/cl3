@@ -20,17 +20,20 @@ function generate_jobs()
 		"deployments":[{
 			"type": "docker-registry",
             "host": "v2-kube.wdf.sap.corp:5000",
-            "repository": "$n"
+            "repository": "$n",
+            "tag" : "$2"
 		}]
 	}
 EOF
 	done
 }
 
+ts="$(date '+%Y%m%d%H%M%S')"
+
 (
 echo '{
 	"jobs" : ['
-generate_jobs "$1"
+generate_jobs "$1" "$ts"
 echo '	],
 	"version":1
 }'
