@@ -24,18 +24,11 @@
 
 #if (CL3_OS == CL3_OS_POSIX)
 
+#include <poll.h>
+
 #include "error.hpp"
 #include "system_task_synchronization.hpp"
 #include "system_task.hpp"
-#include <pthread.h>
-#include <errno.h>
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-
-// static inline bool operator> (const struct ::pollfd& v1, const struct ::pollfd& v2) { return ::memcmp(&v1, &v2, sizeof(struct ::pollfd)) >  0; }
-// static inline bool operator< (const struct ::pollfd& v1, const struct ::pollfd& v2) { return ::memcmp(&v1, &v2, sizeof(struct ::pollfd)) <  0; }
-// static inline bool operator==(const struct ::pollfd& v1, const struct ::pollfd& v2) { return ::memcmp(&v1, &v2, sizeof(struct ::pollfd)) == 0; }
 
 namespace	cl3
 {
@@ -51,10 +44,22 @@ namespace	cl3
 			namespace	synchronization
 			{
 				using namespace error;
-				using namespace system::time;
-				using namespace io::collection;
-				using namespace io::collection::list;
-				using namespace io::collection::array;
+
+				bool IWaitable::WaitFor(time::TTime timeout)
+				{
+					const waitinfo_t wi = this->WaitInfo();
+					struct pollfd pfd;
+					pfd.fd = wi.fd;
+					pfd.events = wi.events;
+					pfd.revents = 0;
+					CL3_CLASS_SYSERR(::poll(&pfd, 1, timeout.ConvertToI(time::TIME_UNIT_MILLISECONDS)));
+					return pfd.revents != 0;
+				}
+
+				io::collection::list::TList<bool> WaitFor(const io::collection::IStaticCollection<IWaitable* const>& waitables, time::TTime timeout)
+				{
+					CL3_NOT_IMPLEMENTED;
+				}
 			}
 		}
 	}

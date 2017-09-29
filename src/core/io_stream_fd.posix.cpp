@@ -268,7 +268,7 @@ namespace	cl3
 					system::task::synchronization::waitinfo_t wi = {
 						this->fd,
 						(short)(
-							(this->input ? POLLIN|POLLPRI : 0) |
+							(this->input ? (POLLIN|POLLPRI) : 0) |
 							(this->output ? POLLOUT : 0) |
 							(this->error ? POLLERR : 0)
 						),
