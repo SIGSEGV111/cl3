@@ -20,6 +20,7 @@
 #define	_include_cl3_core_system_time_timer_hpp_
 
 #include "system_time.hpp"
+#include "io_stream_fd.hpp"
 #include "system_task_synchronization.hpp"
 
 namespace	cl3
@@ -32,17 +33,20 @@ namespace	cl3
 		{
 			namespace	timer
 			{
-				class TTimer : public task::synchronization::IWaitable
+				class CL3PUBT TTimer : public virtual task::synchronization::IWaitable
 				{
 					protected:
-						fd_t fd;
+						const TTime interval;
+						io::stream::fd::TFDStream fds;
 
-						system::task::synchronization::waitinfo_t WaitInfo() const final override CL3_GETTER;
+						CL3PUBF system::task::synchronization::waitinfo_t WaitInfo() const final override CL3_GETTER;
 
 					public:
+						CL3PUBF void Restart();
+						CL3PUBF void Stop();
 						CL3PUBF CLASS TTimer(const TTimer&) = delete;
 						CL3PUBF CLASS TTimer(TTimer&&) = default;
-						CL3PUBF CLASS TTimer(TTime interval);
+						CL3PUBF CLASS TTimer(EClock clock, TTime interval);
 						CL3PUBF CLASS ~TTimer();
 				};
 			}

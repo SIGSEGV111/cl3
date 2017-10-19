@@ -43,9 +43,9 @@ namespace	cl3
 						bool output;
 						bool error;
 
+					public:
 						system::task::synchronization::waitinfo_t WaitInfo() const final override CL3_GETTER;
 
-					public:
 						CL3PUBF CLASS TWaitable();
 						CL3PUBF CLASS TWaitable(fd_t fd, bool input, bool output, bool error);
 				};
