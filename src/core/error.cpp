@@ -78,6 +78,10 @@ namespace	cl3
 			this->expression = expression;
 			this->inner     = inner;
 			this->codeline  = codeline;
+
+			#ifdef CL3_DEBUG
+				this->Print();
+			#endif
 		}
 
 		void	TException::Print	() const
