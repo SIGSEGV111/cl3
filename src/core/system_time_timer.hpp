@@ -36,17 +36,16 @@ namespace	cl3
 				class CL3PUBT TTimer : public virtual task::synchronization::IWaitable
 				{
 					protected:
-						const TTime interval;
 						io::stream::fd::TFDStream fds;
 
 						CL3PUBF system::task::synchronization::waitinfo_t WaitInfo() const final override CL3_GETTER;
 
 					public:
-						CL3PUBF void Restart();
+						CL3PUBF void Start(TTime interval, bool auto_restart = false);
 						CL3PUBF void Stop();
 						CL3PUBF CLASS TTimer(const TTimer&) = delete;
 						CL3PUBF CLASS TTimer(TTimer&&) = default;
-						CL3PUBF CLASS TTimer(EClock clock, TTime interval);
+						CL3PUBF CLASS TTimer(EClock clock);
 						CL3PUBF CLASS ~TTimer();
 				};
 			}
