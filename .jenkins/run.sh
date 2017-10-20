@@ -7,4 +7,5 @@ set -o pipefail
 export -p
 rm -vrf gen tmp
 
-exec ./build-debug.sh 2>&1 </dev/null
+./build-debug.sh 2>&1 </dev/null
+./build-release.sh 2>&1 </dev/null
