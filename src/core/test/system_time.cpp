@@ -17,6 +17,7 @@
 */
 
 #include <cl3/core/system_time.hpp>
+#include <cl3/core/system_time_timer.hpp>
 #include <cl3/core/system_types.hpp>
 #include <gtest/gtest.h>
 #include <iostream>
@@ -58,6 +59,7 @@ namespace
 		namespace	time
 		{
 			using namespace cl3::system::time;
+			using namespace cl3::system::time::timer;
 
 			TEST(system_time_TTime, Copy)
 			{
@@ -540,6 +542,16 @@ namespace
 				const TTime td_out = te - ts;
 				const TTime td_max(0LL,500000000000000000LL);	// 500ms
 				EXPECT_TRUE(td_out < td_max);
+			}
+
+			TEST(system_time_timer_TTimer, Basics)
+			{
+				TTimer timer(TIME_CLOCK_MONOTONIC, TTime(0.01));
+				const TTime ts_start = TTime::Now(TIME_CLOCK_MONOTONIC);
+				EXPECT_TRUE(timer.WaitFor(1));
+				const TTime ts_end = TTime::Now(TIME_CLOCK_MONOTONIC);
+				const TTime ts_diff = ts_end - ts_start;
+				EXPECT_TRUE(ts_diff >= TTime(0.01) && ts_diff <= TTime(1));
 			}
 		}
 	}
