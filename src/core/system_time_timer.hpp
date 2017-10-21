@@ -41,7 +41,7 @@ namespace	cl3
 						CL3PUBF system::task::synchronization::waitinfo_t WaitInfo() const final override CL3_GETTER;
 
 					public:
-						CL3PUBF void Start(TTime interval, bool auto_restart = false);
+						CL3PUBF void Start(TTime interval);
 						CL3PUBF void Stop();
 						CL3PUBF CLASS TTimer(const TTimer&) = delete;
 						CL3PUBF CLASS TTimer(TTimer&&) = default;

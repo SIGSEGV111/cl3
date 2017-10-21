@@ -35,17 +35,12 @@ namespace	cl3
 					return this->fds.OnInputReady().WaitInfo();
 				}
 
-				void TTimer::Start(TTime interval, bool auto_restart)
+				void TTimer::Start(TTime interval)
 				{
 					struct itimerspec it;
+					it.it_interval.tv_sec = 0;
+					it.it_interval.tv_nsec = 0;
 					it.it_value = interval;
-					if(auto_restart)
-						it.it_interval = it.it_value;
-					else
-					{
-						it.it_interval.tv_sec = 0;
-						it.it_interval.tv_nsec = 0;
-					}
 					CL3_CLASS_SYSERR(timerfd_settime(this->fds.FD(), 0, &it, NULL));
 				}
 
@@ -88,8 +83,6 @@ namespace	cl3
 					fd_t fd;
 					CL3_CLASS_SYSERR(fd = timerfd_create(id, TFD_NONBLOCK|TFD_CLOEXEC));
 					this->fds.FD(fd);
-
-					this->Stop();
 				}
 
 				CLASS TTimer::~TTimer()

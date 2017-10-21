@@ -548,7 +548,7 @@ namespace
 			{
 				TTimer timer(TIME_CLOCK_MONOTONIC);
 				const TTime ts_start = TTime::Now(TIME_CLOCK_MONOTONIC);
-				timer.Start(TTime(0.01), false);
+				timer.Start(TTime(0.01));
 				EXPECT_TRUE(timer.WaitFor(1));
 				EXPECT_TRUE(timer.WaitFor(0));
 				const TTime ts_end = TTime::Now(TIME_CLOCK_MONOTONIC);
@@ -558,7 +558,7 @@ namespace
 				EXPECT_TRUE(timer.WaitFor(0));
 				timer.Stop();
 				EXPECT_FALSE(timer.WaitFor(0.1));
-				timer.Start(TTime(0.01), false);
+				timer.Start(TTime(0.01));
 				EXPECT_TRUE(timer.WaitFor(1));
 			}
 		}
