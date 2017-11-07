@@ -152,6 +152,47 @@ namespace	cl3
 
 				namespace	features
 				{
+					template<class T> struct remove_ref      { typedef T type; };
+					template<class T> struct remove_ref<T&>  { typedef T type; };
+					template<class T> struct remove_ref<T&&> { typedef T type; };
+					template<class T> typename remove_ref<T>::type&& move(T&& value) { return static_cast<typename remove_ref<T>::type&&>(value); }
+
+					template<class T> constexpr T& forward( typename remove_ref<T>::type& t ) noexcept { return static_cast<T&>(t); }
+					template<class T> constexpr T&& forward( typename remove_ref<T>::type&& t ) noexcept { return static_cast<T&&>(t); }
+
+					template<bool, typename T1, typename T2>
+					struct type_iif
+					{
+						using type = T2;
+					};
+
+					template<typename T1, typename T2>
+					struct type_iif<true, T1, T2>
+					{
+						using type = T1;
+					};
+
+					template<bool, typename T>
+					struct ref_if
+					{
+						using type = T;
+					};
+
+					template<typename T>
+					struct ref_if<true, T>
+					{
+						using type = const T&;
+					};
+
+					template<bool b, typename T>
+					struct inherit_if;
+
+					template<typename T>
+					struct inherit_if<false, T> {};
+
+					template<typename T>
+					struct inherit_if<true, T> : T {};
+
 					struct yes { char value[1]; };
 					struct no  { char value[sizeof(yes)+1]; };
 
@@ -206,6 +247,23 @@ namespace	cl3
 
 					template<typename T>
 					const bool is_copy_constructible<T>::value;
+
+					template<typename T>
+					class is_move_constructible
+					{
+					private:
+						template<typename U>
+						static decltype(new U(system::def::move(*reinterpret_cast<U*>(_::DUMMY))), yes()) test(int);
+
+						template<typename>
+						static no test(...);
+
+					public:
+						static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+					};
+
+					template<typename T>
+					const bool is_move_constructible<T>::value;
 
 					template<typename T>
 					class is_destructible
