@@ -18,7 +18,6 @@
 
 #include <cl3/core/util.hpp>
 #include <cl3/core/io_text_string.hpp>
-#include <cl3/mm/ui_console.hpp>
 
 #include <gtest/gtest.h>
 
