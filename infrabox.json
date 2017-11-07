@@ -1,6 +1,12 @@
 {
-	"generator" : {
+	"jobs" : [{
+		"name" : "generator",
+		"type" : "docker",
+		"build_only" : false,
+		"resources" : {
+			"limits" : { "memory" : 1024, "cpu" : 1 }
+		},
 		"docker_file" : "infrabox/@/Dockerfile"
-	},
+	}],
 	"version":1
 }
