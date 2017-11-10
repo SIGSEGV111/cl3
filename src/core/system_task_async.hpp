@@ -38,6 +38,9 @@ namespace cl3
 
 			namespace	async
 			{
+
+				// FIXME: this thing is supposed to translate an IWaitable into an TEvent
+
 				class TAsyncEventProcessor
 				{
 					public:

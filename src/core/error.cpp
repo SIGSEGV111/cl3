@@ -70,7 +70,7 @@ namespace	cl3
 			Free(message);
 		}
 
-		void	TException::Set		(const void* object, const char* codefile, const char* function, const char* expression, TException* inner, unsigned codeline)
+		void	TException::Set		(const void* object, const char* codefile, const char* function, const char* expression, const TException* inner, unsigned codeline)
 		{
 			this->object    = object;
 			this->codefile  = codefile;

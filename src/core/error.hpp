@@ -45,7 +45,7 @@ namespace	cl3
 				const char* codefile;	//	sourcecode file (from __FILE__ macro)
 				const char* function;	//	function name in which the exception occurecd (from __FUNCDNAME__ or __PRETTY_FUNCTION__ macro)
 				const char* expression;	//	the expression that triggered the exception (from ERROR(expression, excepclass, args))
-				TException* inner;		//	inner exception (can be NULL)
+				const TException* inner;//	inner exception (can be NULL)
 				unsigned codeline;		//	sourcecode line number (from __LINE__ macro)
 
 				CL3PUBF	CLASS	TException	(const char* format, ...);	//	printf-syle ctor
@@ -53,7 +53,7 @@ namespace	cl3
 				CL3PUBF	CLASS	TException	(const TException&);
 				virtual	CLASS	~TException	();
 
-				CL3PUBF	void	Set			(const void* object, const char* codefile, const char* function, const char* expression, TException* inner, unsigned codeline);
+				CL3PUBF	void	Set			(const void* object, const char* codefile, const char* function, const char* expression, const TException* inner, unsigned codeline);
 				CL3PUBF	void	Print		() const;
 		};
 

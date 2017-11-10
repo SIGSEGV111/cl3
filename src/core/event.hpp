@@ -29,6 +29,10 @@ namespace	cl3
 
 	namespace	event
 	{
+		//	FIXME: use functors and cleanup
+		//	FIXME: remove basiclist
+		//	FIXME: remove IObservable
+
 		template<class TSender, class TData> class TEvent;
 		class	IObservable;
 		typedef TEvent<IObservable, const char*>	TOnChangeEvent;

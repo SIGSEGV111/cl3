@@ -35,11 +35,6 @@ namespace	cl3
 			using namespace async;
 			using namespace synchronization;
 
-			IFiber* IFiber::Self()
-			{
-				return TLocalThread::Self()->CurrentFiber();
-			}
-
 			static memory::TUniquePtr<TLocalProcess> proc_self;
 
 			TLocalProcess* TLocalProcess::Self()

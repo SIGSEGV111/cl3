@@ -32,6 +32,8 @@
 #if (CL3_OS == CL3_OS_POSIX)
 	#include <poll.h>
 	#include <pthread.h>
+	#include <ucontext.h>
+	typedef ucontext_t fiberdata_t;
 #elif (CL3_OS == CL3_OS_WINDOWS)
 	#include <windows.h>
 #endif
@@ -72,24 +74,43 @@ namespace cl3
 
 			class IFiber
 			{
+				public:
+					enum class EState
+					{
+						RUNNING,
+						SUSPENDED,
+						TERMINATED
+					};
+
 				private:
-					io::text::string::TString name;
-					io::collection::list::TList<synchronization::IWaitable*> waitlist;
-					IFiber* on_block;
+					usys_t sz_stack;
+					memory::TUniquePtr<byte_t> p_stack;
+					memory::TUniquePtr<const error::TException> e;
+
+					TLocalThread* volatile thread;
+					IFiber* volatile caller;
+					volatile EState state;
+
+					fiberdata_t context;
+
+					int valgrind_stack_id;
+
+					static void Boot();
+
+					void AfterSwitchTo();
+					void ResetContext();
 
 				protected:
 					virtual void Main() = 0;
 
 				public:
-					CL3PUBF static void Log(ELogLevel reqll, const io::text::string::TString& message);
-					CL3PUBF const io::collection::list::TList<synchronization::IWaitable*>& WaitList() const CL3_GETTER;
-					CL3PUBF void SwitchTo();
-					CL3PUBF void OnBlock(IFiber* on_block) CL3_SETTER;
-					CL3PUBF IFiber* OnBlock() const CL3_GETTER;
-
-					CL3PUBF CLASS explicit IFiber(const io::text::string::TString& name);
-
 					CL3PUBF static IFiber* Self() CL3_GETTER;
+
+					CL3PUBF void SwitchTo();
+					CL3PUBF void Join();
+					CL3PUBF CLASS IFiber(usys_t sz_stack = 16*1024);
+					CL3PUBF CLASS ~IFiber();
+
 			};
 
 			/************************************************************************************/
@@ -232,7 +253,6 @@ namespace cl3
 					CLASS TLocalThread();
 
 					io::collection::list::TList<TCPU* const> affinity;
-					IFiber* fiber;
 					#if (CL3_OS == CL3_OS_POSIX)
 						io::stream::fd::TFDStream fds_signal;
 						pthread_t pth;
@@ -255,7 +275,6 @@ namespace cl3
 					CL3PUBF void Kill() final override;
 					CL3PUBF void Shutdown();
 					CL3PUBF void Start();
-					CL3PUBF IFiber* CurrentFiber() const CL3_GETTER { return this->fiber; }
 					CL3PUBF static TLocalThread* Self();
 					CL3PUBF CLASS explicit TLocalThread(IFiber*, bool autostart = true);
 					CL3PUBF CLASS ~TLocalThread();
