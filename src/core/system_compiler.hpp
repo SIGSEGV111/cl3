@@ -347,6 +347,8 @@ namespace	cl3
 
 			#define	CL3_GETTER CL3_WARN_UNUSED_RESULT CL3_FPURE
 			#define	CL3_SETTER
+
+			CL3PUBF void DebugBreak();
 		}
 	}
 }
