@@ -96,6 +96,10 @@ namespace	cl3
 					<<"\n\tfile: "<<ex.codefile<<":"<<ex.codeline
 					<<"\n\texpression: "<<(ex.expression == NULL ? "<none>" : ex.expression)
 					<<"\n";
+
+			if(ex.inner)
+				tw<<"\n\tINNER "<<(*ex.inner);
+
 			return tw;
 		}
 
