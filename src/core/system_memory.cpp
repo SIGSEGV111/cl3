@@ -25,6 +25,7 @@
 
 #include <sys/mman.h>
 #include <string.h>
+#include <valgrind/valgrind.h>
 
 using namespace cl3::system::types;
 
@@ -166,6 +167,7 @@ namespace	cl3
 					IDynamicAllocator** const p_base = reinterpret_cast<IDynamicAllocator**>(p_mem)-1;
 					IDynamicAllocator* const owner = *p_base;
 					owner->Free(p_base);
+					VALGRIND_FREELIKE_BLOCK(p_base, 0);
 				}
 			}
 
@@ -181,6 +183,8 @@ namespace	cl3
 
 					p_base = reinterpret_cast<IDynamicAllocator**>(owner->Alloc(sizeof(IDynamicAllocator*) + sz_bytes));
 
+					VALGRIND_MALLOCLIKE_BLOCK(p_base, sizeof(IDynamicAllocator*) + sz_bytes, 0, false);
+
 					*p_base = owner;
 					return p_base+1;
 				}
@@ -191,26 +195,41 @@ namespace	cl3
 			void*	Realloc	(void* p_mem, usys_t n_items_new, const typeinfo::TRTTI* rtti, bool inplace)
 			{
 				CL3_NONCLASS_ERROR(n_items_new > (usys_t)-(sizeof(void*)*4), TException, "value in n_items_new is too big");
-				const usys_t sz_bytes_new = rtti == NULL ? n_items_new : n_items_new * rtti->sz_bytes;
+				const usys_t sz_bytes_new = (rtti == NULL ? n_items_new : n_items_new * rtti->sz_bytes) + sizeof(IDynamicAllocator*);
 
 				if(p_mem)
 				{
-					IDynamicAllocator** p_base = reinterpret_cast<IDynamicAllocator**>(p_mem)-1;
-					IDynamicAllocator* const owner = *p_base;
+					IDynamicAllocator** const p_base_old = reinterpret_cast<IDynamicAllocator**>(p_mem)-1;
+					IDynamicAllocator* const owner = *p_base_old;
 
-					if(sz_bytes_new)
+					if(n_items_new)
 					{
-						p_base = reinterpret_cast<IDynamicAllocator**>(owner->Realloc(p_base, sizeof(IDynamicAllocator*) + sz_bytes_new, inplace));
-						return p_base+1;
+// 						const usys_t sz_old = owner->SizeOf(p_mem);
+
+						IDynamicAllocator** const p_base_new = reinterpret_cast<IDynamicAllocator**>(owner->Realloc(p_base_old, sz_bytes_new, inplace));
+
+						if(p_base_old == p_base_new)
+						{
+// 							VALGRIND_RESIZEINPLACE_BLOCK(p_base_old, sz_old, sz_bytes_new, 0);
+						}
+						else
+						{
+							VALGRIND_FREELIKE_BLOCK(p_base_old, 0);
+							VALGRIND_MALLOCLIKE_BLOCK(p_base_new, sz_bytes_new, 0, false);
+							*p_base_new = owner;
+						}
+
+						return p_base_new+1;
 					}
 					else
 					{
-						owner->Free(p_base);
+						owner->Free(p_base_old);
+						VALGRIND_FREELIKE_BLOCK(p_base_old, 0);
 						return NULL;
 					}
 				}
 				else
-					return Alloc(sz_bytes_new, rtti);
+					return Alloc(n_items_new, rtti);
 			}
 
 			usys_t	SizeOf	(void* p_mem)
