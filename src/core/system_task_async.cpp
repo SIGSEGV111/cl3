@@ -21,6 +21,7 @@
 #endif
 
 #include "system_task_synchronization.hpp"
+#include "system_task_async.hpp"
 #include "io_collection_list.hpp"
 
 namespace	cl3

@@ -26,6 +26,7 @@
 
 #include "system_task_synchronization.hpp"
 #include "io_collection_list.hpp"
+#include "system_task_async.hpp"
 
 #include <poll.h>
 
