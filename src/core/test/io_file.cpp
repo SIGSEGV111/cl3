@@ -17,6 +17,8 @@
 */
 
 #include <cl3/core/io_file.hpp>
+#include <cl3/core/io_text_string.hpp>
+#include <cl3/core/io_collection_list.hpp>
 #include <gtest/gtest.h>
 
 using namespace ::testing;
@@ -25,6 +27,8 @@ namespace
 {
 	using namespace cl3::system::types;
 	using namespace cl3::io::file;
+	using namespace cl3::io::text::string;
+	using namespace cl3::io::collection::list;
 	using namespace cl3::error;
 
 	TEST(io_file_TFile, create_always)
@@ -114,5 +118,60 @@ namespace
 			stream.Read(buffer, 12);
 			EXPECT_TRUE(memcmp(buffer, "hello world\n", 12) == 0);
 		}
+	}
+
+	static TDirectoryBrowser TestDataDirectory()
+	{
+		TDirectoryBrowser b;
+
+		while(!b.IsRoot() && !b.Entries().Contains(".git"))
+			b.EnterDirectory("..");
+
+		b.EnterDirectory("data/tests");
+
+		return b;
+	}
+
+	TEST(io_file_TDirectoryBrowser, EnumEntries)
+	{
+		TList<TString> files;
+		TDirectoryBrowser browser = TestDataDirectory();
+		browser.EnterDirectory("folder_with_mixed_files");
+
+		browser.EnumEntries(files);
+
+		EXPECT_TRUE(files.Count() >= 6);
+		EXPECT_TRUE(files.Contains(".posix_hidden_file"));
+		EXPECT_TRUE(files.Contains("blns.txt"));
+		EXPECT_TRUE(files.Contains("empty_file"));
+		EXPECT_TRUE(files.Contains("posix_symbolic_link"));
+		EXPECT_TRUE(files.Contains("random_data_128.bin"));
+		EXPECT_TRUE(files.Contains("small_text_file.txt"));
+		EXPECT_FALSE(files.Contains("."));
+		EXPECT_FALSE(files.Contains(".."));
+
+		// run again, to ensure EnumEntries() does not corrupt the FD
+		files.Clear();
+
+		browser.EnumEntries(files);
+
+		EXPECT_TRUE(files.Count() >= 6);
+		EXPECT_TRUE(files.Contains(".posix_hidden_file"));
+		EXPECT_TRUE(files.Contains("blns.txt"));
+		EXPECT_TRUE(files.Contains("empty_file"));
+		EXPECT_TRUE(files.Contains("posix_symbolic_link"));
+		EXPECT_TRUE(files.Contains("random_data_128.bin"));
+		EXPECT_TRUE(files.Contains("small_text_file.txt"));
+		EXPECT_FALSE(files.Contains("."));
+		EXPECT_FALSE(files.Contains(".."));
+	}
+
+	TEST(io_file_TDirectoryBrowser, OpenFile)
+	{
+		TDirectoryBrowser browser = TestDataDirectory();
+		browser.EnterDirectory("folder_with_mixed_files");
+
+		TFile file = browser.OpenFile("random_data_128.bin");
+		EXPECT_TRUE(file.Size() == 128);
 	}
 }

@@ -169,7 +169,31 @@ namespace	cl3
 
 			/************************************************************************/
 
-			class	CL3PUBT	TFile : public virtual collection::IStaticCollection<byte_t>
+			class   CL3PUBT	TDirectoryBrowser
+			{
+				private:
+					stream::fd::TFDStream fd;
+
+				public:
+					CL3PUBF	fd_t	Handle				() const CL3_GETTER;
+					CL3PUBF	text::string::TString
+									AbsolutePath		() const;
+					CL3PUBF	void	EnterDirectory		(const text::string::TString& name);	//	use ".." to go to the parent directory
+					CL3PUBF	usys_t	EnumEntries			(collection::IDynamicCollection<text::string::TString>&) const;
+					CL3PUBF	bool	IsRoot				() const CL3_GETTER;
+					CL3PUBF collection::list::TList<text::string::TString> Entries() const CL3_GETTER;
+					CL3PUBF TFile	OpenFile			(const text::string::TString& name, int access = FILE_ACCESS_READ, ECreate create = FILE_CREATE_NEVER);
+
+					CL3PUBF	CLASS	TDirectoryBrowser	();	//	starts in current working directory
+					CL3PUBF	explicit TDirectoryBrowser	(const text::string::TString& path);
+					CL3PUBF	CLASS	TDirectoryBrowser	(const TDirectoryBrowser&);
+					CL3PUBF	CLASS	TDirectoryBrowser	(TDirectoryBrowser&&);
+					CL3PUBF	CLASS	~TDirectoryBrowser	();
+			};
+
+			/************************************************************************/
+
+			class	CL3PUBT	TFile
 			{
 				friend class TStream;
 				friend class TMapping;
@@ -178,44 +202,13 @@ namespace	cl3
 					int access;
 
 				public:
-					//	from IStaticCollection
-					CL3PUBF	system::memory::TUniquePtr<collection::IStaticIterator<const byte_t> >	CreateStaticIterator	() const final override CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	system::memory::TUniquePtr<collection::IStaticIterator<byte_t> >		CreateStaticIterator	() final override CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	usys_t	Count		() const final override CL3_GETTER;
-					CL3PUBF	bool	Contains	(const byte_t& item) const final override CL3_GETTER;
-
-					//	from TFile
-					CL3PUBF	void	Count	(uoff_t) CL3_SETTER;
+					CL3PUBF	usys_t	Size	() const CL3_GETTER;
+					CL3PUBF	void	Size	(uoff_t) CL3_SETTER;
 
 					CL3PUBF	CLASS	TFile	();	//	create temporary file
-					CL3PUBF	CLASS	TFile	(const text::string::TString& name, int access = FILE_ACCESS_READ, ECreate create = FILE_CREATE_NEVER);	//	open specific file
+					CL3PUBF	CLASS	TFile	(const text::string::TString& name, int access = FILE_ACCESS_READ, ECreate create = FILE_CREATE_NEVER, const TDirectoryBrowser& directory = TDirectoryBrowser());	//	open specific file
 					CL3PUBF	CLASS	TFile	(TFile&&);
 					CL3PUBF	CLASS	~TFile	();
-			};
-
-			/************************************************************************/
-
-			class   CL3PUBT	TDirectoryBrowser
-			{
-				private:
-					fd_t fd;
-
-				public:
-					CL3PUBF	fd_t	Handle				() const CL3_GETTER;
-					CL3PUBF	text::string::TString
-									AbsolutePath		() const;
-					CL3PUBF	void	EnterDirectory		(const text::string::TString& name);	//	use ".." to go to the parent directory
-					CL3PUBF	usys_t	EnumEntries			(collection::IDynamicCollection<TFileInfo>&) const;
-					CL3PUBF	usys_t	EnumEntries			(collection::IDynamicCollection<text::string::TString>&) const;
-
-					CL3PUBF	CLASS	TDirectoryBrowser	();	//	starts in current working directory
-					CL3PUBF	CLASS	TDirectoryBrowser	(const text::string::TString& path);
-					CL3PUBF	CLASS	TDirectoryBrowser	(const TDirectoryBrowser&);
-					CL3PUBF	CLASS	TDirectoryBrowser	(TDirectoryBrowser&&);
-					CL3PUBF	CLASS	~TDirectoryBrowser	();
-
-					CL3PUBF	static	TDirectoryBrowser&	ThreadCurrentWorkingDirectory	();
-					CL3PUBF	static	TDirectoryBrowser&	ProcessCurrentWorkingDirectory	();
 			};
 		}
 	}

@@ -211,6 +211,32 @@ namespace	cl3
 					}
 				}
 
+				fd_t	TFDStream::Claim		()
+				{
+					fd_t r = this->fd;
+					this->fd = -1;
+					return r;
+				}
+
+				TFDStream& TFDStream::operator=(fd_t new_fd)
+				{
+					this->FD(new_fd);
+					return *this;
+				}
+
+				TFDStream& TFDStream::operator=(const TFDStream& rhs)
+				{
+					CL3_CLASS_SYSERR(this->fd = ::fcntl(rhs.fd, F_DUPFD_CLOEXEC, 0));
+					return *this;
+				}
+
+				TFDStream& TFDStream::operator=(TFDStream&& rhs)
+				{
+					this->fd = rhs.fd;
+					rhs.fd = -1;
+					return *this;
+				}
+
 				/******************************************************************/
 
 				CLASS	TFDStream::TFDStream	() : fd(-1)

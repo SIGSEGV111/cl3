@@ -38,6 +38,8 @@
 #include <poll.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <dirent.h>
+#include <string.h>
 
 namespace	cl3
 {
@@ -50,10 +52,11 @@ namespace	cl3
 			using namespace error;
 			using namespace stream;
 			using namespace io::collection;
+			using namespace io::collection::list;
 
 			void	TMapping::Remap		(uoff_t new_index, usys_t new_count)
 			{
-				const uoff_t sz_file = file->Count();
+				const uoff_t sz_file = file->Size();
 				if(new_count == MAP_COUNT_FULLFILE)
 					new_count = sz_file - new_index;
 
@@ -328,34 +331,19 @@ namespace	cl3
 
 			/**********************************************************************/
 
-			system::memory::TUniquePtr<collection::IStaticIterator<const byte_t> >	TFile::CreateStaticIterator	() const
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			system::memory::TUniquePtr<collection::IStaticIterator<byte_t> >		TFile::CreateStaticIterator	()
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			usys_t	TFile::Count	() const
+			usys_t	TFile::Size		() const
 			{
 				struct ::stat s;
 				CL3_CLASS_SYSERR(::fstat(this->fd, &s));
 				return (usys_t)s.st_size;
 			}
 
-			bool	TFile::Contains	(const byte_t&) const
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			void	TFile::Count	(uoff_t new_count)
+			void	TFile::Size		(uoff_t new_count)
 			{
 				CL3_CLASS_SYSERR(::ftruncate(this->fd, new_count));
 			}
 
-			CLASS	TFile::TFile	(const text::string::TString& name, int access, ECreate create) : fd(-1), access(access)
+			CLASS	TFile::TFile	(const text::string::TString& name, int access, ECreate create, const TDirectoryBrowser& directory) : fd(-1), access(access)
 			{
 				int flags = O_LARGEFILE | O_NOCTTY | O_CLOEXEC;
 				const int mode = (access & FILE_ACCESS_EXECUTE) ? 0777 : 0666;
@@ -387,18 +375,18 @@ namespace	cl3
 				{
 					for(;;)
 					{
-						this->fd = ::openat(TDirectoryBrowser::ThreadCurrentWorkingDirectory().Handle(), cstr.Chars(), flags, mode);
+						this->fd = ::openat(directory.Handle(), cstr.Chars(), flags, mode);
 						if(this->fd != -1)
 							break;
 
 						if(errno == EEXIST)
-							CL3_CLASS_SYSERR(::unlinkat(TDirectoryBrowser::ThreadCurrentWorkingDirectory().Handle(), cstr.Chars(), 0));
+							CL3_CLASS_SYSERR(::unlinkat(directory.Handle(), cstr.Chars(), 0));
 						else
 							CL3_CLASS_SYSERR(-1);
 					}
 				}
 				else
-					CL3_CLASS_SYSERR(this->fd = ::openat(TDirectoryBrowser::ThreadCurrentWorkingDirectory().Handle(), cstr.Chars(), flags, mode));
+					CL3_CLASS_SYSERR(this->fd = ::openat(directory.Handle(), cstr.Chars(), flags, mode));
 			}
 
 			CLASS	TFile::TFile	(TFile&& other) : fd(other.fd)
@@ -414,6 +402,12 @@ namespace	cl3
 
 			/**********************************************************************/
 
+			#if (CL3_OS_DERIVATIVE == CL3_OS_DERIVATIVE_POSIX_LINUX)
+				static const int DIRECTORY_BROWSER_FLAGS = O_RDONLY | O_CLOEXEC | O_NOCTTY | O_DIRECTORY;
+			#else
+				static const int DIRECTORY_BROWSER_FLAGS = O_RDONLY | O_CLOEXEC | O_NOCTTY;
+			#endif
+
 			fd_t	TDirectoryBrowser::Handle				() const
 			{
 				return this->fd;
@@ -421,49 +415,44 @@ namespace	cl3
 
 			void	TDirectoryBrowser::EnterDirectory		(const text::string::TString& name)
 			{
-				#if (CL3_OS_DERIVATIVE == CL3_OS_DERIVATIVE_POSIX_LINUX)
-					const int flags = O_RDONLY | O_CLOEXEC | O_NOCTTY | O_DIRECTORY;
-				#else
-					const int flags = O_RDONLY | O_CLOEXEC | O_NOCTTY;
-				#endif
-
-				int new_fd;
-				CL3_CLASS_SYSERR(new_fd = openat(this->fd, TCString(name, CODEC_CXX_CHAR).Chars(), flags, 0));
+				stream::fd::TFDStream new_fd;
+				CL3_CLASS_SYSERR(new_fd = openat(this->fd, TCString(name, CODEC_CXX_CHAR).Chars(), DIRECTORY_BROWSER_FLAGS));
 
 				#if (CL3_OS_DERIVATIVE != CL3_OS_DERIVATIVE_POSIX_LINUX)
 					struct ::stat st = {};
-					CL3_CLASS_SYSERR(::fstat(new_fd, &st));
+					CL3_CLASS_SYSERR(::fstat(new_fd.FD(), &st));
 					if(!S_ISDIR(st.st_mode))
-					{
-						CL3_CLASS_SYSERR(::close(new_fd));
 						CL3_CLASS_FAIL(TException, "the specified file-system object is not a directory");
-					}
 				#endif
 
-				const int old_fd = this->fd;
 				this->fd = new_fd;
-				CL3_CLASS_SYSERR(::close(old_fd));
 			}
 
-			usys_t	TDirectoryBrowser::EnumEntries			(collection::IDynamicCollection<TFileInfo>&) const
+			TList<TString> TDirectoryBrowser::Entries() const
 			{
-				CL3_NOT_IMPLEMENTED;
+				TList<TString> list;
+				this->EnumEntries(list);
+				return system::def::move(list);
 			}
 
-			usys_t	TDirectoryBrowser::EnumEntries			(collection::IDynamicCollection<text::string::TString>&) const
+			bool	TDirectoryBrowser::IsRoot				() const
 			{
-				CL3_NOT_IMPLEMENTED;
+				return this->AbsolutePath() == "/";
+			}
+
+			TFile	TDirectoryBrowser::OpenFile				(const text::string::TString& name, int access, ECreate create)
+			{
+				return TFile(name, access, create, *this);
 			}
 
 			CLASS	TDirectoryBrowser::TDirectoryBrowser	()
 			{
-				#if (CL3_OS_DERIVATIVE == CL3_OS_DERIVATIVE_POSIX_LINUX)
-					const int flags = O_RDONLY | O_CLOEXEC | O_NOCTTY | O_DIRECTORY;
-				#else
-					const int flags = O_RDONLY | O_CLOEXEC | O_NOCTTY;
-				#endif
+				CL3_CLASS_SYSERR(this->fd = open(".", DIRECTORY_BROWSER_FLAGS));
+			}
 
-				CL3_CLASS_SYSERR(this->fd = open(".", flags, 0));
+			CLASS	TDirectoryBrowser::TDirectoryBrowser	(const text::string::TString& path)
+			{
+				CL3_CLASS_SYSERR(this->fd = open(TCString(path, CODEC_CXX_CHAR).Chars(), DIRECTORY_BROWSER_FLAGS, 0));
 
 				#if (CL3_OS_DERIVATIVE != CL3_OS_DERIVATIVE_POSIX_LINUX)
 					struct ::stat st;
@@ -473,56 +462,18 @@ namespace	cl3
 				#endif
 			}
 
-			CLASS	TDirectoryBrowser::TDirectoryBrowser	(const text::string::TString&) : fd(-1)
+			CLASS	TDirectoryBrowser::TDirectoryBrowser	(const TDirectoryBrowser& other)
 			{
-				CL3_NOT_IMPLEMENTED;
+				CL3_CLASS_LOGIC_ERROR(other.fd < 0);
+				CL3_CLASS_SYSERR(this->fd = openat(other.fd, ".", DIRECTORY_BROWSER_FLAGS));
 			}
 
-			CLASS	TDirectoryBrowser::TDirectoryBrowser	(const TDirectoryBrowser&)
+			CLASS	TDirectoryBrowser::TDirectoryBrowser	(TDirectoryBrowser&& other) : fd(system::def::move(other.fd))
 			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			CLASS	TDirectoryBrowser::TDirectoryBrowser	(TDirectoryBrowser&& other) : fd(other.fd)
-			{
-				other.fd = -1;
 			}
 
 			CLASS	TDirectoryBrowser::~TDirectoryBrowser	()
 			{
-				if(this->fd != -1)
-					::close(this->fd);
-			}
-
-			static CL3_THREAD TDirectoryBrowser* browser_thread = NULL;
-			static TDirectoryBrowser browser_process;
-
-			static void CleanupThreadDirectoryBrowser(
-							event::TEvent<system::task::TLocalThread, system::task::TLocalThread::TEventData>&,
-							system::task::TLocalThread& thread,
-							system::task::TLocalThread::TEventData,
-							TDirectoryBrowser* browser)
-			{
-				CL3_NONCLASS_LOGIC_ERROR(&thread != system::task::TLocalThread::Self());
-				CL3_NONCLASS_LOGIC_ERROR(browser_thread == NULL);
-				CL3_NONCLASS_LOGIC_ERROR(browser_thread != browser);
-				delete browser_thread;
-				browser_thread = NULL;
-			}
-
-			TDirectoryBrowser&	TDirectoryBrowser::ThreadCurrentWorkingDirectory	()
-			{
-				if(browser_thread == NULL)
-				{
-					browser_thread = new TDirectoryBrowser();
-					system::task::TLocalThread::Self()->OnShutdown().Register(&CleanupThreadDirectoryBrowser, browser_thread);
-				}
-				return browser_process;
-			}
-
-			TDirectoryBrowser&	TDirectoryBrowser::ProcessCurrentWorkingDirectory	()
-			{
-				return browser_process;
 			}
 		}
 	}

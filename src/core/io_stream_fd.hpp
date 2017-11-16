@@ -67,8 +67,13 @@ namespace	cl3
 						CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1) final override;
 
 						CL3PUBF	usys_t	Remaining	() const  final override CL3_GETTER;
-
 						CL3PUBF	void	Close		();
+						CL3PUBF	fd_t	Claim		();
+
+						CL3PUBF TFDStream& operator=(fd_t);
+						CL3PUBF TFDStream& operator=(const TFDStream&);
+						CL3PUBF TFDStream& operator=(TFDStream&&);
+						inline operator fd_t() const CL3_GETTER { return this->fd; }
 
 						CL3PUBF	CLASS	TFDStream	();
 						CL3PUBF	CLASS	TFDStream	(fd_t fd);	//	TFDStream takes ownership of the file-descriptor fd
