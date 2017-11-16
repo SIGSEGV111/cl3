@@ -108,9 +108,10 @@ namespace
 	{
 		//	test if the commandline arguments to the process running these tests are dummy1 dummy2 dummy3
 		auto& args = TLocalProcess::Self()->Arguments();
-		EXPECT_EQ(TString("dummy1"), args[1]);
-		EXPECT_EQ(TString("dummy2"), args[2]);
-		EXPECT_EQ(TString("dummy3"), args[3]);
+		EXPECT_EQ(TString("--gtest_output=xml"), args[1]);
+		EXPECT_EQ(TString("dummy1"), args[2]);
+		EXPECT_EQ(TString("dummy2"), args[3]);
+		EXPECT_EQ(TString("dummy3"), args[4]);
 	}
 
 	TEST(system_task_TLocalProcess, Environment)
