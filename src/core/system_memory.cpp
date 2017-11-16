@@ -167,7 +167,7 @@ namespace	cl3
 					IDynamicAllocator** const p_base = reinterpret_cast<IDynamicAllocator**>(p_mem)-1;
 					IDynamicAllocator* const owner = *p_base;
 					owner->Free(p_base);
-					VALGRIND_FREELIKE_BLOCK(p_base, 0);
+					VALGRIND_FREELIKE_BLOCK(p_base+1, 0);
 				}
 			}
 
@@ -183,7 +183,7 @@ namespace	cl3
 
 					p_base = reinterpret_cast<IDynamicAllocator**>(owner->Alloc(sizeof(IDynamicAllocator*) + sz_bytes));
 
-					VALGRIND_MALLOCLIKE_BLOCK(p_base, sizeof(IDynamicAllocator*) + sz_bytes, 0, false);
+					VALGRIND_MALLOCLIKE_BLOCK(p_base+1, sz_bytes, 0, false);
 
 					*p_base = owner;
 					return p_base+1;
@@ -214,8 +214,8 @@ namespace	cl3
 						}
 						else
 						{
-							VALGRIND_FREELIKE_BLOCK(p_base_old, 0);
-							VALGRIND_MALLOCLIKE_BLOCK(p_base_new, sz_bytes_new, 0, false);
+							VALGRIND_FREELIKE_BLOCK(p_base_old+1, 0);
+							VALGRIND_MALLOCLIKE_BLOCK(p_base_new+1, sz_bytes_new - sizeof(IDynamicAllocator), 0, false);
 							*p_base_new = owner;
 						}
 
@@ -224,7 +224,7 @@ namespace	cl3
 					else
 					{
 						owner->Free(p_base_old);
-						VALGRIND_FREELIKE_BLOCK(p_base_old, 0);
+						VALGRIND_FREELIKE_BLOCK(p_base_old+1, 0);
 						return NULL;
 					}
 				}
