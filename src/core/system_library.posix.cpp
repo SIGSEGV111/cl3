@@ -60,12 +60,7 @@ namespace	cl3
 				else
 					cstr = TCString(libname, CODEC_CXX_CHAR);
 
-				int flags = RTLD_LAZY|RTLD_GLOBAL;
-
-				//	causes problems when compiling with "clang++" - somehow the libcl3-core.so gets unloaded mid-flight during the unit tests
-// 				#if (CL3_OS_DERIVATIVE == CL3_OS_DERIVATIVE_POSIX_LINUX)
-// 					flags |= RTLD_DEEPBIND;
-// 				#endif
+				int flags = RTLD_LAZY|RTLD_LOCAL;
 
 				CL3_CLASS_ERROR( (this->handle = dlopen(cstr.Chars(), flags)) == NULL, TException, "dlerror() = %s", dlerror() );
 			}

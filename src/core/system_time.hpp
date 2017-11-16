@@ -129,10 +129,6 @@ namespace	cl3
 					inline	CLASS	TTime	() : sec(0), asec(0) {}
 					CL3PUBF	CLASS	TTime	(double seconds);
 					CL3PUBF	CLASS	TTime	(s64_t seconds, s64_t attoseconds);
-// 					CL3PUBF	CLASS	TTime	(int seconds, int attoseconds);
-// 					CL3PUBF	CLASS	TTime	(double seconds, double attoseconds);
-// 					inline	CLASS	TTime	(s32_t seconds) : sec(seconds), asec(0) {}
-// 					inline	CLASS	TTime	(s64_t seconds) : sec(seconds), asec(0) {}
 					CL3PUBF	CLASS	TTime	(struct timespec ts);
 					CL3PUBF	CLASS	TTime	(struct timeval tv);
 					CL3PUBF	CLASS	TTime	(io::serialization::IDeserializer&);
@@ -140,14 +136,6 @@ namespace	cl3
 					void Serialize(io::serialization::ISerializer&) const;
 					void Deserialize(io::serialization::IDeserializer&);
 			};
-
-// 			class	CL3PUBT	TTime64
-// 			{
-// 				protected:
-// 					u64_t nsec;	//	range 1970-01-01 to ca. 2500-01-01
-//
-// 				public:
-// 			};
 		}
 	}
 }

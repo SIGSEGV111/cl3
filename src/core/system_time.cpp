@@ -285,28 +285,10 @@ namespace cl3
 				asec = (s64_t)(Seconds * 1000000000000000000.0);
 			}
 
-// 			CLASS	TTime::TTime		(s64_t seconds, s64_t attoseconds) : sec(seconds), asec(attoseconds)
-// 			{
-// 				Normalize();
-// 			}
-
-// 			CLASS	TTime::TTime		(int seconds, int attoseconds) : sec(seconds), asec(attoseconds)
-// 			{
-// 				Normalize();
-// 			}
-
 			CLASS	TTime::TTime		(s64_t seconds, s64_t attoseconds) : sec(seconds), asec(attoseconds)
 			{
 				Normalize();
 			}
-
-// 			CLASS	TTime::TTime		(double seconds, double attoseconds) : sec((s64_t)seconds), asec((s64_t)attoseconds)
-// 			{
-// 				seconds -= sec;
-// 				attoseconds -= asec;
-// 				asec += seconds * 1000000000000000000.0;
-// 				Normalize();
-// 			}
 
 			CLASS	TTime::TTime		(io::serialization::IDeserializer& ds)
 			{
