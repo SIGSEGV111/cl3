@@ -124,7 +124,7 @@ namespace
 	{
 		TDirectoryBrowser b;
 
-		while(!b.IsRoot() && !b.Entries().Contains(".git"))
+		while(!b.IsRoot() && !b.Entries().Contains(".gitignore"))
 			b.EnterDirectory("..");
 
 		b.EnterDirectory("data/tests");

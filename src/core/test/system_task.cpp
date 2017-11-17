@@ -232,7 +232,7 @@ namespace
 
 // 		StdErr()<<"HERE! 2\n";
 
-		EXPECT_EQ(15, list.Count());
+		EXPECT_EQ(15U, list.Count());
 		EXPECT_EQ(0, list[0]);
 		EXPECT_EQ(1, list[1]);
 		EXPECT_EQ(2, list[2]);

@@ -201,7 +201,7 @@ namespace	cl3
 
 				CL3_CLASS_ERROR(this->state == IFiber::EState::TERMINATED, TException, "cannot switch to terminted fiber; call Join() first");
 				CL3_CLASS_LOGIC_ERROR(this->state == IFiber::EState::RUNNING);
-				CL3_CLASS_ERROR(compiler::AtomicSwap(this->thread, NULL, TLocalThread::Self()) != NULL, TException, "fiber is already taken by another thread");
+				CL3_CLASS_ERROR(compiler::AtomicSwap(this->thread, (TLocalThread*)NULL, TLocalThread::Self()) != NULL, TException, "fiber is already taken by another thread");
 				this->caller = current_fiber;
 				current_fiber = this;
 
@@ -241,7 +241,7 @@ namespace	cl3
 			{
 				if(this != &fib_main)
 				{
-					CL3_CLASS_LOGIC_ERROR(this == current_fiber);
+// 					CL3_CLASS_LOGIC_ERROR(this == current_fiber);
 					this->Join();
 					VALGRIND_STACK_DEREGISTER(this->valgrind_stack_id);
 				}
