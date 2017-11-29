@@ -46,7 +46,7 @@ namespace
 
 	TEST(io_network, TCP_Loopback_v6)
 	{
-		TTCPServer server(TIPv6("0:0:0:0:0:0:0:1"), 0);
+		TTCPServer server(TIPv6("0:0:0:0:0:0:0:1"));
 		TTCPClient client1(TIPv6("0:0:0:0:0:0:0:1"), server.Port());
 
 		server.OnClientConnecting().WaitFor();
