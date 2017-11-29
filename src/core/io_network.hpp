@@ -26,6 +26,14 @@ namespace cl3
 {
 	namespace io
 	{
+		namespace text
+		{
+			namespace string
+			{
+				class TString;
+			}
+		}
+
 		namespace network
 		{
 			struct TIPv4
@@ -39,6 +47,8 @@ namespace cl3
 				CL3PUBF TIPv4();
 				CL3PUBF TIPv4(u8_t a, u8_t b, u8_t c, u8_t d);
 				CL3PUBF explicit TIPv4(u32_t);
+				CL3PUBF explicit TIPv4(const char*);
+				CL3PUBF explicit TIPv4(const text::string::TString&);
 				TIPv4(const TIPv4&) = default;
 			};
 
@@ -59,6 +69,8 @@ namespace cl3
 				CL3PUBF TIPv6();
 				CL3PUBF TIPv6(TIPv4);
 				CL3PUBF explicit TIPv6(const byte_t octet[16]);
+				CL3PUBF explicit TIPv6(const char*);
+				CL3PUBF explicit TIPv6(const text::string::TString&);
 				TIPv6(const TIPv6&) = default;
 			};
 

@@ -16,8 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
+#include <arpa/inet.h>
+
 #include "io_network.hpp"
 #include "error.hpp"
+#include "io_text_string.hpp"
+#include "io_text_encoding.hpp"
+#include "system_endian.hpp"
 
 namespace cl3
 {
@@ -25,6 +31,9 @@ namespace cl3
 	{
 		namespace network
 		{
+			using namespace text::string;
+			using namespace error;
+
 			TIPv4::TIPv4()
 			{
 				this->u32 = 0;
@@ -36,6 +45,16 @@ namespace cl3
 				this->octet[1] = b;
 				this->octet[2] = c;
 				this->octet[3] = d;
+			}
+
+			TIPv4::TIPv4(const char* ipstr)
+			{
+				CL3_CLASS_ERROR(::sscanf(ipstr, "%hhu.%hhu.%hhu.%hhu", this->octet + 0, this->octet + 1, this->octet + 2, this->octet + 3) != 4, TException, "unable to parse IPv4 address from string");
+			}
+
+			TIPv4::TIPv4(const text::string::TString& ipstr) : TIPv4(TCString(ipstr, text::encoding::CODEC_CXX_CHAR).Chars())
+			{
+				// TODO: switch to use parser
 			}
 
 			TIPv4::TIPv4(u32_t v)
@@ -66,6 +85,19 @@ namespace cl3
 			{
 				for(unsigned i = 0; i < 16; i++)
 					this->octet[i] = octet[i];
+			}
+
+			TIPv6::TIPv6(const char* ipstr)
+			{
+				CL3_CLASS_ERROR(::sscanf(ipstr, "%hx:%hx:%hx:%hx:%hx:%hx:%hx:%hx", this->group + 0, this->group + 1, this->group + 2, this->group + 3, this->group + 4, this->group + 5, this->group + 6, this->group + 7) != 8, TException, "unable to parse IPv6 address from string");
+
+				for(unsigned i = 0; i < 16; i++)
+					this->group[i] = system::endian::ConvertNativeToBigEndian(this->group[i]);
+			}
+
+			TIPv6::TIPv6(const text::string::TString& ipstr) : TIPv6(TCString(ipstr, text::encoding::CODEC_CXX_CHAR).Chars())
+			{
+				// TODO: switch to use parser
 			}
 
 			TTCPClient::TTCPClient(fd_t fd, TIPv6 ip_local, TIPv6 ip_remote, u16_t port_local, u16_t port_remote) : TFDStream(fd), ip_local(ip_local), ip_remote(ip_remote), port_local(port_local), port_remote(port_remote)
