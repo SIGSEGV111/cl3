@@ -86,7 +86,7 @@ namespace cl3
 				socklen_t sz = sizeof(addr);
 				int fd;
 				CL3_CLASS_SYSERR(fd = ::accept4(this->fd.FD(), &addr, &sz, SOCK_NONBLOCK | SOCK_CLOEXEC));
-				CL3_CLASS_LOGIC_ERROR(sz > sizeof(addr));
+				CL3_CLASS_LOGIC_ERROR(sz > sizeof(ip4) && sz > sizeof(ip6));
 
 				u16_t port_remote = 0;
 				TIPv6 ip_remote;
@@ -123,7 +123,7 @@ namespace cl3
 					sockaddr_in addr;
 					memset(&addr, 0, sizeof(addr));
 					addr.sin_family = AF_INET;
-					addr.sin_port = port;
+					addr.sin_port = system::endian::ConvertNativeToBigEndian(port);
 					addr.sin_addr.s_addr = ip.IPv4().u32;
 					CL3_CLASS_SYSERR(bind(this->fd.FD(), (const sockaddr*)&addr, sizeof(addr)));
 
@@ -142,7 +142,7 @@ namespace cl3
 					sockaddr_in6 addr;
 					memset(&addr, 0, sizeof(addr));
 					addr.sin6_family = AF_INET6;
-					addr.sin6_port = port;
+					addr.sin6_port = system::endian::ConvertNativeToBigEndian(port);
 					memcpy(addr.sin6_addr.s6_addr, ip.octet, 16);
 					CL3_CLASS_SYSERR(bind(this->fd.FD(), (const sockaddr*)&addr, sizeof(addr)));
 

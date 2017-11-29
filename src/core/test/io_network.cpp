@@ -27,10 +27,27 @@ namespace
 	using namespace cl3::io::network;
 	using namespace cl3::system::types;
 
-	TEST(io_network, TCP_Loopback)
+	TEST(io_network, TCP_Loopback_v4)
 	{
 		TTCPServer server(TIPv4(127,0,0,1));
 		TTCPClient client1(TIPv4(127,0,0,1), server.Port());
+
+		server.OnClientConnecting().WaitFor();
+		TTCPClient client2 = server.Accept();
+
+		const byte_t test_data[] = { 1,2,3,4,5,6,7,8,9 };
+		client1.Write(test_data, sizeof(test_data));
+
+		byte_t buffer[sizeof(test_data)] = {};
+		client2.Read(buffer, sizeof(test_data));
+
+		EXPECT_TRUE(memcmp(test_data, buffer, sizeof(test_data)) == 0);
+	}
+
+	TEST(io_network, TCP_Loopback_v6)
+	{
+		TTCPServer server(TIPv6("0:0:0:0:0:0:0:1"), 0);
+		TTCPClient client1(TIPv6("0:0:0:0:0:0:0:1"), server.Port());
 
 		server.OnClientConnecting().WaitFor();
 		TTCPClient client2 = server.Accept();
