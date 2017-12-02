@@ -7,5 +7,6 @@ file (GLOB CL3_EXTLIB_SRC
 )
 
 set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_INT_LIB})
+set (CMAKE_C_FLAGS ${CMAKE_C_FLAGS_INT_LIB})
 add_library (cl3-extlib_static STATIC ${CL3_EXTLIB_SRC})
 add_library (cl3-extlib SHARED ${CL3_EXTLIB_SRC})

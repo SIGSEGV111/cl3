@@ -35,7 +35,7 @@ namespace	cl3
 		{
 			namespace	fd
 			{
-				class TWaitable : public system::task::synchronization::IWaitable
+				class CL3PUBT TWaitable : public system::task::synchronization::IWaitable
 				{
 					protected:
 						fd_t fd;
@@ -51,7 +51,7 @@ namespace	cl3
 				};
 
 				//	generic buffered io-stream for interaction with operating systems io-structures (POSIX-fd, Windows HANDLE, etc.)
-				class	TFDStream : public virtual IIn<byte_t>, public virtual IOut<byte_t>
+				class CL3PUBT TFDStream : public virtual IIn<byte_t>, public virtual IOut<byte_t>
 				{
 					protected:
 						fd_t fd;
