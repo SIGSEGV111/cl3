@@ -142,7 +142,7 @@ namespace	cl3
 
 						//	from IDynamicCollection
 						CL3PUBF	void	Clear		() final override;
-						CL3PUBF	bool	Remove		(const TPair<TKey, TValue>& item_remove) final override;
+						CL3PUBF	bool	RemoveItem	(const TPair<TKey, TValue>& item_remove) final override;
 
 						CL3PUBF	system::memory::TUniquePtr<IDynamicIterator<TPair<TKey, TValue>> >
 									CreateDynamicIterator	() final override CL3_WARN_UNUSED_RESULT;
@@ -277,7 +277,7 @@ namespace	cl3
 				}
 
 				template<class TKey, class TValue>
-				bool	TStdMap<TKey, TValue>::Remove	(const TPair<TKey, TValue>&)
+				bool	TStdMap<TKey, TValue>::RemoveItem	(const TPair<TKey, TValue>&)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

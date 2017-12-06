@@ -99,7 +99,6 @@ namespace	cl3
 				struct	CL3PUBT	IList : virtual IDynamicCollection<T>, virtual array::IArray<T>, virtual IList<const T>
 				{
 					using IStaticCollection<const T>::Count;
-					using IDynamicCollection<T>::Remove;
 					using stream::IOut<T>::Write;
 					using array::IArray<T>::Read;
 					using IList<const T>::operator+=;
@@ -316,7 +315,7 @@ namespace	cl3
 						T*			Claim		() final override;
 						T*			ItemPtr		(ssys_t rindex) final override CL3_GETTER;
 
-						bool		Remove		(const T& item_remove) final override;
+						bool		RemoveItem	(const T& item_remove) final override;
 						void		Remove		(ssys_t rindex, usys_t n_items_remove) final override;
 						void		Clear		() final override;
 						void		Cut			(usys_t n_head, usys_t n_tail) final override;
@@ -535,7 +534,7 @@ namespace	cl3
 				template<class T>
 				void	TList<const T>::Prealloc	(usys_t n_items_prealloc_min)
 				{
-					const usys_t n_items_prealloc_ideal = (n_items_current >> 8) + (32 / sizeof(T));
+					const usys_t n_items_prealloc_ideal = CL3_MAX((n_items_current >> 8), ((4096-32) / sizeof(T)));
 
 					if((n_items_prealloc < n_items_prealloc_min) || (n_items_prealloc - n_items_prealloc_min > 2 * n_items_prealloc_ideal))
 					{
@@ -1028,7 +1027,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				bool	TList<T>::Remove	(const T& item_remove)
+				bool	TList<T>::RemoveItem	(const T& item_remove)
 				{
 					usys_t index;
 					if(&item_remove >= arr_items && &item_remove < arr_items + n_items_current)
