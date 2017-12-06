@@ -95,6 +95,24 @@ namespace
 		for(unsigned i = 0; i < 4096; i++)
 		{
 			const double f = cmwc.Normal();
+			if(f < -1 || f > 1)
+			{
+				printf("%f\n", f);
+				n_fail++;
+			}
+		}
+
+		EXPECT_EQ(0, n_fail);
+	}
+
+	TEST(system_random, PositiveNormal_Interval)
+	{
+		TCMWC cmwc;
+		unsigned n_fail = 0;
+
+		for(unsigned i = 0; i < 4096; i++)
+		{
+			const double f = cmwc.PositiveNormal();
 			if(f < 0 || f > 1)
 			{
 				printf("%f\n", f);

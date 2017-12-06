@@ -51,6 +51,16 @@ namespace cl3
 				for(;;)
 				{
 					const double x = ::gaussian_ziggurat(*this, 1.67332005307) / 6.0;
+					if(x >= -1 && x <= 1)
+						return x;
+				}
+			}
+
+			double IRandomNumberGenerator::PositiveNormal()
+			{
+				for(;;)
+				{
+					const double x = ::gaussian_ziggurat(*this, 1.67332005307) / 6.0;
 					const double y = CL3_ABS(x);
 					if(y >= 0 && y <= 1)
 						return y;
@@ -61,7 +71,7 @@ namespace cl3
 			{
 				for(;;)
 				{
-					const double v = this->Normal() * (max + 1);
+					const double v = this->PositiveNormal() * (max + 1);
 					const usys_t i = (usys_t)v;
 					if(i <= max)
 						return i;

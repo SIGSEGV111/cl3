@@ -33,6 +33,7 @@ namespace cl3
 				CL3PUBF u32_t GetU32();
 				CL3PUBF double Float();
 				CL3PUBF double Normal();
+				CL3PUBF double PositiveNormal();
 				CL3PUBF usys_t NormalIndex(usys_t max);
 			};
 
@@ -47,6 +48,7 @@ namespace cl3
 			class CL3PUBT TCMWC : public IRandomNumberGenerator
 			{
 				public:
+					using io::stream::IIn<byte_t>::Read;
 					static const u32_t PHI = 0x9e3779b9;
 
 					struct	TState
