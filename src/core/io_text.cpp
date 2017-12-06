@@ -307,19 +307,21 @@ namespace	cl3
 
 			static	void	PrintNumber	(IOut<TUTF32>& os, const TNumberFormat& f, f64_t num)
 			{
-				struct B
-				{
-					u64_t	s : 1,
-							e : 11,
-							m : 52;
-				};
+// 				struct B
+// 				{
+// 					u64_t	s : 1,
+// 							e : 11,
+// 							m : 52;
+// 				};
+//
+// 				const B& bits = *reinterpret_cast<const B*>(&num);
+//
+// 				const s64_t e = (s64_t)bits.e - 1023;
+// 				const u64_t i = 1 + bits.m / (2 * 52);
 
-				const B& bits = *reinterpret_cast<const B*>(&num);
-
-				const s64_t e = (s64_t)bits.e - 1023;
-				const u64_t i = 1 + bits.m / (2 * 52);
-
-				PrintNumber(os, bits.s != 0, i, e, f);
+				wchar_t buffer[128];
+				swprintf(buffer, 128, L"%f", num);
+				os << buffer;
 			}
 
 			ITextWriter&	ITextWriter::operator<<	(char v)
