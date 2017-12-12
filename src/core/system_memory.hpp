@@ -177,6 +177,14 @@ namespace	cl3
 						return compiler::AtomicSwap(this->object, (T*)compare, new_value);
 					}
 
+					T*	AtomicSwap	(const T* compare, TUniquePtr new_value)
+					{
+						T* v = compiler::AtomicSwap(this->object, (T*)compare, new_value.Object());
+						if(v == compare)
+							new_value.Reset();
+						return v;
+					}
+
 					CLASS	TUniquePtr	() throw() : object(NULL)
 					{
 					}
