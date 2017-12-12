@@ -126,6 +126,9 @@ namespace	cl3
 			template<typename T>
 			struct	IStaticCollection<const T> : virtual event::IObservable
 			{
+				using value_t = T;
+				using valuearg_t = typeinfo::features::type_iif<sizeof(value_t) <= sizeof(void*), value_t, value_t&>;
+
 				virtual	system::memory::TUniquePtr<IStaticIterator<const T> >	CreateStaticIterator	() const CL3_WARN_UNUSED_RESULT = 0;
 
 				virtual	usys_t	Count		() const CL3_GETTER = 0;
