@@ -899,11 +899,11 @@ namespace
 			l.Append(50);
 			l.Append(42);
 
-			EXPECT_EQ(6, l.Count());
+			EXPECT_EQ(6U, l.Count());
 
 			QuickSort(l, [](int a, int b){ return (a > b ? 1 : (a < b ? -1 : 0)); });
 
-			EXPECT_EQ(6, l.Count());
+			EXPECT_EQ(6U, l.Count());
 
 			EXPECT_EQ(1,  l[0]);
 			EXPECT_EQ(5,  l[1]);
@@ -935,7 +935,7 @@ namespace
 			for(unsigned i = 1; i < n; i++)
 				if(l[i] < l[i-1])
 					n_fail++;
-			EXPECT_EQ(0, n_fail);
+			EXPECT_EQ(0U, n_fail);
 		}
 	}
 }

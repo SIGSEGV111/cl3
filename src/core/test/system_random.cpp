@@ -42,7 +42,7 @@ namespace
 				n_fail++;
 		}
 
-		EXPECT_EQ(0, n_fail);
+		EXPECT_EQ(0U, n_fail);
 	}
 
 	TEST(system_random, CryptoRandom)
@@ -72,7 +72,7 @@ namespace
 				if(f < 0 || f > 1)
 					n_fail++;
 			}
-			EXPECT_EQ(0, n_fail);
+			EXPECT_EQ(0U, n_fail);
 		}
 
 		{
@@ -90,7 +90,7 @@ namespace
 				if(f > 0)
 					n_pos++;
 			}
-			EXPECT_EQ(0, n_fail);
+			EXPECT_EQ(0U, n_fail);
 			EXPECT_TRUE(n_neg >= n_total / 4);
 			EXPECT_TRUE(n_pos >= n_total / 4);
 		}
@@ -109,7 +109,7 @@ namespace
 				n_fail++;
 		}
 
-		EXPECT_EQ(0, n_fail);
+		EXPECT_EQ(0U, n_fail);
 	}
 
 	TEST(system_random, Normal_Interval)
@@ -127,7 +127,7 @@ namespace
 			}
 		}
 
-		EXPECT_EQ(0, n_fail);
+		EXPECT_EQ(0U, n_fail);
 	}
 
 	TEST(system_random, PositiveNormal_Interval)
@@ -145,7 +145,7 @@ namespace
 			}
 		}
 
-		EXPECT_EQ(0, n_fail);
+		EXPECT_EQ(0U, n_fail);
 	}
 
 	TEST(system_random, Normal_Randomness)
@@ -161,7 +161,7 @@ namespace
 				n_fail++;
 		}
 
-		EXPECT_EQ(0, n_fail);
+		EXPECT_EQ(0U, n_fail);
 	}
 
 	TEST(system_random, NormalIndex)
