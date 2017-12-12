@@ -77,68 +77,13 @@ namespace	cl3
 	}
 }
 
-static const char chr_pad = 0x01;
-static const usys_t len_progname_want = 64;
-static usys_t len_progname_got = 0;
-
 static void cl3_init(int argc, char* argv[], char* envv[]);
 __attribute__((section(".init_array"))) void (* p_cl3_init)(int,char*[],char*[]) = &cl3_init;
-
-static bool UsingGDB()
-{
-	char buffer[256];
-	snprintf(buffer, 256, "/proc/%d/exe", getppid());
-	ssize_t l = readlink(buffer, buffer, 256);
-	buffer[l] = 0;
-	return l > 4 && memcmp(buffer+l-4, "/gdb", 4) == 0;
-}
 
 static void cl3_init(int argc, char* argv[], char* envv[])
 {
 	if(p_cl3_init == NULL) throw;	//	prevent warning about unused variable
 
-	const usys_t len_progname_current = strlen(argv[0]);
-
-	/*if(RUNNING_ON_VALGRIND == 0 && !UsingGDB())	// valgrind resets argv[0], thus libcl3 will keep execvpe()'ing until all eternity
-	{
-		if(len_progname_current < len_progname_want - 1)
-		{
-			puts("*** now performing black magic ... ");
-
-			//	enlarge the program-name buffer
-			//	this works by execvpe()'ing ourself with a larger (padded) program-name as argv[0], we will have to remove that padding later again
-
-			//	create a new argv
-			char* argv_new[argc+1];
-			char program_new[len_progname_want];
-			memcpy(argv_new, argv, sizeof(char*) * argc);
-			argv_new[0] = program_new;
-			argv_new[argc] = NULL;
-
-			//	copy program-name, but pad it with chr_pad characters to the desired length
-			::memcpy(argv_new[0], argv[0], len_progname_current);
-			::memset(argv_new[0]+len_progname_current, chr_pad, len_progname_want-len_progname_current-1);
-			argv_new[0][len_progname_want-1] = 0;
-
-			//	execvpe() ourself with a new (padded) program-name
-			::execve(argv[0], argv_new, envv);
-
-			//	it did not work... to bad. lets continue as if nothing had happend
-			perror("execve");
-			puts("*** black magic has failed, but we survived it!");
-		}
-		else
-		{
-			puts("*** black magic succeeded!");
-
-			//	fix the program-name buffer, we have to assume it is as messed up as we wanted it to be when we called execvpe()
-			for(char* p = argv[0]; *p != 0; p++)
-				if(*p == chr_pad)
-					*p = ' ';
-		}
-	}*/
-
-	len_progname_got = len_progname_current;
 	cl3::system::task::argv = argv;
 	cl3::system::task::envv = envv;
 }
@@ -163,6 +108,7 @@ namespace	cl3
 
 			static void ReadProcFile(const char* filename, char*& buffer, usys_t& sz)
 			{
+				//	FIXME: this code should use TFile
 				sz = 4096;
 				usys_t p = 0;
 				ssize_t r;
