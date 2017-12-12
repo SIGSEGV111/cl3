@@ -159,7 +159,7 @@ double gaussian_ziggurat(IRandomNumberGenerator& rng, double sigma)
 	double x, y;
 
 	while (1) {
-		U = rng.GetU32();
+		U = rng.GenerateU32();
 		i = U & 0x0000007F;		/* 7 bit to choose the step */
 		sign = U & 0x00000080;	/* 1 bit for the sign */
 		j = U>>8;			/* 24 bit for the x-value */
@@ -171,10 +171,10 @@ double gaussian_ziggurat(IRandomNumberGenerator& rng, double sigma)
 			double  y0, y1;
 			y0 = ytab[i];
 			y1 = ytab[i+1];
-			y = y1+(y0-y1)*rng.Float();
+			y = y1+(y0-y1)*rng.GenerateF64(true);
 		} else {
-			x = PARAM_R - log(1.0-rng.Float())/PARAM_R;
-			y = exp(-PARAM_R*(x-0.5*PARAM_R))*rng.Float();
+			x = PARAM_R - log(1.0-rng.GenerateF64(true))/PARAM_R;
+			y = exp(-PARAM_R*(x-0.5*PARAM_R))*rng.GenerateF64(true);
 		}
 		if (y < exp(-0.5*x*x))  break;
 	}

@@ -32,25 +32,31 @@ namespace cl3
 	{
 		namespace random
 		{
-			u32_t IRandomNumberGenerator::GetU32()
-			{
-				u32_t u;
-				this->Read((byte_t*)&u, 4);
-				return u;
-			}
+			bool  IRandomNumberGenerator::GenerateBool() { return (this->ReadT<u8_t>() % 2) == 0; }
+			u8_t  IRandomNumberGenerator::GenerateU8 () { return this->ReadT<u8_t> (); }
+			u16_t IRandomNumberGenerator::GenerateU16() { return this->ReadT<u16_t>(); }
+			u32_t IRandomNumberGenerator::GenerateU32() { return this->ReadT<u32_t>(); }
+			u64_t IRandomNumberGenerator::GenerateU64() { return this->ReadT<u64_t>(); }
+			s8_t  IRandomNumberGenerator::GenerateS8 () { return this->ReadT<s8_t> (); }
+			s16_t IRandomNumberGenerator::GenerateS16() { return this->ReadT<s16_t>(); }
+			s32_t IRandomNumberGenerator::GenerateS32() { return this->ReadT<s32_t>(); }
+			s64_t IRandomNumberGenerator::GenerateS64() { return this->ReadT<s64_t>(); }
 
-			f64_t IRandomNumberGenerator::Float()
+			f64_t IRandomNumberGenerator::GenerateF64(bool only_positive)
 			{
-				u64_t x;
-				this->Read((byte_t*)&x, 8);
-				return (f64_t)x / (f64_t)((u64_t)-1);
+				const long double x = this->GenerateU64();
+				const long double y = x / (long double)18446744073709551615ULL;
+				if(only_positive)
+					return y;
+				else
+					return (f64_t)(this->GenerateBool() ? y : -y);
 			}
 
 			double IRandomNumberGenerator::Normal()
 			{
 				for(;;)
 				{
-					const double x = ::gaussian_ziggurat(*this, 1.67332005307) / 6.0;
+					const double x = ::gaussian_ziggurat(*this, 1) / 3.0;
 					if(x >= -1 && x <= 1)
 						return x;
 				}
@@ -60,7 +66,7 @@ namespace cl3
 			{
 				for(;;)
 				{
-					const double x = ::gaussian_ziggurat(*this, 1.67332005307) / 6.0;
+					const double x = ::gaussian_ziggurat(*this, 1) / 3.0;
 					const double y = CL3_ABS(x);
 					if(y >= 0 && y <= 1)
 						return y;
@@ -78,30 +84,12 @@ namespace cl3
 				}
 			}
 
-			TCryptoRandom& CryptoRandom()
+			TCryptoRandom& TCryptoRandom::SharedInstance()
 			{
-				static TCryptoRandom crng;
-				return crng;
-			}
-
-			usys_t TCMWC::Read(byte_t* arr_items_read, usys_t n_items_read_max, usys_t)
-			{
-				byte_t* p = arr_items_read;
-				byte_t* e = arr_items_read + (n_items_read_max / 4) * 4;
-
-				for(; p < e; p += 4)
-					*(u32_t*)p = this->state.Generate();
-
-				if(n_items_read_max % 4)
-				{
-					e = arr_items_read + n_items_read_max;
-					u32_t r = this->state.Generate();
-
-					for(; p < e; p++)
-						*p = r >> 8;
-				}
-
-				return n_items_read_max;
+				static system::memory::TUniquePtr<TCryptoRandom> instance;
+				if(instance.Object() == NULL)
+					instance.AtomicSwap(NULL, system::memory::MakeUniquePtr(new TCryptoRandom()));
+				return *instance.Object();
 			}
 
 			u32_t TCMWC::TState::Generate()
@@ -137,7 +125,7 @@ namespace cl3
 
 			CLASS TCMWC::TState::TState()
 			{
-				CryptoRandom().Read((byte_t*)this, sizeof(TState));
+				TCryptoRandom::SharedInstance().Read((byte_t*)this, sizeof(TState));
 				for(unsigned i = 0; i < 4096; i++) Generate();
 			}
 
@@ -152,6 +140,38 @@ namespace cl3
 
 			CLASS TCMWC::TCMWC(const TState& state) : state(state)
 			{
+			}
+
+			CL3PUBF CLASS TXorShift::TXorShift(u64_t x, u64_t y, u64_t z) : x(x), y(y), z(z)
+			{
+			}
+
+			CL3PUBF CLASS TXorShift::TXorShift()
+			{
+				TCryptoRandom::SharedInstance().Read((byte_t*)&x, 8);
+				TCryptoRandom::SharedInstance().Read((byte_t*)&y, 8);
+				TCryptoRandom::SharedInstance().Read((byte_t*)&z, 8);
+			}
+
+			namespace _
+			{
+				template<>
+				TXorShift& TImplPNRG<TXorShift>::SharedInstance()
+				{
+					static system::memory::TUniquePtr<TXorShift> instance;
+					if(instance.Object() == NULL)
+						instance.AtomicSwap(NULL, system::memory::MakeUniquePtr(new TXorShift()));
+					return *instance.Object();
+				}
+
+				template<>
+				TCMWC& TImplPNRG<TCMWC>::SharedInstance()
+				{
+					static system::memory::TUniquePtr<TCMWC> instance;
+					if(instance.Object() == NULL)
+						instance.AtomicSwap(NULL, system::memory::MakeUniquePtr(new TCMWC()));
+					return *instance.Object();
+				}
 			}
 		}
 	}

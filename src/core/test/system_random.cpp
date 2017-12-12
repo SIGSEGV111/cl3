@@ -47,39 +47,64 @@ namespace
 
 	TEST(system_random, CryptoRandom)
 	{
-		TestRandomness(CryptoRandom());
+		TestRandomness(TCryptoRandom::SharedInstance());
 	}
 
 	TEST(system_random, CMWC)
 	{
-		TCMWC cmwc;
-		TestRandomness(cmwc);
+		TestRandomness(TCMWC::SharedInstance());
+	}
+
+	TEST(system_random, XorShift)
+	{
+		TestRandomness(TXorShift::SharedInstance());
 	}
 
 	TEST(system_random, Float_Interval)
 	{
-		TCMWC cmwc;
-		unsigned n_fail = 0;
+		TCMWC& cmwc = TCMWC::SharedInstance();
 
-		for(unsigned i = 0; i < 4096; i++)
 		{
-			const double f = cmwc.Float();
-			if(f < 0 || f > 1)
-				n_fail++;
+			unsigned n_fail = 0;
+			for(unsigned i = 0; i < 4096; i++)
+			{
+				const double f = cmwc.GenerateF64(true);
+				if(f < 0 || f > 1)
+					n_fail++;
+			}
+			EXPECT_EQ(0, n_fail);
 		}
 
-		EXPECT_EQ(0, n_fail);
+		{
+			unsigned n_fail = 0;
+			unsigned n_neg = 0;
+			unsigned n_pos = 0;
+			const unsigned n_total = 4096;
+			for(unsigned i = 0; i < n_total; i++)
+			{
+				const double f = cmwc.GenerateF64(false);
+				if(f < -1 || f > 1)
+					n_fail++;
+				if(f < 0)
+					n_neg++;
+				if(f > 0)
+					n_pos++;
+			}
+			EXPECT_EQ(0, n_fail);
+			EXPECT_TRUE(n_neg >= n_total / 4);
+			EXPECT_TRUE(n_pos >= n_total / 4);
+		}
 	}
 
 	TEST(system_random, Float_Randomness)
 	{
-		TCMWC cmwc;
+		TCMWC& cmwc = TCMWC::SharedInstance();
 		unsigned n_fail = 0;
 
 		for(unsigned i = 0; i < 1024; i++)
 		{
-			const double a = cmwc.Float();
-			const double b = cmwc.Float();
+			const double a = cmwc.GenerateF64(false);
+			const double b = cmwc.GenerateF64(false);
 			if(a == b)
 				n_fail++;
 		}
@@ -89,7 +114,7 @@ namespace
 
 	TEST(system_random, Normal_Interval)
 	{
-		TCMWC cmwc;
+		TCMWC& cmwc = TCMWC::SharedInstance();
 		unsigned n_fail = 0;
 
 		for(unsigned i = 0; i < 4096; i++)
@@ -107,7 +132,7 @@ namespace
 
 	TEST(system_random, PositiveNormal_Interval)
 	{
-		TCMWC cmwc;
+		TCMWC& cmwc = TCMWC::SharedInstance();
 		unsigned n_fail = 0;
 
 		for(unsigned i = 0; i < 4096; i++)
@@ -125,7 +150,7 @@ namespace
 
 	TEST(system_random, Normal_Randomness)
 	{
-		TCMWC cmwc;
+		TCMWC& cmwc = TCMWC::SharedInstance();
 		unsigned n_fail = 0;
 
 		for(unsigned i = 0; i < 1024; i++)
@@ -141,7 +166,7 @@ namespace
 
 	TEST(system_random, NormalIndex)
 	{
-		TCMWC cmwc;
+		TCMWC& cmwc = TCMWC::SharedInstance();
 
 		static const usys_t n = 16;
 		u32_t hist[n] = {};
