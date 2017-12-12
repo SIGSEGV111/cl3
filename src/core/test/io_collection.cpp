@@ -18,12 +18,16 @@
 
 #include "common.hpp"
 #include <gtest/gtest.h>
+#include <cl3/core/io_text_terminal.hpp>
 #include <cl3/core/io_collection.hpp>
 #include <cl3/core/io_collection_bitmask.hpp>
 #include <cl3/core/io_collection_list.hpp>
+#include <cl3/core/io_collection_sort.hpp>
 #include <cl3/core/io_text_string.hpp>
 
 using namespace ::testing;
+
+using namespace cl3::io::text::terminal;
 
 namespace
 {
@@ -864,6 +868,7 @@ namespace
 {
 	using namespace cl3::io::collection;
 	using namespace cl3::io::collection::list;
+	using namespace cl3::io::collection::sort;
 	using namespace cl3::system::types;
 	using namespace cl3::unittest_support;
 	using namespace cl3::io::text::string;
@@ -880,5 +885,57 @@ namespace
 		EXPECT_EQ(TString("test"), strlst[0]);
 		EXPECT_EQ(TString("foo"), strlst[1]);
 		EXPECT_EQ(TString("bbbbar"), strlst[2]);
+	}
+
+	TEST(io_collection_list_TList, QuicKSort)
+	{
+		{
+			TList<int> l;
+
+			l.Append(17);
+			l.Append(5);
+			l.Append(37);
+			l.Append(1);
+			l.Append(50);
+			l.Append(42);
+
+			EXPECT_EQ(6, l.Count());
+
+			QuickSort(l, [](int a, int b){ return (a > b ? 1 : (a < b ? -1 : 0)); });
+
+			EXPECT_EQ(6, l.Count());
+
+			EXPECT_EQ(1,  l[0]);
+			EXPECT_EQ(5,  l[1]);
+			EXPECT_EQ(17, l[2]);
+			EXPECT_EQ(37, l[3]);
+			EXPECT_EQ(42, l[4]);
+			EXPECT_EQ(50, l[5]);
+		}
+
+		{
+			TString str = "Foobar";
+			QuickSort(str, [](TUTF32 a, TUTF32 b){ return (a > b ? 1 : (a < b ? -1 : 0)); });
+			EXPECT_TRUE(str == "Faboor");
+		}
+
+		{
+			const unsigned n = 4096;
+			TList<int> l;
+			for(unsigned i = 0; i < n; i++)
+				l.Append(cl3::system::random::TCMWC::SharedInstance().GenerateS32());
+
+			EXPECT_EQ(n, l.Count());
+
+			QuickSort(l, [](int a, int b){ return (a > b ? 1 : (a < b ? -1 : 0)); });
+
+			EXPECT_EQ(n, l.Count());
+
+			unsigned n_fail = 0;
+			for(unsigned i = 1; i < n; i++)
+				if(l[i] < l[i-1])
+					n_fail++;
+			EXPECT_EQ(0, n_fail);
+		}
 	}
 }
