@@ -64,7 +64,7 @@ namespace	cl3
 
 					if(errno == EOPNOTSUPP || errno == EINVAL || errno == EISDIR)
 					{
-						perror("O_TMPFILE not supported by kernel/filesystem");
+						perror("O_TMPFILE not supported by kernel/filesystem, falling back to workaround");
 						char tmpfile_name[] = ".cl3tmp-XXXXXX";
 						CL3_CLASS_SYSERR(this->fd = mkostemp(tmpfile_name, O_CLOEXEC|O_NOCTTY|O_LARGEFILE|O_RDWR));
 						CL3_CLASS_SYSERR(::unlink(tmpfile_name));
