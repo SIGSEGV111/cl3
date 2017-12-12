@@ -17,6 +17,8 @@
 */
 
 #include <cl3/core/util.hpp>
+#include <cl3/core/util_function.hpp>
+#include <cl3/core/util_event.hpp>
 #include <cl3/core/io_text_string.hpp>
 
 #include <gtest/gtest.h>
@@ -44,5 +46,98 @@ namespace
 		Hexdump(in, sizeof(in), out);
 
 		EXPECT_TRUE(out == ref);
+	}
+}
+
+namespace
+{
+	using namespace cl3::util;
+	using namespace cl3::util::function;
+
+	void TestFunc(int& v, int nv)
+	{
+		v = nv + 10;
+	}
+
+	TEST(util_function, StaticFunction)
+	{
+		int v = 0;
+		TFunction<void, int&, int> func = &TestFunc;
+		func(v, 10);
+		EXPECT_EQ(20, v);
+	}
+
+	TEST(util_function, Lamda)
+	{
+		int v = 0;
+		TFunction<void, int> func = [&v](int nv){ v = nv + 10; };
+		func(10);
+		EXPECT_EQ(20, v);
+	}
+
+	TEST(util_function, MemberFunction)
+	{
+		struct TTest
+		{
+			int v;
+
+			void Callback(int nv)
+			{
+				this->v = nv + 10;
+			}
+		};
+
+		TTest test;
+		test.v = 0;
+
+		TFunction<void, int> func(&test, &TTest::Callback);
+
+		func(10);
+		EXPECT_EQ(20, test.v);
+	}
+}
+
+namespace
+{
+	using namespace cl3::util;
+	using namespace cl3::util::event;
+
+	TEST(util_event, NoListener)
+	{
+		int v = 0;
+		TEvent<int&, int> event;
+		event.Raise(v, 10);
+		EXPECT_EQ(0, v);
+	}
+
+	TEST(util_event, SingleListener)
+	{
+		int v = 0;
+		TEvent<int&, int> event;
+		auto l1 = event.Register([](int& v, int nv){ v += nv; });
+		event.Raise(v, 10);
+		EXPECT_EQ(10, v);
+	}
+
+	TEST(util_event, TwoListeners)
+	{
+		int v = 0;
+		TEvent<int&, int> event;
+		auto l1 = event.Register([](int& v, int nv){ v += nv; });
+		auto l2 = event.Register([](int& v, int nv){ v += nv; });
+		event.Raise(v, 10);
+		EXPECT_EQ(20, v);
+	}
+
+	TEST(util_event, Unregister)
+	{
+		int v = 0;
+		TEvent<int&, int> event;
+		auto l1 = event.Register([](int& v, int nv){ v += nv; });
+		{
+			auto l2 = event.Register([](int& v, int nv){ v += nv; });
+		}
+		event.Raise(v, 10);
+		EXPECT_EQ(10, v);
 	}
 }
