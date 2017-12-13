@@ -40,19 +40,19 @@
 #include "util.hpp"
 #include "error.hpp"
 
-#include <string.h>
+// #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
-#include <sched.h>
-
-#include <valgrind/valgrind.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include <sys/syscall.h>
-#include <sys/wait.h>
-#include <sys/stat.h>
-#include <fcntl.h>
+// #include <sched.h>
+
+// #include <valgrind/valgrind.h>
+// #include <sys/types.h>
+// #include <unistd.h>
+// #include <sys/wait.h>
+// #include <sys/stat.h>
+// #include <fcntl.h>
 
 using namespace cl3::system::types;
 
@@ -106,31 +106,13 @@ namespace	cl3
 
 			/************************************************************************************/
 
-			static void ReadProcFile(const char* filename, char*& buffer, usys_t& sz)
+			static io::collection::list::TList<byte_t> ReadProcFile(const io::text::string::TString& filename)
 			{
-				//	FIXME: this code should use TFile
-				sz = 4096;
-				usys_t p = 0;
-				ssize_t r;
-				buffer = (char*)Alloc(sz, NULL);
-				int fd;
-				CL3_NONCLASS_SYSERR(fd = ::open(filename, O_RDONLY|O_CLOEXEC|O_NOCTTY));
-
-				for(;;)
-				{
-					CL3_NONCLASS_SYSERR(r = ::read(fd, buffer + p, sz - p));
-					if(r == 0)
-						break;
-
-					p += r;
-					if(sz == p)
-					{
-						sz += 512 + sz/5;
-						buffer = (char*)Realloc(buffer, sz, NULL, false);
-					}
-				}
-				::close(fd);
-				sz = p;
+				io::collection::list::TList<byte_t> buffer;
+				io::file::TFile file(filename);
+				io::file::TStream stream(&file);
+				stream.WriteOut(buffer);
+				return buffer;
 			}
 
 			io::text::string::TString TLocalProcess::Executable() const
@@ -146,32 +128,25 @@ namespace	cl3
 			{
 				if(this->args == NULL)
 				{
-					this->args = MakeUniquePtr(new io::collection::list::TList<const io::text::string::TString>());
-
 					char filename[32] = {};
 					snprintf(filename, sizeof(filename), "/proc/%d/cmdline", this->pid);
-					char* buffer = NULL;
-					usys_t sz = 0;
 
-					try
+					auto args = MakeUniquePtr(new io::collection::list::TList<const io::text::string::TString>());
+					const auto buffer = ReadProcFile(filename);
+
+					if(buffer.Count() > 0)
 					{
-						ReadProcFile(filename, buffer, sz);
+						// TString only initializes itself up to the terminating \0 character, the following code makes use this feature...
 
-						if(sz > 0)
-							this->args->Append(TString(buffer));
+						args->Append(TString((const char*)buffer.ItemPtr(0)));
 
-						char* e = buffer + sz - 1;
-						for(char* p = buffer; p < e; p++)
+						const char* e = (const char*)buffer.ItemPtr(-1);
+						for(const char* p = (const char*)buffer.ItemPtr(0); p < e; p++)
 							if(*p == 0)
-								this->args->Append(TString(p+1));
+								args->Append(TString(p+1));
+					}
 
-						Free(buffer);
-					}
-					catch(...)
-					{
-						Free(buffer);
-						throw;
-					}
+					this->args.AtomicSwap(NULL, def::move(args));
 				}
 
 				return *this->args;
@@ -188,33 +163,25 @@ namespace	cl3
 			{
 				if(this->env == NULL)
 				{
-					this->env = MakeUniquePtr(new io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>());
-
 					char filename[32] = {};
 					snprintf(filename, sizeof(filename), "/proc/%d/environ", this->pid);
-					char* buffer = NULL;
-					usys_t sz = 0;
 
-					try
+					auto env = MakeUniquePtr(new io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>());
+					const auto buffer = ReadProcFile(filename);
+
+					if(buffer.Count() > 0)
 					{
-						ReadProcFile(filename, buffer, sz);
+						env->Add(SplitKeyValue((const char*)buffer.ItemPtr(0)));
 
-						if(sz > 0)
-							this->env->Add(SplitKeyValue(buffer));
-
-						char* e = buffer + sz - 1;
-						for(char* p = buffer; p < e; p++)
+						const char* e = (const char*)buffer.ItemPtr(-1);
+						for(const char* p = (const char*)buffer.ItemPtr(0); p < e; p++)
 							if(*p == 0)
-								this->env->Add(SplitKeyValue(p+1));
+								env->Add(SplitKeyValue(p+1));
+					}
 
-						Free(buffer);
-					}
-					catch(...)
-					{
-						Free(buffer);
-						throw;
-					}
+					this->env.AtomicSwap(NULL, def::move(env));
 				}
+
 				return *this->env;
 			}
 		}

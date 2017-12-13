@@ -84,9 +84,9 @@ namespace	cl3
 				inline	bool	IsDry		() const CL3_GETTER { return this->Left() == 0UL; }
 
 				//	pipe data until either source.IsDry() or sink.IsFlooded()
-				virtual	usys_t	WriteOut	(IOut<T>& os) CL3_WARN_UNUSED_RESULT
+				virtual	usys_t	WriteOut	(IOut<T>& os)
 				{
-					return this->WriteOut(os, (usys_t)-1, (usys_t)-1);
+					return this->WriteOut(os, (usys_t)-1, 0);
 				}
 
 				//	pipe data until either source.IsDry() or sink.IsFlooded(), but at least n_items_wo_min, and at most n_items_wo_max
