@@ -44,3 +44,29 @@
    fun:_Z13RUN_ALL_TESTSv
    fun:main
 }
+{
+   llvm/4
+   Memcheck:Cond
+   obj:/usr/lib64/libLLVM.so.4.0.1
+   fun:_ZN4llvm19MachineFunctionPass13runOnFunctionERNS_8FunctionE
+   fun:_ZN4llvm13FPPassManager13runOnFunctionERNS_8FunctionE
+   fun:_ZN4llvm13FPPassManager11runOnModuleERNS_6ModuleE
+   fun:_ZN4llvm6legacy15PassManagerImpl3runERNS_6ModuleE
+   fun:_ZN4llvm5MCJIT10emitObjectEPNS_6ModuleE
+   fun:_ZN4llvm5MCJIT21generateCodeForModuleEPNS_6ModuleE
+   fun:_ZN4llvm5MCJIT14finalizeObjectEv
+   fun:_ZN3cl36system8compiler3jit7TBinaryC1EPN4llvm11LLVMContextEPNS4_6ModuleEh
+   fun:_ZN3cl36system8compiler3jit4TJIT7CompileEh
+   fun:_ZN12_GLOBAL__N_138math_formular_TFormular_FirstTest_Test8TestBodyEv
+   fun:_ZN7testing8internal38HandleSehExceptionsInMethodIfSupportedINS_4TestEvEET0_PT_MS4_FS3_vEPKc
+   fun:_ZN7testing8internal35HandleExceptionsInMethodIfSupportedINS_4TestEvEET0_PT_MS4_FS3_vEPKc
+   fun:_ZN7testing4Test3RunEv
+   fun:_ZN7testing8TestInfo3RunEv
+   fun:_ZN7testing8TestCase3RunEv
+   fun:_ZN7testing8internal12UnitTestImpl11RunAllTestsEv
+   fun:_ZN7testing8internal38HandleSehExceptionsInMethodIfSupportedINS0_12UnitTestImplEbEET0_PT_MS4_FS3_vEPKc
+   fun:_ZN7testing8internal35HandleExceptionsInMethodIfSupportedINS0_12UnitTestImplEbEET0_PT_MS4_FS3_vEPKc
+   fun:_ZN7testing8UnitTest3RunEv
+   fun:_Z13RUN_ALL_TESTSv
+   fun:main
+}

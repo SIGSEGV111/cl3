@@ -12,9 +12,6 @@ cd "$ROOT_DIR"
 
 export SHELL="$ROOT_DIR/util/clean-term.sh"
 
-export CL3_CORE_LLVM_LIBS="$(llvm-config --libs codegen native core engine support)"
-echo "$CL3_CORE_LLVM_LIBS"
-
 mkdir -p gen/{dbg,rel}/{lib,include,bin} tmp/{dbg,rel} gen/dbg/coverage
 
 GTEST_V="1.8.0"

@@ -14,14 +14,25 @@ endif ()
 
 set (VALGRIND_CMD valgrind --quiet --leak-check=full --show-reachable=no --track-origins=yes --num-callers=30 --trace-children=no --track-fds=yes --error-exitcode=1 "--suppressions=${ROOT_DIR}/valgrind.supp" --soname-synonyms=somalloc=NONE --gen-suppressions=all --log-file=valgrind.log)
 
+execute_process(COMMAND "llvm-config" "--ldflags"  OUTPUT_VARIABLE LLVM_LDFLAGS  OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND "llvm-config" "--cppflags" OUTPUT_VARIABLE LLVM_CXXFLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND "llvm-config" "--libs" "support" "native" "engine" OUTPUT_VARIABLE LLVM_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND "llvm-config" "--system-libs" OUTPUT_VARIABLE LLVM_SYSLIBS OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+message(STATUS "LLVM_LIBS: ${LLVM_LIBS} ${LLVM_SYSLIBS}")
+message(STATUS "LLVM_CXXFLAGS: ${LLVM_CXXFLAGS}")
+message(STATUS "LLVM_LDFLAGS: ${LLVM_LDFLAGS}")
+
+set (CMAKE_SHARED_LINKER_FLAGS "${LLVM_LDFLAGS}")
+
 # -Wno-multichar workaround for GCC bug #53431 @ https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53431
 
-set (CXX_OPT_COMMON_LIB "-Wno-unused-command-line-argument -Wno-unused-parameter -Wno-deprecated-declarations -fvisibility-inlines-hidden -std=c++11 -fvisibility=hidden -Wno-unused-function -fPIC -I${GEN_DIR}/include -L${GEN_DIR}/lib -Wno-multichar")
+set (CXX_OPT_COMMON "-Wno-unused-command-line-argument -Wno-unused-parameter -Wno-deprecated-declarations -fvisibility-inlines-hidden -std=c++11 -fvisibility=hidden -Wno-unused-function ${LLVM_CXXFLAGS} ${LLVM_LDFLAGS}")
+set (CXX_OPT_COMMON_LIB "${CXX_OPT_COMMON} -fPIC -I${GEN_DIR}/include -L${GEN_DIR}/lib -Wno-multichar")
+set (CXX_OPT_COMMON_EXE "${CXX_OPT_COMMON} -fPIE -I${GEN_DIR}/include -L${GEN_DIR}/lib -Wno-multichar")
 
-set (CXX_OPT_COMMON_EXE "-Wno-unused-command-line-argument -Wno-unused-parameter -Wno-deprecated-declarations -fvisibility-inlines-hidden -std=c++11 -fvisibility=hidden -Wno-unused-function -fPIE -I${GEN_DIR}/include -L${GEN_DIR}/lib -Wno-multichar")
-
-set (C_OPT_COMMON_LIB   "-fvisibility=hidden -fPIC -I${GEN_DIR}/include")
-set (C_OPT_COMMON_EXE   "-fvisibility=hidden -fPIE -I${GEN_DIR}/include")
+set (C_OPT_COMMON_LIB "-fvisibility=hidden -fPIC -I${GEN_DIR}/include")
+set (C_OPT_COMMON_EXE "-fvisibility=hidden -fPIE -I${GEN_DIR}/include")
 
 if (${BUILD_TYPE} STREQUAL "release")
 	set (CMAKE_CXX_FLAGS_INT_LIB "-g -O3 -DCL3_RELEASE ${CXX_OPT_COMMON_LIB} -DINSIDE_CL3")
