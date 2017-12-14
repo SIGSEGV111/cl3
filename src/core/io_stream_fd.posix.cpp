@@ -226,13 +226,15 @@ namespace	cl3
 
 				TFDStream& TFDStream::operator=(const TFDStream& rhs)
 				{
-					CL3_CLASS_SYSERR(this->fd = ::fcntl(rhs.fd, F_DUPFD_CLOEXEC, 0));
+					int new_fd;
+					CL3_CLASS_SYSERR(new_fd = ::fcntl(rhs.fd, F_DUPFD_CLOEXEC, 0));
+					this->FD(new_fd);
 					return *this;
 				}
 
 				TFDStream& TFDStream::operator=(TFDStream&& rhs)
 				{
-					this->fd = rhs.fd;
+					this->FD(rhs.fd);
 					rhs.fd = -1;
 					return *this;
 				}

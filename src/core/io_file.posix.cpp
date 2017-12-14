@@ -420,12 +420,12 @@ namespace	cl3
 
 				#if (CL3_OS_DERIVATIVE != CL3_OS_DERIVATIVE_POSIX_LINUX)
 					struct ::stat st = {};
-					CL3_CLASS_SYSERR(::fstat(new_fd.FD(), &st));
+					CL3_CLASS_SYSERR(::fstat(new_fd, &st));
 					if(!S_ISDIR(st.st_mode))
 						CL3_CLASS_FAIL(TException, "the specified file-system object is not a directory");
 				#endif
 
-				this->fd = new_fd;
+				this->fd = system::def::move(new_fd);
 			}
 
 			TList<TString> TDirectoryBrowser::Entries() const
