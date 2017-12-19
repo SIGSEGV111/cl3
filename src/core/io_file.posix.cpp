@@ -134,19 +134,19 @@ namespace	cl3
 
 				while(n_items_read < n_items_read_min)
 				{
-					CL3_CLASS_SYSERR(status = ::pread(this->map.file->fd, arr_items_read + n_items_read, n_items_read_max - n_items_read, this->index));
+					CL3_CLASS_SYSERR(status = ::pread(this->file->fd, arr_items_read + n_items_read, n_items_read_max - n_items_read, this->pos));
 					CL3_CLASS_LOGIC_ERROR(status < 0);
 					CL3_CLASS_ERROR(status == 0, TSourceDryException, n_items_read_max, n_items_read_min, n_items_read, 0);
-					this->index += status;
+					this->pos += status;
 					n_items_read += status;
 				}
 
 				while(n_items_read < n_items_read_max)
 				{
-					CL3_CLASS_SYSERR(status = ::pread(this->map.file->fd, arr_items_read + n_items_read, n_items_read_max - n_items_read, this->index));
+					CL3_CLASS_SYSERR(status = ::pread(this->file->fd, arr_items_read + n_items_read, n_items_read_max - n_items_read, this->pos));
 					CL3_CLASS_LOGIC_ERROR(status < 0);
 					if(status == 0) break;
-					this->index += status;
+					this->pos += status;
 					n_items_read += status;
 				}
 
@@ -163,168 +163,31 @@ namespace	cl3
 
 				while(n_items_written < n_items_write_min)
 				{
-					CL3_CLASS_SYSERR(status = ::pwrite(this->map.file->fd, arr_items_write + n_items_written, n_items_write_max - n_items_written, this->index));
+					CL3_CLASS_SYSERR(status = ::pwrite(this->file->fd, arr_items_write + n_items_written, n_items_write_max - n_items_written, this->pos));
 					CL3_CLASS_LOGIC_ERROR(status < 0);
 					CL3_CLASS_ERROR(status == 0, TSinkFloodedException, n_items_write_max, n_items_write_min, n_items_written, 0);
-					this->index += status;
+					this->pos += status;
 					n_items_written += status;
 				}
 
 				while(n_items_written < n_items_write_max)
 				{
-					CL3_CLASS_SYSERR(status = ::pwrite(this->map.file->fd, arr_items_write + n_items_written, n_items_write_max - n_items_written, this->index));
+					CL3_CLASS_SYSERR(status = ::pwrite(this->file->fd, arr_items_write + n_items_written, n_items_write_max - n_items_written, this->pos));
 					CL3_CLASS_LOGIC_ERROR(status < 0);
 					if(status == 0) break;
-					this->index += status;
+					this->pos += status;
 					n_items_written += status;
 				}
 
 				return n_items_written;
 			}
 
-			const byte_t&	TStream::Item	() const
-			{
-				CL3_CLASS_ERROR(!IsValid(), TException, "no current item");
-				return this->map[this->index];
-			}
-
-			byte_t&			TStream::Item	()
-			{
-				CL3_CLASS_ERROR(!IsValid(), TException, "no current item");
-				return this->map[this->index];
-			}
-
-			bool	TStream::IsValid	() const
-			{
-				if(this->index == INDEX_HEAD || this->index == INDEX_TAIL)
-					return false;
-				if(this->index >= this->map.Index() + this->map.Count())
-					const_cast<TStream*>(this)->map.Remap(0, MAP_COUNT_FULLFILE);
-				return this->index < this->map.Index() + this->map.Count();
-			}
-
-			void	TStream::MoveHead	()
-			{
-				this->index = INDEX_HEAD;
-			}
-
-			void	TStream::MoveTail	()
-			{
-				this->index = INDEX_TAIL;
-			}
-
-			bool	TStream::MoveFirst	()
-			{
-				const_cast<TStream*>(this)->map.Remap(0, MAP_COUNT_FULLFILE);
-
-				if(this->map.Count())
-				{
-					this->index = 0;
-					return true;
-				}
-				else
-				{
-					this->index = INDEX_HEAD;
-					return false;
-				}
-			}
-
-			bool	TStream::MoveLast	()
-			{
-				const_cast<TStream*>(this)->map.Remap(0, MAP_COUNT_FULLFILE);
-
-				if(this->map.Count())
-				{
-					this->index = this->map.Count() - 1;
-					return true;
-				}
-				else
-				{
-					this->index = INDEX_TAIL;
-					return false;
-				}
-			}
-
-			bool	TStream::MoveNext	()
-			{
-				switch(this->index)
-				{
-					case INDEX_HEAD:
-						return MoveFirst();
-					case INDEX_TAIL:
-						return false;
-					default:
-						if(this->index + 1 < this->map.Count())
-						{
-							this->index++;
-							return true;
-						}
-						else
-						{
-							const_cast<TStream*>(this)->map.Remap(0, MAP_COUNT_FULLFILE);
-
-							if(this->index + 1 < this->map.Count())
-							{
-								this->index++;
-								return true;
-							}
-							else
-							{
-								this->index = INDEX_TAIL;
-								return false;
-							}
-						}
-				}
-			}
-
-			bool	TStream::MovePrev	()
-			{
-				switch(this->index)
-				{
-					case INDEX_HEAD:
-						return false;
-					case INDEX_TAIL:
-						return MoveLast();
-					default:
-						if(this->index > 0)
-						{
-							if(this->index - 1 < this->map.Count())
-							{
-								this->index--;
-								return true;
-							}
-							else
-							{
-								const_cast<TStream*>(this)->map.Remap(0, MAP_COUNT_FULLFILE);
-
-								if(this->index - 1 < this->map.Count())
-								{
-									this->index--;
-									return true;
-								}
-							}
-						}
-						this->index = INDEX_HEAD;
-						return false;
-				}
-			}
-
-			void	TStream::Index		(uoff_t new_index)
-			{
-				this->index = new_index;
-			}
-
-			uoff_t	TStream::Index		() const
-			{
-				return index;
-			}
-
-			CLASS	TStream::TStream	(TFile* file) : index(0), map(file)
+			CLASS	TStream::TStream	(TFile* file) : file(file), pos(0)
 			{
 				//	nothing else to do
 			}
 
-			CLASS	TStream::TStream	(const TStream& other) : index(other.index), map(other.map.file)
+			CLASS	TStream::TStream	(const TStream& other) : file(other.file), pos(other.pos)
 			{
 				//	nothing else to do
 			}
@@ -343,7 +206,7 @@ namespace	cl3
 				CL3_CLASS_SYSERR(::ftruncate(this->fd, new_count));
 			}
 
-			CLASS	TFile::TFile	(const text::string::TString& name, int access, ECreate create, const TDirectoryBrowser& directory) : fd(-1), access(access)
+			CLASS	TFile::TFile	(const text::string::TString& name, int access, ECreate create, const TDirectoryBrowser& directory) : access(access)
 			{
 				int flags = O_LARGEFILE | O_NOCTTY | O_CLOEXEC;
 				const int mode = (access & FILE_ACCESS_EXECUTE) ? 0777 : 0666;
@@ -389,15 +252,12 @@ namespace	cl3
 					CL3_CLASS_SYSERR(this->fd = ::openat(directory.Handle(), cstr.Chars(), flags, mode));
 			}
 
-			CLASS	TFile::TFile	(TFile&& other) : fd(other.fd)
+			CLASS	TFile::TFile	(TFile&& other) : fd(system::def::move(other.fd))
 			{
-				other.fd = -1;
 			}
 
 			CLASS	TFile::~TFile	()
 			{
-				if(this->fd != -1)
-					::close(this->fd);
 			}
 
 			/**********************************************************************/

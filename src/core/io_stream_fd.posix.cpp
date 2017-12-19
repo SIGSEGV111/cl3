@@ -245,10 +245,9 @@ namespace	cl3
 				{
 				}
 
-				CLASS	TFDStream::TFDStream	(fd_t fd) : fd(-1)
+				CLASS	TFDStream::TFDStream	(fd_t fd) : fd(fd)
 				{
 					CL3_CLASS_ERROR(fd == -1, TException, "file-descriptor is invalid");
-					this->FD(fd);
 				}
 
 				CLASS	TFDStream::TFDStream	(const TFDStream& other)

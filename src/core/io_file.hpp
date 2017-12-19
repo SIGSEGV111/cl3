@@ -115,35 +115,24 @@ namespace	cl3
 
 			/************************************************************************/
 
-			class	CL3PUBT	TStream : public virtual collection::IStaticIterator<byte_t>, public virtual stream::IOut<byte_t>
+			class	CL3PUBT	TStream : public stream::IOut<byte_t>, public stream::IIn<byte_t>
 			{
 				protected:
-					uoff_t index;
-					TMapping map;
+					TFile* file;
+					uoff_t pos;
 
 				public:
 					//	from IIn<byte_t>
 					using IIn<byte_t>::Read;
-					CL3PUBF	usys_t	Read	(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min);
+					CL3PUBF	usys_t	Read	(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min) final override CL3_WARN_UNUSED_RESULT ;
 
 					//	from IOut<byte_t>
 					using IOut<byte_t>::Write;
-					CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min);
-
-					//	from IStaticIterator
-					CL3PUBF	const byte_t&	Item	() const CL3_GETTER;
-					CL3PUBF	byte_t&			Item	() CL3_GETTER;
-					CL3PUBF	bool	IsValid		() const CL3_GETTER;
-					CL3PUBF	void	MoveHead	();
-					CL3PUBF	void	MoveTail	();
-					CL3PUBF	bool	MoveFirst	();
-					CL3PUBF	bool	MoveLast	();
-					CL3PUBF	bool	MoveNext	();
-					CL3PUBF	bool	MovePrev	();
+					CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT ;
 
 					//	from TStream
-					CL3PUBF	void	Index	(uoff_t) CL3_SETTER;
-					CL3PUBF	uoff_t	Index	() const CL3_GETTER;
+					CL3PUBF	void	Position(uoff_t new_pos) CL3_SETTER { this->pos = new_pos; }
+					CL3PUBF	uoff_t	Position() const CL3_GETTER { return this->pos; }
 
 					CL3PUBF	CLASS	TStream	(TFile*);
 					CL3PUBF	CLASS	TStream	(const TStream&);
@@ -198,7 +187,7 @@ namespace	cl3
 				friend class TStream;
 				friend class TMapping;
 				protected:
-					fd_t fd;
+					stream::fd::TFDStream fd;
 					int access;
 
 				public:

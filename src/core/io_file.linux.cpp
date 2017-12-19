@@ -34,8 +34,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <errno.h>
 #include <sys/syscall.h>
 
@@ -52,7 +52,7 @@ namespace	cl3
 			using namespace collection::list;
 			using namespace error;
 
-			CLASS	TFile::TFile	() : fd(-1), access(FILE_ACCESS_READ | FILE_ACCESS_WRITE /*| (executeable ? FILE_ACCESS_EXECUTE : 0)*/)
+			CLASS	TFile::TFile	() : access(FILE_ACCESS_READ | FILE_ACCESS_WRITE /*| (executeable ? FILE_ACCESS_EXECUTE : 0)*/)
 			{
 				const int mode = /*(access & FILE_ACCESS_EXECUTE) ? 0777 :*/ 0666;
 				const int flags = O_LARGEFILE | O_NOCTTY | O_CLOEXEC | O_TMPFILE | O_RDWR;
@@ -60,8 +60,6 @@ namespace	cl3
 				this->fd = open(".", flags, mode);
 				if(this->fd == -1)
 				{
-					::system("mount; echo; pwd; echo; df -h .");
-
 					if(errno == EOPNOTSUPP || errno == EINVAL || errno == EISDIR)
 					{
 						perror("O_TMPFILE not supported by kernel/filesystem, falling back to workaround");
