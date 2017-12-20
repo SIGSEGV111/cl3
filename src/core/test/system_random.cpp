@@ -171,7 +171,7 @@ namespace
 		static const usys_t n = 16;
 		u32_t hist[n] = {};
 
-		for(u32_t i = 0; i < 0x10000; i++)
+		for(u32_t i = 0; i < 0x20000; i++)
 		{
 			const usys_t index = cmwc.NormalIndex(n-1);
 			if(index >= n)
