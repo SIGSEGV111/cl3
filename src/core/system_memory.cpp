@@ -37,7 +37,7 @@ namespace	cl3
 		{
 			using namespace error;
 
-			CLASS	TBadAllocException::TBadAllocException	(usys_t sz_bytes) : TException("memory allocation failed (size: %zd byte_ts)", sz_bytes), sz_bytes(sz_bytes) {}
+			CLASS	TBadAllocException::TBadAllocException	(usys_t sz_bytes) : TException("memory allocation failed (size: %zd bytes)", sz_bytes), sz_bytes(sz_bytes) {}
 			CLASS	TBadAllocException::TBadAllocException	(TBadAllocException&& bae) : TException(static_cast<TException&&>(bae)), sz_bytes(bae.sz_bytes) {}
 			CLASS	TBadAllocException::~TBadAllocException	() {}
 
@@ -147,8 +147,7 @@ namespace	cl3
 
 			CLASS	TRestrictAllocator::~TRestrictAllocator	()
 			{
-				//CL3_CLASS_ERROR(BytesAllocated() != 0, TDirtyAllocatorException, sz_current);
-				//	FIXME: print diagnostic
+				CL3_CLASS_LOGIC_ERROR(BytesAllocated() != 0);
 			}
 
 
@@ -280,16 +279,12 @@ extern "C"
 
 void* operator new(size_t sz)
 {
-	void* v;
-	CL3_NONCLASS_ERROR((v = malloc(sz)) == NULL, cl3::system::memory::TBadAllocException, sz);
-	return v;
+	return cl3::system::memory::Alloc(sz, NULL);
 }
 
 void* operator new[](size_t sz)
 {
-	void* v;
-	CL3_NONCLASS_ERROR((v = malloc(sz)) == NULL, cl3::system::memory::TBadAllocException, sz);
-	return v;
+	return cl3::system::memory::Alloc(sz, NULL);
 }
 
 void* operator new(size_t, void* p) throw()
@@ -299,20 +294,20 @@ void* operator new(size_t, void* p) throw()
 
 void* operator new(size_t sz, const std::nothrow_t&) throw()
 {
-	return malloc(sz);
+	return cl3::system::memory::Alloc(sz, NULL);
 }
 
 void* operator new[](size_t sz, const std::nothrow_t&) throw()
 {
-	return malloc(sz);
+	return cl3::system::memory::Alloc(sz, NULL);
 }
 
 void operator delete(void* p) throw()
 {
-	free(p);
+	cl3::system::memory::Free(p);
 }
 
 void operator delete[](void* p) throw()
 {
-	free(p);
+	cl3::system::memory::Free(p);
 }
