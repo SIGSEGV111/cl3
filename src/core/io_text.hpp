@@ -213,6 +213,7 @@ namespace	cl3
 					CL3PUBF	ITextWriter&	operator<<	(const string::TString&);
 					CL3PUBF	ITextWriter&	operator<<	(const char*);
 					CL3PUBF	ITextWriter&	operator<<	(const wchar_t*);
+					CL3PUBF	ITextWriter&	operator<<	(const void*);
 			};
 
 			struct	CL3PUBT	ITextStream : virtual ITextReader, virtual ITextWriter

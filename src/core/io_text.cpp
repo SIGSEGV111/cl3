@@ -423,6 +423,14 @@ namespace	cl3
 				return *this;
 			}
 
+			ITextWriter&	ITextWriter::operator<<	(const void* v)
+			{
+				char buffer[sizeof(void*)*2+8];
+				const int n = snprintf(buffer, sizeof(buffer), "%p", v);
+				Write(buffer, n);
+				return *this;
+			}
+
 			/******************************** TTextWriter ******************************************************/
 
 			void	TTextWriter::Flush	()
