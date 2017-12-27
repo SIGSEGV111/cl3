@@ -259,7 +259,7 @@ namespace	cl3
 						explicit CLASS		TList		(TList&&);
 						explicit CLASS		TList		(serialization::IDeserializer&);
 								 CLASS		TList		(std::initializer_list<T>);
-						virtual		~TList		();
+						virtual				~TList		();
 				};
 
 				template<class T>
