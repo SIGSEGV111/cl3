@@ -17,6 +17,7 @@
  */
 
 #include <cl3/core/system_random.hpp>
+#include <cl3/core/io_text_terminal.hpp>
 #include <gtest/gtest.h>
 
 using namespace ::testing;
@@ -25,6 +26,7 @@ namespace
 {
 	using namespace cl3::system::types;
 	using namespace cl3::system::random;
+	using namespace cl3::io::text::terminal;
 
 	static void TestRandomness(cl3::io::stream::IIn<byte_t>& rnd)
 	{
@@ -182,7 +184,14 @@ namespace
 			hist[index]++;
 		}
 
+		unsigned n_fail = 0;
 		for(usys_t i = 1; i < n; i++)
-			EXPECT_TRUE(hist[i-1] > hist[i]);
+			if(hist[i-1] <= hist[i])
+				n_fail++;
+		EXPECT_EQ(0U, n_fail);
+
+		if(n_fail)
+			for(usys_t i = 1; i < n; i++)
+				Terminal()<<"hist["<<i<<"] = "<<hist[i]<<'\n';
 	}
 }
