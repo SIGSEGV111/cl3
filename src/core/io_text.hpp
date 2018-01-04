@@ -20,6 +20,7 @@
 #define	_include_cl3_core_io_text_hpp_
 
 #include "system_compiler.hpp"
+#include "system_memory.hpp"
 #include "system_types.hpp"
 #include "io_stream.hpp"
 #include "context.hpp"
