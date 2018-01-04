@@ -537,7 +537,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TArray<const T>::TArray		(const TArray& other) : event::IObservable(), arr_items((T*)system::memory::Alloc(other.n_items, &system::types::typeinfo::TCTTI<T>::rtti)), n_items(other.n_items), is_sorted(other.is_sorted)
+				CLASS		TArray<const T>::TArray		(const TArray& other) : arr_items((T*)system::memory::Alloc(other.n_items, &system::types::typeinfo::TCTTI<T>::rtti)), n_items(other.n_items), is_sorted(other.is_sorted)
 				{
 					for(usys_t i = 0; i < n_items; i++)
 						new (arr_items + i) T(other.arr_items[i]);
@@ -724,7 +724,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TArray<T>::TArray		(const TArray& other) : event::IObservable(), TArray<const T>(other)
+				CLASS		TArray<T>::TArray		(const TArray& other) : TArray<const T>(other)
 				{
 				}
 

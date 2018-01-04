@@ -269,14 +269,12 @@ namespace	cl3
 						using TList<const T>::arr_items;
 						using TList<const T>::n_items_current;
 						using TList<const T>::n_items_prealloc;
-						using TList<const T>::on_change;
 						using TList<const T>::Prealloc;
 
 					public:
 						using IStaticCollection<const T>::Count;
 						using stream::IOut<T>::Write;
 						using array::IArray<T>::Write;
-						using TList<const T>::OnChange;
 						using TList<const T>::CreateStaticIterator;
 						using TList<const T>::CountMin;
 						using TList<const T>::CountMax;
@@ -837,13 +835,6 @@ namespace	cl3
 				template<class T>
 				void	TList<const T>::InternalClear	()
 				{
-					if(this->on_action.HasReceivers())
-					{
-						TIterator<const T> it(this, 0);
-						TOnActionData<const T> data(ACTION_REMOVE, &it);
-						this->on_action.Raise(*this, data);
-					}
-
 					for(usys_t i = 0; i < n_items_current; i++)
 						arr_items[i].~T();
 					n_items_prealloc += n_items_current;
@@ -888,7 +879,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TList<const T>::TList		(const TList& list) : event::IObservable(), arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(list.is_sorted)
+				CLASS		TList<const T>::TList		(const TList& list) : arr_items(NULL), n_items_current(0), n_items_prealloc(0), is_sorted(list.is_sorted)
 				{
 					Prealloc(list.n_items_current);
 					Append(list.arr_items, list.n_items_current);
@@ -1128,7 +1119,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TList<T>::TList		(const TList& other) : event::IObservable(), TList<const T>(other)
+				CLASS		TList<T>::TList		(const TList& other) : TList<const T>(other)
 				{
 				}
 

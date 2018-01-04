@@ -23,11 +23,12 @@
 #include "io_text_string.hpp"
 #include "io_text_encoding.hpp"
 
-extern "C" size_t strlen(const char *s) throw();
-extern "C" size_t strnlen(const char *s, size_t maxlen) throw();
-extern "C" size_t wcsnlen(const wchar_t *s, size_t maxlen) throw();
-extern "C" size_t wcslen(const wchar_t *s) throw();
-extern "C" int memcmp(const void *s1, const void *s2, size_t n);
+extern "C" size_t strlen(const char* s) throw();
+extern "C" size_t strnlen(const char* s, size_t maxlen) throw();
+extern "C" size_t wcsnlen(const wchar_t* s, size_t maxlen) throw();
+extern "C" size_t wcslen(const wchar_t* s) throw();
+extern "C" int memcmp(const void* s1, const void* s2, size_t n);
+extern "C" void* memmove(void* dest, const void* src, size_t n);
 
 namespace	cl3
 {
@@ -638,7 +639,7 @@ namespace	cl3
 					this->Append(str, UnicodeStringLength(str, maxlen));
 				}
 
-				CLASS	TString::TString	(const TString& other) : event::IObservable(), TList<const TUTF32>(other), TList<TUTF32>(other)
+				CLASS	TString::TString	(const TString& other) : TList<const TUTF32>(other), TList<TUTF32>(other)
 				{
 					//	nothing else to do
 				}
@@ -691,7 +692,7 @@ namespace	cl3
 					e->Write(&TUTF32::TERMINATOR, 1);
 				}
 
-				CLASS		TCString::TCString	(const TCString& other) : event::IObservable(), TList<const byte_t>(other), TList<byte_t>(other), codec(other.codec)
+				CLASS		TCString::TCString	(const TCString& other) : TList<const byte_t>(other), TList<byte_t>(other), codec(other.codec)
 				{
 					//	nothing else to do
 				}

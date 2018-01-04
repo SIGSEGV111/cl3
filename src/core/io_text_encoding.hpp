@@ -20,7 +20,7 @@
 #define	_include_cl3_core_io_text_encoding_hpp_
 
 #include "io_text.hpp"
-#include "event.hpp"
+#include "util_event.hpp"
 
 namespace	cl3
 {
@@ -101,20 +101,20 @@ namespace	cl3
 				class	CL3PUBT	IEncoder : public stream::ISource<byte_t>, public virtual stream::IOut<TUTF32>, public virtual IXCoder
 				{
 					protected:
-						event::TEvent<IEncoder,TTranscodeException&> on_error;
+						util::event::TEvent<IEncoder&, TTranscodeException&> on_error;
 
 					public:
-						inline	const event::TEvent<IEncoder,TTranscodeException&>&	OnError	() const { return on_error; }
+						inline	const util::event::TEvent<IEncoder&, TTranscodeException&>&	OnError	() const { return on_error; }
 						virtual	CLASS	~IEncoder	() {}
 				};
 
 				class	CL3PUBT	IDecoder : public stream::ISource<TUTF32>, public virtual stream::IOut<byte_t>, public virtual IXCoder
 				{
 					protected:
-						event::TEvent<IDecoder,TTranscodeException&> on_error;
+						util::event::TEvent<IDecoder&, TTranscodeException&> on_error;
 
 					public:
-						inline	const event::TEvent<IDecoder,TTranscodeException&>&	OnError	() const { return on_error; }
+						inline	const util::event::TEvent<IDecoder&, TTranscodeException&>&	OnError	() const { return on_error; }
 						virtual	CLASS	~IDecoder	() {}
 				};
 

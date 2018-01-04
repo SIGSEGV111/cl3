@@ -22,7 +22,6 @@
 #include "system_compiler.hpp"
 #include "system_types.hpp"
 #include "error.hpp"
-#include "event.hpp"
 #include "system_task_async.hpp"
 
 namespace	cl3

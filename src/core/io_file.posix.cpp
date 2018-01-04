@@ -108,7 +108,7 @@ namespace	cl3
 				CL3_NOT_IMPLEMENTED;
 			}
 
-			CLASS	TMapping::TMapping	(const TMapping& other) : event::IObservable(), TArray<const byte_t>(NULL,0), TArray<byte_t>(NULL,0), file(other.file), index(other.index)
+			CLASS	TMapping::TMapping	(const TMapping& other) : TArray<const byte_t>(NULL,0), TArray<byte_t>(NULL,0), file(other.file), index(other.index)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}

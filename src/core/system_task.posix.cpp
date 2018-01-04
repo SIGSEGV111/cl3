@@ -82,8 +82,8 @@ namespace	cl3
 
 				CLASS ~TMainThread()
 				{
-					TEventData ed;
-					this->on_shutdown.Raise(*this, ed);
+// 					TEventData ed;
+// 					this->on_shutdown.Raise(*this, ed);
 				}
 			};
 

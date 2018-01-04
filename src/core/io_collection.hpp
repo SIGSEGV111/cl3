@@ -20,7 +20,6 @@
 #define	_include_cl3_core_io_collection_hpp_
 
 #include "io_stream.hpp"
-#include "event.hpp"
 #include "system_types_typeinfo.hpp"
 
 namespace	cl3
@@ -64,21 +63,6 @@ namespace	cl3
 			template<typename T>	struct	IDynamicIterator;
 			template<typename T>	struct	IStaticCollection;
 			template<typename T>	class	IDynamicCollection;
-
-			enum	EAction
-			{
-				ACTION_ADD,
-				ACTION_REMOVE
-			};
-
-			template<typename T>
-			struct	TOnActionData
-			{
-				EAction action;
-				IStaticIterator<T>* iterator;
-
-				CLASS	TOnActionData	(EAction action, IStaticIterator<T>* iterator) : action(action), iterator(iterator) {}
-			};
 
 			/************************************************************************/
 
@@ -124,7 +108,7 @@ namespace	cl3
 			/************************************************************************/
 
 			template<typename T>
-			struct	IStaticCollection<const T> : virtual event::IObservable
+			struct	IStaticCollection<const T>
 			{
 				using value_t = T;
 				using valuearg_t = typeinfo::features::type_iif<sizeof(value_t) <= sizeof(void*), value_t, value_t&>;
@@ -159,17 +143,9 @@ namespace	cl3
 			/************************************************************************/
 
 			template<typename T>
-			class	IDynamicCollection<const T> : public virtual IStaticCollection<const T>, public virtual stream::IOut<T>, public event::TEvent< IDynamicCollection<const T>, TOnActionData<const T> >
+			class	IDynamicCollection<const T> : public virtual IStaticCollection<const T>, public virtual stream::IOut<T>
 			{
 				public:
-					typedef event::TEvent< const IDynamicCollection<const T>, const TOnActionData<const T>& > TOnActionEvent;
-
-				protected:
-					TOnActionEvent on_action;
-
-				public:
-					inline	const TOnActionEvent&	OnAction	() const CL3_GETTER { return this->on_action; }
-
 					//	IIn removes read items, while IOut adds written items (no strict FIFO requirements!)
 					virtual	system::memory::TUniquePtr<IDynamicIterator<const T> >	CreateDynamicIterator	() const CL3_WARN_UNUSED_RESULT = 0;
 

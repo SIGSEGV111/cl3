@@ -24,7 +24,6 @@
 #include "system_os.hpp"
 #include "system_time.hpp"
 #include "io_collection_list.hpp"
-#include "event.hpp"
 
 namespace	cl3
 {

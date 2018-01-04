@@ -248,7 +248,7 @@ namespace	cl3
 				}
 
 				template<class TKey, class TValue>
-				CLASS			TStdMap<const TKey, const TValue>::TStdMap	(const TStdMap& other) : event::IObservable(), items(other.items)
+				CLASS			TStdMap<const TKey, const TValue>::TStdMap	(const TStdMap& other) : items(other.items)
 				{
 				}
 
@@ -330,7 +330,7 @@ namespace	cl3
 				}
 
 				template<class TKey, class TValue>
-				CLASS	TStdMap<TKey, TValue>::TStdMap	(const TStdMap& other) : event::IObservable(), TStdMap<const TKey, const TValue>(other)
+				CLASS	TStdMap<TKey, TValue>::TStdMap	(const TStdMap& other) : TStdMap<const TKey, const TValue>(other)
 				{
 				}
 

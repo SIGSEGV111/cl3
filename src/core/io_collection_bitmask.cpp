@@ -210,7 +210,7 @@ namespace	cl3
 				{
 				}
 
-				CLASS		TBitmask::TBitmask	(const TBitmask& other) : IObservable()
+				CLASS		TBitmask::TBitmask	(const TBitmask& other)
 				{
 					arr_bits = reinterpret_cast<byte_t*>(Alloc(other.n_bits / 8U + (((other.n_bits % 8U) != 0U) ? 1U : 0U), NULL));
 					n_bits = other.n_bits;
