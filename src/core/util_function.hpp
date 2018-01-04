@@ -1,5 +1,7 @@
 #pragma once
 
+#include "system_memory.hpp"
+
 namespace cl3
 {
 	namespace util

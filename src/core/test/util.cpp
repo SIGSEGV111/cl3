@@ -54,20 +54,20 @@ namespace
 	using namespace cl3::util;
 	using namespace cl3::util::function;
 
-	void TestFunc(int& v, int nv)
+	void TestFuncVoid(int& v, int nv)
 	{
 		v = nv + 10;
 	}
 
-	TEST(util_function, StaticFunction)
+	TEST(util_function, StaticFunctionVoid)
 	{
 		int v = 0;
-		TFunction<void, int&, int> func = &TestFunc;
+		TFunction<void, int&, int> func = &TestFuncVoid;
 		func(v, 10);
 		EXPECT_EQ(20, v);
 	}
 
-	TEST(util_function, Lamda)
+	TEST(util_function, LamdaVoid)
 	{
 		int v = 0;
 		TFunction<void, int> func = [&v](int nv){ v = nv + 10; };
@@ -75,7 +75,7 @@ namespace
 		EXPECT_EQ(20, v);
 	}
 
-	TEST(util_function, MemberFunction)
+	TEST(util_function, MemberFunctionVoid)
 	{
 		struct TTest
 		{
@@ -93,6 +93,48 @@ namespace
 		TFunction<void, int> func(&test, &TTest::Callback);
 
 		func(10);
+		EXPECT_EQ(20, test.v);
+	}
+
+	int TestFuncInt(int& v, int nv)
+	{
+		return v = nv + 10;
+	}
+
+	TEST(util_function, StaticFunctionInt)
+	{
+		int v = 0;
+		TFunction<int, int&, int> func = &TestFuncInt;
+		EXPECT_EQ(20, func(v, 10));
+		EXPECT_EQ(20, v);
+	}
+
+	TEST(util_function, LamdaInt)
+	{
+		int v = 0;
+		TFunction<int, int> func = [&v](int nv){ return v = nv + 10; };
+		EXPECT_EQ(20, func(10));
+		EXPECT_EQ(20, v);
+	}
+
+	TEST(util_function, MemberFunctionInt)
+	{
+		struct TTest
+		{
+			int v;
+
+			int Callback(int nv)
+			{
+				return this->v = nv + 10;
+			}
+		};
+
+		TTest test;
+		test.v = 0;
+
+		TFunction<int, int> func(&test, &TTest::Callback);
+
+		EXPECT_EQ(20, func(10));
 		EXPECT_EQ(20, test.v);
 	}
 }
