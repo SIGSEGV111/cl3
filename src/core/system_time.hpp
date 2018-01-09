@@ -55,32 +55,32 @@ namespace	cl3
 	{
 		namespace	time
 		{
-			enum	EUnit
+			enum class EUnit : int
 			{
-				TIME_UNIT_ATTOSECONDS  = -6,
-				TIME_UNIT_FEMTOSECONDS = -5,
-				TIME_UNIT_PICOSECONDS  = -4,
-				TIME_UNIT_NANOSECONDS  = -3,
-				TIME_UNIT_MICROSECONDS = -2,
-				TIME_UNIT_MILLISECONDS = -1,
-				TIME_UNIT_SECONDS =     1,
-				TIME_UNIT_MINUTES =    60,
-				TIME_UNIT_HOURS   =  3600,
-				TIME_UNIT_DAYS    = 86400
+				ATTOSECONDS  = -6,
+				FEMTOSECONDS = -5,
+				PICOSECONDS  = -4,
+				NANOSECONDS  = -3,
+				MICROSECONDS = -2,
+				MILLISECONDS = -1,
+				SECONDS =     1,
+				MINUTES =    60,
+				HOURS   =  3600,
+				DAYS    = 86400,
 				//	no month, year, etc. because they are not constant
 			};
 
-			enum	EClock
+			enum class EClock
 			{
-				TIME_CLOCK_TAI,			//	counted on earth by an monotonic atomic clock (https://en.wikipedia.org/wiki/International_Atomic_Time)
-				TIME_CLOCK_REALTIME,	//	System-wide real-time clock (based on unixtime - *NOT* MONOTONIC !!!).
-				TIME_CLOCK_MONOTONIC,	//	Clock that cannot be set and represents monotonic time since some unspecified (and possibly changing) starting point not subject to NTP/leap adjustments.
-				TIME_CLOCK_PROCESS,		//	Process time is defined as the amount of CPU time consumed by a process.
-				TIME_CLOCK_PROCESS_USER,//	as above but only the portion spent in user-mode
-				TIME_CLOCK_PROCESS_SYS,	//	as above but only the portion spent in kernel-mode
-				TIME_CLOCK_THREAD,		//	Thread  time is defined as the amount of CPU time consumed by a (/ the calling) thread.
-				TIME_CLOCK_THREAD_USER,	//	as above but only the portion spent iqn user-mode
-				TIME_CLOCK_THREAD_SYS	//	as above but only the portion spent in kernel-mode
+				TAI,			//	counted on earth by an monotonic atomic clock (https://en.wikipedia.org/wiki/International_Atomic_Time)
+				REALTIME,		//	System-wide real-time clock (based on unixtime - *NOT* MONOTONIC !!!).
+				MONOTONIC,		//	Clock that cannot be set and represents monotonic time since some unspecified (and possibly changing) starting point not subject to NTP/leap adjustments.
+				PROCESS,		//	Process time is defined as the amount of CPU time consumed by a process.
+				PROCESS_USER,	//	as above but only the portion spent in user-mode
+				PROCESS_SYS,	//	as above but only the portion spent in kernel-mode
+				THREAD,			//	Thread  time is defined as the amount of CPU time consumed by a (/ the calling) thread.
+				THREAD_USER,	//	as above but only the portion spent iqn user-mode
+				THREAD_SYS,		//	as above but only the portion spent in kernel-mode
 			};
 
 			class	CL3PUBT	TTime	//	always unixtime / UTC

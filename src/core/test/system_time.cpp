@@ -286,39 +286,39 @@ namespace
 			{
 				{
 					const TTime t1(1LL,123456789123456789LL);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_ATTOSECONDS)  == 1123456789123456789LL);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_FEMTOSECONDS) == 1123456789123456LL);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_PICOSECONDS)  == 1123456789123LL);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_NANOSECONDS)  == 1123456789LL);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_MICROSECONDS) == 1123456LL);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_MILLISECONDS) == 1123LL);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_SECONDS)  == 1);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::ATTOSECONDS)  == 1123456789123456789LL);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::FEMTOSECONDS) == 1123456789123456LL);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::PICOSECONDS)  == 1123456789123LL);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::NANOSECONDS)  == 1123456789LL);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::MICROSECONDS) == 1123456LL);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::MILLISECONDS) == 1123LL);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::SECONDS)  == 1);
 				}
 				{
 					//	1 day, 1 hour, 54 minutes, 17 seconds, 250 milliseconds
 					const TTime t1(86400LL+3600LL+3240LL+17LL,250000000000000000LL);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_SECONDS) == 86400LL+3600LL+3240LL+17LL);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_MINUTES) == 1554);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_HOURS)   == 25);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_DAYS)    == 1);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::SECONDS) == 86400LL+3600LL+3240LL+17LL);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::MINUTES) == 1554);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::HOURS)   == 25);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::DAYS)    == 1);
 				}
 				{
 					const TTime t1(-1LL,-123456789123456789LL);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_ATTOSECONDS)  == -1123456789123456789LL);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_FEMTOSECONDS) == -1123456789123456LL);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_PICOSECONDS)  == -1123456789123LL);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_NANOSECONDS)  == -1123456789LL);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_MICROSECONDS) == -1123456LL);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_MILLISECONDS) == -1123LL);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_SECONDS)  == -1);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::ATTOSECONDS)  == -1123456789123456789LL);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::FEMTOSECONDS) == -1123456789123456LL);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::PICOSECONDS)  == -1123456789123LL);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::NANOSECONDS)  == -1123456789LL);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::MICROSECONDS) == -1123456LL);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::MILLISECONDS) == -1123LL);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::SECONDS)  == -1);
 				}
 				{
 					//	-1 day, -1 hour, -54 minutes, -17 seconds, -250 milliseconds
 					const TTime t1(-(86400LL+3600LL+3240LL+17LL),-250000000000000000LL);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_SECONDS) == -(86400LL+3600LL+3240LL+17LL));
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_MINUTES) == -1554);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_HOURS)   == -25);
-					EXPECT_TRUE(t1.ConvertToI(TIME_UNIT_DAYS)    == -1);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::SECONDS) == -(86400LL+3600LL+3240LL+17LL));
+					EXPECT_TRUE(t1.ConvertToI(EUnit::MINUTES) == -1554);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::HOURS)   == -25);
+					EXPECT_TRUE(t1.ConvertToI(EUnit::DAYS)    == -1);
 				}
 			}
 
@@ -326,39 +326,39 @@ namespace
 			{
 				{
 					const TTime t1(1LL,123456789123456789LL);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_ATTOSECONDS)  == 1123456789123456789.0);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_FEMTOSECONDS) == 1123456789123456.7890);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_PICOSECONDS)  == 1123456789123.4567890);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_NANOSECONDS)  == 1123456789.1234567890);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_MICROSECONDS) == 1123456.7891234567890);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_MILLISECONDS) == 1123.4567891234567890);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_SECONDS)      == 1.1234567891234567890);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::ATTOSECONDS)  == 1123456789123456789.0);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::FEMTOSECONDS) == 1123456789123456.7890);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::PICOSECONDS)  == 1123456789123.4567890);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::NANOSECONDS)  == 1123456789.1234567890);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::MICROSECONDS) == 1123456.7891234567890);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::MILLISECONDS) == 1123.4567891234567890);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::SECONDS)      == 1.1234567891234567890);
 				}
 				{
 					//	1 day, 1 hour, 54 minutes, 17 seconds, 250 milliseconds
 					const TTime t1(86400LL+3600LL+3240LL+17LL,250000000000000000LL);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_SECONDS) == 93257.25);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_MINUTES) == 1554.2875);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_HOURS)   == 25.904791666666666666666666666666666667);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_DAYS)    == 1.0793663194444444444444444444444444444);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::SECONDS) == 93257.25);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::MINUTES) == 1554.2875);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::HOURS)   == 25.904791666666666666666666666666666667);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::DAYS)    == 1.0793663194444444444444444444444444444);
 				}
 				{
 					const TTime t1(-1LL,-123456789123456789LL);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_ATTOSECONDS)  == -1123456789123456789.0);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_FEMTOSECONDS) == -1123456789123456.789);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_PICOSECONDS)  == -1123456789123.456789);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_NANOSECONDS)  == -1123456789.123456789);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_MICROSECONDS) == -1123456.789123456789);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_MILLISECONDS) == -1123.456789123456789);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_SECONDS)      == -1.123456789123456789);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::ATTOSECONDS)  == -1123456789123456789.0);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::FEMTOSECONDS) == -1123456789123456.789);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::PICOSECONDS)  == -1123456789123.456789);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::NANOSECONDS)  == -1123456789.123456789);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::MICROSECONDS) == -1123456.789123456789);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::MILLISECONDS) == -1123.456789123456789);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::SECONDS)      == -1.123456789123456789);
 				}
 				{
 					//	-1 day, -1 hour, -54 minutes, -17 seconds, -250 milliseconds
 					const TTime t1(-(86400LL+3600LL+3240LL+17LL),-250000000000000000LL);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_SECONDS) == -93257.25);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_MINUTES) == -1554.2875);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_HOURS)   == -25.904791666666666666666666666666666667);
-					EXPECT_TRUE(t1.ConvertToF(TIME_UNIT_DAYS)    == -1.0793663194444444444444444444444444444);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::SECONDS) == -93257.25);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::MINUTES) == -1554.2875);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::HOURS)   == -25.904791666666666666666666666666666667);
+					EXPECT_TRUE(t1.ConvertToF(EUnit::DAYS)    == -1.0793663194444444444444444444444444444);
 				}
 			}
 
@@ -408,14 +408,14 @@ namespace
 
 			TEST(system_time_TTime, ConvertFrom_Int)
 			{
-				EXPECT_TRUE(TTime::ConvertFrom(TIME_UNIT_MILLISECONDS, (s64_t)123456789)  == TTime(123456LL,789000000000000000LL));
-				EXPECT_TRUE(TTime::ConvertFrom(TIME_UNIT_SECONDS, (s64_t)123456789)  == TTime(123456789LL,0LL));
+				EXPECT_TRUE(TTime::ConvertFrom(EUnit::MILLISECONDS, (s64_t)123456789)  == TTime(123456LL,789000000000000000LL));
+				EXPECT_TRUE(TTime::ConvertFrom(EUnit::SECONDS, (s64_t)123456789)  == TTime(123456789LL,0LL));
 			}
 
 			TEST(system_time_TTime, ConvertFrom_Float)
 			{
-				EXPECT_TRUE(TTime::ConvertFrom(TIME_UNIT_MILLISECONDS, 1000.0)  == TTime(1,0));
-				EXPECT_TRUE(TTime::ConvertFrom(TIME_UNIT_SECONDS,   123456789.500)  == TTime(123456789LL,500000000000000000LL));
+				EXPECT_TRUE(TTime::ConvertFrom(EUnit::MILLISECONDS, 1000.0)  == TTime(1,0));
+				EXPECT_TRUE(TTime::ConvertFrom(EUnit::SECONDS,   123456789.500)  == TTime(123456789LL,500000000000000000LL));
 			}
 
 			TEST(system_time_TTime, MulDiv)
@@ -441,9 +441,9 @@ namespace
 
 			TEST(system_time_TTime, Now_Realtime)
 			{
-				const TTime ts = TTime::Now(TIME_CLOCK_REALTIME);
+				const TTime ts = TTime::Now(EClock::REALTIME);
 				::usleep(10000L);	// sleep 10ms
-				const TTime te = TTime::Now(TIME_CLOCK_REALTIME);
+				const TTime te = TTime::Now(EClock::REALTIME);
 				EXPECT_TRUE(ts < te);
 				const TTime td_out = te - ts;
 				const TTime td_min(0LL,  9000000000000000LL);	//   9ms
@@ -454,9 +454,9 @@ namespace
 
 			TEST(system_time_TTime, Now_Monotonic)
 			{
-				const TTime ts = TTime::Now(TIME_CLOCK_MONOTONIC);
+				const TTime ts = TTime::Now(EClock::MONOTONIC);
 				::usleep(10000L);	// sleep 10ms
-				const TTime te = TTime::Now(TIME_CLOCK_MONOTONIC);
+				const TTime te = TTime::Now(EClock::MONOTONIC);
 				EXPECT_TRUE(ts < te);
 				const TTime td_out = te - ts;
 				const TTime td_min(0LL,  9000000000000000LL);	//   9ms
@@ -467,9 +467,9 @@ namespace
 
 			TEST(system_time_TTime, Now_TAI)
 			{
-				const TTime ts = TTime::Now(TIME_CLOCK_TAI);
+				const TTime ts = TTime::Now(EClock::TAI);
 				::usleep(10000L);	// sleep 10ms
-				const TTime te = TTime::Now(TIME_CLOCK_TAI);
+				const TTime te = TTime::Now(EClock::TAI);
 				EXPECT_TRUE(ts < te);
 				const TTime td_out = te - ts;
 				const TTime td_min(0LL,  9000000000000000LL);	//   9ms
@@ -480,9 +480,9 @@ namespace
 
 			TEST(system_time_TTime, Now_CPU_Process)
 			{
-				const TTime ts = TTime::Now(TIME_CLOCK_PROCESS);
+				const TTime ts = TTime::Now(EClock::PROCESS);
 				for(volatile unsigned i = 0; i < 0xfffff; i++);
-				const TTime te = TTime::Now(TIME_CLOCK_PROCESS);
+				const TTime te = TTime::Now(EClock::PROCESS);
 				EXPECT_TRUE(ts < te);
 				const TTime td_out = te - ts;
 				const TTime td_max(0LL,500000000000000000LL);	// 500ms
@@ -491,9 +491,9 @@ namespace
 
 			TEST(system_time_TTime, Now_CPU_Thread)
 			{
-				const TTime ts = TTime::Now(TIME_CLOCK_THREAD);
+				const TTime ts = TTime::Now(EClock::THREAD);
 				for(volatile unsigned i = 0; i < 0xfffff; i++);
-				const TTime te = TTime::Now(TIME_CLOCK_THREAD);
+				const TTime te = TTime::Now(EClock::THREAD);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
 				const TTime td_max(0LL,500000000000000000LL);	// 500ms
@@ -502,9 +502,9 @@ namespace
 
 			TEST(system_time_TTime, Now_CPU_Process_User)
 			{
-				const TTime ts = TTime::Now(TIME_CLOCK_PROCESS_USER);
+				const TTime ts = TTime::Now(EClock::PROCESS_USER);
 				for(volatile unsigned i = 0; i < 0xfffff; i++);
-				const TTime te = TTime::Now(TIME_CLOCK_PROCESS_USER);
+				const TTime te = TTime::Now(EClock::PROCESS_USER);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
 				const TTime td_max(0LL,500000000000000000LL);	// 500ms
@@ -513,9 +513,9 @@ namespace
 
 			TEST(system_time_TTime, Now_CPU_Process_Sys)
 			{
-				const TTime ts = TTime::Now(TIME_CLOCK_PROCESS_SYS);
+				const TTime ts = TTime::Now(EClock::PROCESS_SYS);
 				for(unsigned i = 0; i < 1000; i++) ::usleep(1L);
-				const TTime te = TTime::Now(TIME_CLOCK_PROCESS_SYS);
+				const TTime te = TTime::Now(EClock::PROCESS_SYS);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
 				const TTime td_max(0LL,500000000000000000LL);	// 500ms
@@ -524,9 +524,9 @@ namespace
 
 			TEST(system_time_TTime, Now_CPU_Thread_User)
 			{
-				const TTime ts = TTime::Now(TIME_CLOCK_THREAD_USER);
+				const TTime ts = TTime::Now(EClock::THREAD_USER);
 				for(volatile unsigned i = 0; i < 0xfffff; i++);
-				const TTime te = TTime::Now(TIME_CLOCK_THREAD_USER);
+				const TTime te = TTime::Now(EClock::THREAD_USER);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
 				const TTime td_max(0LL,500000000000000000LL);	// 500ms
@@ -535,9 +535,9 @@ namespace
 
 			TEST(system_time_TTime, Now_CPU_Thread_Sys)
 			{
-				const TTime ts = TTime::Now(TIME_CLOCK_THREAD_SYS);
+				const TTime ts = TTime::Now(EClock::THREAD_SYS);
 				for(unsigned i = 0; i < 1000; i++) ::usleep(1L);
-				const TTime te = TTime::Now(TIME_CLOCK_THREAD_SYS);
+				const TTime te = TTime::Now(EClock::THREAD_SYS);
 				EXPECT_TRUE(ts <= te);
 				const TTime td_out = te - ts;
 				const TTime td_max(0LL,500000000000000000LL);	// 500ms
@@ -546,12 +546,12 @@ namespace
 
 			TEST(system_time_timer_TTimer, Basics)
 			{
-				TTimer timer(TIME_CLOCK_MONOTONIC);
-				const TTime ts_start = TTime::Now(TIME_CLOCK_MONOTONIC);
+				TTimer timer(EClock::MONOTONIC);
+				const TTime ts_start = TTime::Now(EClock::MONOTONIC);
 				timer.Start(TTime(0.01));
 				EXPECT_TRUE(timer.WaitFor(1));
 				EXPECT_TRUE(timer.WaitFor(0));
-				const TTime ts_end = TTime::Now(TIME_CLOCK_MONOTONIC);
+				const TTime ts_end = TTime::Now(EClock::MONOTONIC);
 				const TTime ts_diff = ts_end - ts_start;
 				EXPECT_TRUE(ts_diff >= TTime(0.01));
 				EXPECT_TRUE(ts_diff <= TTime(1));

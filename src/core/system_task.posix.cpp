@@ -254,16 +254,16 @@ namespace	cl3
 				const struct timespec ts = time;
 				switch(clock)
 				{
-					case TIME_CLOCK_TAI:
-					case TIME_CLOCK_MONOTONIC:
+					case EClock::TAI:
+					case EClock::MONOTONIC:
 						CL3_NONCLASS_SYSERR(clock_nanosleep(CLOCK_MONOTONIC, 0, &ts, NULL));
 						break;
 
-					case TIME_CLOCK_REALTIME:
+					case EClock::REALTIME:
 						CL3_NONCLASS_SYSERR(clock_nanosleep(CLOCK_REALTIME, 0, &ts, NULL));
 						break;
 
-					case TIME_CLOCK_PROCESS:
+					case EClock::PROCESS:
 						CL3_NONCLASS_SYSERR(clock_nanosleep(CLOCK_PROCESS_CPUTIME_ID, 0, &ts, NULL));
 						break;
 

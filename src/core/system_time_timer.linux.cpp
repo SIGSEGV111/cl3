@@ -59,20 +59,20 @@ namespace	cl3
 
 					switch(clock)
 					{
-						case TIME_CLOCK_TAI:
-						case TIME_CLOCK_REALTIME:
+						case EClock::TAI:
+						case EClock::REALTIME:
 							id = CLOCK_REALTIME;
 							break;
 
-						case TIME_CLOCK_MONOTONIC:
+						case EClock::MONOTONIC:
 							id = CLOCK_MONOTONIC;
 							break;
 
-						case TIME_CLOCK_PROCESS:
+						case EClock::PROCESS:
 							id = CLOCK_PROCESS_CPUTIME_ID;
 							break;
 
-						case TIME_CLOCK_THREAD:
+						case EClock::THREAD:
 							id = CLOCK_THREAD_CPUTIME_ID;
 							break;
 

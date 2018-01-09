@@ -61,7 +61,7 @@ namespace cl3
 		{
 			s.Push("id", this->AtomID().id);
 			s.Push("id_parent", id_parent.id);
-			s.Push("ts_save", system::time::TTime::Now(system::time::TIME_CLOCK_REALTIME));
+			s.Push("ts_save", system::time::TTime::Now(system::time::EClock::REALTIME));
 		}
 
 		CLASS IAtom::IAtom(io::serialization::IDeserializer& ds) : manager(NULL), id(0), id_parent(0)

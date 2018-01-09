@@ -46,12 +46,12 @@ namespace	cl3
 
 				switch(clock)
 				{
-					case TIME_CLOCK_TAI:
-					case TIME_CLOCK_REALTIME:
+					case EClock::TAI:
+					case EClock::REALTIME:
 						id = CLOCK_REALTIME;
 						break;
 
-					case TIME_CLOCK_MONOTONIC:
+					case EClock::MONOTONIC:
 						#if (_OST == OST_LINUX)
 							id = CLOCK_MONOTONIC_RAW;
 						#else
@@ -59,34 +59,34 @@ namespace	cl3
 						#endif
 						break;
 
-					case TIME_CLOCK_PROCESS:
+					case EClock::PROCESS:
 						id = CLOCK_PROCESS_CPUTIME_ID;
 						break;
 
-					case TIME_CLOCK_THREAD:
+					case EClock::THREAD:
 						id = CLOCK_THREAD_CPUTIME_ID;
 						break;
 
-					case TIME_CLOCK_PROCESS_USER:
+					case EClock::PROCESS_USER:
 						CL3_NONCLASS_SYSERR(getrusage(RUSAGE_SELF, &ru));
 						return TTime(ru.ru_utime.tv_sec, (s64_t)ru.ru_utime.tv_usec * (s64_t)1000000000000);
 
-					case TIME_CLOCK_PROCESS_SYS:
+					case EClock::PROCESS_SYS:
 						CL3_NONCLASS_SYSERR(getrusage(RUSAGE_SELF, &ru));
 						return TTime(ru.ru_stime.tv_sec, (s64_t)ru.ru_stime.tv_usec * (s64_t)1000000000000);
 
-					case TIME_CLOCK_THREAD_USER:
+					case EClock::THREAD_USER:
 						CL3_NONCLASS_SYSERR(getrusage(RUSAGE_THREAD, &ru));
 						return TTime(ru.ru_utime.tv_sec, (s64_t)ru.ru_utime.tv_usec * (s64_t)1000000000000);
 
-					case TIME_CLOCK_THREAD_SYS:
+					case EClock::THREAD_SYS:
 						CL3_NONCLASS_SYSERR(getrusage(RUSAGE_THREAD, &ru));
 						return TTime(ru.ru_stime.tv_sec, (s64_t)ru.ru_stime.tv_usec * (s64_t)1000000000000);
 				}
 
 				CL3_NONCLASS_SYSERR(clock_gettime(id, &ts));
 
-				if(clock == TIME_CLOCK_TAI)
+				if(clock == EClock::TAI)
 					ts.tv_sec -= 35;
 
 				return TTime((s64_t)ts.tv_sec, (s64_t)ts.tv_nsec * (s64_t)1000000000);

@@ -66,7 +66,7 @@ namespace	cl3
 			{
 				switch(clock)
 				{
-					case TIME_CLOCK_REALTIME:
+					case EClock::REALTIME:
 					{
 						SYSTEMTIME st;
 						FILETIME ft;	//	 100-nanosecond intervals since January 1, 1601 (UTC).
@@ -89,7 +89,7 @@ namespace	cl3
 						return TTime(sec - offset_unixtime, li.QuadPart * 100000000000LL);
 					}
 
-					case TIME_CLOCK_MONOTONIC:
+					case EClock::MONOTONIC:
 					{
 						LARGE_INTEGER hpc_now;
 						SYSERR(QueryPerformanceCounter(&hpc_now) == 0);
@@ -102,7 +102,7 @@ namespace	cl3
 
 
 
-					case TIME_CLOCK_PROCESS:
+					case EClock::PROCESS:
 					{
 						FILETIME results[4];
 						SYSERR(GetProcessTimes(GetCurrentProcess(),results, results+1, results+2, results+3) == 0);
@@ -122,7 +122,7 @@ namespace	cl3
 
 						return TTime(sec, total_time.QuadPart * 100000000000LL);
 					}
-					case TIME_CLOCK_PROCESS_USER:
+					case EClock::PROCESS_USER:
 					{
 						FILETIME results[4];
 						SYSERR(GetProcessTimes(GetCurrentProcess(),results, results+1, results+2, results+3) == 0);
@@ -135,7 +135,7 @@ namespace	cl3
 
 						return TTime(sec, user_time.QuadPart * 100000000000LL);
 					}
-					case TIME_CLOCK_PROCESS_SYS:
+					case EClock::PROCESS_SYS:
 					{
 						FILETIME results[4];
 						SYSERR(GetProcessTimes(GetCurrentProcess(),results, results+1, results+2, results+3) == 0);
@@ -150,7 +150,7 @@ namespace	cl3
 					}
 
 
-					case TIME_CLOCK_THREAD:
+					case EClock::THREAD:
 					{
 						FILETIME results[4];
 						SYSERR(GetThreadTimes(GetCurrentThread(),results, results+1, results+2, results+3) == 0);
@@ -170,7 +170,7 @@ namespace	cl3
 
 						return TTime(sec, total_time.QuadPart * 100000000000LL);
 					}
-					case TIME_CLOCK_THREAD_USER:
+					case EClock::THREAD_USER:
 					{
 						FILETIME results[4];
 						SYSERR(GetThreadTimes(GetCurrentThread(),results, results+1, results+2, results+3) == 0);
@@ -183,7 +183,7 @@ namespace	cl3
 
 						return TTime(sec, user_time.QuadPart * 100000000000LL);
 					}
-					case TIME_CLOCK_THREAD_SYS:
+					case EClock::THREAD_SYS:
 					{
 						FILETIME results[4];
 						SYSERR(GetThreadTimes(GetCurrentThread(),results, results+1, results+2, results+3) == 0);

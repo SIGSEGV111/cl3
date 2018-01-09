@@ -152,8 +152,9 @@ namespace cl3
 				return sec != op.sec || asec != op.asec;
 			}
 
-			s64_t		TTime::ConvertToI	(EUnit cunit) const
+			s64_t		TTime::ConvertToI	(EUnit cunit_) const
 			{
+				const int cunit = (int)cunit_;
 				if(cunit < 0)
 				{
 					s64_t mul = 1LL;
@@ -171,8 +172,9 @@ namespace cl3
 					return sec / cunit;
 			}
 
-			double	TTime::ConvertToF	(EUnit cunit) const
+			double	TTime::ConvertToF	(EUnit cunit_) const
 			{
+				const int cunit = (int)cunit_;
 				if(cunit < 0)
 				{
 					double mul = 1.0;
@@ -190,8 +192,9 @@ namespace cl3
 					return ((double)sec + (double)asec / 1000000000000000000.0) / (double)cunit;
 			}
 
-			TTime	TTime::ConvertFrom	(EUnit cunit, s64_t value)
+			TTime	TTime::ConvertFrom	(EUnit cunit_, s64_t value)
 			{
+				const int cunit = (int)cunit_;
 				if(cunit < 0)
 				{
 					s64_t div = 1LL;
@@ -212,8 +215,9 @@ namespace cl3
 					return TTime(value * cunit, (s64_t)0);
 			}
 
-			TTime	TTime::ConvertFrom	(EUnit cunit, double value)
+			TTime	TTime::ConvertFrom	(EUnit cunit_, double value)
 			{
+				const int cunit = (int)cunit_;
 				if(cunit < 0)
 				{
 					double div = 1.0;

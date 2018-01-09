@@ -52,7 +52,7 @@ namespace	cl3
 					pfd.fd = wi.fd;
 					pfd.events = wi.events;
 					pfd.revents = 0;
-					CL3_CLASS_SYSERR(::poll(&pfd, 1, timeout.ConvertToI(time::TIME_UNIT_MILLISECONDS)));
+					CL3_CLASS_SYSERR(::poll(&pfd, 1, timeout.ConvertToI(time::EUnit::MILLISECONDS)));
 					return pfd.revents != 0;
 				}
 
