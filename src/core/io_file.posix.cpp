@@ -57,6 +57,11 @@ namespace	cl3
 			const TAccess TAccess::READ = { true, false, false };
 			const TAccess TAccess::WRITE = { false, true, false };
 			const TAccess TAccess::EXECUTE = { false, false, true };
+			const TAccess TAccess::RW = { true, true, false };
+
+			const TIOFlags TIOFlags::NONE = { false, false };
+			const TIOFlags TIOFlags::SYNC = { true, false };
+			const TIOFlags TIOFlags::NO_CACHE = { false, true };
 
 			void	TMapping::Remap		(uoff_t new_index, usys_t new_count)
 			{
@@ -200,9 +205,9 @@ namespace	cl3
 				CL3_CLASS_SYSERR(::ftruncate(this->fd, new_count));
 			}
 
-			CLASS	TFile::TFile	(const text::string::TString& name, TAccess access, ECreate create, const TDirectoryBrowser& directory) : access(access)
+			CLASS	TFile::TFile	(const text::string::TString& name, TAccess access, ECreate create, const TDirectoryBrowser& directory, TIOFlags ioflags) : access(access)
 			{
-				int flags = O_LARGEFILE | O_NOCTTY | O_CLOEXEC;
+				int flags = O_LARGEFILE | O_NOCTTY | O_CLOEXEC | (ioflags.disable_cache ? O_DIRECT : 0) | (ioflags.synchronous_io ? O_DSYNC : 0);
 				const int mode = (access & TAccess::EXECUTE) ? 0777 : 0666;
 
 				CL3_CLASS_ERROR( (access & TAccess::READ) == 0 && (access & TAccess::WRITE) == 0, TException, "file access mode is invalid");
@@ -294,9 +299,9 @@ namespace	cl3
 				return this->AbsolutePath() == "/";
 			}
 
-			TFile	TDirectoryBrowser::OpenFile				(const text::string::TString& name, TAccess access, ECreate create)
+			TFile	TDirectoryBrowser::OpenFile				(const text::string::TString& name, TAccess access, ECreate create, TIOFlags flags)
 			{
-				return TFile(name, access, create, *this);
+				return TFile(name, access, create, *this, flags);
 			}
 
 			CLASS	TDirectoryBrowser::TDirectoryBrowser	()

@@ -17,6 +17,7 @@
 */
 
 #include <cl3/core/io_file.hpp>
+#include <cl3/core/system_memory.hpp>
 #include <cl3/core/io_text_string.hpp>
 #include <cl3/core/io_collection_list.hpp>
 #include <gtest/gtest.h>
@@ -26,6 +27,7 @@ using namespace ::testing;
 namespace
 {
 	using namespace cl3::system::types;
+	using namespace cl3::system::memory;
 	using namespace cl3::io::file;
 	using namespace cl3::io::text::string;
 	using namespace cl3::io::collection::list;
@@ -173,5 +175,46 @@ namespace
 
 		TFile file = browser.OpenFile("random_data_128.bin");
 		EXPECT_TRUE(file.Size() == 128);
+	}
+
+	TEST(io_file_TFile, NoCache)
+	{
+		const usys_t SZ = 512;
+		byte_t write_buffer_[SZ + NO_CACHE_MEMORY_ALIGNMENT];
+		byte_t read_buffer_[SZ + NO_CACHE_MEMORY_ALIGNMENT];
+
+		byte_t* write_buffer = AlignMemory(write_buffer_, NO_CACHE_MEMORY_ALIGNMENT);
+		byte_t* read_buffer = AlignMemory(read_buffer_, NO_CACHE_MEMORY_ALIGNMENT);
+
+		memset(write_buffer, 0xff, SZ);
+		memset(read_buffer,  0x00, SZ);
+
+		TFile file("io_file_TFile_no_cache.tmp", TAccess::RW, ECreate::ALWAYS, TDirectoryBrowser(), TIOFlags::NO_CACHE);
+		TStream stream(&file);
+
+		stream.Write(write_buffer, SZ);
+		stream.Position(0);
+		stream.Read(read_buffer, SZ);
+
+		EXPECT_TRUE(memcmp(read_buffer, write_buffer, SZ) == 0);
+	}
+
+	TEST(io_file_TFile, SynchronousIO)
+	{
+		const usys_t SZ = 512;
+		byte_t write_buffer[SZ];
+		byte_t read_buffer[SZ];
+
+		memset(write_buffer, 0xff, SZ);
+		memset(read_buffer,  0x00, SZ);
+
+		TFile file("io_file_TFile_no_cache.tmp", TAccess::RW, ECreate::ALWAYS, TDirectoryBrowser(), TIOFlags::SYNC);
+		TStream stream(&file);
+
+		stream.Write(write_buffer, SZ);
+		stream.Position(0);
+		stream.Read(read_buffer, SZ);
+
+		EXPECT_TRUE(memcmp(read_buffer, write_buffer, SZ) == 0);
 	}
 }

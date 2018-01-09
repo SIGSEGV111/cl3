@@ -52,6 +52,8 @@ namespace	cl3
 			using namespace collection::list;
 			using namespace error;
 
+			const usys_t NO_CACHE_MEMORY_ALIGNMENT = 512;
+
 			CLASS	TFile::TFile	() : access(TAccess::READ | TAccess::WRITE /*| (executeable ? TAccess::EXECUTE : 0)*/)
 			{
 				const int mode = /*(access & TAccess::EXECUTE) ? 0777 :*/ 0666;

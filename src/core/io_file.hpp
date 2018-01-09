@@ -52,11 +52,25 @@ namespace	cl3
 				CL3PUBF static const TAccess READ;
 				CL3PUBF static const TAccess WRITE;
 				CL3PUBF static const TAccess EXECUTE;
+				CL3PUBF static const TAccess RW;
 
 				inline TAccess operator|(TAccess other) const { return { this->read || other.read, this->write || other.write, this->execute || other.execute }; }
 				inline TAccess operator&(TAccess other) const { return { this->read && other.read, this->write && other.write, this->execute && other.execute }; }
 
 				inline operator bool() const { return this->read || this->write || this->execute; }
+			};
+
+			struct TIOFlags
+			{
+				bool synchronous_io;
+				bool disable_cache;
+
+				CL3PUBF static const TIOFlags NONE;
+				CL3PUBF static const TIOFlags SYNC;
+				CL3PUBF static const TIOFlags NO_CACHE;
+
+				inline TIOFlags operator|(TIOFlags other) const { return { this->synchronous_io || other.synchronous_io, this->disable_cache || other.disable_cache }; }
+				inline TIOFlags operator&(TIOFlags other) const { return { this->synchronous_io && other.synchronous_io, this->disable_cache && other.disable_cache }; }
 			};
 
 			enum class ECreate
@@ -91,6 +105,8 @@ namespace	cl3
 			static const usys_t MAP_COUNT_FULLFILE = (usys_t)-1;
 			static const usys_t INDEX_HEAD = (usys_t)-1;
 			static const usys_t INDEX_TAIL = (usys_t)-2;
+
+			CL3PUBV const usys_t NO_CACHE_MEMORY_ALIGNMENT;
 
 			/************************************************************************/
 
@@ -172,7 +188,7 @@ namespace	cl3
 					CL3PUBF	usys_t	EnumEntries			(collection::IDynamicCollection<text::string::TString>&) const;
 					CL3PUBF	bool	IsRoot				() const CL3_GETTER;
 					CL3PUBF collection::list::TList<text::string::TString> Entries() const CL3_GETTER;
-					CL3PUBF TFile	OpenFile			(const text::string::TString& name, TAccess access = TAccess::READ, ECreate create = ECreate::NEVER);
+					CL3PUBF TFile	OpenFile			(const text::string::TString& name, TAccess access = TAccess::READ, ECreate create = ECreate::NEVER, TIOFlags flags = TIOFlags::NONE);
 
 					CL3PUBF	CLASS	TDirectoryBrowser	();	//	starts in current working directory
 					CL3PUBF	explicit TDirectoryBrowser	(const text::string::TString& path);
@@ -196,7 +212,7 @@ namespace	cl3
 					CL3PUBF	void	Size	(uoff_t) CL3_SETTER;
 
 					CL3PUBF	CLASS	TFile	();	//	create temporary file
-					CL3PUBF	CLASS	TFile	(const text::string::TString& name, TAccess access = TAccess::READ, ECreate create = ECreate::NEVER, const TDirectoryBrowser& directory = TDirectoryBrowser());	//	open specific file
+					CL3PUBF	CLASS	TFile	(const text::string::TString& name, TAccess access = TAccess::READ, ECreate create = ECreate::NEVER, const TDirectoryBrowser& directory = TDirectoryBrowser(), TIOFlags flags = TIOFlags::NONE);	//	open specific file
 					CL3PUBF	CLASS	TFile	(TFile&&);
 					CL3PUBF	CLASS	~TFile	();
 			};

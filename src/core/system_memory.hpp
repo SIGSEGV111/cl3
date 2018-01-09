@@ -93,6 +93,15 @@ namespace	cl3
 			CL3PUBF	usys_t	SizeOf	(void*) CL3_GETTER;
 
 			template<typename T>
+			T* AlignMemory(T* p, const usys_t alignment)
+			{
+				const usys_t d = alignment - (((usys_t)p) % alignment);
+				if(d == alignment)
+					return p;
+				return (T*)((usys_t)p + d);
+			}
+
+			template<typename T>
 			T*	Alloc	(usys_t n_items)
 			{
 				return reinterpret_cast<T*>(Alloc(n_items, &types::typeinfo::TCTTI<T>::rtti));
