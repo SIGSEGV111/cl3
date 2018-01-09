@@ -54,15 +54,19 @@ namespace	cl3
 			using namespace io::collection;
 			using namespace io::collection::list;
 
+			const TAccess TAccess::READ = { true, false, false };
+			const TAccess TAccess::WRITE = { false, true, false };
+			const TAccess TAccess::EXECUTE = { false, false, true };
+
 			void	TMapping::Remap		(uoff_t new_index, usys_t new_count)
 			{
 				const uoff_t sz_file = file->Size();
 				if(new_count == MAP_COUNT_FULLFILE)
 					new_count = sz_file - new_index;
 
-				const int access	= ((file->access & FILE_ACCESS_READ) != 0 ? PROT_READ : 0)
-									| ((file->access & FILE_ACCESS_WRITE) != 0 ? PROT_WRITE : 0)
-									| ((file->access & FILE_ACCESS_EXECUTE) != 0 ? PROT_EXEC : 0);
+				const int access	= ((file->access & TAccess::READ) != 0 ? PROT_READ : 0)
+									| ((file->access & TAccess::WRITE) != 0 ? PROT_WRITE : 0)
+									| ((file->access & TAccess::EXECUTE) != 0 ? PROT_EXEC : 0);
 
 				CL3_CLASS_ERROR(new_index + new_count > sz_file, collection::TIndexOutOfBoundsException, index, sz_file);
 
@@ -101,16 +105,6 @@ namespace	cl3
 				this->arr_items = other.arr_items;
 				this->n_items = other.n_items;
 				other.arr_items = NULL;
-			}
-
-			CLASS	TMapping::TMapping	(TMapping& other, ESharing /*sharing*/) : TArray<const byte_t>(NULL,0), TArray<byte_t>(NULL,0), file(other.file), index(other.index)
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
-			CLASS	TMapping::TMapping	(const TMapping& other) : TArray<const byte_t>(NULL,0), TArray<byte_t>(NULL,0), file(other.file), index(other.index)
-			{
-				CL3_NOT_IMPLEMENTED;
 			}
 
 			CLASS	TMapping::~TMapping	()
@@ -206,28 +200,28 @@ namespace	cl3
 				CL3_CLASS_SYSERR(::ftruncate(this->fd, new_count));
 			}
 
-			CLASS	TFile::TFile	(const text::string::TString& name, int access, ECreate create, const TDirectoryBrowser& directory) : access(access)
+			CLASS	TFile::TFile	(const text::string::TString& name, TAccess access, ECreate create, const TDirectoryBrowser& directory) : access(access)
 			{
 				int flags = O_LARGEFILE | O_NOCTTY | O_CLOEXEC;
-				const int mode = (access & FILE_ACCESS_EXECUTE) ? 0777 : 0666;
+				const int mode = (access & TAccess::EXECUTE) ? 0777 : 0666;
 
-				CL3_CLASS_ERROR( (access & FILE_ACCESS_READ) == 0 && (access & FILE_ACCESS_WRITE) == 0, TException, "file access mode is invalid");
+				CL3_CLASS_ERROR( (access & TAccess::READ) == 0 && (access & TAccess::WRITE) == 0, TException, "file access mode is invalid");
 
-				if( (access & FILE_ACCESS_READ) != 0 && (access & FILE_ACCESS_WRITE) != 0 )
+				if( (access & TAccess::READ) != 0 && (access & TAccess::WRITE) != 0 )
 					flags |= O_RDWR;
-				else if( (access & FILE_ACCESS_READ) != 0)
+				else if( (access & TAccess::READ) != 0)
 					flags |= O_RDONLY;
-				else if( (access & FILE_ACCESS_WRITE) != 0)
+				else if( (access & TAccess::WRITE) != 0)
 					flags |= O_WRONLY;
 
 				switch(create)
 				{
-					case FILE_CREATE_ALWAYS:
+					case ECreate::ALWAYS:
 						flags |= (O_CREAT | O_EXCL);
 						break;
-					case FILE_CREATE_NEVER:
+					case ECreate::NEVER:
 						break;
-					case FILE_CREATE_CAN:
+					case ECreate::CAN:
 						flags |= O_CREAT;
 						break;
 				}
@@ -300,7 +294,7 @@ namespace	cl3
 				return this->AbsolutePath() == "/";
 			}
 
-			TFile	TDirectoryBrowser::OpenFile				(const text::string::TString& name, int access, ECreate create)
+			TFile	TDirectoryBrowser::OpenFile				(const text::string::TString& name, TAccess access, ECreate create)
 			{
 				return TFile(name, access, create, *this);
 			}

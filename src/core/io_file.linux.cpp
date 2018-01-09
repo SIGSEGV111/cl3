@@ -52,9 +52,9 @@ namespace	cl3
 			using namespace collection::list;
 			using namespace error;
 
-			CLASS	TFile::TFile	() : access(FILE_ACCESS_READ | FILE_ACCESS_WRITE /*| (executeable ? FILE_ACCESS_EXECUTE : 0)*/)
+			CLASS	TFile::TFile	() : access(TAccess::READ | TAccess::WRITE /*| (executeable ? TAccess::EXECUTE : 0)*/)
 			{
-				const int mode = /*(access & FILE_ACCESS_EXECUTE) ? 0777 :*/ 0666;
+				const int mode = /*(access & TAccess::EXECUTE) ? 0777 :*/ 0666;
 				const int flags = O_LARGEFILE | O_NOCTTY | O_CLOEXEC | O_TMPFILE | O_RDWR;
 
 				this->fd = open(".", flags, mode);

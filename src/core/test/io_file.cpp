@@ -35,14 +35,14 @@ namespace
 	{
 		{
 			//	create the file once
-			TFile file("io_file_TFile_create_always.tmp", FILE_ACCESS_READ | FILE_ACCESS_WRITE, FILE_CREATE_ALWAYS);
+			TFile file("io_file_TFile_create_always.tmp", TAccess::READ | TAccess::WRITE, ECreate::ALWAYS);
 			TStream stream(&file);
 			stream.Write((const byte_t*)"fail\n", 5);
 		}
 
 		{
 			//	now the file already exists and has to be replaced
-			TFile file("io_file_TFile_create_always.tmp", FILE_ACCESS_READ | FILE_ACCESS_WRITE, FILE_CREATE_ALWAYS);
+			TFile file("io_file_TFile_create_always.tmp", TAccess::READ | TAccess::WRITE, ECreate::ALWAYS);
 			TStream stream(&file);
 			stream.Write((const byte_t*)"hello world\n", 12);
 		}
@@ -52,14 +52,14 @@ namespace
 	{
 		{
 			//	create the file
-			TFile file("io_file_TFile_create_never.tmp", FILE_ACCESS_READ | FILE_ACCESS_WRITE, FILE_CREATE_ALWAYS);
+			TFile file("io_file_TFile_create_never.tmp", TAccess::READ | TAccess::WRITE, ECreate::ALWAYS);
 			TStream stream(&file);
 			stream.Write((const byte_t*)"fail\n", 5);
 		}
 
 		{
 			//	now open the file we created
-			TFile file("io_file_TFile_create_never.tmp", FILE_ACCESS_READ | FILE_ACCESS_WRITE, FILE_CREATE_NEVER);
+			TFile file("io_file_TFile_create_never.tmp", TAccess::READ | TAccess::WRITE, ECreate::NEVER);
 			TStream stream(&file);
 			stream.Write((const byte_t*)"hello world\n", 12);
 		}
@@ -69,7 +69,7 @@ namespace
 			bool ok = false;
 			try
 			{
-				TFile file("io_file_TFile_create_never2.tmp", FILE_ACCESS_READ | FILE_ACCESS_WRITE, FILE_CREATE_NEVER);
+				TFile file("io_file_TFile_create_never2.tmp", TAccess::READ | TAccess::WRITE, ECreate::NEVER);
 			}
 			catch(TException& e)
 			{
@@ -83,21 +83,21 @@ namespace
 	{
 		{
 			//	create the file
-			TFile file("io_file_TFile_create_can.tmp", FILE_ACCESS_READ | FILE_ACCESS_WRITE, FILE_CREATE_ALWAYS);
+			TFile file("io_file_TFile_create_can.tmp", TAccess::READ | TAccess::WRITE, ECreate::ALWAYS);
 			TStream stream(&file);
 			stream.Write((const byte_t*)"fail\n", 5);
 		}
 
 		{
 			//	now open the file we created
-			TFile file("io_file_TFile_create_can.tmp", FILE_ACCESS_READ | FILE_ACCESS_WRITE, FILE_CREATE_CAN);
+			TFile file("io_file_TFile_create_can.tmp", TAccess::READ | TAccess::WRITE, ECreate::CAN);
 			TStream stream(&file);
 			stream.Write((const byte_t*)"hello world\n", 12);
 		}
 
 		{
 			//	now try to open a file which does not exist yet
-			TFile file("io_file_TFile_create_can2.tmp", FILE_ACCESS_READ | FILE_ACCESS_WRITE, FILE_CREATE_CAN);
+			TFile file("io_file_TFile_create_can2.tmp", TAccess::READ | TAccess::WRITE, ECreate::CAN);
 			TStream stream(&file);
 			stream.Write((const byte_t*)"hello world\n", 12);
 		}

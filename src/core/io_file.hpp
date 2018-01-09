@@ -43,24 +43,27 @@ namespace	cl3
 
 			/************************************************************************/
 
-			enum	EAccess
+			struct TAccess
 			{
-				FILE_ACCESS_READ = 1,
-				FILE_ACCESS_WRITE = 2,
-				FILE_ACCESS_EXECUTE = 4
+				bool read;
+				bool write;
+				bool execute;
+
+				CL3PUBF static const TAccess READ;
+				CL3PUBF static const TAccess WRITE;
+				CL3PUBF static const TAccess EXECUTE;
+
+				inline TAccess operator|(TAccess other) const { return { this->read || other.read, this->write || other.write, this->execute || other.execute }; }
+				inline TAccess operator&(TAccess other) const { return { this->read && other.read, this->write && other.write, this->execute && other.execute }; }
+
+				inline operator bool() const { return this->read || this->write || this->execute; }
 			};
 
-			enum	ESharing
+			enum class ECreate
 			{
-				MAP_SHARING_COHERENT,	//	the mappings are kept coherent at all times, they effectivly refer to the same physical pages
-				MAP_SHARING_SNAPSHOT	//	take a snapshot-copy from the original mapping and employ copy-on-write semantics afterwards, changes to the original mapping are not visible in the copy and vice-versa
-			};
-
-			enum	ECreate
-			{
-				FILE_CREATE_NEVER,	//	never create the file - the file must exist or the call fails
-				FILE_CREATE_ALWAYS,	//	always create a new file - destroy/truncate existing file, fails if it can not create a new file
-				FILE_CREATE_CAN		//	only create if the file does not yet exist
+				NEVER,	//	never create the file - the file must exist or the call fails
+				ALWAYS,	//	always create a new file - destroy/truncate existing file, fails if it can not create a new file
+				CAN		//	only create if the file does not yet exist
 			};
 
 			enum	EEntryType
@@ -78,7 +81,7 @@ namespace	cl3
 			{
 				text::string::TString name;
 				EEntryType type;
-				uoff_t sz_virtual;	//	virtual file size, or "reserved" file size
+				uoff_t sz_virtual;	//	virtual file size, or "apparent" file size
 				uoff_t sz_physical;	//	physical file size, or "actual disk usage"
 				system::time::TTime ts_create;
 				system::time::TTime ts_change;
@@ -108,8 +111,6 @@ namespace	cl3
 
 					CL3PUBF	CLASS	TMapping	(TFile* file, uoff_t index = 0, usys_t count = (usys_t)-1);
 					CL3PUBF	CLASS	TMapping	(TMapping&&);
-					CL3PUBF	CLASS	TMapping	(TMapping&, ESharing);
-					CL3PUBF	CLASS	TMapping	(const TMapping&);
 					CL3PUBF	CLASS	~TMapping	();
 			};
 
@@ -171,7 +172,7 @@ namespace	cl3
 					CL3PUBF	usys_t	EnumEntries			(collection::IDynamicCollection<text::string::TString>&) const;
 					CL3PUBF	bool	IsRoot				() const CL3_GETTER;
 					CL3PUBF collection::list::TList<text::string::TString> Entries() const CL3_GETTER;
-					CL3PUBF TFile	OpenFile			(const text::string::TString& name, int access = FILE_ACCESS_READ, ECreate create = FILE_CREATE_NEVER);
+					CL3PUBF TFile	OpenFile			(const text::string::TString& name, TAccess access = TAccess::READ, ECreate create = ECreate::NEVER);
 
 					CL3PUBF	CLASS	TDirectoryBrowser	();	//	starts in current working directory
 					CL3PUBF	explicit TDirectoryBrowser	(const text::string::TString& path);
@@ -195,7 +196,7 @@ namespace	cl3
 					CL3PUBF	void	Size	(uoff_t) CL3_SETTER;
 
 					CL3PUBF	CLASS	TFile	();	//	create temporary file
-					CL3PUBF	CLASS	TFile	(const text::string::TString& name, int access = FILE_ACCESS_READ, ECreate create = FILE_CREATE_NEVER, const TDirectoryBrowser& directory = TDirectoryBrowser());	//	open specific file
+					CL3PUBF	CLASS	TFile	(const text::string::TString& name, TAccess access = TAccess::READ, ECreate create = ECreate::NEVER, const TDirectoryBrowser& directory = TDirectoryBrowser());	//	open specific file
 					CL3PUBF	CLASS	TFile	(TFile&&);
 					CL3PUBF	CLASS	~TFile	();
 			};
