@@ -253,11 +253,12 @@ namespace
 	TEST(system_task_TProcess, Name)
 	{
 		auto& self = *TSelfProcess::Self();
-		EXPECT_TRUE(self.Name() == "cl3-core-test" || self.Name().Left(8) == "memcheck");
+		const TString old_name = self.Name();
+		EXPECT_TRUE(old_name == "cl3-core-test" || old_name.Left(8) == "memcheck");
 
 		self.Name("foobar");
 		EXPECT_TRUE(self.Name() == "foobar");
 
-		self.Name("cl3-core-test");
+		self.Name(old_name);
 	}
 }
