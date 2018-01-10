@@ -208,6 +208,9 @@ namespace	cl3
 					int access;
 
 				public:
+					inline const stream::fd::TFDStream& FD() const { return this->fd; }
+					inline stream::fd::TFDStream& FD() { return this->fd; }
+
 					CL3PUBF	usys_t	Size	() const CL3_GETTER;
 					CL3PUBF	void	Size	(uoff_t) CL3_SETTER;
 

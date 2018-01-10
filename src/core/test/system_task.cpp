@@ -68,7 +68,7 @@ namespace
 		TList<TString> args;
 		args.Append("-c");
 		args.Append("export -p | sort");
-		TStdMap<TString,TString> env = TLocalProcess::Self()->Environment();
+		TStdMap<TString,TString> env = TSelfProcess::Self()->Environment();
 
 		//	add a new environment variables named "foo" with the value "bar"
 		env["foo"] = "bar";
@@ -94,7 +94,7 @@ namespace
 
 		input.Append((const byte_t*)"a\nz\ne\nx\n", 8);
 
-		TChildProcess cp("/usr/bin/sort", args, TLocalProcess::Self()->Environment(), &input, &output);
+		TChildProcess cp("/usr/bin/sort", args, TSelfProcess::Self()->Environment(), &input, &output);
 
 		while(TAsyncEventProcessor::Default().ProcessEvents() && cp.IsAlive());
 
@@ -104,19 +104,19 @@ namespace
 		EXPECT_TRUE(output.Count() == 8 && memcmp(output.ItemPtr(0), "a\ne\nx\nz\n", 8) == 0);
 	}
 
-	TEST(system_task_TLocalProcess, Arguments)
+	TEST(system_task_TSelfProcess, Arguments)
 	{
 		//	test if the commandline arguments to the process running these tests are dummy1 dummy2 dummy3
-		auto& args = TLocalProcess::Self()->Arguments();
+		auto& args = TSelfProcess::Self()->Arguments();
 		EXPECT_TRUE(args[1] == "--gtest_output=xml:gtest.native.xml" || args[1] == "--gtest_output=xml:gtest.valgrind.xml");
 		EXPECT_EQ(TString("dummy1"), args[2]);
 		EXPECT_EQ(TString("dummy2"), args[3]);
 		EXPECT_EQ(TString("dummy3"), args[4]);
 	}
 
-	TEST(system_task_TLocalProcess, Environment)
+	TEST(system_task_TSelfProcess, Environment)
 	{
-		auto& env = TLocalProcess::Self()->Environment();
+		auto& env = TSelfProcess::Self()->Environment();
 
 		EXPECT_TRUE(env.Count() > 2);
 // 		EXPECT_EQ(env["PWD"], cl3::io::file::TDirectoryBrowser::ProcessCurrentWorkingDirectory().AbsolutePath());	//	won't work when a path component is symlinked
@@ -248,5 +248,16 @@ namespace
 		EXPECT_EQ(3, list[12]);
 		EXPECT_EQ(2, list[13]);
 		EXPECT_EQ(1, list[14]);
+	}
+
+	TEST(system_task_TProcess, Name)
+	{
+		auto& self = *TSelfProcess::Self();
+		EXPECT_TRUE(self.Name() == "cl3-core-test" || self.Name().Left(8) == "memcheck");
+
+		self.Name("foobar");
+		EXPECT_TRUE(self.Name() == "foobar");
+
+		self.Name("cl3-core-test");
 	}
 }

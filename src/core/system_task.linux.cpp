@@ -96,12 +96,37 @@ namespace	cl3
 		{
 			using namespace io::file;
 			using namespace io::collection::map;
+			using namespace io::text::encoding;
 			using namespace memory;
 			using namespace error;
 
 			pid_t gettid()
 			{
 				return (pid_t)syscall(SYS_gettid);
+			}
+
+			/************************************************************************************/
+
+			io::text::string::TString IProcess::Name() const
+			{
+				char buffer[64];
+				snprintf(buffer, sizeof(buffer), "/proc/%d/comm", this->ID());
+				TFile f(buffer, TAccess::RW);
+				TStream s(&f);
+				TList<byte_t> c;
+				s.WriteOut(c);
+				if(c[-1] == '\n')
+					c.Cut(0,1);
+				return TString((const char*)c.ItemPtr(0), c.Count());
+			}
+
+			void IProcess::Name(io::text::string::TString new_name)
+			{
+				char buffer[64];
+				snprintf(buffer, sizeof(buffer), "/proc/%d/comm", this->ID());
+				TFile f(buffer, TAccess::RW);
+				TCString c(new_name, CODEC_CXX_CHAR);
+				f.FD().Write((const byte_t*)c.Chars(), c.Count());
 			}
 
 			/************************************************************************************/
@@ -115,21 +140,21 @@ namespace	cl3
 				return buffer;
 			}
 
-			io::text::string::TString TLocalProcess::Executable() const
+			io::text::string::TString TSelfProcess::Executable() const
 			{
 				char symlink[32] = {};
-				snprintf(symlink, sizeof(symlink), "/proc/%d/exe", this->pid);
+				snprintf(symlink, sizeof(symlink), "/proc/%d/exe", this->ID());
 				char exe[256];
 				CL3_CLASS_SYSERR(readlink(symlink, exe, sizeof(exe)));
 				return io::text::string::TString(exe);
 			}
 
-			const io::collection::list::TList<const io::text::string::TString>& TProcess::Arguments() const
+			const io::collection::list::TList<const io::text::string::TString>& IProcess::Arguments() const
 			{
 				if(this->args == NULL)
 				{
 					char filename[32] = {};
-					snprintf(filename, sizeof(filename), "/proc/%d/cmdline", this->pid);
+					snprintf(filename, sizeof(filename), "/proc/%d/cmdline", this->ID());
 
 					auto args = MakeUniquePtr(new io::collection::list::TList<const io::text::string::TString>());
 					const auto buffer = ReadProcFile(filename);
@@ -159,12 +184,12 @@ namespace	cl3
 				return TPair<TString, TString>(key, value);
 			}
 
-			const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& TProcess::Environment() const
+			const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& IProcess::Environment() const
 			{
 				if(this->env == NULL)
 				{
 					char filename[32] = {};
-					snprintf(filename, sizeof(filename), "/proc/%d/environ", this->pid);
+					snprintf(filename, sizeof(filename), "/proc/%d/environ", this->ID());
 
 					auto env = MakeUniquePtr(new io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>());
 					const auto buffer = ReadProcFile(filename);

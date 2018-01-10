@@ -106,11 +106,7 @@ namespace	cl3
 
 			/**************************************************************************************/
 
-			CLASS TLocalProcess::TLocalProcess() : TProcess(getpid())
-			{
-			}
-
-			CLASS	TProcess::TProcess(pid_t pid) : pid(pid)
+			CLASS TSelfProcess::TSelfProcess()
 			{
 			}
 
@@ -320,9 +316,14 @@ namespace	cl3
 // 				CL3_NOT_IMPLEMENTED;
 			}
 
-			bool TProcess::IsAlive() const
+			pid_t TSelfProcess::ID() const
 			{
-				const int status = kill(this->pid, 0);
+				return getpid();
+			}
+
+			bool IProcess::IsAlive() const
+			{
+				const int status = kill(this->ID(), 0);
 				if(status == -1)
 				{
 					if(errno == ESRCH)
@@ -339,17 +340,17 @@ namespace	cl3
 			static TFDStream fds_stdout(STDOUT_FILENO);
 			static TFDStream fds_stderr(STDERR_FILENO);
 
-			io::stream::fd::TFDStream& TLocalProcess::StdIn()
+			io::stream::fd::TFDStream& TSelfProcess::StdIn()
 			{
 				return fds_stdin;
 			}
 
-			io::stream::fd::TFDStream& TLocalProcess::StdOut()
+			io::stream::fd::TFDStream& TSelfProcess::StdOut()
 			{
 				return fds_stdout;
 			}
 
-			io::stream::fd::TFDStream& TLocalProcess::StdErr()
+			io::stream::fd::TFDStream& TSelfProcess::StdErr()
 			{
 				return fds_stderr;
 			}
@@ -427,21 +428,17 @@ namespace	cl3
 
 			/**************************************************************************************/
 
-			CLASS TProcess::TProcess() : pid(-1)
-			{
-			}
-
 			CLASS TChildProcess::TChildProcess(const io::text::string::TString& exe,
 												const io::collection::list::TList<const io::text::string::TString>& args,
 												const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& env,
 												io::stream::IIn<byte_t>* stdin,
 												io::stream::IOut<byte_t>* stdout,
 												io::stream::IOut<byte_t>* stderr,
-												TAsyncEventProcessor* aep) : TProcess(), is_stdin(stdin), os_stdout(stdout), os_stderr(stderr)
+												TAsyncEventProcessor* aep) : IProcess(), is_stdin(stdin), os_stdout(stdout), os_stderr(stderr)
 			{
-				TUniquePtr<TPipe> pipe_stdin = MakeUniquePtr(stdin != NULL && stdin != &TLocalProcess::StdIn() ? new TPipe() : NULL);
-				TUniquePtr<TPipe> pipe_stdout = MakeUniquePtr(stdout != NULL && stdout != &TLocalProcess::StdOut() ? new TPipe() : NULL);
-				TUniquePtr<TPipe> pipe_stderr = MakeUniquePtr(stderr != NULL && stderr != &TLocalProcess::StdErr() ? new TPipe() : NULL);
+				TUniquePtr<TPipe> pipe_stdin = MakeUniquePtr(stdin != NULL && stdin != &TSelfProcess::StdIn() ? new TPipe() : NULL);
+				TUniquePtr<TPipe> pipe_stdout = MakeUniquePtr(stdout != NULL && stdout != &TSelfProcess::StdOut() ? new TPipe() : NULL);
+				TUniquePtr<TPipe> pipe_stderr = MakeUniquePtr(stderr != NULL && stderr != &TSelfProcess::StdErr() ? new TPipe() : NULL);
 
 				int pid_child;
 				CL3_NONCLASS_SYSERR(pid_child = ::fork());
@@ -546,9 +543,9 @@ namespace	cl3
 
 			CLASS TChildProcess::~TChildProcess()
 			{
-				::kill(this->pid, SIGKILL);
+				::kill(this->ID(), SIGKILL);
 				int status = 0;
-				::waitpid(this->pid, &status, 0);
+				::waitpid(this->ID(), &status, 0);
 			}
 		}
 	}

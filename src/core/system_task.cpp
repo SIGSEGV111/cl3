@@ -35,21 +35,24 @@ namespace	cl3
 			using namespace async;
 			using namespace synchronization;
 
-			static memory::TUniquePtr<TLocalProcess> proc_self;
+			static memory::TUniquePtr<TSelfProcess> proc_self;
 
-			TLocalProcess* TLocalProcess::Self()
+			TSelfProcess* TSelfProcess::Self()
 			{
 				if(proc_self == NULL)
-					proc_self = memory::MakeUniquePtr(new TLocalProcess());
+					proc_self = memory::MakeUniquePtr(new TSelfProcess());
 				return proc_self.Object();
 			}
 
-			pid_t TLocalProcess::ID() const
+			CLASS IProcess::~IProcess()
 			{
-				return this->pid;
 			}
 
-			const io::collection::list::TList<IThread* const>& TLocalProcess::Threads() const
+			CLASS	TProcess::TProcess(pid_t pid) : pid(pid)
+			{
+			}
+
+			const io::collection::list::TList<IThread* const>& TSelfProcess::Threads() const
 			{
 				return this->threads;
 			}

@@ -75,7 +75,7 @@ namespace	cl3
 				{
 					if(terminal == NULL)
 					{
-						TTerminal* t = new TTerminal(&system::task::TLocalProcess::StdOut(), &system::task::TLocalProcess::StdIn());
+						TTerminal* t = new TTerminal(&system::task::TSelfProcess::StdOut(), &system::task::TSelfProcess::StdIn());
 						if(terminal.AtomicSwap(NULL, t) != NULL)
 							delete t;
 					}
@@ -86,7 +86,7 @@ namespace	cl3
 				{
 					if(stderr == NULL)
 					{
-						TTerminal* t = new TTerminal(&system::task::TLocalProcess::StdErr(), &system::task::TLocalProcess::StdIn());
+						TTerminal* t = new TTerminal(&system::task::TSelfProcess::StdErr(), &system::task::TSelfProcess::StdIn());
 						if(stderr.AtomicSwap(NULL, t) != NULL)
 							delete t;
 					}

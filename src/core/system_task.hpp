@@ -64,8 +64,8 @@ namespace cl3
 			struct IThread;
 			class TForeignThread;
 			class TLocalThread;
-			class TProcess;
-			class TLocalProcess;
+			class IProcess;
+			class TSelfProcess;
 			class TCPU;
 			class TNUMANode;
 
@@ -114,18 +114,19 @@ namespace cl3
 
 			/************************************************************************************/
 
-			class TProcess
+			// one random process in the system we have access to
+			class CL3PUBT IProcess
 			{
-				//	just information extracted from OS APIs (e.g. /proc/<pid>/*)
 				protected:
-					pid_t pid;
 					mutable system::memory::TUniquePtr<io::collection::list::TList<const io::text::string::TString>> args;
 					mutable system::memory::TUniquePtr<io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>> env;
 
-					CL3PUBF CLASS explicit TProcess();
-
 				public:
-					CL3PUBF pid_t ID() const CL3_GETTER;
+					virtual pid_t ID() const CL3_GETTER = 0;
+
+					CL3PUBF io::text::string::TString Name() const;
+					CL3PUBF void Name(io::text::string::TString);
+
 					CL3PUBF const io::text::string::TString& Executable() const CL3_GETTER;
 					CL3PUBF const io::collection::list::TList<const io::text::string::TString>& Arguments() const CL3_GETTER;
 					CL3PUBF const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& Environment() const CL3_GETTER;
@@ -136,48 +137,43 @@ namespace cl3
 
 					CL3PUBF bool IsAlive() const;
 
+					CL3PUBF virtual ~IProcess();
+			};
+
+			class CL3PUBT TProcess : public IProcess
+			{
+				protected:
+					pid_t pid;
+
+				public:
+					inline pid_t ID() const final override CL3_GETTER { return this->pid; }
 					CLASS explicit TProcess(pid_t pid);
 			};
 
-// 			class TProcessMonitor
-// 			{
-// 				//	monitoring using black-magic agent-library injection
-// 				public:
-// 					CL3PUBF const synchronization::ISignal& OnShutdown() const CL3_GETTER;
-// 					CL3PUBF const io::collection::list::TList<IThread* const>& Threads() const CL3_GETTER;
-//
-// 					CL3PUBF explicit CLASS TProcessMonitor(system::memory::TUniquePtr<TProcess>);
-// 			};
-//
-// 			class TProcessDebugger
-// 			{
-// 				//	ptrace()-like deep hijacking
-// 				//	to manipulate the input/output data streams (e.g. stdio) install IO-filters
-// 			};
-
-			class TLocalProcess : public TProcess
+			class CL3PUBT TSelfProcess : public IProcess
 			{
 				private:
-					CLASS TLocalProcess(const TLocalProcess&) = delete;
-					CLASS TLocalProcess();
+					CLASS TSelfProcess(const TSelfProcess&) = delete;
+					CLASS TSelfProcess();
 
 				protected:
 					io::collection::list::TList<IThread*> threads;
 
 				public:
-					CL3PUBF pid_t ID() const CL3_GETTER;
+ 					CL3PUBF pid_t ID() const final override CL3_GETTER;
 					CL3PUBF const io::collection::list::TList<IThread* const>& Threads() const CL3_GETTER;
 					CL3PUBF io::text::string::TString Executable() const CL3_GETTER;
-					CL3PUBF static TLocalProcess* Self();
+					CL3PUBF static TSelfProcess* Self();
 
 					CL3PUBF static io::stream::fd::TFDStream& StdIn() CL3_GETTER;
 					CL3PUBF static io::stream::fd::TFDStream& StdOut() CL3_GETTER;
 					CL3PUBF static io::stream::fd::TFDStream& StdErr() CL3_GETTER;
 			};
 
-			class TChildProcess : public TProcess, private async::TAsyncEventProcessor::TCallback::IReceiver
+			class TChildProcess : public IProcess, private async::TAsyncEventProcessor::TCallback::IReceiver
 			{
 				private:
+					pid_t pid;
 					void AsyncCallback(async::TAsyncEventProcessor*, synchronization::IWaitable*) final override;
 
 				protected:
@@ -195,14 +191,15 @@ namespace cl3
 					io::stream::IOut<byte_t>* os_stderr;
 
 				public:
+					inline pid_t ID() const final override CL3_GETTER { return this->pid; }
 					CLASS TChildProcess(const TChildProcess&) = delete;
 
 					CL3PUBF CLASS explicit TChildProcess(const io::text::string::TString& exe,
 														const io::collection::list::TList<const io::text::string::TString>& args,
-														const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& env = TLocalProcess::Self()->Environment(),
-														io::stream::IIn<byte_t>* stdin = &TLocalProcess::StdIn(),
-														io::stream::IOut<byte_t>* stdout = &TLocalProcess::StdOut(),
-														io::stream::IOut<byte_t>* stderr = &TLocalProcess::StdErr(),
+														const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& env = TSelfProcess::Self()->Environment(),
+														io::stream::IIn<byte_t>* stdin = &TSelfProcess::StdIn(),
+														io::stream::IOut<byte_t>* stdout = &TSelfProcess::StdOut(),
+														io::stream::IOut<byte_t>* stderr = &TSelfProcess::StdErr(),
 														async::TAsyncEventProcessor* aep = &async::TAsyncEventProcessor::Default());
 
 					CL3PUBF CLASS ~TChildProcess();
@@ -215,10 +212,12 @@ namespace cl3
 				CL3PUBF static void Sleep(time::TTime time, time::EClock clock = time::EClock::MONOTONIC);
 				virtual pid_t ID() const CL3_GETTER = 0;
 				virtual io::collection::list::TList<TCPU* const>& Affinity() = 0;
-				virtual TProcess* Process() const CL3_GETTER = 0;
+				virtual IProcess* Process() const CL3_GETTER = 0;
 				virtual void Suspend() = 0;
 				virtual void Resume() = 0;
 				virtual void Kill() = 0;
+// 				virtual io::text::string::TString Name() const = 0;
+// 				virtual void Name(io::text::string::TString) = 0;
 			};
 
 			class TForeignThread : public IThread
@@ -227,14 +226,14 @@ namespace cl3
 					CLASS TForeignThread(const TForeignThread&) = delete;
 
 				protected:
-					TProcess* process;
+					IProcess* process;
 					io::collection::list::TList<TCPU* const> affinity;
 					pid_t id;
 
 				public:
 					CL3PUBF pid_t ID() const final override CL3_GETTER { return this->id; }
 					CL3PUBF io::collection::list::TList<TCPU* const>& Affinity() final override { return this->affinity; }
-					CL3PUBF TProcess* Process() const  final override CL3_GETTER { return this->process; }
+					CL3PUBF IProcess* Process() const  final override CL3_GETTER { return this->process; }
 					CL3PUBF void Suspend() final override;
 					CL3PUBF void Resume() final override;
 					CL3PUBF void Kill() final override;
@@ -268,7 +267,7 @@ namespace cl3
 // 					CL3PUBF const event::TEvent<TLocalThread, TEventData>& OnShutdown() { return this->on_shutdown; }
 					CL3PUBF pid_t ID() const final override CL3_GETTER { return this->id; }
 					CL3PUBF io::collection::list::TList<TCPU* const>& Affinity() final override { return this->affinity; }
-					CL3PUBF TLocalProcess* Process() const final override CL3_GETTER { return TLocalProcess::Self(); }
+					CL3PUBF TSelfProcess* Process() const final override CL3_GETTER { return TSelfProcess::Self(); }
 					CL3PUBF void Suspend() final override;
 					CL3PUBF void Resume() final override;
 					CL3PUBF void Kill() final override;
@@ -313,7 +312,7 @@ namespace cl3
 			CL3PUBF thread_info_t ThreadInfo(pid_t, pid_t);
 			CL3PUBF process_info_t ProcessInfo(pid_t);
 			CL3PUBF io::collection::list::TList<pid_t> EnumProcesses();
-			CL3PUBF system::memory::TUniquePtr<TProcess> OpenProcess(pid_t);
+			CL3PUBF system::memory::TUniquePtr<IProcess> OpenProcess(pid_t);
 		}
 	}
 }
