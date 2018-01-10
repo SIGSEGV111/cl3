@@ -89,11 +89,6 @@ namespace	cl3
 			}
 		}
 	}
-/*
-	namespace	event
-	{
-		extern template class TEvent<system::task::synchronization::IMutex, system::task::synchronization::TOnMutexActionData>;
-	}*/
 }
 
 #endif
