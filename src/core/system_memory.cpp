@@ -147,7 +147,7 @@ namespace	cl3
 
 			CLASS	TRestrictAllocator::~TRestrictAllocator	()
 			{
-				CL3_CLASS_LOGIC_ERROR(BytesAllocated() != 0);
+// 				CL3_CLASS_LOGIC_ERROR(BytesAllocated() != 0);	//	FIXME
 			}
 
 
