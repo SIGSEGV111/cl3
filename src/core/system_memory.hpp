@@ -19,8 +19,7 @@
 #ifndef	_include_cl3_core_system_memory_hpp_
 #define	_include_cl3_core_system_memory_hpp_
 
-// #include <utility>
-
+#include "system_def.hpp"
 #include "system_compiler.hpp"
 #include "system_types.hpp"
 #include "error.hpp"
@@ -401,6 +400,14 @@ namespace	cl3
 
 			CL3_CONTEXT_VARIABLE_DECL(IDynamicAllocator*, allocator_generic);
 			CL3_CONTEXT_VARIABLE_DECL(IDynamicAllocator*, allocator_exception);
+
+
+
+			template<typename T, typename ...Args>
+			TUniquePtr<T> New(Args... args)
+			{
+				return MakeUniquePtr<T>(new T(def::forward<Args>(args)...));
+			}
 		}
 	}
 }

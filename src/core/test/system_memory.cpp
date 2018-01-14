@@ -307,4 +307,10 @@ namespace
 		EXPECT_TRUE(p_te1.Object() == NULL);
 		EXPECT_TRUE(p_te2.Object() != NULL);
 	}
+
+	TEST(system_memory, UniqueNew)
+	{
+		TUniquePtr<int> p = New<int>(7);
+		EXPECT_EQ(7, *p);
+	}
 }
