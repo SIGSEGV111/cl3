@@ -286,6 +286,21 @@ namespace	cl3
 						return *this;
 					}
 
+					bool		operator==	(const TSharedPtr& rhs) const CL3_GETTER { return this->obj == rhs.obj; }
+					bool		operator!=	(const TSharedPtr& rhs) const CL3_GETTER { return this->obj != rhs.obj; }
+					bool		operator==	(const T* rhs) const CL3_GETTER { return this->obj == rhs; }
+					bool		operator!=	(const T* rhs) const CL3_GETTER { return this->obj != rhs; }
+
+					inline	T*			Object()
+					{
+						return this->obj;
+					}
+
+					inline	const T*	Object() const
+					{
+						return this->obj;
+					}
+
 					template<typename TT>
 					CLASS	TSharedPtr	(TSharedPtr<TT>&& rhs) : obj(rhs.obj), info(rhs.info)
 					{
