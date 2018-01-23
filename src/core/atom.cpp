@@ -49,7 +49,7 @@ namespace cl3
 
 		void IAtom::Save() const
 		{
-			this->manager->Save(const_cast<IAtom*>(this));
+			this->manager->Save(this);
 		}
 
 		CLASS IAtom::IAtom(IManager* manager) : manager(manager), id(0), id_parent(0)
@@ -91,7 +91,7 @@ namespace cl3
 			CL3_NOT_IMPLEMENTED;
 		}
 
-		void TManager::Save(IAtom*)
+		void TManager::Save(const IAtom*)
 		{
 			CL3_NOT_IMPLEMENTED;
 		}

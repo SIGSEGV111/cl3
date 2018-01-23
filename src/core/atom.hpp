@@ -73,8 +73,8 @@ namespace cl3
 		struct IManager
 		{
 			//	a manager must be multi-thread safe
-			virtual IAtom* Load(atom_id_t, bool copy_orig = false) = 0;	//	loads the atom referenced by ID; if it is already loaded it returns the ptr to the loaded instance; if copy_orig is set to true, no overriding is performed and a *COPY* (instead of a new version) of the original atom is returned
-			virtual void Save(IAtom*) = 0;				//	saves the atom to the store and assigns a new ID
+			virtual IAtom* Load(atom_id_t, bool fork = false) = 0;	//	loads the atom referenced by ID; if it is already loaded it returns the ptr to the loaded instance; if fork is set to true, no overriding is performed and a *COPY* (instead of a new version) of the original atom is returned
+			virtual void Save(const IAtom*) = 0;		//	saves the atom to the store and assigns a new ID
 			virtual void New(IAtom*) = 0;				//	registers the specified atom with this manager and assigns an ID
 			virtual void Delete(atom_id_t) = 0;			//	deletes the atom from the store; can be a NO-OP
 			virtual atom_id_t ParentOf(atom_id_t) = 0;	//	returns the parent atom of the specified atom - if any
@@ -104,8 +104,8 @@ namespace cl3
 				u64_t next_id;	//	used to generate new atom-ids
 
 			public:
-				CL3PUBF IAtom* Load(atom_id_t, bool copy_orig = false) final override;
-				CL3PUBF void Save(IAtom*) final override;
+				CL3PUBF IAtom* Load(atom_id_t, bool fork = false) final override;
+				CL3PUBF void Save(const IAtom*) final override;
 				CL3PUBF void New(IAtom*) final override;
 				CL3PUBF void Delete(atom_id_t) final override;
 				CL3PUBF atom_id_t ParentOf(atom_id_t) final override;
@@ -166,7 +166,7 @@ namespace cl3
 
 				inline bool IsLoaded() const CL3_GETTER { return this->id.flag == 0; }
 				inline bool IsBound() const CL3_GETTER { return this->id.id != 0; }
-				void Load(bool copy_orig = false);	//	loads the atom into memory
+				void Load(bool fork = false);	//	loads the atom into memory
 				void Unload();	//	allows the atom to be unloaded if all other references are also released
 
 				TAtomPtr& operator=(atom_id_t);
@@ -182,13 +182,13 @@ namespace cl3
 		};
 
 		template<typename T>
-		void TAtomPtr<T>::Load(bool copy_orig)
+		void TAtomPtr<T>::Load(bool fork)
 		{
 			if(!this->IsLoaded())
 			{
 				CL3_CLASS_ERROR(!this->IsBound(), error::TException, "this TAtomPtr was not bound to any atom");
 				CL3_CLASS_LOGIC_ERROR(this->manager == NULL);
-				this->obj = dynamic_cast<T*>(this->manager->Load(this->id, copy_orig));
+				this->obj = dynamic_cast<T*>(this->manager->Load(this->id, fork));
 				//this->obj->IncRef();	//	the atom manager already incremented the ref-count
 			}
 		}
