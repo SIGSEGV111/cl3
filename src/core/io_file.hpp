@@ -80,15 +80,15 @@ namespace	cl3
 				CAN		//	only create if the file does not yet exist
 			};
 
-			enum	EEntryType
+			enum class EEntryType
 			{
-				ENTRY_TYPE_UNKNOWN = 0,
-				ENTRY_TYPE_FILE,
-				ENTRY_TYPE_DIRECTORY,
-				ENTRY_TYPE_PIPE,
-				ENTRY_TYPE_SOCKET,
-				ENTRY_TYPE_DEVICE_CHAR,
-				ENTRY_TYPE_DEVICE_BLOCK
+				UNKNOWN = 0,
+				FILE,
+				DIRECTORY,
+				PIPE,
+				SOCKET,
+				DEVICE_CHAR,
+				DEVICE_BLOCK
 			};
 
 			struct	TFileInfo
