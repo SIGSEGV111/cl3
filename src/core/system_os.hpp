@@ -45,22 +45,6 @@ namespace	cl3
 				OS_DERIVATIVE_WINDOWS_NT
 			};
 
-			enum	EOSVersion
-			{
-				OS_VERSION_POSIX_LINUX_24,	//	Linux Kernel 2.4.xx
-				OS_VERSION_POSIX_LINUX_26,	//	Linux Kernel 2.6.xx and 3.x.xx
-				OS_VERSION_POSIX_MACOS_105,	//	MacOS X 10.5
-				OS_VERSION_WINDOWS_9X_95,	//	Windows 95
-				OS_VERSION_WINDOWS_9X_98,	//	Windows 98
-				OS_VERSION_WINDOWS_9X_ME,	//	Windows Millenium
-				OS_VERSION_WINDOWS_NT_40,	//	Windows NT 4.0
-				OS_VERSION_WINDOWS_NT_50,	//	Windows 2000
-				OS_VERSION_WINDOWS_NT_51,	//	Windows XP
-				OS_VERSION_WINDOWS_NT_52,	//	Windows Server 2003
-				OS_VERSION_WINDOWS_NT_60,	//	Windows Vista
-				OS_VERSION_WINDOWS_NT_61,	//	Windows 7
-			};
-
 			#define	CL3_OS_POSIX	1	//	Linux, Unix, SunOS, MacOS ...
 			#define	CL3_OS_WINDOWS	2	//	Windows 9x, NT, mobile, etc...
 
@@ -105,12 +89,10 @@ namespace	cl3
 
 			#if (CL3_OS == CL3_OS_POSIX)
 				#define	PATHNAME_SEPARATOR	'/'
-				#define	DEBUGGER_BREAK	IFDBG(CL2_DBGLVL_BASIC, ::raise(SIGTRAP))
 			#endif
 
 			#if (CL3_OS == CL3_OS_WINDOWS)
 				#define	PATHNAME_SEPARATOR	'\\'
-				#define	DEBUGGER_BREAK	IFDBG(CL2_DBGLVL_BASIC, _CrtDbgBreak())
 			#endif
 		}
 	}
