@@ -160,6 +160,10 @@ namespace	cl3
 					template<class T> constexpr T& forward( typename remove_ref<T>::type& t ) noexcept { return static_cast<T&>(t); }
 					template<class T> constexpr T&& forward( typename remove_ref<T>::type&& t ) noexcept { return static_cast<T&&>(t); }
 
+
+					template<class T> struct remove_const             { typedef T type; };
+					template<class T> struct remove_const<const T>    { typedef T type; };
+
 					template<bool, typename T1, typename T2>
 					struct type_iif
 					{
