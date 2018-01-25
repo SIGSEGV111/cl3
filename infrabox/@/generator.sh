@@ -16,7 +16,8 @@ function generate_jobs()
 		"resources":{"limits":{"cpu":4,"memory":4096}},
 		"docker_file":"infrabox/$n/Dockerfile",
 		"name":"$n",
-		"build_only":false
+		"build_only":false,
+		"build_context":"../.."
 	}
 EOF
 	done
