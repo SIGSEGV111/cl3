@@ -14,22 +14,13 @@ export SHELL="$ROOT_DIR/util/clean-term.sh"
 
 mkdir -p gen/{dbg,rel}/{lib,include,bin} tmp/{dbg,rel} gen/dbg/coverage
 
-GTEST_V="1.8.0"
+cd "$ROOT_DIR"
+mkdir -p "tmp/gtest/build"
+cd "tmp/gtest/build"
+cmake "$ROOT_DIR/util/gtest"
+make -j $PJOBS
 
-if ! test -L "tmp/gtest/build"; then
-	echo -n "building google-test framework ... "
-	rm -rf "tmp/gtest"
-	mkdir -p "tmp/gtest"
-	cd "tmp/gtest"
-	tar -xf "../../util/gtest-$GTEST_V.tar.gz"
-	cd "googletest-release-$GTEST_V"
-	cmake . && make -j $PJOBS
-	cd ..
-	ln -nsf "googletest-release-$GTEST_V" build
-	echo "done"
-	cd "$ROOT_DIR"
-fi
-
+cd "$ROOT_DIR"
 for m in dbg rel; do
 	mkdir -p gen/$m/include/cl3
 	for f in $cl3_libs; do
@@ -38,7 +29,8 @@ for m in dbg rel; do
 		ln -nfs ../../../../src/$f gen/$m/include/cl3/$f
 		ln -nfs ../../../tmp/$m/src/$f/test/cl3-$f-test gen/$m/bin/
 	done
-	ln -nfs ../../../tmp/gtest/build/googletest/include/gtest gen/$m/include/gtest
+
+	ln -nfs ../../../util/gtest/googletest/include/gtest gen/$m/include/gtest
 
 	for f in tmp/gtest/build/googlemock/gtest/*; do
 		ln -nfs ../../../"$f" gen/$m/lib/

@@ -1,3 +1,6 @@
 [submodule "util/infrabox-testresult"]
 	path = util/infrabox-testresult
 	url = https://github.com/InfraBox/testresult.git
+[submodule "util/gtest"]
+	path = util/gtest
+	url = https://github.com/google/googletest.git
