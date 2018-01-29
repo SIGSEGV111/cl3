@@ -33,6 +33,7 @@ namespace cl3
 		{
 			using namespace text::string;
 			using namespace error;
+			using namespace system::endian;
 
 			TIPv4::TIPv4()
 			{
@@ -61,6 +62,25 @@ namespace cl3
 			{
 				this->u32 = v;
 			}
+
+			u8_t TIPv4::MaskToCIDR(const TIPv4 mask)
+			{
+				return system::compiler::CountLeadingZeroes(~ConvertBigEndianToNative(mask.u32));
+			}
+
+			TIPv4 TIPv4::CIDRToMask(const u8_t cidr)
+			{
+				TIPv4 mask;
+				mask.u32 = ConvertNativeToBigEndian( (u32_t)((u64_t)0xffffffff << (32-cidr)) );
+				return mask;
+			}
+
+			text::ITextWriter& operator<<(text::ITextWriter& w, const TIPv4 ip)
+			{
+				w<<ip.octet[0]<<'.'<<ip.octet[1]<<'.'<<ip.octet[2]<<'.'<<ip.octet[3];
+				return w;
+			}
+
 
 			TIPv6::TIPv6()
 			{
@@ -92,7 +112,7 @@ namespace cl3
 				CL3_CLASS_ERROR(::sscanf(ipstr, "%hx:%hx:%hx:%hx:%hx:%hx:%hx:%hx", this->group + 0, this->group + 1, this->group + 2, this->group + 3, this->group + 4, this->group + 5, this->group + 6, this->group + 7) != 8, TException, "unable to parse IPv6 address from string");
 
 				for(unsigned i = 0; i < 16; i++)
-					this->group[i] = system::endian::ConvertNativeToBigEndian(this->group[i]);
+					this->group[i] = ConvertNativeToBigEndian(this->group[i]);
 			}
 
 			TIPv6::TIPv6(const text::string::TString& ipstr) : TIPv6(TCString(ipstr, text::encoding::CODEC_CXX_CHAR).Chars())

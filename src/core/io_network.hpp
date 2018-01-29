@@ -28,6 +28,8 @@ namespace cl3
 	{
 		namespace text
 		{
+			struct ITextWriter;
+
 			namespace string
 			{
 				class TString;
@@ -50,7 +52,19 @@ namespace cl3
 				CL3PUBF explicit TIPv4(const char*);
 				CL3PUBF explicit TIPv4(const text::string::TString&);
 				TIPv4(const TIPv4&) = default;
+
+				inline bool operator!=(const TIPv4& rhs) const { return this->u32 != rhs.u32; }
+				inline bool operator==(const TIPv4& rhs) const { return this->u32 == rhs.u32; }
+				inline bool operator>=(const TIPv4& rhs) const { return this->u32 >= rhs.u32; }
+				inline bool operator<=(const TIPv4& rhs) const { return this->u32 <= rhs.u32; }
+				inline bool operator> (const TIPv4& rhs) const { return this->u32 >  rhs.u32; }
+				inline bool operator< (const TIPv4& rhs) const { return this->u32 <  rhs.u32; }
+
+				CL3PUBF static u8_t MaskToCIDR(const TIPv4);
+				CL3PUBF static TIPv4 CIDRToMask(const u8_t);
 			};
+
+			CL3PUBF text::ITextWriter& operator<<(text::ITextWriter&, const TIPv4);
 
 			struct TIPv6
 			{

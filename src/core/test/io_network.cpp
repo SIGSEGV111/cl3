@@ -17,6 +17,7 @@
  */
 
 #include <cl3/core/io_network.hpp>
+#include <cl3/core/io_text_string.hpp>
 #include <cl3/core/error.hpp>
 #include <gtest/gtest.h>
 
@@ -26,6 +27,7 @@ namespace
 {
 	using namespace cl3::io::network;
 	using namespace cl3::system::types;
+	using namespace cl3::io::text::string;
 
 	TEST(io_network, TCP_Loopback_v4)
 	{
@@ -59,5 +61,35 @@ namespace
 		client2.Read(buffer, sizeof(test_data));
 
 		EXPECT_TRUE(memcmp(test_data, buffer, sizeof(test_data)) == 0);
+	}
+
+	TEST(io_network_TIPv4, MaskToCIDR)
+	{
+		EXPECT_EQ(0, TIPv4::MaskToCIDR(TIPv4("0.0.0.0")));
+		EXPECT_EQ(8, TIPv4::MaskToCIDR(TIPv4("255.0.0.0")));
+		EXPECT_EQ(16, TIPv4::MaskToCIDR(TIPv4("255.255.0.0")));
+		EXPECT_EQ(24, TIPv4::MaskToCIDR(TIPv4("255.255.255.0")));
+		EXPECT_EQ(32, TIPv4::MaskToCIDR(TIPv4("255.255.255.255")));
+		EXPECT_EQ(20, TIPv4::MaskToCIDR(TIPv4("255.255.240.0")));
+	}
+
+	TEST(io_network_TIPv4, CIDRToMask)
+	{
+		EXPECT_EQ(TIPv4::CIDRToMask(0), TIPv4("0.0.0.0"));
+		EXPECT_EQ(TIPv4::CIDRToMask(8), TIPv4("255.0.0.0"));
+		EXPECT_EQ(TIPv4::CIDRToMask(16), TIPv4("255.255.0.0"));
+		EXPECT_EQ(TIPv4::CIDRToMask(24), TIPv4("255.255.255.0"));
+		EXPECT_EQ(TIPv4::CIDRToMask(31), TIPv4("255.255.255.254"));
+		EXPECT_EQ(TIPv4::CIDRToMask(32), TIPv4("255.255.255.255"));
+		EXPECT_EQ(TIPv4::CIDRToMask(20), TIPv4("255.255.240.0"));
+	}
+
+	TEST(io_network_TIPv4, ToString)
+	{
+		const TString src = "192.168.168.17";
+		const TIPv4 ip(src);
+		TString dst;
+		dst<<ip;
+		EXPECT_EQ(src, dst);
 	}
 }
