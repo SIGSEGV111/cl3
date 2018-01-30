@@ -16,12 +16,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3
-#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#ifndef INSIDE_CL3CORE
+#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
 #endif
 
 #include "system_time.hpp"
 #include "io_serialization.hpp"
+#include <math.h>
 
 namespace cl3
 {
@@ -34,8 +35,8 @@ namespace cl3
 				if(asec <= -1000000000000000000LL)
 				{
 					const s64_t f = asec / 1000000000000000000LL;
-					sec -= f;
-					asec += f * 1000000000000000000LL;
+					sec += f;
+					asec -= f * 1000000000000000000LL;
 				}
 				else if(asec >= 1000000000000000000LL)
 				{
@@ -88,22 +89,29 @@ namespace cl3
 
 			TTime&	TTime::operator*=	(const double f)
 			{
-				return (*this = TTime((double)this->sec * f, (double)this->asec * f));
+				this->sec *= f;
+				this->asec *= f;
+				Normalize();
+				return *this;
 			}
 
 			TTime&	TTime::operator/=	(const double f)
 			{
-				return (*this = TTime((double)this->sec / f, (double)this->asec / f));
+				this->asec += fmod(this->sec, f) * 1000000000000000000LL;
+				this->asec /= f;
+				this->sec /= f;
+				Normalize();
+				return *this;
 			}
 
 			TTime	TTime::operator*	(const double f) const
 			{
-				return TTime((double)this->sec * f, (double)this->asec * f);
+				return TTime(*this) *= f;
 			}
 
 			TTime	TTime::operator/	(const double f) const
 			{
-				return TTime((double)this->sec / f, (double)this->asec / f);
+				return TTime(*this) /= f;
 			}
 
 			bool	TTime::operator>	(const TTime op) const
@@ -245,6 +253,29 @@ namespace cl3
 				}
 			}
 
+			s64_t	TTime::ConvertToI	(s64_t  tps) const
+			{
+				return this->sec * tps + this->asec / (1000000000000000000LL / tps);
+			}
+
+			double	TTime::ConvertToF	(double tps) const
+			{
+				return this->sec * tps + this->asec / (1000000000000000000LL / tps);
+			}
+
+			TTime	TTime::ConvertFrom	(s64_t  tps, s64_t value)
+			{
+				const s64_t sec = value / tps;
+				value -= sec * tps;	// compute fractional part
+				value *= 1000000000000000000ULL / tps;	// ticks per attosecond
+				return TTime(sec, value);
+			}
+
+			TTime	TTime::ConvertFrom	(double tps, double value)
+			{
+				return TTime(value / tps);
+			}
+
 			s64_t		TTime::UnixTimeI		() const
 			{
 				return sec;
@@ -294,11 +325,11 @@ namespace cl3
 				Normalize();
 			}
 
-			CLASS	TTime::TTime		(io::serialization::IDeserializer& ds)
-			{
-				ds.Pop("seconds", this->sec);
-				ds.Pop("attoseconds", this->asec);
-			}
+// 			CLASS	TTime::TTime		(io::serialization::IDeserializer& ds)
+// 			{
+// 				ds.Pop("seconds", this->sec);
+// 				ds.Pop("attoseconds", this->asec);
+// 			}
 
 			CLASS	TTime::TTime		(struct timespec ts) : sec((s64_t)ts.tv_sec), asec((s64_t)ts.tv_nsec * (s64_t)1000000000LL)
 			{
@@ -310,17 +341,17 @@ namespace cl3
 				Normalize();
 			}
 
-			void TTime::Serialize(io::serialization::ISerializer& s) const
-			{
-				s.Push("seconds", this->sec);
-				s.Push("attoseconds", this->asec);
-			}
-
-			void TTime::Deserialize(io::serialization::IDeserializer& ds)
-			{
-				ds.Pop("seconds", this->sec);
-				ds.Pop("attoseconds", this->asec);
-			}
+// 			void TTime::Serialize(io::serialization::ISerializer& s) const
+// 			{
+// 				s.Push("seconds", this->sec);
+// 				s.Push("attoseconds", this->asec);
+// 			}
+//
+// 			void TTime::Deserialize(io::serialization::IDeserializer& ds)
+// 			{
+// 				ds.Pop("seconds", this->sec);
+// 				ds.Pop("attoseconds", this->asec);
+// 			}
 		}
 	}
 }

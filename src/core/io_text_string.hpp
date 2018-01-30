@@ -57,6 +57,8 @@ namespace	cl3
 						using collection::list::TList<TUTF32>::Contains;
 // 						using collection::list::TList<TUTF32>::ItemPtr;
 
+						CL3PUBF static const io::collection::array::TArray<const TUTF32> WHITESPACE_DEFAULT;
+
 						CL3PUBF	void		Prepend		(const char& item_append);
 						CL3PUBF	void		Prepend		(const char* arr_items_append, usys_t n_items_append = (usys_t)-1);
 						CL3PUBF	void		Prepend		(const IStaticCollection<const char>& collection);
@@ -133,7 +135,7 @@ namespace	cl3
 						CL3PUBF static TString Join		(const io::collection::IStaticCollection<const TString>& collection, const TString& delimiter) CL3_GETTER;
 
 						//	remove/append whitespace (or other characters)
-						CL3PUBF	void		Trim		(const IStaticCollection<const TUTF32>& collection = *whitespace, int position = POSITION_HEAD | POSITION_TAIL);
+						CL3PUBF	void		Trim		(const IStaticCollection<const TUTF32>& collection = TString::WHITESPACE_DEFAULT, int position = POSITION_HEAD | POSITION_TAIL);
 						CL3PUBF	void		Pad			(EPosition position, usys_t n_pad, TUTF32 chr_pad = ' ');
 						CL3PUBF	void		PadTo		(EPosition position, usys_t n_target_length, TUTF32 chr_pad = ' ');
 						CL3PUBF	TString		Padded		(EPosition position, usys_t n_pad, TUTF32 chr_pad = ' ') const CL3_GETTER;
@@ -171,6 +173,13 @@ namespace	cl3
 						CL3PUBF	CLASS	TString	(const TString&);
 						CL3PUBF	CLASS	TString	(TString&&);
 						CL3PUBF	virtual	~TString();
+
+
+						template<typename... TArg>
+						static io::text::string::TString Format(const char* format, TArg... args)
+						{
+							CL3_NOT_IMPLEMENTED;
+						}
 				};
 
 				inline static stream::IOut<TUTF32>& operator<<(stream::IOut<TUTF32>& os, const TString& s) { os.Write(s.ItemPtr(0), s.Count()); return os; }

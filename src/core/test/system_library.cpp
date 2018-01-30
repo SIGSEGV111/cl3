@@ -40,32 +40,7 @@ namespace
 
 	TEST(system_library_TLibrary, ResolveSymbol)
 	{
-		#if	(CL3_OS == CL3_OS_POSIX)
-			TLibrary lib("rt");
-			EXPECT_TRUE(lib.ResolveSymbol("aio_suspend") != NULL);
-			EXPECT_TRUE(lib.ResolveSymbol("aio_error") != NULL);
-			EXPECT_TRUE(lib.ResolveSymbol("aio_fsync") != NULL);
-		#elif (CL3_OS == CL3_OS_WINDOWS)
-			TLibrary lib("gdi32");
-			EXPECT_TRUE(lib.ResolveSymbol("BitBlt") != NULL);
-			//	TODO
-		#else
-			#error "unsupported platform"
-		#endif
-	}
-
-	TEST(system_library_TLibrary, LoadSymbol)
-	{
-		#if	(CL3_OS == CL3_OS_POSIX)
-			TLibrary lib("rt");
-			int (*aio_suspend)(const struct aiocb * const aiocb_list[], int nitems, const struct timespec *timeout);
-			lib.LoadSymbol("aio_suspend", aio_suspend);
-			EXPECT_TRUE(aio_suspend != NULL);
-		#elif (CL3_OS == CL3_OS_WINDOWS)
-			TLibrary lib("gdi32");
-			throw; //	TODO
-		#else
-			#error "unsupported platform"
-		#endif
+		TLibrary lib("cl3-core");
+		EXPECT_TRUE(lib.ResolveSymbol("_ZN3cl36system7library8TLibrary13ResolveSymbolERKNS_2io4text6string7TStringE") != NULL);
 	}
 }

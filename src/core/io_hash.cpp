@@ -20,16 +20,14 @@
 
 #include <string.h>
 
+void hashlittle2(const void *key, size_t length, cl3::system::types::u32_t *pc, cl3::system::types::u32_t *pb);
+
 namespace cl3
 {
 	namespace io
 	{
 		namespace hash
 		{
-			namespace _
-			{
-				extern "C" void hashlittle2(const void *key, size_t length, u32_t *pc, u32_t *pb);
-			}
 
 			u64_t JenkinsHash(const byte_t* arr_items, usys_t n_items)
 			{
@@ -44,7 +42,7 @@ namespace cl3
 
 				a.qw = 0;
 
-				_::hashlittle2(arr_items, n_items, &a.l, &a.h);
+				::hashlittle2(arr_items, n_items, &a.l, &a.h);
 
 				return a.qw;
 			}

@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3
-#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#ifndef INSIDE_CL3CORE
+#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
 #endif
 
 #include "atom.hpp"
@@ -61,7 +61,9 @@ namespace cl3
 		{
 			s.Push("id", this->AtomID().id);
 			s.Push("id_parent", id_parent.id);
-			s.Push("ts_save", system::time::TTime::Now(system::time::EClock::REALTIME));
+// 			s.Push("ts_save", system::time::TTime::Now(system::time::EClock::REALTIME));
+
+			CL3_NOT_IMPLEMENTED;
 		}
 
 		CLASS IAtom::IAtom(io::serialization::IDeserializer& ds) : manager(NULL), id(0), id_parent(0)
@@ -73,7 +75,9 @@ namespace cl3
 			ds.Pop("id_parent", id_parent.u64);
 
 			system::time::TTime ts_save;
-			ds.Pop("ts_save", ts_save);
+// 			ds.Pop("ts_save", ts_save);
+
+			CL3_NOT_IMPLEMENTED;
 		}
 
 		CLASS IAtom::IAtom(const IAtom& other) : manager(other.manager), id(0), id_parent(other.AtomID())

@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3
-#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#ifndef INSIDE_CL3CORE
+#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
 #endif
 
 #include "system_os.hpp"
@@ -56,7 +56,7 @@ namespace	cl3
 					return pfd.revents != 0;
 				}
 
-				io::collection::list::TList<bool> WaitFor(const io::collection::IStaticCollection<IWaitable* const>& waitables, time::TTime timeout)
+				io::collection::list::TList<bool> WaitFor(const io::collection::IStaticCollection<IWaitable* const>&, time::TTime)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

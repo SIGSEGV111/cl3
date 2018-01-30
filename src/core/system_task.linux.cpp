@@ -24,8 +24,8 @@
 	but it seems to work for now....
 */
 
-#ifndef INSIDE_CL3
-#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#ifndef INSIDE_CL3CORE
+#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
 #endif
 
 #include "system_os.hpp"
@@ -45,6 +45,9 @@
 #include <stdio.h>
 #include <errno.h>
 #include <sys/syscall.h>
+#include <signal.h>
+#include <sys/signalfd.h>
+#include <string.h>
 // #include <sched.h>
 
 // #include <valgrind/valgrind.h>
@@ -80,7 +83,7 @@ namespace	cl3
 static void cl3_init(int argc, char* argv[], char* envv[]);
 __attribute__((section(".init_array"))) void (* p_cl3_init)(int,char*[],char*[]) = &cl3_init;
 
-static void cl3_init(int argc, char* argv[], char* envv[])
+static void cl3_init(int, char* argv[], char* envv[])
 {
 	if(p_cl3_init == NULL) throw;	//	prevent warning about unused variable
 
@@ -96,18 +99,155 @@ namespace	cl3
 		{
 			using namespace io::file;
 			using namespace io::collection::map;
+			using namespace io::collection::list;
 			using namespace io::text::encoding;
 			using namespace memory;
 			using namespace error;
+			using namespace io::text::string;
 
-			pid_t gettid()
+// 			pid_t gettid()
+// 			{
+// 				return (pid_t)syscall(SYS_gettid);
+// 			}
+
+			static TList<byte_t> ReadProcFile(const TString& filename)
 			{
-				return (pid_t)syscall(SYS_gettid);
+				TList<byte_t> buffer;
+				io::file::TFile file(filename);
+				io::file::TStream stream(&file);
+				stream.WriteOut(buffer);
+				return buffer;
+			}
+
+			struct TStatFile
+			{
+				int pid;
+				TString comm;
+				io::text::TUTF32 state;
+				int ppid;
+				int pgrp;
+				int session;
+				int tty_nr;
+				int tpgid;
+				unsigned flags;
+				unsigned long minflt;
+				unsigned long cminflt;
+				unsigned long majflt;
+				unsigned long cmajflt;
+				unsigned long utime;
+				unsigned long stime;
+				long cutime;
+				long cstime;
+				long priority;
+				long nice;
+				long num_threads;
+				long itrealvalue;
+				s64_t starttime;
+				unsigned long vsize;
+				long rss;
+				unsigned long rsslim;
+				unsigned long startcode;
+				unsigned long endcode;
+				unsigned long startstack;
+				unsigned long kstkesp;
+				unsigned long kstkeip;
+				unsigned long signal;
+				unsigned long blocked;
+				unsigned long sigignore;
+				unsigned long sigcatch;
+				unsigned long wchan;
+				unsigned long nswap;
+				unsigned long cnswap;
+				int exit_signal;
+				int processor;
+				unsigned rt_priority;
+				unsigned policy;
+				u64_t delayacct_blkio_ticks;
+				unsigned long guest_time;
+				long cguest_time;
+				unsigned long start_data;
+				unsigned long end_data;
+				unsigned long start_brk;
+				unsigned long arg_start;
+				unsigned long arg_end;
+				unsigned long env_start;
+				unsigned long env_end;
+				int exit_code;
+			};
+
+			static TStatFile ReadStatFile(pid_t pid)
+			{
+				char filename[32] = {}; // "/proc/" + sign + 10 digits + "/stat" + null
+				snprintf(filename, sizeof(filename), "/proc/%d/stat", pid);
+				auto buffer = ReadProcFile(TString(filename));
+				TString stat((const char*)buffer.ItemPtr(0), buffer.Count());
+
+				TStatFile sf;
+				stat >> sf.pid;
+
+				const usys_t p_first_ob = stat.Find("(", 0, io::collection::DIRECTION_FORWARD);
+				CL3_NONCLASS_LOGIC_ERROR(p_first_ob != 0);
+				const usys_t p_last_cb = stat.Find(")", stat.Count()-1, io::collection::DIRECTION_BACKWARD);
+				sf.comm = stat.Slice(p_first_ob + 1, p_last_cb - p_first_ob - 1);
+				stat.Cut(p_last_cb + 2, 0);
+
+				stat >> sf.state;
+				stat >> sf.ppid;
+				stat >> sf.pgrp;
+				stat >> sf.session;
+				stat >> sf.tty_nr;
+				stat >> sf.tpgid;
+				stat >> sf.flags;
+				stat >> sf.minflt;
+				stat >> sf.cminflt;
+				stat >> sf.majflt;
+				stat >> sf.cmajflt;
+				stat >> sf.utime;
+				stat >> sf.stime;
+				stat >> sf.cutime;
+				stat >> sf.cstime;
+				stat >> sf.priority;
+				stat >> sf.nice;
+				stat >> sf.num_threads;
+				stat >> sf.itrealvalue;
+				stat >> sf.starttime;
+				stat >> sf.vsize;
+				stat >> sf.rss;
+				stat >> sf.rsslim;
+				stat >> sf.startcode;
+				stat >> sf.endcode;
+				stat >> sf.startstack;
+				stat >> sf.kstkesp;
+				stat >> sf.kstkeip;
+				stat >> sf.signal;
+				stat >> sf.blocked;
+				stat >> sf.sigignore;
+				stat >> sf.sigcatch;
+				stat >> sf.wchan;
+				stat >> sf.nswap;
+				stat >> sf.cnswap;
+				stat >> sf.exit_signal;
+				stat >> sf.processor;
+				stat >> sf.rt_priority;
+				stat >> sf.policy;
+				stat >> sf.delayacct_blkio_ticks;
+				stat >> sf.guest_time;
+				stat >> sf.cguest_time;
+				stat >> sf.start_data;
+				stat >> sf.end_data;
+				stat >> sf.start_brk;
+				stat >> sf.arg_start;
+				stat >> sf.arg_end;
+				stat >> sf.env_start;
+				stat >> sf.env_end;
+				stat >> sf.exit_code;
+
+				return sf;
 			}
 
 			/************************************************************************************/
 
-			io::text::string::TString IProcess::Name() const
+			TString IProcess::Name() const
 			{
 				char buffer[64];
 				snprintf(buffer, sizeof(buffer), "/proc/%d/comm", this->ID());
@@ -120,7 +260,7 @@ namespace	cl3
 				return TString((const char*)c.ItemPtr(0), c.Count());
 			}
 
-			void IProcess::Name(io::text::string::TString new_name)
+			void IProcess::Name(TString new_name)
 			{
 				char buffer[64];
 				snprintf(buffer, sizeof(buffer), "/proc/%d/comm", this->ID());
@@ -129,34 +269,105 @@ namespace	cl3
 				f.FD().Write((const byte_t*)c.Chars(), c.Count());
 			}
 
-			/************************************************************************************/
-
-			static io::collection::list::TList<byte_t> ReadProcFile(const io::text::string::TString& filename)
+			TProcess IProcess::Parent() const
 			{
-				io::collection::list::TList<byte_t> buffer;
-				io::file::TFile file(filename);
-				io::file::TStream stream(&file);
-				stream.WriteOut(buffer);
-				return buffer;
+				const TStatFile sf = ReadStatFile(this->ID());
+				return TProcess(sf.ppid);
 			}
 
-			io::text::string::TString TSelfProcess::Executable() const
+			bool IProcess::IsRootProcess() const
+			{
+				return this->ID() == 1 || this->ID() == 0;
+			}
+
+// 			TList<TProcess> IProcess::Childs() const
+// 			{
+// 				CL3_NOT_IMPLEMENTED;
+// 			}
+
+			TList<const IProcess::TOpenFile> IProcess::OpenFiles() const
+			{
+				TList<const IProcess::TOpenFile> ofs;
+
+				char fd_dir[32];
+				snprintf(fd_dir, sizeof(fd_dir), "/proc/%d/fd", this->ID());
+
+				TDirectoryBrowser db(fd_dir);
+
+				TList<TString> symlinks;
+				db.EnumEntries(symlinks);
+
+				for(usys_t i = 0; i < symlinks.Count(); i++)
+				{
+					TOpenFile of;
+					of.pid = this->ID();
+					TCString str(TString("/proc/") + of.pid + "/fd/" + symlinks[i], CODEC_CXX_CHAR);
+					char buffer[256] = {};
+					CL3_CLASS_SYSERR(readlink(str.Chars(), buffer, sizeof(buffer)));
+					symlinks[i] >> of.fd;
+					of.filename = buffer;
+					ofs.Append(of);
+				}
+
+				return cl3::system::def::move(ofs);
+			}
+
+			time::TTime IProcess::StartTime() const
+			{
+				if(this->ts_start == time::TTime(-1,-1))
+				{
+					const TStatFile sf = ReadStatFile(this->ID());
+					this->ts_start = time::TTime::ConvertFrom((s64_t)sysconf(_SC_CLK_TCK), (s64_t)sf.starttime);
+				}
+				return this->ts_start;
+			}
+
+			/************************************************************************************/
+
+			static const int SHUTDOWN_SIGNALS[] = { SIGINT, SIGTERM, SIGHUP, SIGQUIT };
+			static const int ERROR_SIGNALS[] = { SIGABRT, SIGTRAP, SIGILL, SIGFPE, SIGSEGV, SIGBUS };
+
+			static const unsigned NUM_SHUTDOWN_SIGNALS = sizeof(SHUTDOWN_SIGNALS) / sizeof(SHUTDOWN_SIGNALS[0]);
+			static const unsigned NUM_ERROR_SIGNALS = sizeof(ERROR_SIGNALS) / sizeof(ERROR_SIGNALS[0]);
+
+			CLASS TSelfProcess::TSelfProcess()
+			{
+				sigset_t ss;
+
+				sigfillset(&ss);
+				for(usys_t i = 0; i < NUM_ERROR_SIGNALS; i++)
+				{
+					sigdelset(&ss, ERROR_SIGNALS[i]);
+					struct sigaction sa;
+					memset(&sa, 0, sizeof(sa));
+					sa.sa_handler = SIG_DFL;
+					CL3_CLASS_SYSERR(sigaction(ERROR_SIGNALS[i], &sa, NULL));
+				}
+				CL3_CLASS_PTHREAD_ERROR(pthread_sigmask(SIG_SETMASK, &ss, NULL));
+
+				sigemptyset(&ss);
+				for(usys_t i = 0; i < NUM_SHUTDOWN_SIGNALS; i++)
+					sigaddset(&ss, SHUTDOWN_SIGNALS[i]);
+				CL3_CLASS_SYSERR(this->fd_signal = signalfd(-1, &ss, SFD_CLOEXEC|SFD_NONBLOCK));
+			}
+
+			TString TSelfProcess::Executable() const
 			{
 				char symlink[32] = {};
 				snprintf(symlink, sizeof(symlink), "/proc/%d/exe", this->ID());
-				char exe[256];
+				char exe[256] = {};
 				CL3_CLASS_SYSERR(readlink(symlink, exe, sizeof(exe)));
-				return io::text::string::TString(exe);
+				return TString(exe);
 			}
 
-			const io::collection::list::TList<const io::text::string::TString>& IProcess::Arguments() const
+			const TList<const TString>& IProcess::Arguments() const
 			{
 				if(this->args == NULL)
 				{
 					char filename[32] = {};
 					snprintf(filename, sizeof(filename), "/proc/%d/cmdline", this->ID());
 
-					auto args = MakeUniquePtr(new io::collection::list::TList<const io::text::string::TString>());
+					auto args = MakeUniquePtr(new TList<const TString>());
 					const auto buffer = ReadProcFile(filename);
 
 					if(buffer.Count() > 0)
@@ -179,19 +390,20 @@ namespace	cl3
 
 			static TPair<TString, TString> SplitKeyValue(const TString& str)
 			{
-				TString key = str.Left(str.Find("="));
-				TString value = str.Slice(str.Find("=")+1);
+				const auto p = str.Find("=");
+				TString key = str.Left(p);
+				TString value = str.Slice(p+1);
 				return TPair<TString, TString>(key, value);
 			}
 
-			const io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>& IProcess::Environment() const
+			const io::collection::map::TStdMap<const TString, const TString>& IProcess::Environment() const
 			{
 				if(this->env == NULL)
 				{
 					char filename[32] = {};
 					snprintf(filename, sizeof(filename), "/proc/%d/environ", this->ID());
 
-					auto env = MakeUniquePtr(new io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>());
+					auto env = MakeUniquePtr(new io::collection::map::TStdMap<const TString, const TString>());
 					const auto buffer = ReadProcFile(filename);
 
 					if(buffer.Count() > 0)

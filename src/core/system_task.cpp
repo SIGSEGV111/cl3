@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3
-#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#ifndef INSIDE_CL3CORE
+#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
 #endif
 
 #include "system_task.hpp"
@@ -44,10 +44,6 @@ namespace	cl3
 				return proc_self.Object();
 			}
 
-			CLASS IProcess::~IProcess()
-			{
-			}
-
 			CLASS	TProcess::TProcess(pid_t pid) : pid(pid)
 			{
 			}
@@ -55,10 +51,6 @@ namespace	cl3
 			const io::collection::list::TList<IThread* const>& TSelfProcess::Threads() const
 			{
 				return this->threads;
-			}
-
-			CLASS TLocalThread::TLocalThread()
-			{
 			}
 
 			void TChildProcess::AsyncCallback(TAsyncEventProcessor*, synchronization::IWaitable* waitable)

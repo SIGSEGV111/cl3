@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "common.hpp"
 #include <cl3/core/io_file.hpp>
 #include <cl3/core/system_memory.hpp>
 #include <cl3/core/io_text_string.hpp>
@@ -122,22 +123,10 @@ namespace
 		}
 	}
 
-	static TDirectoryBrowser TestDataDirectory()
-	{
-		TDirectoryBrowser b;
-
-		while(!b.IsRoot() && !b.Entries().Contains(".gitignore"))
-			b.EnterDirectory("..");
-
-		b.EnterDirectory("data/tests");
-
-		return b;
-	}
-
 	TEST(io_file_TDirectoryBrowser, EnumEntries)
 	{
 		TList<TString> files;
-		TDirectoryBrowser browser = TestDataDirectory();
+		TDirectoryBrowser browser = cl3::unittest_support::TestDataDirectory();
 		browser.EnterDirectory("folder_with_mixed_files");
 
 		browser.EnumEntries(files);
@@ -170,7 +159,7 @@ namespace
 
 	TEST(io_file_TDirectoryBrowser, OpenFile)
 	{
-		TDirectoryBrowser browser = TestDataDirectory();
+		TDirectoryBrowser browser = cl3::unittest_support::TestDataDirectory();
 		browser.EnterDirectory("folder_with_mixed_files");
 
 		TFile file = browser.OpenFile("random_data_128.bin");

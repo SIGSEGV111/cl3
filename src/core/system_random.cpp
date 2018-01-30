@@ -16,8 +16,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INSIDE_CL3
-#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#ifndef INSIDE_CL3CORE
+#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
 #endif
 
 #include <math.h>
@@ -84,12 +84,13 @@ namespace cl3
 				}
 			}
 
+			static system::memory::TUniquePtr<TCryptoRandom> rnd_crypto_instance;
+
 			TCryptoRandom& TCryptoRandom::SharedInstance()
 			{
-				static system::memory::TUniquePtr<TCryptoRandom> instance;
-				if(instance.Object() == NULL)
-					instance.AtomicSwap(NULL, system::memory::MakeUniquePtr(new TCryptoRandom()));
-				return *instance.Object();
+				if(rnd_crypto_instance.Object() == NULL)
+					rnd_crypto_instance.AtomicSwap(NULL, system::memory::MakeUniquePtr(new TCryptoRandom()));
+				return *rnd_crypto_instance.Object();
 			}
 
 			u32_t TCMWC::TState::Generate()
@@ -155,22 +156,24 @@ namespace cl3
 
 			namespace _
 			{
+				static system::memory::TUniquePtr<TXorShift> rnd_xor_instance;
+
 				template<>
 				TXorShift& TImplPNRG<TXorShift>::SharedInstance()
 				{
-					static system::memory::TUniquePtr<TXorShift> instance;
-					if(instance.Object() == NULL)
-						instance.AtomicSwap(NULL, system::memory::MakeUniquePtr(new TXorShift()));
-					return *instance.Object();
+					if(rnd_xor_instance.Object() == NULL)
+						rnd_xor_instance.AtomicSwap(NULL, system::memory::MakeUniquePtr(new TXorShift()));
+					return *rnd_xor_instance.Object();
 				}
+
+				static system::memory::TUniquePtr<TCMWC> rnd_cmwc_instance;
 
 				template<>
 				TCMWC& TImplPNRG<TCMWC>::SharedInstance()
 				{
-					static system::memory::TUniquePtr<TCMWC> instance;
-					if(instance.Object() == NULL)
-						instance.AtomicSwap(NULL, system::memory::MakeUniquePtr(new TCMWC()));
-					return *instance.Object();
+					if(rnd_cmwc_instance.Object() == NULL)
+						rnd_cmwc_instance.AtomicSwap(NULL, system::memory::MakeUniquePtr(new TCMWC()));
+					return *rnd_cmwc_instance.Object();
 				}
 			}
 		}

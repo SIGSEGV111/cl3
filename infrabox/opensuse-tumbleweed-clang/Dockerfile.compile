@@ -1,0 +1,3 @@
+FROM v2-registry.dhcp.wdf.sap.corp/opensuse-tumbleweed-clang:latest
+ADD . /cl3
+CMD cd /cl3 && CXX=clang++ ./compile.sh

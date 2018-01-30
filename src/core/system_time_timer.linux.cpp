@@ -68,16 +68,8 @@ namespace	cl3
 							id = CLOCK_MONOTONIC;
 							break;
 
-						case EClock::PROCESS:
-							id = CLOCK_PROCESS_CPUTIME_ID;
-							break;
-
-						case EClock::THREAD:
-							id = CLOCK_THREAD_CPUTIME_ID;
-							break;
-
 						default:
-							CL3_CLASS_FAIL(error::TException, "unsupported clock selected");
+							CL3_CLASS_FAIL(error::TException, "unsupported clock selected");  // LCOV_EXCL_LINE
 					}
 
 					fd_t fd;

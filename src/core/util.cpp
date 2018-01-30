@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3
-#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#ifndef INSIDE_CL3CORE
+#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
 #endif
 
 #include <stdio.h>
@@ -37,7 +37,7 @@ namespace	cl3
 		using namespace system::memory;
 		using namespace system::types;
 
-		TUniquePtr<char,UPTR_ALLOC> mkstrcpy(const char* str, system::memory::IDynamicAllocator* local_allocator)
+		TUniquePtr<char,UPTR_ALLOC> MakeCStringCopy(const char* str, system::memory::IDynamicAllocator* local_allocator)
 		{
 			if(local_allocator == NULL)
 				local_allocator = allocator_generic();

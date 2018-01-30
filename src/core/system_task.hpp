@@ -41,8 +41,148 @@ namespace cl3
 {
 	using namespace system::types;
 
+	namespace io
+	{
+		namespace file
+		{
+			class TFile;
+		}
+	}
+
+
 	namespace system
 	{
+		#ifdef __x86_64__
+			struct TContextRegisters
+			{
+				union
+				{
+					u64_t arr[8];
+					struct
+					{
+						u64_t rbx;
+						u64_t rbp;
+						u64_t r12;
+						u64_t r13;
+						u64_t r14;
+						u64_t r15;
+						u64_t rsp;
+						u64_t rip;
+					};
+				};
+
+				static const unsigned n = sizeof(arr) / sizeof(arr[0]);
+
+				TContextRegisters()
+				{
+					for(unsigned i = 0; i < n; i++)
+						this->arr[i] = 0;
+				}
+
+				TContextRegisters(void* p_stack, usys_t sz_stack, void (*f_boot)())
+				{
+					for(unsigned i = 0; i < n - 2; i++)
+						this->arr[i] = 0;
+
+					this->rsp = (u64_t)p_stack + sz_stack;
+					this->rip = (u64_t)f_boot;
+				}
+			};
+		#else
+			#error "unsupported CPU architecture"
+		#endif
+
+
+// 		namespace task_v2
+// 		{
+// 			typedef int pid_t;
+//
+// 			class TThread
+// 			{
+// 				protected:
+// 					pid_t pid;
+// 					pid_t tid;
+//
+// 				public:
+// 					CL3PUBF pid_t ID() const CL3_GETTER = 0;
+// 					CL3PUBF TProcess Process() const CL3_GETTER = 0;
+//
+// 					CL3PUBF TString Name() const = 0;
+//
+// 					CL3PUBF void Shutdown() = 0;
+// 					CL3PUBF void Kill() = 0;
+// 					CL3PUBF bool IsAlive() const = 0;
+//
+// 					CL3PUBF IWaitable& OnTerminate() const = 0;
+//
+// 					CL3PUBF static TThread Self();
+// 			};
+//
+// 			class IThread : public TThread
+// 			{
+// 				using namespace io::text::string;
+// 				private:
+//
+//
+// 				protected:
+// 					virtual void Main() = 0;
+// 			};
+//
+// 			class TProcess
+// 			{
+// 				protected:
+// 					pid_t pid;
+//
+// 				public:
+// 					using namespace io::text::string;
+// 					using namespace io::collection::list;
+// 					using namespace io::collection::map;
+// 					using namespace synchronization;
+//
+// 					struct TOpenFile
+// 					{
+// 						pid_t pid;
+// 						fd_t fd;
+//
+// 						TString filename; // WARNING: this could be outdated or plain out invalid, maybe even dangerous to use
+//
+// 						CL3PUBF TFile Open() const;	//	this will always give you exactly the same file as the target process uses
+// 					};
+//
+// 					CL3PUBF pid_t ID() const CL3_GETTER = 0;
+// 					CL3PUBF TProcess Parent() const = 0;
+// 					CL3PUBF bool IsRootProcess() const CL3_GETTER = 0;
+// 					CL3PUBF TList<TProcess> Childs() const = 0;
+// 					CL3PUBF TList<TThread> Threads() const = 0;
+//
+// 					CL3PUBF TString Name() const = 0;
+// 					CL3PUBF TString ExecutableFile() const CL3_GETTER = 0;
+// 					CL3PUBF TList<TString> Arguments() const CL3_GETTER = 0;
+// 					CL3PUBF TStdMap<TString, TString> Environment() const CL3_GETTER = 0;
+// 					CL3PUBF TList<const TOpenFile> OpenFiles() const CL3_GETTER = 0;
+// 					CL3PUBF TTime StartTime() const CL3_GETTER = 0;
+//
+// 					CL3PUBF void Shutdown() = 0;
+// 					CL3PUBF void Kill() = 0;
+// 					CL3PUBF bool IsAlive() const = 0;
+//
+// 					CL3PUBF IWaitable& OnTerminate() const = 0;
+//
+// 					CL3PUBF static TProcess Self();
+//
+// 					CL3PUBF CLASS TProcess(const TProcess&);
+// 					CL3PUBF CLASS TProcess(TProcess&&);
+// 					CL3PUBF CLASS TProcess(pid_t);
+// 					CL3PUBF CLASS ~TProcess();
+// 			};
+//
+// 			class TChildProcess : TProcess
+// 			{
+// 				public:
+//
+// 			};
+// 		}
+
 		namespace task
 		{
 			typedef int pid_t;
@@ -83,14 +223,14 @@ namespace cl3
 
 				private:
 					usys_t sz_stack;
-					memory::TUniquePtr<byte_t> p_stack;
+					memory::TUniquePtr<byte_t,memory::UPTR_ALLOC> p_stack;
 					memory::TUniquePtr<const error::TException> e;
 
 					TLocalThread* volatile thread;
 					IFiber* volatile caller;
 					volatile EState state;
 
-					fiberdata_t context;
+					TContextRegisters registers;
 
 					int valgrind_stack_id;
 
@@ -112,12 +252,16 @@ namespace cl3
 
 			};
 
+
 			/************************************************************************************/
+
+			class CL3PUBT TProcess;
 
 			// one random process in the system we have access to
 			class CL3PUBT IProcess
 			{
 				protected:
+					mutable time::TTime ts_start;
 					mutable system::memory::TUniquePtr<io::collection::list::TList<const io::text::string::TString>> args;
 					mutable system::memory::TUniquePtr<io::collection::map::TStdMap<const io::text::string::TString, const io::text::string::TString>> env;
 
@@ -133,10 +277,27 @@ namespace cl3
 
 					CL3PUBF void Shutdown();	//	request shutdown (SIGTERM on POSIX)
 					CL3PUBF void Kill();		//	hard kill process (SIGKILL on POSIX)
-					CL3PUBF synchronization::IWaitable& OnTerminate();
 
+					struct TOpenFile
+					{
+						pid_t pid;
+						fd_t fd;
+
+						io::text::string::TString filename; // WARNING: this could be outdated or plain out invalid, maybe even dangerous to use
+
+						inline bool operator==(const TOpenFile& rhs) const { return this->pid == rhs.pid && this->fd == rhs.fd; }
+						CL3PUBF io::file::TFile Open() const;	//	this will always give you exactly the same file as the target process uses
+					};
+
+					CL3PUBF TProcess Parent() const;
+					CL3PUBF bool IsRootProcess() const CL3_GETTER;
+// 					CL3PUBF io::collection::list::TList<TProcess> Childs() const;
+// 					CL3PUBF io::collection::list::TList<TThread> Threads() const;
+					CL3PUBF io::collection::list::TList<const TOpenFile> OpenFiles() const CL3_GETTER;
+					CL3PUBF time::TTime StartTime() const CL3_GETTER;
 					CL3PUBF bool IsAlive() const;
 
+					CL3PUBF IProcess();
 					CL3PUBF virtual ~IProcess();
 			};
 
@@ -148,6 +309,7 @@ namespace cl3
 				public:
 					inline pid_t ID() const final override CL3_GETTER { return this->pid; }
 					CLASS explicit TProcess(pid_t pid);
+					CLASS TProcess(const TProcess& other) : pid(other.pid) {}
 			};
 
 			class CL3PUBT TSelfProcess : public IProcess
@@ -155,6 +317,8 @@ namespace cl3
 				private:
 					CLASS TSelfProcess(const TSelfProcess&) = delete;
 					CLASS TSelfProcess();
+
+					io::stream::fd::TFDStream fd_signal;
 
 				protected:
 					io::collection::list::TList<IThread*> threads;
@@ -205,91 +369,11 @@ namespace cl3
 					CL3PUBF CLASS ~TChildProcess();
 			};
 
-			/************************************************************************************/
-
-			struct IThread
+			struct TLocalThread
 			{
+				CL3PUBF static TLocalThread* Self();
+
 				CL3PUBF static void Sleep(time::TTime time, time::EClock clock = time::EClock::MONOTONIC);
-				virtual pid_t ID() const CL3_GETTER = 0;
-				virtual io::collection::list::TList<TCPU* const>& Affinity() = 0;
-				virtual IProcess* Process() const CL3_GETTER = 0;
-				virtual void Suspend() = 0;
-				virtual void Resume() = 0;
-				virtual void Kill() = 0;
-// 				virtual io::text::string::TString Name() const = 0;
-// 				virtual void Name(io::text::string::TString) = 0;
-			};
-
-			class TForeignThread : public IThread
-			{
-				private:
-					CLASS TForeignThread(const TForeignThread&) = delete;
-
-				protected:
-					IProcess* process;
-					io::collection::list::TList<TCPU* const> affinity;
-					pid_t id;
-
-				public:
-					CL3PUBF pid_t ID() const final override CL3_GETTER { return this->id; }
-					CL3PUBF io::collection::list::TList<TCPU* const>& Affinity() final override { return this->affinity; }
-					CL3PUBF IProcess* Process() const  final override CL3_GETTER { return this->process; }
-					CL3PUBF void Suspend() final override;
-					CL3PUBF void Resume() final override;
-					CL3PUBF void Kill() final override;
-			};
-
-			class TLocalThread : public IThread
-			{
-				public:
-					struct TEventData {};
-
-				private:
-					CLASS TLocalThread(const TLocalThread&) = delete;
-
-				protected:
-					CLASS TLocalThread();
-
-					io::collection::list::TList<TCPU* const> affinity;
-					#if (CL3_OS == CL3_OS_POSIX)
-						io::stream::fd::TFDStream fds_signal;
-						pthread_t pth;
-					#elif (CL3_OS == CL3_OS_WINDOWS)
-						HANDLE hth;
-					#else
-						#error
-					#endif
-					pid_t id;
-
-// 					event::TEvent<TLocalThread, TEventData> on_shutdown;
-
-				public:
-// 					CL3PUBF const event::TEvent<TLocalThread, TEventData>& OnShutdown() { return this->on_shutdown; }
-					CL3PUBF pid_t ID() const final override CL3_GETTER { return this->id; }
-					CL3PUBF io::collection::list::TList<TCPU* const>& Affinity() final override { return this->affinity; }
-					CL3PUBF TSelfProcess* Process() const final override CL3_GETTER { return TSelfProcess::Self(); }
-					CL3PUBF void Suspend() final override;
-					CL3PUBF void Resume() final override;
-					CL3PUBF void Kill() final override;
-					CL3PUBF void Shutdown();
-					CL3PUBF void Start();
-					CL3PUBF static TLocalThread* Self();
-					CL3PUBF CLASS explicit TLocalThread(IFiber*, bool autostart = true);
-					CL3PUBF CLASS ~TLocalThread();
-			};
-
-			/************************************************************************************/
-
-			class TCPU
-			{
-				public:
-					CL3PUBF TNUMANode* NumaNode() const CL3_GETTER;
-			};
-
-			class TNUMANode
-			{
-				public:
-					CL3PUBF const io::collection::list::TList<TCPU* const>& CPUs() const CL3_GETTER;
 			};
 
 			/************************************************************************************/

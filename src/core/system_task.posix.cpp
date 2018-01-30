@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3
-#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#ifndef INSIDE_CL3CORE
+#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
 #endif
 
 #include "system_os.hpp"
@@ -69,7 +69,8 @@ namespace	cl3
 
 			/**************************************************************************************/
 
-			pid_t gettid();
+// 			pid_t gettid();
+			void SwapRegisters(TContextRegisters* current, TContextRegisters* target) asm ("__SwapRegisters__");
 
 			static CL3_THREAD TLocalThread* th_self = NULL;
 
@@ -78,12 +79,6 @@ namespace	cl3
 				CLASS TMainThread()
 				{
 					th_self = this;
-				}
-
-				CLASS ~TMainThread()
-				{
-// 					TEventData ed;
-// 					this->on_shutdown.Raise(*this, ed);
 				}
 			};
 
@@ -103,12 +98,6 @@ namespace	cl3
 			};
 
 			static TMainFiber fib_main;
-
-			/**************************************************************************************/
-
-			CLASS TSelfProcess::TSelfProcess()
-			{
-			}
 
 			/**************************************************************************************/
 
@@ -202,29 +191,18 @@ namespace	cl3
 				current_fiber = this;
 
 				// during this call "this" and "current_fiber" will change
-				CL3_CLASS_SYSERR(swapcontext(&this->caller->context, &this->context));
+				SwapRegisters(&this->caller->registers, &this->registers);
 
 				current_fiber->AfterSwitchTo();
 			}
 
 			void IFiber::ResetContext()
 			{
-// 				fprintf(stderr, "TLocalThread::Self() = %p running fiber %p resetting context of fiber %p\n", TLocalThread::Self(), IFiber::Self(), this);
-
 				this->state = IFiber::EState::SUSPENDED;
-
-// 				fprintf(stderr, "%s\n", __PRETTY_FUNCTION__);
-				memset(&this->context, 0, sizeof(this->context));
-
-				getcontext(&this->context);
-
-				this->context.uc_stack.ss_size = this->sz_stack;
-				this->context.uc_stack.ss_sp = this->p_stack.Object();
-
-				makecontext(&this->context, &IFiber::Boot, 0);
+				this->registers = TContextRegisters(this->p_stack.Object(), this->sz_stack, &IFiber::Boot);
 			}
 
-			CLASS IFiber::IFiber(usys_t sz_stack) : sz_stack(this == &fib_main ? 0 : sz_stack), p_stack(MakeUniquePtr((byte_t*)(this == &fib_main ? NULL : memory::Alloc(sz_stack, NULL)))), thread(this == &fib_main ? &th_main : NULL), caller(NULL)
+			CLASS IFiber::IFiber(usys_t sz_stack) : sz_stack(this == &fib_main ? 0 : sz_stack), p_stack(MakeUniquePtr<UPTR_ALLOC,byte_t>((byte_t*)(this == &fib_main ? NULL : memory::Alloc(sz_stack, NULL)))), thread(this == &fib_main ? &th_main : NULL), caller(NULL)
 			{
 				if(this != &fib_main)
 				{
@@ -245,7 +223,7 @@ namespace	cl3
 
 			/**************************************************************************************/
 
-			void	IThread::Sleep	(TTime time, EClock clock)
+			void	TLocalThread::Sleep	(TTime time, EClock clock)
 			{
 				const struct timespec ts = time;
 				switch(clock)
@@ -268,53 +246,13 @@ namespace	cl3
 				}
 			}
 
-			void TLocalThread::Suspend()
-			{
-				CL3_CLASS_PTHREAD_ERROR(pthread_kill(this->pth, SIGSTOP));
-			}
-
-			void TLocalThread::Resume()
-			{
-				CL3_CLASS_PTHREAD_ERROR(pthread_kill(this->pth, SIGCONT));
-			}
-
-			void TLocalThread::Kill()
-			{
-				CL3_CLASS_PTHREAD_ERROR(pthread_kill(this->pth, SIGKILL));
-			}
-
-			void TLocalThread::Shutdown()
-			{
-				CL3_CLASS_PTHREAD_ERROR(pthread_kill(this->pth, SIGTERM));
-			}
-
-			void TLocalThread::Start()
-			{
-				CL3_NOT_IMPLEMENTED;
-			}
-
 			TLocalThread* TLocalThread::Self()
 			{
 				CL3_NONCLASS_LOGIC_ERROR(th_self == NULL);
 				return th_self;
 			}
 
-			CLASS TLocalThread::TLocalThread(IFiber* fiber, bool autostart)
-			{
-				CL3_CLASS_ERROR(fiber == NULL, TException, "fiber cannot be NULL");
-				CL3_NOT_IMPLEMENTED;
-				if(autostart)
-					this->Start();
-			}
-
-			CLASS TLocalThread::~TLocalThread()
-			{
-				/*
-				 * 1) Acquire lock
-				 * 2) if running; Stop()
-				 */
-// 				CL3_NOT_IMPLEMENTED;
-			}
+			/**************************************************************************************/
 
 			pid_t TSelfProcess::ID() const
 			{
@@ -332,6 +270,14 @@ namespace	cl3
 				}
 				else
 					return true;
+			}
+
+			CLASS IProcess::IProcess() : ts_start(-1,-1)
+			{
+			}
+
+			CLASS IProcess::~IProcess()
+			{
 			}
 
 			/**************************************************************************************/
@@ -402,17 +348,19 @@ namespace	cl3
 					fd[0] = -1;
 					fd[1] = -1;
 					CL3_NONCLASS_SYSERR(::pipe(this->fd));
-					try
-					{
-						CL3_CLASS_LOGIC_ERROR(fd[0] == STDIN_FILENO || fd[0] == STDOUT_FILENO || fd[0] == STDERR_FILENO);
-						CL3_CLASS_LOGIC_ERROR(fd[1] == STDIN_FILENO || fd[1] == STDOUT_FILENO || fd[1] == STDERR_FILENO);
-					}
-					catch(...)
-					{
-						::close(fd[0]);
-						::close(fd[1]);
-						throw;
-					}
+
+// 					try
+// 					{
+// 						CL3_CLASS_LOGIC_ERROR(fd[0] == STDIN_FILENO || fd[0] == STDOUT_FILENO || fd[0] == STDERR_FILENO);
+// 						CL3_CLASS_LOGIC_ERROR(fd[1] == STDIN_FILENO || fd[1] == STDOUT_FILENO || fd[1] == STDERR_FILENO);
+// 						// FIXME: WTF? WHY?
+// 					}
+// 					catch(...)
+// 					{
+// 						::close(fd[0]);
+// 						::close(fd[1]);
+// 						throw;
+// 					}
 				}
 
 				CLASS ~TPipe()
@@ -436,7 +384,8 @@ namespace	cl3
 												io::stream::IOut<byte_t>* stderr,
 												TAsyncEventProcessor* aep) : IProcess(), is_stdin(stdin), os_stdout(stdout), os_stderr(stderr)
 			{
-				TUniquePtr<TPipe> pipe_stdin = MakeUniquePtr(stdin != NULL && stdin != &TSelfProcess::StdIn() ? new TPipe() : NULL);
+				//	FIXME: if input stream can be casted to FDStream, then the actual FD should be used instead of a Pipe
+				TUniquePtr<TPipe> pipe_stdin  = MakeUniquePtr(stdin  != NULL && stdin  != &TSelfProcess::StdIn()  ? new TPipe() : NULL);
 				TUniquePtr<TPipe> pipe_stdout = MakeUniquePtr(stdout != NULL && stdout != &TSelfProcess::StdOut() ? new TPipe() : NULL);
 				TUniquePtr<TPipe> pipe_stderr = MakeUniquePtr(stderr != NULL && stderr != &TSelfProcess::StdErr() ? new TPipe() : NULL);
 

@@ -1,3 +1,0 @@
-/infrabox/output/
-
-/infrabox/inputs/<name-cc>

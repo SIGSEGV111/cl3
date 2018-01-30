@@ -41,7 +41,7 @@ namespace
 			rnd.Read(a, n);
 			rnd.Read(b, n);
 			if(memcmp(a, b, n) == 0)
-				n_fail++;
+				n_fail++; // LCOV_EXCL_LINE
 		}
 
 		EXPECT_EQ(0U, n_fail);
@@ -72,7 +72,7 @@ namespace
 			{
 				const double f = cmwc.GenerateF64(true);
 				if(f < 0 || f > 1)
-					n_fail++;
+					n_fail++; // LCOV_EXCL_LINE
 			}
 			EXPECT_EQ(0U, n_fail);
 		}
@@ -86,7 +86,7 @@ namespace
 			{
 				const double f = cmwc.GenerateF64(false);
 				if(f < -1 || f > 1)
-					n_fail++;
+					n_fail++; // LCOV_EXCL_LINE
 				if(f < 0)
 					n_neg++;
 				if(f > 0)
@@ -108,7 +108,7 @@ namespace
 			const double a = cmwc.GenerateF64(false);
 			const double b = cmwc.GenerateF64(false);
 			if(a == b)
-				n_fail++;
+				n_fail++; // LCOV_EXCL_LINE
 		}
 
 		EXPECT_EQ(0U, n_fail);
@@ -124,8 +124,8 @@ namespace
 			const double f = cmwc.Normal();
 			if(f < -1 || f > 1)
 			{
-				printf("%f\n", f);
-				n_fail++;
+				printf("%f\n", f); // LCOV_EXCL_LINE
+				n_fail++; // LCOV_EXCL_LINE
 			}
 		}
 
@@ -142,8 +142,8 @@ namespace
 			const double f = cmwc.PositiveNormal();
 			if(f < 0 || f > 1)
 			{
-				printf("%f\n", f);
-				n_fail++;
+				printf("%f\n", f); // LCOV_EXCL_LINE
+				n_fail++; // LCOV_EXCL_LINE
 			}
 		}
 
@@ -160,7 +160,7 @@ namespace
 			const double a = cmwc.Normal();
 			const double b = cmwc.Normal();
 			if(a == b)
-				n_fail++;
+				n_fail++; // LCOV_EXCL_LINE
 		}
 
 		EXPECT_EQ(0U, n_fail);
@@ -173,7 +173,7 @@ namespace
 		static const usys_t n = 16;
 		u32_t hist[n] = {};
 
-		for(u32_t i = 0; i < 0x20000; i++)
+		for(u32_t i = 0; i < 0x40000; i++)
 		{
 			const usys_t index = cmwc.NormalIndex(n-1);
 			if(index >= n)
@@ -187,11 +187,11 @@ namespace
 		unsigned n_fail = 0;
 		for(usys_t i = 1; i < n; i++)
 			if(hist[i-1] <= hist[i])
-				n_fail++;
+				n_fail++; // LCOV_EXCL_LINE
 		EXPECT_EQ(0U, n_fail);
 
 		if(n_fail)
 			for(usys_t i = 1; i < n; i++)
-				Terminal()<<"hist["<<i<<"] = "<<hist[i]<<'\n';
+				Terminal()<<"hist["<<i<<"] = "<<hist[i]<<'\n'; // LCOV_EXCL_LINE
 	}
 }

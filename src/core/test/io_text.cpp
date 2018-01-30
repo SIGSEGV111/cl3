@@ -24,7 +24,6 @@
 #include <cl3/core/io_collection_list.hpp>
 #include <cl3/core/io_collection_array.hpp>
 #include <cl3/core/io_text.hpp>
-#include <cl3/core/io_text_parser.hpp>
 #include <cl3/core/io_text_string.hpp>
 #include <cl3/core/io_text_encoding.hpp>
 #include <cl3/core/io_text_encoding_utf8.hpp>
@@ -40,14 +39,12 @@ namespace
 	using namespace cl3::system::types;
 	using namespace cl3::system::memory;
 	using namespace cl3::io::text;
-	using namespace cl3::io::text::parser;
 	using namespace cl3::io::text::string;
 	using namespace cl3::io::text::encoding;
 	using namespace cl3::io::text::encoding::utf8;
 	using namespace cl3::io::collection::list;
 	using namespace cl3::io::collection;
 	using namespace cl3::system::types::typeinfo;
-// 	using namespace cl3::io::text::parser;
 
 	TEST(io_text_encoding_utf8, Codec)
 	{
@@ -254,7 +251,13 @@ namespace
 		TString s = "hello world foo";
 		EXPECT_TRUE(s.Find("hello") == 0);
 		EXPECT_TRUE(s.Find("world") == 6);
+		EXPECT_TRUE(s.Find("world", 2) == 6);
+		EXPECT_TRUE(s.Find("world", 6) == 6);
+		EXPECT_TRUE(s.Find("world", 7) == (usys_t)-1);
 		EXPECT_TRUE(s.Find("foo") == 12);
+		EXPECT_TRUE(s.Find("foo", 12) == 12);
+		EXPECT_TRUE(s.Find("foo", 11) == 12);
+		EXPECT_TRUE(s.Find("foo", 13) == (usys_t)-1);
 		EXPECT_TRUE(s.Find("hello world foo") == 0);
 		EXPECT_TRUE(s.Find("world foo") == 6);
 		EXPECT_TRUE(s.Find("hello foo") == (usys_t)-1);
@@ -266,9 +269,13 @@ namespace
 		TString s = "hello world foo";
 		EXPECT_TRUE(s.Find("hello", -1, DIRECTION_BACKWARD) == 0);
 		EXPECT_TRUE(s.Find("world", -1, DIRECTION_BACKWARD) == 6);
+		EXPECT_TRUE(s.Find("world", s.Count()-5, DIRECTION_BACKWARD) == 6);
+		EXPECT_TRUE(s.Find("world", s.Count()-6, DIRECTION_BACKWARD) == (usys_t)-1);
 		EXPECT_TRUE(s.Find("foo", -1, DIRECTION_BACKWARD) == 12);
 		EXPECT_TRUE(s.Find("hello world foo", -1, DIRECTION_BACKWARD) == 0);
 		EXPECT_TRUE(s.Find("world foo", -1, DIRECTION_BACKWARD) == 6);
+		EXPECT_TRUE(s.Find("world foo", s.Count()-1, DIRECTION_BACKWARD) == 6);
+		EXPECT_TRUE(s.Find("world foo", s.Count()-2, DIRECTION_BACKWARD) == (usys_t)-1);
 		EXPECT_TRUE(s.Find("hello foo", -1, DIRECTION_BACKWARD) == (usys_t)-1);
 		EXPECT_TRUE(s.Find("hello world foo ", -1, DIRECTION_BACKWARD) == (usys_t)-1);
 	};

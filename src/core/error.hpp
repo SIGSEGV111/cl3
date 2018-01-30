@@ -34,6 +34,11 @@ namespace	cl3
 
 	namespace	error
 	{
+		namespace diag
+		{
+			struct TBacktrace;
+		}
+
 		class	CL3PUBT	TException
 		{
 			private:
@@ -47,6 +52,7 @@ namespace	cl3
 				const char* expression;	//	the expression that triggered the exception (from ERROR(expression, excepclass, args))
 				const TException* inner;//	inner exception (can be NULL)
 				unsigned codeline;		//	sourcecode line number (from __LINE__ macro)
+				const diag::TBacktrace* backtrace;
 
 				CL3PUBF	CLASS	TException	(const char* format, ...);	//	printf-syle ctor
 				CL3PUBF	CLASS	TException	(TException&&);

@@ -118,6 +118,11 @@ namespace	cl3
 					CL3PUBF	static TTime	ConvertFrom	(EUnit unit, s64_t value);
 					CL3PUBF	static TTime	ConvertFrom	(EUnit unit, double value);
 
+					CL3PUBF	s64_t			ConvertToI	(s64_t  tps) const;
+					CL3PUBF	double			ConvertToF	(double tps) const;
+					CL3PUBF	static TTime	ConvertFrom	(s64_t  tps, s64_t value);
+					CL3PUBF	static TTime	ConvertFrom	(double tps, double value);
+
 					CL3PUBF	static	TTime	Now			(EClock clock);
 					CL3PUBF	s64_t			UnixTimeI	() const;
 					CL3PUBF	double			UnixTimeF	() const;
@@ -126,15 +131,15 @@ namespace	cl3
 					CL3PUBF	operator timespec			() const;
 					CL3PUBF	operator timeval			() const;
 
-					inline	CLASS	TTime	() : sec(0), asec(0) {}
+					inline	CLASS	TTime	() : sec(0), asec(0) {} // LCOV_EXCL_LINE
 					CL3PUBF	CLASS	TTime	(double seconds);
 					CL3PUBF	CLASS	TTime	(s64_t seconds, s64_t attoseconds);
 					CL3PUBF	CLASS	TTime	(struct timespec ts);
 					CL3PUBF	CLASS	TTime	(struct timeval tv);
-					CL3PUBF	CLASS	TTime	(io::serialization::IDeserializer&);
+// 					CL3PUBF	CLASS	TTime	(io::serialization::IDeserializer&);
 
-					void Serialize(io::serialization::ISerializer&) const;
-					void Deserialize(io::serialization::IDeserializer&);
+// 					void Serialize(io::serialization::ISerializer&) const;
+// 					void Deserialize(io::serialization::IDeserializer&);
 			};
 		}
 	}

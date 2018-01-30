@@ -331,7 +331,7 @@ namespace	cl3
 				#undef SendMessage
 			#endif
 
-			#ifdef	INSIDE_CL3
+			#ifdef	INSIDE_CL3CORE
 				#define	CL3PUBF CL3_CXX_EXPORT_FUNC
 				#define	CL3PUBT CL3_CXX_EXPORT_TYPE
 				#define	CL3PUBV extern CL3_CXX_EXPORT_FUNC
@@ -349,6 +349,12 @@ namespace	cl3
 			#define	CL3_SETTER
 
 			CL3PUBF void DebugBreak();
+
+			#ifdef CL3_DEBUG
+				#define CL3_IFDEBUG(expr) expr
+			#else
+				#define CL3_IFDEBUG(expr)
+			#endif
 		}
 	}
 }

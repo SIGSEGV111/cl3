@@ -16,13 +16,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3
-#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#ifndef INSIDE_CL3CORE
+#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
 #endif
 
 #include "io_text.hpp"
 #include "io_text_string.hpp"
-#include "io_text_parser.hpp"
 #include "io_text_encoding.hpp"
 #include "error.hpp"
 #include "io_collection_array.hpp"
@@ -46,16 +45,6 @@ namespace	cl3
 			using namespace error;
 
 			/******************************** Constants and Variables ******************************************************/
-
-			static const TUTF32 ARR_WHITESPACE_DEFAULT[] = { 0x0020U, 0x0009U, 0x000AU, 0x000CU, 0x000DU, 0x000BU };
-			static const collection::array::TArray<const TUTF32> COLLECTION_WHITESPACE_DEFAULT(ARR_WHITESPACE_DEFAULT, sizeof(ARR_WHITESPACE_DEFAULT) / sizeof(TUTF32), false);
-			const collection::IStaticCollection<const TUTF32>* whitespace = &COLLECTION_WHITESPACE_DEFAULT;
-
-			const collection::IStaticCollection<const TUTF32>* eos_markers = &COLLECTION_WHITESPACE_DEFAULT;
-
-			static const TUTF32 ARR_NEWLINE_DEFAULT[] = { 0x000AU };
-			static const collection::array::TArray<const TUTF32> COLLECTION_NEWLINE_DEFAULT(ARR_NEWLINE_DEFAULT, sizeof(ARR_NEWLINE_DEFAULT) / sizeof(TUTF32), false);
-			const collection::IStaticCollection<const TUTF32>* newline_markers = &COLLECTION_NEWLINE_DEFAULT;
 
 			static const TUTF32 ARR_OCTAL_DIGITS[] = { '0', '1', '2', '3', '4', '5', '6', '7' };
 			static const collection::array::TArray<const TUTF32> COLLECTION_OCTAL_DIGITS(ARR_OCTAL_DIGITS, sizeof(ARR_OCTAL_DIGITS) / sizeof(TUTF32), false);
@@ -102,10 +91,6 @@ namespace	cl3
 				}
 			}
 
-			CLASS	TTextFormat::TTextFormat	() :	eos_markers(text::eos_markers), /*max_string_length((usys_t)-1),*/ discard_eos_marker(true)
-			{
-			}
-
 			/******************************** TNumberFormat ******************************************************/
 
 			CLASS	TNumberFormat::TNumberFormat	() : prefix_sign(NULL), prefix_digits(NULL), prefix_decimal(NULL), postfix_digits(NULL), postfix_sign(NULL), postfix_decimal(NULL), digits(&COLLECTION_DECIMAL_DIGITS), positive_mark(TUTF32::TERMINATOR), negative_mark('-'), zero_mark(TUTF32::TERMINATOR), decimal_mark('.'), grouping_mark(TUTF32::TERMINATOR), integer_padding(TUTF32::TERMINATOR), fractional_padding(TUTF32::TERMINATOR), exponential_mark('e'), positive_mark_placement(TNumberFormat::SYMBOL_PLACEMENT_BEFORE), negative_mark_placement(TNumberFormat::SYMBOL_PLACEMENT_BEFORE), zero_mark_placement(TNumberFormat::SYMBOL_PLACEMENT_BEFORE), grouping_length(0), integer_length_min(0), fractional_length_min(0), fractional_length_max((u16_t)-1)
@@ -125,14 +110,40 @@ namespace	cl3
 
 			/******************************** TTextIOCommon ******************************************************/
 
-			CLASS	TTextIOCommon::TTextIOCommon	() : text_format(NULL), number_format(NULL) {}
+			CLASS	TTextIOCommon::TTextIOCommon	() : number_format(NULL) {}
 
 			/******************************** ITextReader ******************************************************/
 
 			template<bool b_signed, class T>
-			static	void	ParseInteger	(IIn<TUTF32>&, const TNumberFormat*, T&)
+			static	void	ParseInteger	(IIn<TUTF32>& s, const TNumberFormat* nf, T& v)
 			{
-				CL3_NOT_IMPLEMENTED;
+				// FIXME make use of TNumberFormat
+
+				v = (T)0;
+				TUTF32 chr;
+
+				for(;;)
+				{
+					s.Read(&chr, 1);
+					if(chr == ' ')
+						continue;
+					else
+						break;
+				}
+
+				CL3_NONCLASS_ERROR(!(chr >= '0' && chr <= '9'), TException, "unable to parse integer");
+
+				do
+				{
+					if(chr >= '0' && chr <= '9')
+					{
+						v *= 10;
+						v += (chr.code - '0');
+					}
+					else
+						break;
+				}
+				while(s.Read(&chr, 1, 0) == 1);
 			}
 
 			template<class T>
@@ -305,7 +316,7 @@ namespace	cl3
 				PrintNumber(os, negative, num, 1, f);
 			}
 
-			static	void	PrintNumber	(IOut<TUTF32>& os, const TNumberFormat& f, f64_t num)
+			static	void	PrintNumber	(IOut<TUTF32>& os, const TNumberFormat&, f64_t num)
 			{
 // 				struct B
 // 				{

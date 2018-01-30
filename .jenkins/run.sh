@@ -1,11 +1,6 @@
 #!/bin/bash
 
-set -x
-set -e
-set -o pipefail
+P="$(dirname "$(readlink -f "$0")")"
+cd "$P/.."
 
-export -p
-rm -vrf gen tmp
-
-./build-debug.sh 2>&1 </dev/null
-./build-release.sh 2>&1 </dev/null
+exec ./compile.sh

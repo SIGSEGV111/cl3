@@ -142,7 +142,7 @@ namespace
 				}
 			}
 
-			TEST(system_time_TTime, ConvertTo_sint64)
+			TEST(system_time_TTime, UnixTimeI)
 			{
 				{
 					const TTime t1(8589934592LL, 654743500000000LL);
@@ -158,7 +158,7 @@ namespace
 				}
 			}
 
-			TEST(system_time_TTime, ConvertTo_float64)
+			TEST(system_time_TTime, UnixTimeF)
 			{
 				{
 					const TTime t1(1024LL, 976562500000000LL);
@@ -248,6 +248,16 @@ namespace
 					const TTime t2(9LL, 223372036854775807ULL);
 					EXPECT_TRUE(t1 == t2);
 				}
+
+				{
+					const TTime t1(1LL,-2000000000000000000ULL);
+					EXPECT_TRUE(t1 == TTime(-1,0));
+				}
+
+				{
+					const TTime t1(-1LL,500000000000000000LL);
+					EXPECT_TRUE(t1 == TTime(-0.5));
+				}
 			}
 
 			TEST(system_time_TTime, BasicMath)
@@ -320,6 +330,16 @@ namespace
 					EXPECT_TRUE(t1.ConvertToI(EUnit::HOURS)   == -25);
 					EXPECT_TRUE(t1.ConvertToI(EUnit::DAYS)    == -1);
 				}
+				{
+					const TTime t1(5.25);
+					EXPECT_TRUE(t1.ConvertToI(25) == (s64_t)(5.25*25));
+					EXPECT_TRUE(t1.ConvertToI(100ULL) == (s64_t)(5.25*100));
+				}
+				{
+					const TTime t1(-5.25);
+					EXPECT_TRUE(t1.ConvertToI(25) == (s64_t)(-5.25*25));
+					EXPECT_TRUE(t1.ConvertToI(100ULL) == (s64_t)(-5.25*100));
+				}
 			}
 
 			TEST(system_time_TTime, ConvertToF)
@@ -359,6 +379,16 @@ namespace
 					EXPECT_TRUE(t1.ConvertToF(EUnit::MINUTES) == -1554.2875);
 					EXPECT_TRUE(t1.ConvertToF(EUnit::HOURS)   == -25.904791666666666666666666666666666667);
 					EXPECT_TRUE(t1.ConvertToF(EUnit::DAYS)    == -1.0793663194444444444444444444444444444);
+				}
+				{
+					const TTime t1(5.25);
+					EXPECT_TRUE(t1.ConvertToF(25) == (5.25*25));
+					EXPECT_TRUE(t1.ConvertToF(100ULL) == (5.25*100));
+				}
+				{
+					const TTime t1(-5.25);
+					EXPECT_TRUE(t1.ConvertToF(25) == (-5.25*25));
+					EXPECT_TRUE(t1.ConvertToF(100ULL) == (-5.25*100));
 				}
 			}
 
@@ -404,18 +434,25 @@ namespace
 
 				EXPECT_TRUE(t1 != t7);
 				EXPECT_FALSE(t1 == t7);
+
+				EXPECT_FALSE(t1 > t2);
+				EXPECT_FALSE(t2 < t1);
+				EXPECT_FALSE(t1 >= t2);
+				EXPECT_FALSE(t2 <= t1);
 			}
 
 			TEST(system_time_TTime, ConvertFrom_Int)
 			{
 				EXPECT_TRUE(TTime::ConvertFrom(EUnit::MILLISECONDS, (s64_t)123456789)  == TTime(123456LL,789000000000000000LL));
 				EXPECT_TRUE(TTime::ConvertFrom(EUnit::SECONDS, (s64_t)123456789)  == TTime(123456789LL,0LL));
+				EXPECT_TRUE(TTime::ConvertFrom(25, (s64_t)17)  == TTime(0.68));
 			}
 
 			TEST(system_time_TTime, ConvertFrom_Float)
 			{
 				EXPECT_TRUE(TTime::ConvertFrom(EUnit::MILLISECONDS, 1000.0)  == TTime(1,0));
 				EXPECT_TRUE(TTime::ConvertFrom(EUnit::SECONDS,   123456789.500)  == TTime(123456789LL,500000000000000000LL));
+				EXPECT_TRUE(TTime::ConvertFrom(25.0, 17.0)  == TTime(0.68));
 			}
 
 			TEST(system_time_TTime, MulDiv)
@@ -436,6 +473,23 @@ namespace
 					TTime t1(10LL, 500000000000000000LL);
 					t1 *= 3.5;
 					EXPECT_TRUE(t1.Seconds() == 36 && t1.Attoseconds() == 750000000000000000LL);
+				}
+
+				{
+					TTime t1(10, 0);
+					t1 /= 2.5;
+					EXPECT_TRUE(t1 == TTime(4,0));
+				}
+
+				{
+					TTime t1(10, 0);
+					t1 /= 4;
+					EXPECT_TRUE(t1 == TTime(2.5));
+				}
+
+				{
+					TTime t1 = (TTime(1.5) * 5 + TTime(2.5)) / 4;
+					EXPECT_TRUE(t1 == TTime(2.5));
 				}
 			}
 
@@ -544,9 +598,8 @@ namespace
 				EXPECT_TRUE(td_out < td_max);
 			}
 
-			TEST(system_time_timer_TTimer, Basics)
+			static void TestTimerWait(TTimer& timer)
 			{
-				TTimer timer(EClock::MONOTONIC);
 				const TTime ts_start = TTime::Now(EClock::MONOTONIC);
 				timer.Start(TTime(0.01));
 				EXPECT_TRUE(timer.WaitFor(1));
@@ -560,6 +613,15 @@ namespace
 				EXPECT_FALSE(timer.WaitFor(0.1));
 				timer.Start(TTime(0.01));
 				EXPECT_TRUE(timer.WaitFor(1));
+			}
+
+			TEST(system_time_timer_TTimer, Basics)
+			{
+				TTimer tmr_realtime(EClock::REALTIME);
+				TTimer tmr_monotonic(EClock::MONOTONIC);
+
+				TestTimerWait(tmr_realtime);
+				TestTimerWait(tmr_monotonic);
 			}
 		}
 	}

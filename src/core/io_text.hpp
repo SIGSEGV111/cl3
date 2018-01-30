@@ -85,10 +85,6 @@ namespace	cl3
 				inline	CLASS	TUTF32	(u32_t code = 0U) throw() : code(code) {}
 			};
 
-			CL3PUBF extern const collection::IStaticCollection<const TUTF32>* whitespace;
-			CL3PUBF extern const collection::IStaticCollection<const TUTF32>* eos_markers;	//	end-of-string markers
-			CL3PUBF extern const collection::IStaticCollection<const TUTF32>* newline_markers;	//	newline markers
-
 			struct	CL3PUBT	TNumberFormat
 			{
 				enum	ESymbolPlacement
@@ -109,6 +105,7 @@ namespace	cl3
 				//	if a specific symbol is set to TUTF32::TERMINATOR, then it will not be displayed
 
 				const collection::array::IArray<const TUTF32>* digits;
+				const collection::IStaticCollection<const TUTF32>* whitespace;
 
 				TUTF32 positive_mark;	//	the charcater which indicates a positive value (usually not set)
 				TUTF32 negative_mark;	//	the charcater which indicates a negative value (usually '-')
@@ -139,18 +136,8 @@ namespace	cl3
 				CL3PUBF	CLASS	TNumberFormat	();
 			};
 
-			struct	CL3PUBT	TTextFormat
-			{
-				const collection::IStaticCollection<const TUTF32>* eos_markers;
-// 				usys_t max_string_length;
-				bool discard_eos_marker;
-
-				CL3PUBF	CLASS	TTextFormat	();
-			};
-
 			struct	CL3PUBT	TTextIOCommon
 			{
-				const TTextFormat* text_format;
 				const TNumberFormat* number_format;
 
 				CL3PUBF	CLASS	TTextIOCommon	();

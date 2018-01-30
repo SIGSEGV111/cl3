@@ -28,7 +28,7 @@ namespace cl3
 	{
 		namespace text
 		{
-			struct ITextWriter;
+			class ITextWriter;
 
 			namespace string
 			{

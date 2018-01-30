@@ -16,19 +16,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3
-#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#ifndef INSIDE_CL3CORE
+#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
 #endif
 
 #include "io_text_string.hpp"
 #include "io_text_encoding.hpp"
 
-extern "C" size_t strlen(const char* s) throw();
-extern "C" size_t strnlen(const char* s, size_t maxlen) throw();
-extern "C" size_t wcsnlen(const wchar_t* s, size_t maxlen) throw();
-extern "C" size_t wcslen(const wchar_t* s) throw();
-extern "C" int memcmp(const void* s1, const void* s2, size_t n);
-extern "C" void* memmove(void* dest, const void* src, size_t n);
+#include <string.h>
+#include <wchar.h>
 
 namespace	cl3
 {
@@ -53,6 +49,9 @@ namespace	cl3
 				}
 
 				/*****************************************************************/
+
+				static const TUTF32 ARR_WHITESPACE_DEFAULT[] = { 0x0020U, 0x0009U, 0x000AU, 0x000CU, 0x000DU, 0x000BU };
+				const io::collection::array::TArray<const TUTF32> TString::WHITESPACE_DEFAULT(ARR_WHITESPACE_DEFAULT, sizeof(ARR_WHITESPACE_DEFAULT) / sizeof(ARR_WHITESPACE_DEFAULT[0]), false);
 
 				void		TString::Prepend		(const char& item_prepend)
 				{
@@ -595,9 +594,11 @@ namespace	cl3
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(s32_t /*num*/, const TNumberFormat& /*format*/)
+				CLASS	TString::TString	(s32_t num, const TNumberFormat& nf)
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->number_format = &nf;
+					(*this) << num;
+					this->number_format = TNumberFormat::default_format;
 				}
 
 				CLASS	TString::TString	(u64_t /*num*/, const TNumberFormat& /*format*/)

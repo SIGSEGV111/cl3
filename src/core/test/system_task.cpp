@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "common.hpp"
 #include <cl3/core/system_compiler.hpp>
 #include <cl3/core/system_types.hpp>
 #include <cl3/core/system_types_typeinfo.hpp>
@@ -31,6 +32,7 @@
 #include <cl3/core/system_task_async.hpp>
 #include <gtest/gtest.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "common.hpp"
 //#include <valgrind/valgrind.h>
 
@@ -51,6 +53,8 @@ namespace
 	using namespace cl3::io::collection::array;
 	using namespace cl3::io::collection::map;
 	using namespace cl3::io::collection;
+	using namespace cl3::io::stream::fd;
+	using namespace cl3::io::file;
 	using namespace cl3::error;
 
 	TEST(system_task_CreateProcess, Invocation)
@@ -85,6 +89,80 @@ namespace
 		EXPECT_TRUE(output.Contains("declare -x foo=\"bar\"\n"));
 	}
 
+	TEST(system_task_TProcess, IsAlive)
+	{
+		TProcess proc_init(1);
+		TProcess proc_myself(TSelfProcess::Self()->ID());
+		TProcess proc_nope(23009781);
+
+		EXPECT_TRUE(proc_myself.IsAlive());
+		EXPECT_FALSE(proc_nope.IsAlive());
+		EXPECT_THROW(proc_init.IsAlive(), TSyscallException);
+	}
+
+	TEST(system_task_TProcess, Parent)
+	{
+		auto& myself = *TSelfProcess::Self();
+		TProcess my_parent = myself.Parent();
+		EXPECT_EQ(getppid(), my_parent.ID());
+	}
+
+	TEST(system_task_TProcess, Executable)
+	{
+		const auto exe = TSelfProcess::Self()->Executable();
+		EXPECT_TRUE(exe.Right(15) == "/cl3-core-tests");
+	}
+
+	TEST(system_task_TProcess, StartTime)
+	{
+		const TTime ts_my_start = TSelfProcess::Self()->StartTime();
+
+		TPipe p_in;
+		TPipe p_cc;
+		TList<TString> args;
+		TChildProcess cp_cat_1("/bin/cat", args, TSelfProcess::Self()->Environment(), &p_in, &p_cc);
+		TLocalThread::Sleep(TTime::ConvertFrom(EUnit::MILLISECONDS, (s64_t)1));
+		TChildProcess cp_cat_2("/bin/cat", args, TSelfProcess::Self()->Environment(), &p_cc);
+
+		EXPECT_TRUE(cp_cat_1.StartTime() > ts_my_start);
+		EXPECT_TRUE(cp_cat_2.StartTime() > cp_cat_1.StartTime());
+	}
+
+	TEST(system_task_TProcess, IsRootProcess)
+	{
+		EXPECT_FALSE(TSelfProcess::Self()->IsRootProcess());
+		EXPECT_TRUE(TProcess(1).IsRootProcess());
+
+		TPipe p_in;
+		TList<TString> args;
+		TChildProcess cp_cat("/bin/cat", args, TSelfProcess::Self()->Environment(), &p_in, NULL);
+
+		EXPECT_FALSE(cp_cat.IsRootProcess());
+	}
+
+	TEST(system_task_TProcess, OpenFiles)
+	{
+		auto& self = *TSelfProcess::Self();
+
+		auto ls_base = self.OpenFiles();
+
+		TDirectoryBrowser browser = cl3::unittest_support::TestDataDirectory();
+		TFile f = browser.OpenFile("folder_with_mixed_files/empty_file");
+
+		auto ls_two_more = self.OpenFiles();
+
+		EXPECT_TRUE(ls_two_more.Count() >= ls_base.Count() + 2);
+
+		bool ok = false;
+		for(usys_t i = 0; i < ls_two_more.Count(); i++)
+			if(ls_two_more[i].filename.Contains("/folder_with_mixed_files/empty_file"))
+			{
+				ok = true;
+				break;
+			}
+		EXPECT_TRUE(ok);
+	}
+
 	TEST(system_task_CreateProcess, Pipe)
 	{
 		TList<TString> args;
@@ -108,10 +186,10 @@ namespace
 	{
 		//	test if the commandline arguments to the process running these tests are dummy1 dummy2 dummy3
 		auto& args = TSelfProcess::Self()->Arguments();
-		EXPECT_TRUE(args[1] == "--gtest_output=xml:gtest.native.xml" || args[1] == "--gtest_output=xml:gtest.valgrind.xml");
-		EXPECT_EQ(TString("dummy1"), args[2]);
-		EXPECT_EQ(TString("dummy2"), args[3]);
-		EXPECT_EQ(TString("dummy3"), args[4]);
+		EXPECT_TRUE(args[2] == "--gtest_output=xml:gtest.xml");
+		EXPECT_EQ(TString("dummy1"), args[3]);
+		EXPECT_EQ(TString("dummy2"), args[4]);
+		EXPECT_EQ(TString("dummy3"), args[5]);
 	}
 
 	TEST(system_task_TSelfProcess, Environment)
@@ -254,7 +332,7 @@ namespace
 	{
 		auto& self = *TSelfProcess::Self();
 		const TString old_name = self.Name();
-		EXPECT_TRUE(old_name == "cl3-core-test" || old_name.Left(8) == "memcheck");
+		EXPECT_TRUE(old_name == "cl3-core-tests" || old_name.Left(8) == "memcheck");
 
 		self.Name("foobar");
 		EXPECT_TRUE(self.Name() == "foobar");

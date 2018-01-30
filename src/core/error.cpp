@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3
-#error "compiling cl3 source code but macro INSIDE_CL3 is not defined"
+#ifndef INSIDE_CL3CORE
+#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
 #endif
 
 #include <stdio.h>
@@ -26,13 +26,18 @@
 #include "util.hpp"
 #include "system_memory.hpp"
 #include "io_text.hpp"
+#include "io_text_string.hpp"
 #include "io_text_terminal.hpp"
+#include "error_diag.hpp"
 
 namespace	cl3
 {
 	namespace	error
 	{
 		using namespace system::memory;
+		using namespace io::text::string;
+		using namespace io::text;
+		using namespace diag;
 
 		CLASS	TException::TException	(const char* format, ...) : message(NULL), object(NULL), codefile(NULL), function(NULL), expression(NULL), inner(NULL), codeline(0)
 		{
@@ -52,22 +57,27 @@ namespace	cl3
 				vsnprintf(message, l, format, list);
 				va_end(list);
 			}
+
+			this->backtrace = new TBacktrace(system::def::move(GenerateBacktrace(32)));
 		}
 
-		CLASS	TException::TException	(TException&& e) : message(e.message), object(e.object), codefile(e.codefile), function(e.function), expression(e.expression), inner(e.inner), codeline(e.codeline)
+		CLASS	TException::TException	(TException&& e) : message(e.message), object(e.object), codefile(e.codefile), function(e.function), expression(e.expression), inner(e.inner), codeline(e.codeline), backtrace(e.backtrace)
 		{
 			e.message = NULL;
+			e.backtrace = NULL;
 		}
 
 		CLASS	TException::TException	(const TException& e) : message(NULL), object(e.object), codefile(e.codefile), function(e.function), expression(e.expression), inner(e.inner), codeline(e.codeline)
 		{
 			CL3_CONTEXT_VARIABLE_PUSH(allocator_generic, allocator_exception.Value());
-			this->message = util::mkstrcpy(e.message).Claim();
+			this->message = util::MakeCStringCopy(e.message).Claim();
+			this->backtrace = new TBacktrace(*e.backtrace);
 		}
 
 		CLASS	TException::~TException	()
 		{
 			Free(message);
+			delete this->backtrace;
 		}
 
 		void	TException::Set		(const void* object, const char* codefile, const char* function, const char* expression, const TException* inner, unsigned codeline)
@@ -95,7 +105,30 @@ namespace	cl3
 					<<"\n\tmessage: "<<ex.message
 					<<"\n\tfile: "<<ex.codefile<<":"<<ex.codeline
 					<<"\n\texpression: "<<(ex.expression == NULL ? "<none>" : ex.expression)
-					<<"\n";
+					<<"\n\tbacktrace:";
+
+			tw.number_format = &TNumberFormat::HEX;
+			const TString unknown = "???";
+			for(usys_t i = 0; i < ex.backtrace->callstack.Count(); i++)
+			{
+				const auto& cs = ex.backtrace->callstack[i];
+
+				const TString* s = &unknown;
+				if(cs.function.name.Count() > 0)
+					s = &cs.function.name;
+				else if(cs.function.name_mangled.Count() > 0)
+					s = &cs.function.name_mangled;
+
+				if(s->Left(12) == "cl3::error::")
+					continue;
+
+				if(s->Left(20) == "testing::Test::Run()" || s->Left(24) == "void testing::internal::")
+					break;
+
+				tw<<"\n\t\t["<< cs.function.addr_start << '+' << cs.offset <<"] "<<*s;
+			}
+
+			tw<<"\n";
 
 			if(ex.inner)
 				tw<<"\n\tINNER "<<(*ex.inner);
@@ -127,7 +160,7 @@ namespace	cl3
 		{
 		}
 
-		CLASS TInvalidArgumentException::TInvalidArgumentException	(const char* argname) : TException("an invalid value was passed as argument"), argname(util::mkstrcpy(argname).Claim())
+		CLASS TInvalidArgumentException::TInvalidArgumentException	(const char* argname) : TException("an invalid value was passed as argument"), argname(util::MakeCStringCopy(argname).Claim())
 		{
 		}
 

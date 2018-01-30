@@ -81,6 +81,19 @@ namespace	cl3
 						CL3PUBF	CLASS	TFDStream	(TFDStream&&);
 						CL3PUBF	CLASS	~TFDStream	();
 				};
+
+				class CL3PUBT TPipe : public virtual IIn<byte_t>, public virtual IOut<byte_t>
+				{
+					public:
+						TFDStream fd[2];
+
+						CL3PUBF	usys_t	Read	(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min = (usys_t)-1) final override;
+						CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1) final override;
+
+						CL3PUBF	usys_t	Remaining	() const  final override CL3_GETTER;
+
+						CL3PUBF CLASS TPipe();
+				};
 			}
 		}
 	}

@@ -99,8 +99,8 @@ namespace	cl3
 				struct	CL3PUBT	IList : virtual IDynamicCollection<T>, virtual array::IArray<T>, virtual IList<const T>
 				{
 					using IStaticCollection<const T>::Count;
-					using stream::IOut<T>::Write;
-					using array::IArray<T>::Read;
+// 					using stream::IOut<T>::Write;
+// 					using array::IArray<T>::Read;
 					using IList<const T>::operator+=;
 
 // 					inline	IList&	operator+=	(const IStaticCollection<T>& rhs) { Append(rhs); return *this; }
@@ -252,13 +252,13 @@ namespace	cl3
 
 						//	from TList
 						CLASS		TList		();
-						explicit CLASS		TList		(T* arr_items, usys_t n_items, bool claim);
-						explicit CLASS		TList		(const T* arr_items, usys_t n_items);
-						explicit CLASS		TList		(const IStaticCollection<const T>&);
-						explicit CLASS		TList		(const TList&);
-						explicit CLASS		TList		(TList&&);
-						explicit CLASS		TList		(serialization::IDeserializer&);
-								 CLASS		TList		(std::initializer_list<T>);
+						CLASS		TList		(T* arr_items, usys_t n_items, bool claim);
+						CLASS		TList		(const T* arr_items, usys_t n_items);
+						CLASS		TList		(const IStaticCollection<const T>&);
+						CLASS		TList		(const TList&);
+						CLASS		TList		(TList&&);
+						CLASS		TList		(serialization::IDeserializer&);
+						 CLASS		TList		(std::initializer_list<T>);
 						virtual				~TList		();
 				};
 
@@ -274,13 +274,13 @@ namespace	cl3
 					public:
 						using IStaticCollection<const T>::Count;
 						using stream::IOut<T>::Write;
-						using array::IArray<T>::Write;
+// 						using array::IArray<T>::Write;
 						using TList<const T>::CreateStaticIterator;
 						using TList<const T>::CountMin;
 						using TList<const T>::CountMax;
 						using TList<const T>::CreateDynamicIterator;
 						using TList<const T>::Add;
-						using TList<const T>::Read;
+// 						using TList<const T>::Read;
 						using TList<const T>::operator[];
 						using TList<const T>::ItemPtr;
 						using TList<const T>::Grow;

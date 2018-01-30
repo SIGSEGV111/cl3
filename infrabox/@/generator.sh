@@ -13,9 +13,9 @@ function generate_jobs()
 		cat << EOF
 	{
 		"type":"docker",
-		"resources":{"limits":{"cpu":4,"memory":4096}},
-		"docker_file":"infrabox/$n/Dockerfile",
-		"name":"$n",
+		"resources":{"limits":{"cpu":1,"memory":2048}},
+		"docker_file":"infrabox/$n/Dockerfile.compile",
+		"name":"$n-compile",
 		"build_only":false,
 		"build_context":"../.."
 	}
@@ -33,3 +33,15 @@ echo '	],
 ) >"/infrabox/output/infrabox.json"
 
 cat < "/infrabox/output/infrabox.json"
+
+# ,
+# 	{
+# 		"type":"docker",
+# 		"resources":{"limits":{"cpu":1,"memory":2048}},
+# 		"docker_file":"infrabox/$n/Dockerfile.tests",
+# 		"name":"$n-tests",
+# 		"build_only":false,
+# 		"build_context":"../..",
+# 		"environment":{"COMPILE_CONTAINER":"$n-compile"},
+# 		"depends_on": ["$n-compile"]
+# 	}

@@ -1,0 +1,3 @@
+FROM opensuse:42.1
+MAINTAINER simon@brennecke-it.net
+CMD zypper in -y /infrabox/inputs/$COMPILE_CONTAINER/libcl3-core-3.0-1.x86_64.rpm /infrabox/inputs/$COMPILE_CONTAINER/libcl3-core-tests-3.0-1.x86_64.rpm && cd /opt/cl3 && /usr/local/bin/cl3-core-test --gtest_output=xml:gtest.native.xml dummy1 dummy2 dummy3

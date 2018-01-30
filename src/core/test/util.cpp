@@ -22,6 +22,7 @@
 #include <cl3/core/io_text_string.hpp>
 
 #include <gtest/gtest.h>
+#include <string.h>
 
 using namespace ::testing;
 
@@ -46,6 +47,13 @@ namespace
 		Hexdump(in, sizeof(in), out);
 
 		EXPECT_TRUE(out == ref);
+	}
+
+	TEST(util, mkstrcpy)
+	{
+		const char* src = "hello world 123 !";
+		auto p = MakeCStringCopy(src);
+		EXPECT_TRUE(strcmp(src, p.Object()) == 0);
 	}
 }
 

@@ -160,7 +160,7 @@ namespace cl3
 				CL3_CLASS_SYSERR(listen(this->fd.FD(), 32));
 			}
 
-			TTCPServer::TTCPServer(EIPVersionSelect ipvs, u16_t port)
+			TTCPServer::TTCPServer(EIPVersionSelect, u16_t)
 			{
 				CL3_NOT_IMPLEMENTED;
 			}

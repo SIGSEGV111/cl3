@@ -12,17 +12,25 @@ function generate_jobs()
 		cat << EOF
 	{
 		"type":"docker",
-		"resources":{"limits":{"cpu":1,"memory":8192}},
+		"resources":{"limits":{"cpu":1,"memory":1024}},
 		"docker_file":"infrabox/$n/Dockerfile",
 		"name":"$n",
 		"build_only":true,
-		"keep":true,
-		"deployments":[{
-			"type": "docker-registry",
-            "host": "v2-kube.wdf.sap.corp:5000",
-            "repository": "$n",
-            "tag" : "$2"
-		}]
+		"build_context":"../..",
+		"deployments":[
+			{
+				"type": "docker-registry",
+				"host": "v2-registry.dhcp.wdf.sap.corp",
+				"repository": "$n",
+				"tag" : "$2"
+			},
+			{
+				"type": "docker-registry",
+				"host": "v2-registry.dhcp.wdf.sap.corp",
+				"repository": "$n",
+				"tag" : "latest"
+			}
+		]
 	}
 EOF
 	done
