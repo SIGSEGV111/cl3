@@ -80,6 +80,8 @@ namespace cl3
 						}
 
 					public:
+						using io::stream::IIn<byte_t>::Read;
+
 						CL3PUBF bool  GenerateBool() final override CL3_WARN_UNUSED_RESULT { return (this->GenerateT<u8_t>() % 2) == 0; }
 						CL3PUBF u8_t  GenerateU8 () final override CL3_WARN_UNUSED_RESULT { return this->GenerateT<u8_t> (); }
 						CL3PUBF u16_t GenerateU16() final override CL3_WARN_UNUSED_RESULT { return this->GenerateT<u16_t>(); }
@@ -136,7 +138,6 @@ namespace cl3
 			class CL3PUBT TCMWC : public _::TImplPNRG<TCMWC>
 			{
 				public:
-					using io::stream::IIn<byte_t>::Read;
 					static const u32_t PHI = 0x9e3779b9;
 
 					struct	TState
