@@ -1,6 +1,9 @@
 #!/bin/bash
 
 P="$(dirname "$(readlink -f "$0")")"
+
+set -x
+set -u
 cd "$P/.."
 
-exec ./compile.sh
+infrabox run

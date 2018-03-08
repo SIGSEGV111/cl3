@@ -140,29 +140,35 @@ OPTS_CL3LLVMTESTS="$OPTS_EXE $OPTS_QA $LLVM_CXXFLAGS $LLVM_LDFLAGS $LLVM_LIBS -l
 
 for f in "$CL3_GENDIR/include/cl3/core/"*.cpp "$CL3_ROOT/src/extlib/"*.cpp; do
 	echo "#include \"$f\""
-done > "$CL3_WORKDIR/core.cpp"
+done > "$CL3_WORKDIR/core-lib.cpp"
+
+for f in "$CL3_GENDIR/include/cl3/core/test/"*.cpp "$CL3_ROOT/src/extlib/"*.cpp; do
+	echo "#include \"$f\""
+done > "$CL3_WORKDIR/core-test.cpp"
 
 for f in "$CL3_GENDIR/include/cl3/llvm/"*.cpp; do
 	echo "#include \"$f\""
-done > "$CL3_WORKDIR/llvm.cpp"
+done > "$CL3_WORKDIR/llvm-lib.cpp"
+
+for f in "$CL3_GENDIR/include/cl3/llvm/test/"*.cpp; do
+	echo "#include \"$f\""
+done > "$CL3_WORKDIR/llvm-test.cpp"
 
 set -x
 
 cd "$CL3_WORKDIR/core/lib"
-time "$CXX" -o "$CL3_GENDIR/lib/libcl3-core.so" "$CL3_WORKDIR/core.cpp" "$CL3_GENDIR/include/cl3/core/"*.S $OPTS_CL3CORELIB # "$CL3_ROOT/tmp/musl/build/lib/libc.a"
-
-time "$CXX" -o "$CL3_GENDIR/lib/libcl3-core_noamalgam.so" "$CL3_GENDIR/include/cl3/core/"*.cpp "$CL3_GENDIR/include/cl3/core/"*.S "$CL3_ROOT/src/extlib/"*.cpp $OPTS_CL3CORELIB
-
+time "$CXX" -o "$CL3_GENDIR/lib/libcl3-core.so" "$CL3_WORKDIR/core-lib.cpp" "$CL3_GENDIR/include/cl3/core/"*.S $OPTS_CL3CORELIB & # "$CL3_ROOT/tmp/musl/build/lib/libc.a"
+time "$CXX" -o "$CL3_GENDIR/lib/libcl3-core_noamalgam.so" "$CL3_GENDIR/include/cl3/core/"*.cpp "$CL3_GENDIR/include/cl3/core/"*.S "$CL3_ROOT/src/extlib/"*.cpp $OPTS_CL3CORELIB &
 cd "$CL3_WORKDIR/core/tests"
-time "$CXX" -o "$CL3_GENDIR/bin/cl3-core-tests" "$CL3_GENDIR/include/cl3/core/test/"*.cpp "$CL3_GENDIR/lib/libgtest"*.a $OPTS_CL3CORETESTS
+wait
+time "$CXX" -o "$CL3_GENDIR/bin/cl3-core-tests" "$CL3_WORKDIR/core-test.cpp" "$CL3_GENDIR/lib/libgtest"*.a $OPTS_CL3CORETESTS &
 
 cd "$CL3_WORKDIR/llvm/lib"
-time "$CXX" -o "$CL3_GENDIR/lib/libcl3-llvm.so" "$CL3_WORKDIR/llvm.cpp" $OPTS_CL3LLVMLIB
-
-time "$CXX" -o "$CL3_GENDIR/lib/libcl3-llvm_noamalgam.so" "$CL3_GENDIR/include/cl3/llvm/"*.cpp $OPTS_CL3LLVMLIB
-
+time "$CXX" -o "$CL3_GENDIR/lib/libcl3-llvm.so" "$CL3_WORKDIR/llvm-lib.cpp" $OPTS_CL3LLVMLIB &
+time "$CXX" -o "$CL3_GENDIR/lib/libcl3-llvm_noamalgam.so" "$CL3_GENDIR/include/cl3/llvm/"*.cpp $OPTS_CL3LLVMLIB &
 cd "$CL3_WORKDIR/llvm/tests"
-time "$CXX" -o "$CL3_GENDIR/bin/cl3-llvm-tests" "$CL3_GENDIR/include/cl3/llvm/test/"*.cpp "$CL3_GENDIR/lib/libgtest"*.a $OPTS_CL3LLVMTESTS
+wait
+time "$CXX" -o "$CL3_GENDIR/bin/cl3-llvm-tests" "$CL3_WORKDIR/llvm-test.cpp" "$CL3_GENDIR/lib/libgtest"*.a $OPTS_CL3LLVMTESTS
 
 set +x
 cd "$CL3_WORKDIR"
@@ -175,13 +181,17 @@ time "$CL3_GENDIR/bin/cl3-core-tests" '--gtest_filter=system_memory*' --gtest_ou
 RunValgrind "$CL3_GENDIR/bin/cl3-llvm-tests" --gtest_output=xml:gtest.xml
 
 if test "$BUILD_TYPE" == "debug" && ((INFRABOX==0)); then
-	mkdir -p "$CL3_GENDIR/coverage"
-	lcov --capture --rc lcov_branch_coverage=1 \
-		--directory "$CL3_WORKDIR/core/lib" --directory "$CL3_WORKDIR/core/tests" \
-		--directory "$CL3_WORKDIR/llvm/lib" --directory "$CL3_WORKDIR/llvm/tests" \
-		--output-file coverage.info
+	(
+		mkdir -p "$CL3_GENDIR/coverage"
+		lcov --capture --rc lcov_branch_coverage=1 \
+			--directory "$CL3_WORKDIR/core/lib" --directory "$CL3_WORKDIR/core/tests" \
+			--directory "$CL3_WORKDIR/llvm/lib" --directory "$CL3_WORKDIR/llvm/tests" \
+			--output-file coverage.info
 
-	lcov --remove coverage.info '*gtest*' '/usr/include/*' '*extlib*' -o coverage.info
-	genhtml coverage.info --output-directory "$CL3_GENDIR/coverage"
+		lcov --remove coverage.info '*gtest*' '/usr/include/*' '*extlib*' -o coverage.info
+		genhtml coverage.info --output-directory "$CL3_GENDIR/coverage"
+	) > "$CL3_WORKDIR/lcov.log" 2>&1
 	echo "coverage URL: $(readlink -f "$CL3_GENDIR/coverage/index.html")"
-fi > "$CL3_WORKDIR/lcov.log" 2>&1
+fi
+
+echo "Build successful"
