@@ -91,13 +91,11 @@ namespace
 
 	TEST(system_task_TProcess, IsAlive)
 	{
-		TProcess proc_init(1);
 		TProcess proc_myself(TSelfProcess::Self()->ID());
 		TProcess proc_nope(23009781);
 
 		EXPECT_TRUE(proc_myself.IsAlive());
 		EXPECT_FALSE(proc_nope.IsAlive());
-		EXPECT_THROW(proc_init.IsAlive(), TSyscallException);
 	}
 
 	TEST(system_task_TProcess, Parent)
@@ -327,6 +325,68 @@ namespace
 		EXPECT_EQ(2, list[13]);
 		EXPECT_EQ(1, list[14]);
 	}
+
+	TEST(system_task_IFiber, Join_without_Exception)
+	{
+		struct TFiber : IFiber
+		{
+			volatile int x;
+			void Main() final override
+			{
+				x = 1;
+			}
+		};
+
+		TFiber fiber;
+
+		// initialy the fiber should be SUSPENDED
+		EXPECT_TRUE(fiber.State() == IFiber::EState::SUSPENDED);
+
+		// this should not throw
+		fiber.x = 0;
+		fiber.SwitchTo();
+		EXPECT_TRUE(fiber.x == 1);
+
+		// the fiber should now be dead
+		EXPECT_TRUE(fiber.State() == IFiber::EState::TERMINATED);
+
+		fiber.Join();
+
+		// now the fiber was reset and should be ready to run again
+		EXPECT_TRUE(fiber.State() == IFiber::EState::SUSPENDED);
+	}
+
+// 	TEST(system_task_IFiber, Join_with_Exception)
+// 	{
+// 		struct TTestException
+// 		{
+// 		};
+//
+// 		struct TIGoOutWithABang : IFiber
+// 		{
+// 			void Main() final override
+// 			{
+// 				throw TTestException();
+// 			}
+// 		};
+//
+// 		TIGoOutWithABang fiber;
+//
+// 		// initialy the fiber should be SUSPENDED
+// 		EXPECT_TRUE(fiber.State() == IFiber::EState::SUSPENDED);
+//
+// 		// this should not throw
+// 		fiber.SwitchTo();
+//
+// 		// the fiber should now be dead
+// 		EXPECT_TRUE(fiber.State() == IFiber::EState::TERMINATED);
+//
+// 		// THIS should throw
+// 		EXPECT_THROW(fiber.Join(), TTestException);
+//
+// 		// now the fiber was reset and should be ready to run again
+// 		EXPECT_TRUE(fiber.State() == IFiber::EState::SUSPENDED);
+// 	}
 
 	TEST(system_task_TProcess, Name)
 	{

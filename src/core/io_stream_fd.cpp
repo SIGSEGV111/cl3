@@ -22,6 +22,11 @@ namespace cl3
 				{
 					return this->fd[0].Remaining();
 				}
+
+				CLASS TPipe::~TPipe()
+				{
+					// nothing to do
+				}
 			}
 		}
 	}

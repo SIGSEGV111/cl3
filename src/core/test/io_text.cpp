@@ -718,14 +718,106 @@ namespace
 
 		{
 			TString buffer;
-			buffer<<9223372036854775807;
-			EXPECT_TRUE(buffer == "9223372036854775807");
+			buffer<<(u64_t)9223372036854775808U;
+			EXPECT_TRUE(buffer == "9223372036854775808");
 		}
 
 		{
 			TString buffer;
-			buffer<<-9223372036854775807;
-			EXPECT_TRUE(buffer == "-9223372036854775807");
+			buffer<<(s64_t)(-(9223372036854775808ULL));
+			EXPECT_TRUE(buffer == "-9223372036854775808");
+		}
+	}
+
+	TEST(io_text_ITextWriter, Integers_custom)
+	{
+		{
+			TNumberFormat nf = TNumberFormat::DECIMAL_SIMPLE;
+			nf.grouping_length = 3;
+			nf.grouping_mark = '.';
+			TString buffer;
+			buffer.number_format = &nf;
+
+			buffer<<1234567;
+			EXPECT_TRUE(buffer == "1.234.567");
+		}
+
+		{
+			TNumberFormat nf = TNumberFormat::DECIMAL_SIMPLE;
+			nf.grouping_length = 1;
+			nf.grouping_mark = '.';
+
+			const TString prefix("PREFIX ");
+			const TString postfix(" POSTFIX");
+
+			nf.prefix = &prefix;
+			nf.postfix = &postfix;
+
+			const TString presign("PRESIGN ");
+			const TString postsign(" POSTSIGN");
+
+			nf.prefix_sign = &presign;
+			nf.postfix_sign = &postsign;
+
+			const TString preint(" PREINT ");
+			const TString postint(" POSTINT");
+
+			nf.prefix_digits = &preint;
+			nf.postfix_digits = &postint;
+
+			nf.positive_mark = '+';
+			TString buffer;
+			buffer.number_format = &nf;
+
+			buffer<<1234567;
+			EXPECT_TRUE(buffer == "PREFIX PRESIGN + POSTSIGN PREINT 1.2.3.4.5.6.7 POSTINT POSTFIX");
+			buffer = TString(-1234567, &nf);
+			EXPECT_TRUE(buffer == "PREFIX PRESIGN - POSTSIGN PREINT 1.2.3.4.5.6.7 POSTINT POSTFIX");
+// 			Terminal()<<"buffer: \""<<buffer<<"\"\n";
+		}
+
+		{
+			TNumberFormat nf = TNumberFormat::DECIMAL_SIMPLE;
+			nf.negative_mark_placement = TNumberFormat::ESymbolPlacement::AFTER;
+
+			TString buffer;
+			buffer.number_format = &nf;
+
+			buffer<<-1234567;
+			EXPECT_TRUE(buffer == "1234567-");
+		}
+
+		{
+			TNumberFormat nf = TNumberFormat::DECIMAL_SIMPLE;
+			nf.fractional_length_min = 2;
+			nf.decimal_mark = '.';
+			nf.negative_mark_placement = TNumberFormat::ESymbolPlacement::AFTER;
+
+			const TString predec("PREDEC");
+			const TString postdec("POSTDEC");
+
+			nf.prefix_decimal = &predec;
+			nf.postfix_decimal = &postdec;
+
+			TString buffer;
+			buffer.number_format = &nf;
+
+			buffer<<-1234567;
+			EXPECT_TRUE(buffer == "1234567.PREDEC00POSTDEC-");
+		}
+
+		{
+			TNumberFormat nf = TNumberFormat::HEX;
+			nf.grouping_length = 2;
+			nf.grouping_mark = ' ';
+			nf.integer_padding = '0';
+			nf.integer_length_min = 5*2+4;
+
+			TString buffer;
+			buffer.number_format = &nf;
+
+			buffer<<0x12345678;
+			EXPECT_TRUE(buffer == "00 12 34 56 78");
 		}
 	}
 
@@ -894,5 +986,21 @@ namespace
 		const TList<const TString> list = { "hello", "world", "foo", "bar" };
 		const TString str = TString::Join(list, " DELIMITER ");
 		EXPECT_EQ(TString("hello DELIMITER world DELIMITER foo DELIMITER bar"), str);
+	}
+
+	TEST(io_text_string_TString, Format)
+	{
+		TNumberFormat nf_year = TNumberFormat::DECIMAL_SIMPLE;
+		nf_year.integer_padding = ' ';
+		nf_year.integer_length_min = 4;
+
+		TNumberFormat nf_std = TNumberFormat::DECIMAL_SIMPLE;
+		nf_std.integer_padding = '0';
+		nf_std.integer_length_min = 2;
+
+		TString s;
+		EXPECT_TRUE((s = TString::Format("§-§-§ §:§:§", &nf_year, 513, &nf_std, 2, 30, 17, 2, 13)) == " 513-02-30 17:02:13");
+// 		Terminal()<<"\""<<s<<"\"\n";
+
 	}
 }

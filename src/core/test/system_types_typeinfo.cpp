@@ -38,8 +38,6 @@ namespace
 	using namespace cl3::io::text::string;
 	using namespace cl3::io::text::encoding;
 
-	struct	TTestException {};
-
 	struct	TT_POD
 	{
 		int a,b,c;
@@ -275,7 +273,7 @@ namespace
 
 		//	*************************************************
 
-		EXPECT_TRUE( *TCTTI<TTestException>::rtti.Name() == "(anonymous namespace)::TTestException" );
+		EXPECT_TRUE( *TCTTI<TTestException>::rtti.Name() == "cl3::unittest_support::TTestException" );
 		EXPECT_TRUE( *TCTTI<TT_POD>::rtti.Name() == "(anonymous namespace)::TT_POD" );
 
 		//	*************************************************

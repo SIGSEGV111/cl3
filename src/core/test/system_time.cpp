@@ -17,8 +17,12 @@
 */
 
 #include <cl3/core/system_time.hpp>
+#include <cl3/core/system_time_calendar.hpp>
 #include <cl3/core/system_time_timer.hpp>
 #include <cl3/core/system_types.hpp>
+#include <cl3/core/io_text.hpp>
+#include <cl3/core/io_text_string.hpp>
+#include <cl3/core/io_text_terminal.hpp>
 #include <gtest/gtest.h>
 #include <iostream>
 
@@ -31,10 +35,18 @@ namespace	cl3
 	{
 		namespace	time
 		{
+			using namespace io::text;
+
 			ostream& operator<<(ostream& os, TTime t)
 			{
 				os<<"{ "<<t.Seconds()<<"; "<<t.Attoseconds()<<" }";
 				return os;
+			}
+
+			ITextWriter& operator<<(ITextWriter& w, TTime t)
+			{
+				w<<"{ "<<t.Seconds()<<"; "<<t.Attoseconds()<<" }";
+				return w;
 			}
 
 			bool operator==(const timespec ts1, const timespec ts2)
@@ -47,6 +59,138 @@ namespace	cl3
 				return tv1.tv_sec == tv2.tv_sec && tv1.tv_usec == tv2.tv_usec;
 			}
 		}
+	}
+}
+
+namespace
+{
+	using namespace cl3::system::types;
+	using namespace cl3::system::time;
+	using namespace cl3::system::time::calendar;
+	using namespace cl3::io::text;
+	using namespace cl3::io::text::string;
+	using namespace cl3::io::text::terminal;
+
+	TEST(system_time_calendar_TGregorian, Normalize)
+	{
+		{
+			TGregorian g(2018, 03, 14, 25, 61, 1000);
+			g.Normalize();
+			EXPECT_TRUE(g == TGregorian(2018, 03, 15, 2, 1+16, 40));
+		}
+
+		{
+			TGregorian g(2018, 0, 1, 0, 0, 0);
+			g.Normalize();
+			EXPECT_TRUE(g == TGregorian(2017, 12, 1, 0, 0, 0));
+		}
+
+		{
+			TGregorian g(2018, -1, 1, 0, 0, 0);
+			g.Normalize();
+			EXPECT_TRUE(g == TGregorian(2017, 11, 1, 0, 0, 0));
+		}
+
+		{
+			TGregorian g(2018, -11, 1, 0, 0, 0);
+			g.Normalize();
+			EXPECT_TRUE(g == TGregorian(2017, 1, 1, 0, 0, 0));
+		}
+
+		{
+			TGregorian g(2018, -12, 1, 0, 0, 0);
+			g.Normalize();
+			EXPECT_TRUE(g == TGregorian(2016, 12, 1, 0, 0, 0));
+		}
+
+		{
+			TGregorian g(2018, 1, 0, 0, 0, 0);
+			g.Normalize();
+			EXPECT_TRUE(g == TGregorian(2017, 12, 31, 0, 0, 0));
+		}
+
+		{
+			TGregorian g(2018, 1, -1, 0, 0, 0);
+			g.Normalize();
+			EXPECT_TRUE(g == TGregorian(2017, 12, 30, 0, 0, 0));
+		}
+	}
+
+	TEST(system_time_calendar_TGregorian, Stringify)
+	{
+		TGregorian g(2018, 03, 14, 01, 17, 12);
+		EXPECT_TRUE( (TString)g == "2018-03-14 01:17:12" );
+	}
+
+	TEST(system_time_calendar_TGregorian, TTime_to_TGregorian)
+	{
+		TGregorian g;
+		TTime t;
+
+		EXPECT_TRUE((g = TGregorian(2018, 3, 16, 9, 31, 57, 378545339 * 1000000000ULL)) == (t = TTime(1521192717, 378545339ULL * 1000000000ULL)));
+		EXPECT_TRUE((g = TGregorian(2018, 3, 16, 9, 31, 57, 883431062 * 1000000000ULL)) == (t = TTime(1521192717, 883431062ULL * 1000000000ULL)));
+		EXPECT_TRUE((g = TGregorian(2018, 3, 16, 9, 31, 58, 388149982 * 1000000000ULL)) == (t = TTime(1521192718, 388149982ULL * 1000000000ULL)));
+		EXPECT_TRUE((g = TGregorian(2018, 3, 16, 9, 31, 58, 893133914 * 1000000000ULL)) == (t = TTime(1521192718, 893133914ULL * 1000000000ULL)));
+		EXPECT_TRUE((g = TGregorian(2018, 3, 16, 9, 31, 59, 398072161 * 1000000000ULL)) == (t = TTime(1521192719, 398072161ULL * 1000000000ULL)));
+		EXPECT_TRUE((g = TGregorian(2018, 3, 16, 9, 31, 59, 902685885 * 1000000000ULL)) == (t = TTime(1521192719, 902685885ULL * 1000000000ULL)));
+		EXPECT_TRUE((g = TGregorian(2018, 3, 16, 9, 32, 00, 407328676 * 1000000000ULL)) == (t = TTime(1521192720, 407328676ULL * 1000000000ULL)));
+		EXPECT_TRUE((g = TGregorian(2018, 3, 16, 9, 32, 00, 912023523 * 1000000000ULL)) == (t = TTime(1521192720, 912023523ULL * 1000000000ULL)));
+		EXPECT_TRUE((g = TGregorian(2018, 3, 16, 9, 32, 01, 416972799 * 1000000000ULL)) == (t = TTime(1521192721, 416972799ULL * 1000000000ULL)));
+		EXPECT_TRUE((g = TGregorian(2018, 3, 16, 9, 32, 01, 921867452 * 1000000000ULL)) == (t = TTime(1521192721, 921867452ULL * 1000000000ULL)));
+		EXPECT_TRUE((g = TGregorian(2018, 3, 16, 9, 32, 02, 426581072 * 1000000000ULL)) == (t = TTime(1521192722, 426581072ULL * 1000000000ULL)));
+		EXPECT_TRUE((g = TGregorian(2018, 3, 16, 9, 32, 02, 931404298 * 1000000000ULL)) == (t = TTime(1521192722, 931404298ULL * 1000000000ULL)));
+// 		Terminal()<<"g: "<<(TString)g<<" == t: "<<(TString)(TGregorian)t<<"\n";
+	}
+
+	TEST(system_time_calendar_TGregorian, TGregorian_to_TTime)
+	{
+		TGregorian g;
+		TTime t;
+
+		EXPECT_TRUE((t = TTime(1521192717, 378545339ULL * 1000000000ULL)) == (g = TGregorian(2018, 3, 16, 9, 31, 57, 378545339 * 1000000000ULL)));
+		EXPECT_TRUE((t = TTime(1521192717, 883431062ULL * 1000000000ULL)) == (g = TGregorian(2018, 3, 16, 9, 31, 57, 883431062 * 1000000000ULL)));
+		EXPECT_TRUE((t = TTime(1521192718, 388149982ULL * 1000000000ULL)) == (g = TGregorian(2018, 3, 16, 9, 31, 58, 388149982 * 1000000000ULL)));
+		EXPECT_TRUE((t = TTime(1521192718, 893133914ULL * 1000000000ULL)) == (g = TGregorian(2018, 3, 16, 9, 31, 58, 893133914 * 1000000000ULL)));
+		EXPECT_TRUE((t = TTime(1521192719, 398072161ULL * 1000000000ULL)) == (g = TGregorian(2018, 3, 16, 9, 31, 59, 398072161 * 1000000000ULL)));
+		EXPECT_TRUE((t = TTime(1521192719, 902685885ULL * 1000000000ULL)) == (g = TGregorian(2018, 3, 16, 9, 31, 59, 902685885 * 1000000000ULL)));
+		EXPECT_TRUE((t = TTime(1521192720, 407328676ULL * 1000000000ULL)) == (g = TGregorian(2018, 3, 16, 9, 32, 00, 407328676 * 1000000000ULL)));
+		EXPECT_TRUE((t = TTime(1521192720, 912023523ULL * 1000000000ULL)) == (g = TGregorian(2018, 3, 16, 9, 32, 00, 912023523 * 1000000000ULL)));
+		EXPECT_TRUE((t = TTime(1521192721, 416972799ULL * 1000000000ULL)) == (g = TGregorian(2018, 3, 16, 9, 32, 01, 416972799 * 1000000000ULL)));
+		EXPECT_TRUE((t = TTime(1521192721, 921867452ULL * 1000000000ULL)) == (g = TGregorian(2018, 3, 16, 9, 32, 01, 921867452 * 1000000000ULL)));
+		EXPECT_TRUE((t = TTime(1521192722, 426581072ULL * 1000000000ULL)) == (g = TGregorian(2018, 3, 16, 9, 32, 02, 426581072 * 1000000000ULL)));
+		EXPECT_TRUE((t = TTime(1521192722, 931404298ULL * 1000000000ULL)) == (g = TGregorian(2018, 3, 16, 9, 32, 02, 931404298 * 1000000000ULL)));
+		Terminal()<<"g: "<<(TTime)g<<"\nt: "<<t<<"\n";
+	}
+
+	TEST(system_time_calendar_TGregorian, NumDaysInMonth)
+	{
+		EXPECT_EQ((int)TGregorian::NumDaysInMonth(2017,  2), 28);
+		EXPECT_EQ((int)TGregorian::NumDaysInMonth(2018,  2), 28);
+		EXPECT_EQ((int)TGregorian::NumDaysInMonth(2019,  2), 28);
+		EXPECT_EQ((int)TGregorian::NumDaysInMonth(2020,  2), 29);
+		EXPECT_EQ((int)TGregorian::NumDaysInMonth(2000,  2), 29);
+		EXPECT_EQ((int)TGregorian::NumDaysInMonth(1600,  2), 29);
+		EXPECT_EQ((int)TGregorian::NumDaysInMonth(1700,  2), 28);
+		EXPECT_EQ((int)TGregorian::NumDaysInMonth(1800,  2), 28);
+		EXPECT_EQ((int)TGregorian::NumDaysInMonth(1583, 10), 21);
+		EXPECT_EQ((int)TGregorian::NumDaysInMonth(1584, 10), 31);
+		EXPECT_EQ((int)TGregorian::NumDaysInMonth(2018, 10), 31);
+		EXPECT_EQ((int)TGregorian::NumDaysInMonth(1399,  2), 28);
+		EXPECT_EQ((int)TGregorian::NumDaysInMonth(1400,  2), 29);
+		EXPECT_EQ((int)TGregorian::NumDaysInMonth(1401,  2), 28);
+		EXPECT_EQ((int)TGregorian::NumDaysInMonth(1402,  2), 28);
+		EXPECT_EQ((int)TGregorian::NumDaysInMonth(1403,  2), 28);
+		EXPECT_EQ((int)TGregorian::NumDaysInMonth(1404,  2), 29);
+	}
+
+	TEST(system_time_calendar_TGregorian, NumDaysInYear)
+	{
+		EXPECT_EQ((int)TGregorian::NumDaysInYear(2017), 365);
+		EXPECT_EQ((int)TGregorian::NumDaysInYear(2018), 365);
+		EXPECT_EQ((int)TGregorian::NumDaysInYear(2019), 365);
+		EXPECT_EQ((int)TGregorian::NumDaysInYear(2020), 366);
+		EXPECT_EQ((int)TGregorian::NumDaysInYear(2000), 366);
+		EXPECT_EQ((int)TGregorian::NumDaysInYear(2100), 365);
 	}
 }
 

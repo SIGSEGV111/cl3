@@ -145,7 +145,7 @@ namespace	cl3
 
 					virtual	bool		IsSorted	() const CL3_GETTER = 0;
 
-					virtual	const T&	operator[]	(ssys_t index) const CL3_GETTER = 0;
+					virtual	const T&	operator[]	(ssys_t index) const CL3_GETTER = 0;	// FIXME: new version should have inline oeprator[] based on and virtual ItemPtr(0) CL3_GETTER function (to improve tight loop calls to operator[])
 					virtual	const T*	ItemPtr		(ssys_t index) const CL3_GETTER = 0;
 
 					virtual	usys_t		IndexOf		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) const CL3_GETTER;

@@ -86,6 +86,7 @@ namespace	cl3
 
 			static CL3_THREAD IFiber* volatile current_fiber = NULL;
 
+			// LCOV_EXCL_START
 			struct TMainFiber : IFiber
 			{
 				void Main()
@@ -96,6 +97,7 @@ namespace	cl3
 
 				TMainFiber() : IFiber() { current_fiber = this; }
 			};
+			// LCOV_EXCL_STOP
 
 			static TMainFiber fib_main;
 
@@ -105,6 +107,7 @@ namespace	cl3
 			{
 				IFiber* fiber = current_fiber;
 
+				fiber->dirty = true;
 				fiber->AfterSwitchTo();
 
 				try { fiber->Main(); }
@@ -135,7 +138,7 @@ namespace	cl3
 
 				fiber->caller->SwitchTo();
 
-				CL3_NONCLASS_LOGIC_ERROR(true);
+				CL3_NONCLASS_LOGIC_ERROR(true); // LCOV_EXCL_LINE
 			}
 
 			IFiber* IFiber::Self()
@@ -145,6 +148,9 @@ namespace	cl3
 
 			void IFiber::Join()
 			{
+				if(!this->dirty)
+					return;
+
 // 				fprintf(stderr, "TLocalThread::Self() = %p running fiber %p executing join on %p\n", TLocalThread::Self(), IFiber::Self(), this);
 				while(this->state != IFiber::EState::TERMINATED)
 					this->SwitchTo();
@@ -199,6 +205,7 @@ namespace	cl3
 			void IFiber::ResetContext()
 			{
 				this->state = IFiber::EState::SUSPENDED;
+				this->dirty = false;
 				this->registers = TContextRegisters(this->p_stack.Object(), this->sz_stack, &IFiber::Boot);
 			}
 
@@ -206,6 +213,7 @@ namespace	cl3
 			{
 				if(this != &fib_main)
 				{
+					memset((byte_t*)p_stack.Object(), 0, sz_stack);
 					this->ResetContext();
 					this->valgrind_stack_id = VALGRIND_STACK_REGISTER(this->p_stack.Object(), this->p_stack.Object() + this->sz_stack);
 				}
@@ -242,7 +250,7 @@ namespace	cl3
 						break;
 
 					default:
-						CL3_NONCLASS_FAIL(TException, "the requested clock is not supported by Sleep()");
+						CL3_NONCLASS_FAIL(TException, "the requested clock is not supported by Sleep()"); // LCOV_EXCL_LINE
 				}
 			}
 
@@ -301,80 +309,9 @@ namespace	cl3
 				return fds_stderr;
 			}
 
-			/**************************************************************************************/
-
-			struct TPipe
-			{
-				int fd[2];	//	[0] = read; [1] = write
-
-				void CloseRead()
-				{
-					if(fd[0] != -1)
-					{
-						CL3_NONCLASS_SYSERR(::close(fd[0]));
-						fd[0] = -1;
-					}
-				}
-
-				void CloseWrite()
-				{
-					if(fd[1] != -1)
-					{
-						CL3_NONCLASS_SYSERR(::close(fd[1]));
-						fd[1] = -1;
-					}
-				}
-
-				int ReadFD() const CL3_GETTER
-				{
-					return this->fd[0];
-				}
-
-				int WriteFD() const CL3_GETTER
-				{
-					return this->fd[1];
-				}
-
-				void Claim(bool read, bool write)
-				{
-					if(read)
-						this->fd[0] = -1;
-					if(write)
-						this->fd[1] = -1;
-				}
-
-				CLASS TPipe()
-				{
-					fd[0] = -1;
-					fd[1] = -1;
-					CL3_NONCLASS_SYSERR(::pipe(this->fd));
-
-// 					try
-// 					{
-// 						CL3_CLASS_LOGIC_ERROR(fd[0] == STDIN_FILENO || fd[0] == STDOUT_FILENO || fd[0] == STDERR_FILENO);
-// 						CL3_CLASS_LOGIC_ERROR(fd[1] == STDIN_FILENO || fd[1] == STDOUT_FILENO || fd[1] == STDERR_FILENO);
-// 						// FIXME: WTF? WHY?
-// 					}
-// 					catch(...)
-// 					{
-// 						::close(fd[0]);
-// 						::close(fd[1]);
-// 						throw;
-// 					}
-				}
-
-				CLASS ~TPipe()
-				{
-					if(fd[0] != -1)
-						::close(fd[0]);
-					if(fd[1] != -1)
-						::close(fd[1]);
-				}
-
-				CLASS TPipe(const TPipe&) = delete;
-			};
 
 			/**************************************************************************************/
+
 
 			CLASS TChildProcess::TChildProcess(const io::text::string::TString& exe,
 												const io::collection::list::TList<const io::text::string::TString>& args,
@@ -384,7 +321,6 @@ namespace	cl3
 												io::stream::IOut<byte_t>* stderr,
 												TAsyncEventProcessor* aep) : IProcess(), is_stdin(stdin), os_stdout(stdout), os_stderr(stderr)
 			{
-				//	FIXME: if input stream can be casted to FDStream, then the actual FD should be used instead of a Pipe
 				TUniquePtr<TPipe> pipe_stdin  = MakeUniquePtr(stdin  != NULL && stdin  != &TSelfProcess::StdIn()  ? new TPipe() : NULL);
 				TUniquePtr<TPipe> pipe_stdout = MakeUniquePtr(stdout != NULL && stdout != &TSelfProcess::StdOut() ? new TPipe() : NULL);
 				TUniquePtr<TPipe> pipe_stderr = MakeUniquePtr(stderr != NULL && stderr != &TSelfProcess::StdErr() ? new TPipe() : NULL);
@@ -399,27 +335,27 @@ namespace	cl3
 					{
 						if(pipe_stdin != NULL)
 						{
-							pipe_stdin->CloseWrite();
+							pipe_stdin->WriteFD().Close();
 							CL3_NONCLASS_SYSERR(::dup2(pipe_stdin->ReadFD(), STDIN_FILENO));
-							pipe_stdin->CloseRead();
+							pipe_stdin->ReadFD().Close();
 						}
 						else if(stdin == NULL)
 							::close(STDIN_FILENO);	//	FIXME: pass a handle to /dev/null
 
 						if(pipe_stdout != NULL)
 						{
-							pipe_stdout->CloseRead();
+							pipe_stdout->ReadFD().Close();
 							CL3_NONCLASS_SYSERR(::dup2(pipe_stdout->WriteFD(), STDOUT_FILENO));
-							pipe_stdout->CloseWrite();
+							pipe_stdout->WriteFD().Close();
 						}
 						else if(stdout == NULL)
 							::close(STDOUT_FILENO);	//	FIXME: pass a handle to /dev/null
 
 						if(pipe_stderr != NULL)
 						{
-							pipe_stderr->CloseRead();
+							pipe_stderr->ReadFD().Close();
 							CL3_NONCLASS_SYSERR(::dup2(pipe_stderr->WriteFD(), STDERR_FILENO));
-							pipe_stderr->CloseWrite();
+							pipe_stderr->WriteFD().Close();
 						}
 						else if(stderr == NULL)
 							::close(STDERR_FILENO);	//	FIXME: pass a handle to /dev/null
@@ -447,7 +383,7 @@ namespace	cl3
 								env_cstr[i] = (char*)TCString(it->Item().key + "=" + it->Item().value, CODEC_CXX_CHAR).Claim();
 						}
 
-						CL3_NONCLASS_SYSERR(::execvpe(args_cstr[0], (char**)args_cstr.ItemPtr(0), (char**)env_cstr.ItemPtr(0)));
+						CL3_NONCLASS_SYSERR(execvpe(args_cstr[0], (char**)args_cstr.ItemPtr(0), (char**)env_cstr.ItemPtr(0)));
 					}
 					catch(const TException& e)
 					{
@@ -461,28 +397,28 @@ namespace	cl3
 					//	parent
 					if(pipe_stdin != NULL)
 					{
-						pipe_stdin->CloseRead();
+						pipe_stdin->ReadFD().Close();
 						this->fds_stdin.FD(pipe_stdin->WriteFD());
 						this->w_stdin = this->fds_stdin.OnOutputReady();
-						pipe_stdin->Claim(false,true);
+						pipe_stdin->WriteFD().Claim();
 						this->callback_stdin.Register(aep, &this->w_stdin, this);
 					}
 
 					if(pipe_stdout != NULL)
 					{
-						pipe_stdout->CloseWrite();
+						pipe_stdout->WriteFD().Close();
 						this->fds_stdout.FD(pipe_stdout->ReadFD());
 						this->w_stdout = this->fds_stdout.OnInputReady();
-						pipe_stdout->Claim(true,false);
+						pipe_stdout->ReadFD().Claim();
 						this->callback_stdout.Register(aep, &this->w_stdout, this);
 					}
 
 					if(pipe_stderr != NULL)
 					{
-						pipe_stderr->CloseWrite();
+						pipe_stderr->WriteFD().Close();
 						this->fds_stderr.FD(pipe_stderr->ReadFD());
 						this->w_stderr = this->fds_stderr.OnInputReady();
-						pipe_stderr->Claim(true,false);
+						pipe_stderr->ReadFD().Claim();
 						this->callback_stderr.Register(aep, &this->w_stderr, this);
 					}
 

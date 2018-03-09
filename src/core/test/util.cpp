@@ -20,6 +20,7 @@
 #include <cl3/core/util_function.hpp>
 #include <cl3/core/util_event.hpp>
 #include <cl3/core/io_text_string.hpp>
+#include <cl3/core/system_memory.hpp>
 
 #include <gtest/gtest.h>
 #include <string.h>
@@ -62,7 +63,7 @@ namespace
 	using namespace cl3::util;
 	using namespace cl3::util::function;
 
-	void TestFuncVoid(int& v, int nv)
+	static void TestFuncVoid(int& v, int nv)
 	{
 		v = nv + 10;
 	}
@@ -91,7 +92,7 @@ namespace
 
 			void Callback(int nv)
 			{
-				this->v = nv + 10;
+				this->v += nv + 10;
 			}
 		};
 
@@ -106,7 +107,7 @@ namespace
 
 	int TestFuncInt(int& v, int nv)
 	{
-		return v = nv + 10;
+		return v += nv + 10;
 	}
 
 	TEST(util_function, StaticFunctionInt)
@@ -115,14 +116,22 @@ namespace
 		TFunction<int, int&, int> func = &TestFuncInt;
 		EXPECT_EQ(20, func(v, 10));
 		EXPECT_EQ(20, v);
+
+		TFunction<int, int&, int> f2 = func;
+		EXPECT_EQ(40, f2(v, 10));
+		EXPECT_EQ(40, v);
 	}
 
 	TEST(util_function, LamdaInt)
 	{
 		int v = 0;
-		TFunction<int, int> func = [&v](int nv){ return v = nv + 10; };
+		TFunction<int, int> func = [&v](int nv){ return v += nv + 10; };
 		EXPECT_EQ(20, func(10));
 		EXPECT_EQ(20, v);
+
+		TFunction<int, int> f2 = func;
+		EXPECT_EQ(40, f2(10));
+		EXPECT_EQ(40, v);
 	}
 
 	TEST(util_function, MemberFunctionInt)
@@ -133,7 +142,7 @@ namespace
 
 			int Callback(int nv)
 			{
-				return this->v = nv + 10;
+				return this->v += nv + 10;
 			}
 		};
 
@@ -144,6 +153,10 @@ namespace
 
 		EXPECT_EQ(20, func(10));
 		EXPECT_EQ(20, test.v);
+
+		TFunction<int, int> f2 = func;
+		EXPECT_EQ(40, f2(10));
+		EXPECT_EQ(40, test.v);
 	}
 }
 
@@ -151,6 +164,7 @@ namespace
 {
 	using namespace cl3::util;
 	using namespace cl3::util::event;
+	using namespace cl3::system::memory;
 
 	TEST(util_event, NoListener)
 	{
@@ -183,11 +197,16 @@ namespace
 	{
 		int v = 0;
 		TEvent<int&, int> event;
+
 		auto l1 = event.Register([](int& v, int nv){ v += nv; });
+		TUniquePtr<decltype(l1)> l3;
+
 		{
 			auto l2 = event.Register([](int& v, int nv){ v += nv; });
+			l3 = MakeUniquePtr(new TEvent<int&,int>::TListener(event.Register([](int& v, int nv){ v += nv; })));
 		}
+
 		event.Raise(v, 10);
-		EXPECT_EQ(10, v);
+		EXPECT_EQ(20, v);
 	}
 }

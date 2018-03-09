@@ -84,8 +84,12 @@ namespace	cl3
 
 				class CL3PUBT TPipe : public virtual IIn<byte_t>, public virtual IOut<byte_t>
 				{
-					public:
+					protected:
 						TFDStream fd[2];
+
+					public:
+						inline TFDStream& ReadFD()  CL3_GETTER { return this->fd[0]; }
+						inline TFDStream& WriteFD() CL3_GETTER { return this->fd[1]; }
 
 						CL3PUBF	usys_t	Read	(byte_t* arr_items_read, usys_t n_items_read_max, usys_t n_items_read_min = (usys_t)-1) final override;
 						CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min = (usys_t)-1) final override;
@@ -93,6 +97,7 @@ namespace	cl3
 						CL3PUBF	usys_t	Remaining	() const  final override CL3_GETTER;
 
 						CL3PUBF CLASS TPipe();
+						CL3PUBF virtual ~TPipe();
 				};
 			}
 		}

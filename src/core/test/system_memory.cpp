@@ -31,8 +31,6 @@ namespace
 	using namespace cl3::system::types;
 	using namespace cl3::system::memory;
 
-	struct	TTestException {};
-
 	struct	TFailAllocator : IDynamicAllocator
 	{
 		void*	Alloc	(usys_t) CL3_WARN_UNUSED_RESULT { throw TTestException(); }

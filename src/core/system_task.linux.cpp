@@ -16,14 +16,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
-	*** WARNING WARNING WARNING ***
-	this file contains black magic!
-	do not try this at home!
-	it is utterly linux, and probably also architecture and kernel-version specific
-	but it seems to work for now....
-*/
-
 #ifndef INSIDE_CL3CORE
 #error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
 #endif
@@ -324,11 +316,13 @@ namespace	cl3
 
 			/************************************************************************************/
 
-			static const int SHUTDOWN_SIGNALS[] = { SIGINT, SIGTERM, SIGHUP, SIGQUIT };
+			static const int FD_SIGNALS[] = { SIGINT, SIGTERM, SIGHUP, SIGQUIT };
 			static const int ERROR_SIGNALS[] = { SIGABRT, SIGTRAP, SIGILL, SIGFPE, SIGSEGV, SIGBUS };
 
-			static const unsigned NUM_SHUTDOWN_SIGNALS = sizeof(SHUTDOWN_SIGNALS) / sizeof(SHUTDOWN_SIGNALS[0]);
+			static const unsigned NUM_FD_SIGNALS = sizeof(FD_SIGNALS) / sizeof(FD_SIGNALS[0]);
 			static const unsigned NUM_ERROR_SIGNALS = sizeof(ERROR_SIGNALS) / sizeof(ERROR_SIGNALS[0]);
+
+			static io::stream::fd::TFDStream fd_signal;
 
 			CLASS TSelfProcess::TSelfProcess()
 			{
@@ -346,9 +340,11 @@ namespace	cl3
 				CL3_CLASS_PTHREAD_ERROR(pthread_sigmask(SIG_SETMASK, &ss, NULL));
 
 				sigemptyset(&ss);
-				for(usys_t i = 0; i < NUM_SHUTDOWN_SIGNALS; i++)
-					sigaddset(&ss, SHUTDOWN_SIGNALS[i]);
-				CL3_CLASS_SYSERR(this->fd_signal = signalfd(-1, &ss, SFD_CLOEXEC|SFD_NONBLOCK));
+				for(usys_t i = 0; i < NUM_FD_SIGNALS; i++)
+					sigaddset(&ss, FD_SIGNALS[i]);
+				CL3_CLASS_SYSERR(fd_signal = signalfd(-1, &ss, SFD_CLOEXEC|SFD_NONBLOCK));
+
+				//
 			}
 
 			TString TSelfProcess::Executable() const

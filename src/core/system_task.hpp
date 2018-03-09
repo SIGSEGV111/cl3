@@ -79,12 +79,14 @@ namespace cl3
 						this->arr[i] = 0;
 				}
 
-				TContextRegisters(void* p_stack, usys_t sz_stack, void (*f_boot)())
+				TContextRegisters(const void* p_stack, const usys_t sz_stack, void (*f_boot)())
 				{
 					for(unsigned i = 0; i < n - 2; i++)
 						this->arr[i] = 0;
 
-					this->rsp = (u64_t)p_stack + sz_stack;
+					const u64_t p_stack_start_aligned = ((u64_t)p_stack + (u64_t)sz_stack) & (u64_t)0xfffffffffffffff0;
+
+					this->rsp = p_stack_start_aligned;
 					this->rip = (u64_t)f_boot;
 				}
 			};
@@ -229,6 +231,7 @@ namespace cl3
 					TLocalThread* volatile thread;
 					IFiber* volatile caller;
 					volatile EState state;
+					volatile bool dirty;
 
 					TContextRegisters registers;
 
@@ -243,7 +246,11 @@ namespace cl3
 					virtual void Main() = 0;
 
 				public:
+					inline EState State() const CL3_GETTER { return this->state; }
+
 					CL3PUBF static IFiber* Self() CL3_GETTER;
+
+					CL3PUBF static void Return();
 
 					CL3PUBF void SwitchTo();
 					CL3PUBF void Join();
@@ -318,8 +325,6 @@ namespace cl3
 					CLASS TSelfProcess(const TSelfProcess&) = delete;
 					CLASS TSelfProcess();
 
-					io::stream::fd::TFDStream fd_signal;
-
 				protected:
 					io::collection::list::TList<IThread*> threads;
 
@@ -353,6 +358,13 @@ namespace cl3
 					io::stream::IIn<byte_t>* is_stdin;
 					io::stream::IOut<byte_t>* os_stdout;
 					io::stream::IOut<byte_t>* os_stderr;
+// 					memory::TUniquePtr<io::stream::fd::TPipe> pipe_stdin;
+// 					memory::TUniquePtr<io::stream::fd::TPipe> pipe_stdout;
+// 					memory::TUniquePtr<io::stream::fd::TPipe> pipe_stderr;
+//
+// 					memory::TUniquePtr<io::stream::TPump> pump_stdin;
+// 					memory::TUniquePtr<io::stream::TPump> pump_stdout;
+// 					memory::TUniquePtr<io::stream::TPump> pump_stderr;
 
 				public:
 					inline pid_t ID() const final override CL3_GETTER { return this->pid; }
@@ -369,11 +381,12 @@ namespace cl3
 					CL3PUBF CLASS ~TChildProcess();
 			};
 
-			struct TLocalThread
+			class TLocalThread
 			{
-				CL3PUBF static TLocalThread* Self();
+				public:
+					CL3PUBF static TLocalThread* Self();
 
-				CL3PUBF static void Sleep(time::TTime time, time::EClock clock = time::EClock::MONOTONIC);
+					CL3PUBF static void Sleep(time::TTime time, time::EClock clock = time::EClock::MONOTONIC);
 			};
 
 			/************************************************************************************/

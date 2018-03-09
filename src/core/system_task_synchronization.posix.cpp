@@ -58,6 +58,8 @@ namespace	cl3
 
 				io::collection::list::TList<bool> WaitFor(const io::collection::IStaticCollection<IWaitable* const>&, time::TTime)
 				{
+					// if fiber blocks and it has a calling fiber the switch back to calling fiber
+					// if there is no calling fiber then register fiber as async-event and process async-events
 					CL3_NOT_IMPLEMENTED;
 				}
 			}

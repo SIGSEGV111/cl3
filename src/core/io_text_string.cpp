@@ -40,7 +40,7 @@ namespace	cl3
 				using namespace encoding;
 				using namespace error;
 
-				static	usys_t	UnicodeStringLength	(const TUTF32* str, usys_t maxlen)
+				static usys_t UnicodeStringLength(const TUTF32* str, const usys_t maxlen)
 				{
 					for(usys_t i = 0; i < maxlen; i++)
 						if(str[i].code == 0U)
@@ -559,54 +559,53 @@ namespace	cl3
 					this->Append(chr);
 				}
 
-				CLASS	TString::TString	(f32_t /*num*/, const TNumberFormat& /*format*/)
+				CLASS	TString::TString	(f32_t /*num*/, const TNumberFormat* /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(f64_t /*num*/, const TNumberFormat& /*format*/)
+				CLASS	TString::TString	(f64_t /*num*/, const TNumberFormat* /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(u8_t /*num*/, const TNumberFormat& /*format*/)
+				CLASS	TString::TString	(u8_t /*num*/, const TNumberFormat* /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(s8_t /*num*/, const TNumberFormat& /*format*/)
+				CLASS	TString::TString	(s8_t /*num*/, const TNumberFormat* /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(u16_t /*num*/, const TNumberFormat& /*format*/)
+				CLASS	TString::TString	(u16_t /*num*/, const TNumberFormat* /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(s16_t /*num*/, const TNumberFormat& /*format*/)
+				CLASS	TString::TString	(s16_t /*num*/, const TNumberFormat* /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(u32_t /*num*/, const TNumberFormat& /*format*/)
+				CLASS	TString::TString	(u32_t /*num*/, const TNumberFormat* /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(s32_t num, const TNumberFormat& nf)
+				CLASS	TString::TString	(s32_t num, const TNumberFormat* nf)
 				{
-					this->number_format = &nf;
+					this->number_format = nf;
 					(*this) << num;
-					this->number_format = TNumberFormat::default_format;
 				}
 
-				CLASS	TString::TString	(u64_t /*num*/, const TNumberFormat& /*format*/)
+				CLASS	TString::TString	(u64_t /*num*/, const TNumberFormat* /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}
 
-				CLASS	TString::TString	(s64_t /*num*/, const TNumberFormat& /*format*/)
+				CLASS	TString::TString	(s64_t /*num*/, const TNumberFormat* /*format*/)
 				{
 					CL3_NOT_IMPLEMENTED;
 				}

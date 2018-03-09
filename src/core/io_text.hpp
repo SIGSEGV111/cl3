@@ -87,18 +87,21 @@ namespace	cl3
 
 			struct	CL3PUBT	TNumberFormat
 			{
-				enum	ESymbolPlacement
+				enum class ESymbolPlacement
 				{
-					SYMBOL_PLACEMENT_BEFORE,
-					SYMBOL_PLACEMENT_AFTER
+					BEFORE,
+					AFTER,
+					MIDDLE
 				};
 
-				string::TString* prefix_sign;		//	prefix to put in front of the number, even before the positive/negative symbol (can be NULL)
-				string::TString* prefix_digits;		//	prefix to put in front of the number, but after the positive/negative symbol (can be NULL)
-				string::TString* prefix_decimal;	//	prefix to put before the decimal mark
-				string::TString* postfix_digits;	//	postfix to put behind the number, but before the positive/negative symbol (can be NULL)
-				string::TString* postfix_sign;		//	postfix to put behind the number, even after the positive/negative symbol (can be NULL)
-				string::TString* postfix_decimal;	//	postfix to put behind the decimal mark
+				const string::TString* prefix;
+				const string::TString* prefix_sign;		//	prefix to put in front of the number, even before the positive/negative symbol (can be NULL)
+				const string::TString* prefix_digits;		//	prefix to put in front of the number, but after the positive/negative symbol (can be NULL)
+				const string::TString* prefix_decimal;	//	prefix to put before the decimal mark
+				const string::TString* postfix;
+				const string::TString* postfix_digits;	//	postfix to put behind the number, but before the positive/negative symbol (can be NULL)
+				const string::TString* postfix_sign;		//	postfix to put behind the number, even after the positive/negative symbol (can be NULL)
+				const string::TString* postfix_decimal;	//	postfix to put behind the decimal mark
 
 				//	<prefix_sign><sign-symbol><prefix_digits><digits><postfix_digits><sign-symbol><postfix_sign>
 
@@ -120,7 +123,7 @@ namespace	cl3
 				ESymbolPlacement negative_mark_placement;	//	specifies where to place the negative mark (usually SYMBOL_PLACEMENT_BEFORE)
 				ESymbolPlacement zero_mark_placement;		//	specifies where to place the tero mark (usually SYMBOL_PLACEMENT_BEFORE)
 
-				u16_t grouping_length;	//	length of a group of digits (usually 3 for base 10/decimal formats)
+				u16_t grouping_length;	//	length of a group of integer part digits (usually 3 for base 10/decimal formats)
 				u16_t integer_length_min;	//	minimum number of characters before the decimal mark
 				u16_t fractional_length_min;	//	minimum number of characters after the decimal mark
 				u16_t fractional_length_max;	//	maximum number of characters after the decimal mark
@@ -202,6 +205,7 @@ namespace	cl3
 					CL3PUBF	ITextWriter&	operator<<	(const char*);
 					CL3PUBF	ITextWriter&	operator<<	(const wchar_t*);
 					CL3PUBF	ITextWriter&	operator<<	(const void*);
+					CL3PUBF	ITextWriter&	operator<<	(const TNumberFormat*);
 			};
 
 			struct	CL3PUBT	ITextStream : virtual ITextReader, virtual ITextWriter

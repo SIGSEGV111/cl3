@@ -19,6 +19,7 @@
 #ifndef	_include_cl3_core_io_text_string_hpp_
 #define	_include_cl3_core_io_text_string_hpp_
 
+#include "system_def.hpp"
 #include "io_text.hpp"
 #include "io_collection_list.hpp"
 #include "io_text_encoding.hpp"
@@ -50,6 +51,48 @@ namespace	cl3
 								public virtual encoding::AWCharDecoder,
 								public virtual encoding::AWCharEncoder
 				{
+					private:
+						template<typename T>
+						inline static void Format(TString& s, T a0)
+						{
+							TString tmp;
+							tmp.number_format = s.number_format;
+							tmp<<a0;
+							s.Replace("§", tmp, 1);
+						}
+
+						inline static void Format(TString& s, const TString& a0)
+						{
+							s.Replace("§", a0, 1);
+						}
+
+						inline static void Format(TString& s, TNumberFormat* a0)
+						{
+							s.number_format = a0;
+						}
+
+						inline static void Format(TString& s, const TNumberFormat* a0)
+						{
+							s.number_format = a0;
+						}
+
+						inline static void Format(TString& s, TNumberFormat& a0)
+						{
+							s.number_format = &a0;
+						}
+
+						inline static void Format(TString& s, const TNumberFormat& a0)
+						{
+							s.number_format = &a0;
+						}
+
+						template<typename T, typename... TArg>
+						inline static void Format(TString& s, T a0, TArg... args)
+						{
+							TString::Format(s, a0);
+							TString::Format(s, args...);
+						}
+
 					public:
 						using collection::list::TList<TUTF32>::Prepend;
 						using collection::list::TList<TUTF32>::Append;
@@ -157,16 +200,16 @@ namespace	cl3
 
 						CL3PUBF	CLASS	TString	();
 						CL3PUBF	CLASS	TString	(TUTF32);
-						CL3PUBF	CLASS	TString	(f32_t num, const TNumberFormat& format = *TNumberFormat::default_format);
-						CL3PUBF	CLASS	TString	(f64_t num, const TNumberFormat& format = *TNumberFormat::default_format);
-						CL3PUBF	CLASS	TString	(u8_t num, const TNumberFormat& format = *TNumberFormat::default_format);
-						CL3PUBF	CLASS	TString	(s8_t num, const TNumberFormat& format = *TNumberFormat::default_format);
-						CL3PUBF	CLASS	TString	(u16_t num, const TNumberFormat& format = *TNumberFormat::default_format);
-						CL3PUBF	CLASS	TString	(s16_t num, const TNumberFormat& format = *TNumberFormat::default_format);
-						CL3PUBF	CLASS	TString	(u32_t num, const TNumberFormat& format = *TNumberFormat::default_format);
-						CL3PUBF	CLASS	TString	(s32_t num, const TNumberFormat& format = *TNumberFormat::default_format);
-						CL3PUBF	CLASS	TString	(u64_t num, const TNumberFormat& format = *TNumberFormat::default_format);
-						CL3PUBF	CLASS	TString	(s64_t num, const TNumberFormat& format = *TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	( u8_t num, const TNumberFormat* format = TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	( s8_t num, const TNumberFormat* format = TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	(u16_t num, const TNumberFormat* format = TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	(s16_t num, const TNumberFormat* format = TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	(u32_t num, const TNumberFormat* format = TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	(s32_t num, const TNumberFormat* format = TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	(u64_t num, const TNumberFormat* format = TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	(s64_t num, const TNumberFormat* format = TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	(f32_t num, const TNumberFormat* format = TNumberFormat::default_format);
+						CL3PUBF	CLASS	TString	(f64_t num, const TNumberFormat* format = TNumberFormat::default_format);
 						CL3PUBF	CLASS	TString	(const char*    cstr, usys_t maxlen = (usys_t)-1);
 						CL3PUBF	CLASS	TString	(const wchar_t* wstr, usys_t maxlen = (usys_t)-1);
 						CL3PUBF	CLASS	TString	(const TUTF32*  ustr, usys_t maxlen = (usys_t)-1);
@@ -174,11 +217,13 @@ namespace	cl3
 						CL3PUBF	CLASS	TString	(TString&&);
 						CL3PUBF	virtual	~TString();
 
-
 						template<typename... TArg>
-						static io::text::string::TString Format(const char* format, TArg... args)
+						static TString Format(const char* format, TArg... args)
 						{
-							CL3_NOT_IMPLEMENTED;
+							TString s = format;
+							TString::Format(s, args...);
+							s.number_format = NULL;
+							return s;
 						}
 				};
 

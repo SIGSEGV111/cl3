@@ -6,7 +6,7 @@ set +x
 set -e
 set -u
 set -o pipefail
-trap 'code=$?; set +x; echo "ERROR code $code at line $LINENO"; exit $code' ERR
+trap 'code=$?; set +x; echo "ERROR code $code at line $LINENO"; wait || true; exit $code' ERR
 
 set +u
 if test -z "$CXX"; then
@@ -154,29 +154,31 @@ for f in "$CL3_GENDIR/include/cl3/llvm/test/"*.cpp; do
 	echo "#include \"$f\""
 done > "$CL3_WORKDIR/llvm-test.cpp"
 
-set -x
-
 cd "$CL3_WORKDIR/core/lib"
-time "$CXX" -o "$CL3_GENDIR/lib/libcl3-core.so" "$CL3_WORKDIR/core-lib.cpp" "$CL3_GENDIR/include/cl3/core/"*.S $OPTS_CL3CORELIB & # "$CL3_ROOT/tmp/musl/build/lib/libc.a"
+time "$CXX" -o "$CL3_GENDIR/lib/libcl3-core.so" "$CL3_WORKDIR/core-lib.cpp" "$CL3_GENDIR/include/cl3/core/"*.S $OPTS_CL3CORELIB & p1=$! # "$CL3_ROOT/tmp/musl/build/lib/libc.a"
 time "$CXX" -o "$CL3_GENDIR/lib/libcl3-core_noamalgam.so" "$CL3_GENDIR/include/cl3/core/"*.cpp "$CL3_GENDIR/include/cl3/core/"*.S "$CL3_ROOT/src/extlib/"*.cpp $OPTS_CL3CORELIB &
+wait $p1
+
 cd "$CL3_WORKDIR/core/tests"
-wait
-time "$CXX" -o "$CL3_GENDIR/bin/cl3-core-tests" "$CL3_WORKDIR/core-test.cpp" "$CL3_GENDIR/lib/libgtest"*.a $OPTS_CL3CORETESTS &
+time "$CXX" -o "$CL3_GENDIR/bin/cl3-core-tests" "$CL3_WORKDIR/core-test.cpp" "$CL3_GENDIR/lib/libgtest"*.a $OPTS_CL3CORETESTS & p2=$!
 
 cd "$CL3_WORKDIR/llvm/lib"
-time "$CXX" -o "$CL3_GENDIR/lib/libcl3-llvm.so" "$CL3_WORKDIR/llvm-lib.cpp" $OPTS_CL3LLVMLIB &
+time "$CXX" -o "$CL3_GENDIR/lib/libcl3-llvm.so" "$CL3_WORKDIR/llvm-lib.cpp" $OPTS_CL3LLVMLIB & p1=$!
 time "$CXX" -o "$CL3_GENDIR/lib/libcl3-llvm_noamalgam.so" "$CL3_GENDIR/include/cl3/llvm/"*.cpp $OPTS_CL3LLVMLIB &
-cd "$CL3_WORKDIR/llvm/tests"
-wait
-time "$CXX" -o "$CL3_GENDIR/bin/cl3-llvm-tests" "$CL3_WORKDIR/llvm-test.cpp" "$CL3_GENDIR/lib/libgtest"*.a $OPTS_CL3LLVMTESTS
+wait $p1
 
-set +x
+cd "$CL3_WORKDIR/llvm/tests"
+time "$CXX" -o "$CL3_GENDIR/bin/cl3-llvm-tests" "$CL3_WORKDIR/llvm-test.cpp" "$CL3_GENDIR/lib/libgtest"*.a $OPTS_CL3LLVMTESTS & p1=$!
+
 cd "$CL3_WORKDIR"
 
 export LD_LIBRARY_PATH="$CL3_GENDIR/lib"
 
+wait $p2
 RunValgrind "$CL3_GENDIR/bin/cl3-core-tests" '--gtest_filter=-system_memory*' --gtest_output=xml:gtest.xml dummy1 dummy2 dummy3
 time "$CL3_GENDIR/bin/cl3-core-tests" '--gtest_filter=system_memory*' --gtest_output=xml:gtest.xml dummy1 dummy2 dummy3
+
+wait $p1
 
 RunValgrind "$CL3_GENDIR/bin/cl3-llvm-tests" --gtest_output=xml:gtest.xml
 
@@ -194,4 +196,5 @@ if test "$BUILD_TYPE" == "debug" && ((INFRABOX==0)); then
 	echo "coverage URL: $(readlink -f "$CL3_GENDIR/coverage/index.html")"
 fi
 
+wait
 echo "Build successful"

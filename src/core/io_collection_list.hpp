@@ -100,7 +100,7 @@ namespace	cl3
 				{
 					using IStaticCollection<const T>::Count;
 // 					using stream::IOut<T>::Write;
-// 					using array::IArray<T>::Read;
+					using array::IArray<T>::Read;
 					using IList<const T>::operator+=;
 
 // 					inline	IList&	operator+=	(const IStaticCollection<T>& rhs) { Append(rhs); return *this; }
@@ -280,7 +280,7 @@ namespace	cl3
 						using TList<const T>::CountMax;
 						using TList<const T>::CreateDynamicIterator;
 						using TList<const T>::Add;
-// 						using TList<const T>::Read;
+						using TList<const T>::Read;
 						using TList<const T>::operator[];
 						using TList<const T>::ItemPtr;
 						using TList<const T>::Grow;

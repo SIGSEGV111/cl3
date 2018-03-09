@@ -26,6 +26,7 @@
 #include <sys/mman.h>
 #include <string.h>
 #include <valgrind/valgrind.h>
+#include <stdio.h>
 
 using namespace cl3::system::types;
 
@@ -55,6 +56,7 @@ namespace	cl3
 
 					CL3_CLASS_SYSERR(p = (usys_t*)mmap(NULL, sz_bytes, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0));
 					*p++ = sz_bytes;
+
 					return p;
 				}
 
@@ -185,7 +187,8 @@ namespace	cl3
 					VALGRIND_MALLOCLIKE_BLOCK(p_base+1, sz_bytes, 0, false);
 
 					*p_base = owner;
-					return p_base+1;
+					void* r = p_base+1;
+					return r;
 				}
 				else
 					return NULL;	//	LCOV_EXCL_LINE

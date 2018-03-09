@@ -35,6 +35,12 @@ namespace	cl3
 			using namespace async;
 			using namespace synchronization;
 
+			void IFiber::Return()
+			{
+				CL3_NONCLASS_LOGIC_ERROR(IFiber::Self()->caller == NULL);
+				IFiber::Self()->caller->SwitchTo();
+			}
+
 			static memory::TUniquePtr<TSelfProcess> proc_self;
 
 			TSelfProcess* TSelfProcess::Self()

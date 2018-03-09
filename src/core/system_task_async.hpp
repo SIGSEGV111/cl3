@@ -22,6 +22,7 @@
 #include "system_compiler.hpp"
 #include "system_types.hpp"
 #include "system_time.hpp"
+#include "util_function.hpp"
 
 namespace cl3
 {
@@ -84,6 +85,24 @@ namespace cl3
 						CL3PUBF CLASS TAsyncEventProcessor();
 				};
 			}
+
+// 			namespace async_v2
+// 			{
+// 				class TAsyncEventProcessor
+// 				{
+// 					public:
+// 				};
+//
+// 				class TAsyncEvent
+// 				{
+// 					protected:
+// 						synchronization::IWaitable* waitable;
+// 						util::TFunction<void, TAsyncEventProcessor&, const TAsyncEvent*> function;
+//
+// 					public:
+// 						CLASS TAsyncEvent(synchronization::IWaitable* waitable, util::TFunction<void, TAsyncEventProcessor&, synchronization::IWaitable*> function) : waitable(waitable), function(function) {}
+// 				};
+// 			}
 		}
 	}
 }

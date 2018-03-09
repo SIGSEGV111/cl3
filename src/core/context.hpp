@@ -144,6 +144,29 @@ namespace	cl3
 		};
 
 		#define	CL3_CONTEXT_VARIABLE_PUSH(name, new_value)	cl3::context::TLocalValueHolder<typename cl3::system::def::remove_ref<decltype(name)>::type::TValue> CL3_PASTE(__context_variable__, __COUNTER__) ((name), (new_value))
+
+		template<typename T>
+		struct TVariableSwapper
+		{
+			T* const variable;
+			const T value_enter;
+			T value_leave;
+
+			TVariableSwapper(T* variable, T value_enter) : variable(variable), value_enter(value_enter), value_leave(*variable)
+			{
+				*this->variable = value_enter;
+			}
+
+			TVariableSwapper(T* variable, T value_enter, T value_leave) : variable(variable), value_enter(value_enter), value_leave(value_leave)
+			{
+				*this->variable = value_enter;
+			}
+
+			~TVariableSwapper()
+			{
+				*this->variable = this->value_leave;
+			}
+		};
 	}
 }
 
