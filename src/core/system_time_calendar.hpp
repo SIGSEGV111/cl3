@@ -35,6 +35,11 @@ namespace cl3
 					s32_t minute;
 					s32_t second;
 
+					CL3PUBF TGregorian& operator+=(const TGregorian&);
+					CL3PUBF TGregorian& operator-=(const TGregorian&);
+					CL3PUBF TGregorian operator+(const TGregorian&) const CL3_GETTER;
+					CL3PUBF TGregorian operator-(const TGregorian&) const CL3_GETTER;
+
 					CL3PUBF bool operator==(const TGregorian&) const CL3_GETTER;
 					inline bool operator!=(const TGregorian& rhs) const CL3_GETTER { return !(*this == rhs); }
 

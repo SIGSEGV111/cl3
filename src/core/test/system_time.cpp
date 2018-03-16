@@ -192,6 +192,11 @@ namespace
 		EXPECT_EQ((int)TGregorian::NumDaysInYear(2000), 366);
 		EXPECT_EQ((int)TGregorian::NumDaysInYear(2100), 365);
 	}
+
+	TEST(system_time_calendar_TGregorian, Math)
+	{
+		EXPECT_EQ(TGregorian(2018, 3, 14, 17, 12, 11) + TGregorian(2, 1, 3, 1, 2, 1), TGregorian(2020, 4, 17, 18, 14, 12));
+	}
 }
 
 namespace

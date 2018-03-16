@@ -49,6 +49,46 @@ namespace cl3
 					}
 				}
 
+				TGregorian& TGregorian::operator+=(const TGregorian& rhs)
+				{
+					attoseconds += rhs.attoseconds;
+					year += rhs.year;
+					month += rhs.month;
+					day += rhs.day;
+					hour += rhs.hour;
+					minute += rhs.minute;
+					second += rhs.second;
+					Normalize();
+					return *this;
+				}
+
+				TGregorian& TGregorian::operator-=(const TGregorian& rhs)
+				{
+					attoseconds -= rhs.attoseconds;
+					year -= rhs.year;
+					month -= rhs.month;
+					day -= rhs.day;
+					hour -= rhs.hour;
+					minute -= rhs.minute;
+					second -= rhs.second;
+					Normalize();
+					return *this;
+				}
+
+				TGregorian TGregorian::operator+(const TGregorian& rhs) const
+				{
+					TGregorian r = *this;
+					r += rhs;
+					return r;
+				}
+
+				TGregorian TGregorian::operator-(const TGregorian& rhs) const
+				{
+					TGregorian r = *this;
+					r -= rhs;
+					return r;
+				}
+
 				bool TGregorian::operator==(const TGregorian& rhs) const
 				{
 					return
