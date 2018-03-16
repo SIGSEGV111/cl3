@@ -76,7 +76,7 @@ namespace	cl3
 				return n_space_report;
 			}
 
-			usys_t Write(const T* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT
+			usys_t Write(const T*, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT
 			{
 				if(n_items_write_min == (usys_t)-1)
 					n_items_write_min = n_items_write_max;
