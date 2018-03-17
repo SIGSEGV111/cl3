@@ -193,7 +193,7 @@ if test "$BUILD_TYPE" == "debug" && ((INFRABOX==0)); then
 		lcov --remove coverage.info '*gtest*' '/usr/include/*' '*extlib*' -o coverage.info
 		genhtml coverage.info --output-directory "$CL3_GENDIR/coverage"
 	) > "$CL3_WORKDIR/lcov.log" 2>&1
-	echo "coverage URL: $(readlink -f "$CL3_GENDIR/coverage/index.html")"
+	echo "coverage URL: $(readlink -f "$CL3_GENDIR/coverage/core/index-sort-l.html")"
 fi
 
 wait
