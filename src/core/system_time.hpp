@@ -93,43 +93,43 @@ namespace	cl3
 					s64_t	asec;	//	atto-seconds (10^-18) of current second
 
 				public:
-					inline	s64_t	Seconds		() const { return sec; }
-					inline	s64_t	Attoseconds	() const { return asec; }
+					inline	s64_t	Seconds		() const CL3_GETTER { return sec; }
+					inline	s64_t	Attoseconds	() const CL3_GETTER { return asec; }
 
 					CL3PUBF	TTime&	operator+=	(const TTime op);
 					CL3PUBF	TTime&	operator-=	(const TTime op);
-					CL3PUBF	TTime	operator+	(const TTime op) const;
-					CL3PUBF	TTime	operator-	(const TTime op) const;
+					CL3PUBF	TTime	operator+	(const TTime op) const CL3_GETTER;
+					CL3PUBF	TTime	operator-	(const TTime op) const CL3_GETTER;
 
 					CL3PUBF	TTime&	operator*=	(const double f);
 					CL3PUBF	TTime&	operator/=	(const double f);
-					CL3PUBF	TTime	operator*	(const double f) const;
-					CL3PUBF	TTime	operator/	(const double f) const;
+					CL3PUBF	TTime	operator*	(const double f) const CL3_GETTER;
+					CL3PUBF	TTime	operator/	(const double f) const CL3_GETTER;
 
-					CL3PUBF	bool	operator>	(const TTime op) const;
-					CL3PUBF	bool	operator<	(const TTime op) const;
-					CL3PUBF	bool	operator>=	(const TTime op) const;
-					CL3PUBF	bool	operator<=	(const TTime op) const;
-					CL3PUBF	bool	operator==	(const TTime op) const;
-					CL3PUBF	bool	operator!=	(const TTime op) const;
+					CL3PUBF	bool	operator>	(const TTime op) const CL3_GETTER;
+					CL3PUBF	bool	operator<	(const TTime op) const CL3_GETTER;
+					CL3PUBF	bool	operator>=	(const TTime op) const CL3_GETTER;
+					CL3PUBF	bool	operator<=	(const TTime op) const CL3_GETTER;
+					CL3PUBF	bool	operator==	(const TTime op) const CL3_GETTER;
+					CL3PUBF	bool	operator!=	(const TTime op) const CL3_GETTER;
 
-					CL3PUBF	s64_t			ConvertToI	(EUnit unit) const;
-					CL3PUBF	double			ConvertToF	(EUnit unit) const;
-					CL3PUBF	static TTime	ConvertFrom	(EUnit unit, s64_t value);
-					CL3PUBF	static TTime	ConvertFrom	(EUnit unit, double value);
+					CL3PUBF	s64_t			ConvertToI	(EUnit unit) const CL3_GETTER;
+					CL3PUBF	double			ConvertToF	(EUnit unit) const CL3_GETTER;
+					CL3PUBF	static TTime	ConvertFrom	(EUnit unit, s64_t value) CL3_FCONST CL3_WARN_UNUSED_RESULT;
+					CL3PUBF	static TTime	ConvertFrom	(EUnit unit, double value) CL3_FCONST CL3_WARN_UNUSED_RESULT;
 
-					CL3PUBF	s64_t			ConvertToI	(s64_t  tps) const;
-					CL3PUBF	double			ConvertToF	(double tps) const;
-					CL3PUBF	static TTime	ConvertFrom	(s64_t  tps, s64_t value);
-					CL3PUBF	static TTime	ConvertFrom	(double tps, double value);
+					CL3PUBF	s64_t			ConvertToI	(s64_t  tps) const CL3_GETTER;
+					CL3PUBF	double			ConvertToF	(double tps) const CL3_GETTER;
+					CL3PUBF	static TTime	ConvertFrom	(s64_t  tps, s64_t value) CL3_FCONST CL3_WARN_UNUSED_RESULT;
+					CL3PUBF	static TTime	ConvertFrom	(double tps, double value) CL3_FCONST CL3_WARN_UNUSED_RESULT;
 
 					CL3PUBF	static	TTime	Now			(EClock clock);
-					CL3PUBF	s64_t			UnixTimeI	() const;
-					CL3PUBF	double			UnixTimeF	() const;
-					CL3PUBF	static	TTime	UnixTime	(double unixtime);
-					CL3PUBF	static	TTime	UnixTime	(s64_t unixtime);
-					CL3PUBF	operator timespec			() const;
-					CL3PUBF	operator timeval			() const;
+					CL3PUBF			s64_t	UnixTimeI	() const CL3_GETTER;
+					CL3PUBF			double	UnixTimeF	() const CL3_GETTER;
+					CL3PUBF	static	TTime	UnixTime	(double unixtime) CL3_FCONST CL3_WARN_UNUSED_RESULT;
+					CL3PUBF	static	TTime	UnixTime	(s64_t unixtime) CL3_FCONST CL3_WARN_UNUSED_RESULT;
+					CL3PUBF	operator timespec			() const CL3_GETTER;
+					CL3PUBF	operator timeval			() const CL3_GETTER;
 
 					inline	CLASS	TTime	() : sec(0), asec(0) {} // LCOV_EXCL_LINE
 					CL3PUBF	CLASS	TTime	(double seconds);
