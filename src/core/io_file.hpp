@@ -205,7 +205,7 @@ namespace	cl3
 				friend class TMapping;
 				protected:
 					stream::fd::TFDStream fd;
-					int access;
+					TAccess access;
 
 				public:
 					inline const stream::fd::TFDStream& FD() const { return this->fd; }
