@@ -250,6 +250,20 @@ namespace	cl3
 					CL3_CLASS_SYSERR(this->fd = ::openat(directory.Handle(), cstr.Chars(), flags, mode));
 			}
 
+			usys_t	TFile::Read		(u64_t pos, byte_t* arr_items_read, usys_t n_items_read_max)
+			{
+				ssize_t sz;
+				CL3_CLASS_SYSERR(sz = pread(this->fd, arr_items_read, n_items_read_max, pos));
+				return sz;
+			}
+
+			usys_t	TFile::Write	(u64_t pos, const byte_t* arr_items_write, usys_t n_items_write_max)
+			{
+				ssize_t sz;
+				CL3_CLASS_SYSERR(sz = pwrite(this->fd, arr_items_write, n_items_write_max, pos));
+				return sz;
+			}
+
 			CLASS	TFile::TFile	(TFile&& other) : fd(system::def::move(other.fd))
 			{
 			}
