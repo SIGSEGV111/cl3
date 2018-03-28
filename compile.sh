@@ -132,39 +132,54 @@ case "$BUILD_TYPE" in
 		;;
 esac
 
-OPTS_CL3CORELIB="$OPTS_LIB $OPTS_QA -ldl -lm -DINSIDE_CL3CORE"
-OPTS_CL3LLVMLIB="$OPTS_LIB $OPTS_QA $LLVM_CXXFLAGS $LLVM_LDFLAGS $LLVM_LIBS $LLVM_SYSLIBS -lcl3-core -DINSIDE_CL3LLVM"
+OPTS_CL3CORELIB_AMALGAM="$OPTS_LIB $OPTS_QA -ldl -lm"
+OPTS_CL3LLVMLIB_AMALGAM="$OPTS_LIB $OPTS_QA $LLVM_CXXFLAGS $LLVM_LDFLAGS $LLVM_LIBS $LLVM_SYSLIBS -lcl3-core"
+
+OPTS_CL3CORELIB_NOAMALGAM="$OPTS_CL3CORELIB_AMALGAM -DINSIDE_CL3CORE"
+OPTS_CL3LLVMLIB_NOAMALGAM="$OPTS_CL3LLVMLIB_AMALGAM -DINSIDE_CL3LLVM"
 
 OPTS_CL3CORETESTS="$OPTS_EXE $OPTS_QA -lcl3-core"
 OPTS_CL3LLVMTESTS="$OPTS_EXE $OPTS_QA $LLVM_CXXFLAGS $LLVM_LDFLAGS $LLVM_LIBS -lcl3-core -lcl3-llvm"
 
+cat >"$CL3_WORKDIR/core-lib.cpp" <<"EOF"
+#define INSIDE_CL3CORE
+EOF
 for f in "$CL3_GENDIR/include/cl3/core/"*.cpp "$CL3_ROOT/src/extlib/"*.cpp; do
 	echo "#include \"$f\""
-done > "$CL3_WORKDIR/core-lib.cpp"
+done >> "$CL3_WORKDIR/core-lib.cpp"
+cat >>"$CL3_WORKDIR/core-lib.cpp" <<"EOF"
+#undef INSIDE_CL3CORE
+EOF
 
 for f in "$CL3_GENDIR/include/cl3/core/test/"*.cpp "$CL3_ROOT/src/extlib/"*.cpp; do
 	echo "#include \"$f\""
 done > "$CL3_WORKDIR/core-test.cpp"
 
+cat >"$CL3_WORKDIR/llvm-lib.cpp" <<"EOF"
+#define INSIDE_CL3LLVM
+EOF
 for f in "$CL3_GENDIR/include/cl3/llvm/"*.cpp; do
 	echo "#include \"$f\""
-done > "$CL3_WORKDIR/llvm-lib.cpp"
+done >> "$CL3_WORKDIR/llvm-lib.cpp"
+cat >>"$CL3_WORKDIR/llvm-lib.cpp" <<"EOF"
+#undef INSIDE_CL3LLVM
+EOF
 
 for f in "$CL3_GENDIR/include/cl3/llvm/test/"*.cpp; do
 	echo "#include \"$f\""
 done > "$CL3_WORKDIR/llvm-test.cpp"
 
 cd "$CL3_WORKDIR/core/lib"
-time "$CXX" -o "$CL3_GENDIR/lib/libcl3-core.so" "$CL3_WORKDIR/core-lib.cpp" "$CL3_GENDIR/include/cl3/core/"*.S $OPTS_CL3CORELIB & p1=$! # "$CL3_ROOT/tmp/musl/build/lib/libc.a"
-time "$CXX" -o "$CL3_GENDIR/lib/libcl3-core_noamalgam.so" "$CL3_GENDIR/include/cl3/core/"*.cpp "$CL3_GENDIR/include/cl3/core/"*.S "$CL3_ROOT/src/extlib/"*.cpp $OPTS_CL3CORELIB &
+time "$CXX" -o "$CL3_GENDIR/lib/libcl3-core.so" "$CL3_WORKDIR/core-lib.cpp" "$CL3_GENDIR/include/cl3/core/"*.S $OPTS_CL3CORELIB_AMALGAM & p1=$! # "$CL3_ROOT/tmp/musl/build/lib/libc.a"
+time "$CXX" -o "$CL3_GENDIR/lib/libcl3-core_noamalgam.so" "$CL3_GENDIR/include/cl3/core/"*.cpp "$CL3_GENDIR/include/cl3/core/"*.S "$CL3_ROOT/src/extlib/"*.cpp $OPTS_CL3CORELIB_NOAMALGAM &
 wait $p1
 
 cd "$CL3_WORKDIR/core/tests"
 time "$CXX" -o "$CL3_GENDIR/bin/cl3-core-tests" "$CL3_WORKDIR/core-test.cpp" "$CL3_GENDIR/lib/libgtest"*.a $OPTS_CL3CORETESTS & p2=$!
 
 cd "$CL3_WORKDIR/llvm/lib"
-time "$CXX" -o "$CL3_GENDIR/lib/libcl3-llvm.so" "$CL3_WORKDIR/llvm-lib.cpp" $OPTS_CL3LLVMLIB & p1=$!
-time "$CXX" -o "$CL3_GENDIR/lib/libcl3-llvm_noamalgam.so" "$CL3_GENDIR/include/cl3/llvm/"*.cpp $OPTS_CL3LLVMLIB &
+time "$CXX" -o "$CL3_GENDIR/lib/libcl3-llvm.so" "$CL3_WORKDIR/llvm-lib.cpp" $OPTS_CL3LLVMLIB_AMALGAM & p1=$!
+time "$CXX" -o "$CL3_GENDIR/lib/libcl3-llvm_noamalgam.so" "$CL3_GENDIR/include/cl3/llvm/"*.cpp $OPTS_CL3LLVMLIB_NOAMALGAM &
 wait $p1
 
 cd "$CL3_WORKDIR/llvm/tests"
