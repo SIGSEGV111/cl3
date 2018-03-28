@@ -57,15 +57,18 @@ namespace cl3
 
 							CL3PUBF CLASS ~TListener()
 							{
-								if(this->previous)
-									this->previous->next = this->next;
-								else
-									this->event->first = this->next;
+								if(this->event)
+								{
+									if(this->previous)
+										this->previous->next = this->next;
+									else
+										this->event->first = this->next;
 
-								if(this->next)
-									this->next->previous = this->previous;
-								else
-									this->event->last = this->previous;
+									if(this->next)
+										this->next->previous = this->previous;
+									else
+										this->event->last = this->previous;
+								}
 							}
 					};
 
