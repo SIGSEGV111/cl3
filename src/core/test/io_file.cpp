@@ -206,4 +206,31 @@ namespace
 
 		EXPECT_TRUE(memcmp(read_buffer, write_buffer, SZ) == 0);
 	}
+	TEST(io_file_TFile, Pos_Read_Write)
+	{
+		TFile test;
+
+		byte_t buffer[300];
+		byte_t reference[sizeof(buffer)];
+
+		memset(reference, 0xAA, sizeof(buffer));
+		EXPECT_EQ(test.Read(0, buffer, sizeof(buffer)), 0U);
+		EXPECT_EQ(test.Write(0, reference, sizeof(reference)), sizeof(reference));
+		EXPECT_EQ(test.Read(0, buffer, sizeof(buffer)), sizeof(reference));
+		EXPECT_TRUE(memcmp(buffer, reference, sizeof(buffer)) == 0);
+
+		memset(reference, 0x80, sizeof(buffer));
+		EXPECT_EQ(test.Read(3467, buffer, sizeof(buffer)), 0U);
+		EXPECT_EQ(test.Write(3467, reference, sizeof(reference)), sizeof(reference));
+		EXPECT_EQ(test.Read(3467, buffer, sizeof(buffer)), sizeof(reference));
+		EXPECT_TRUE(memcmp(buffer, reference, sizeof(buffer)) == 0);
+
+		memset(reference, 0xAA, sizeof(buffer));
+		EXPECT_EQ(test.Read(0, buffer, sizeof(buffer)), sizeof(reference));
+		EXPECT_TRUE(memcmp(buffer, reference, sizeof(buffer)) == 0);
+
+		memset(reference, 0, sizeof(buffer));
+		EXPECT_EQ(test.Read(2000, buffer, sizeof(buffer)), sizeof(reference));
+		EXPECT_TRUE(memcmp(buffer, reference, sizeof(buffer)) == 0);
+	}
 }
