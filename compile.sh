@@ -211,5 +211,22 @@ if test "$BUILD_TYPE" == "debug" && ((INFRABOX==0)); then
 	echo "coverage URL: $(readlink -f "$CL3_GENDIR/coverage/core/index-sort-l.html")"
 fi
 
-wait
+if ((${BASH_VERSINFO[0]} > 4 || (${BASH_VERSINFO[0]} == 4 && ${BASH_VERSINFO[1]} >= 3))); then
+	trap - ERR
+	set +e
+	while true; do
+		wait -n
+		code=$?
+		if(($code == 127)); then
+			break;
+		elif(($code != 0)); then
+			echo "ERROR: background task failed with code $code" 1>&2
+			exit $code
+		fi
+	done
+	set -e
+else
+	wait
+fi
+
 echo "Build successful"
