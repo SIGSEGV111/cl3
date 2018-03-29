@@ -194,9 +194,9 @@ namespace	cl3
 
 			usys_t	TFile::Size		() const
 			{
-				struct ::stat s;
-				CL3_CLASS_SYSERR(::fstat(this->fd, &s));
-				return (usys_t)s.st_size;
+				off_t sz;
+				CL3_CLASS_SYSERR(sz = lseek(this->fd, 0, SEEK_END));
+				return sz;
 			}
 
 			void	TFile::Size		(uoff_t new_count)
