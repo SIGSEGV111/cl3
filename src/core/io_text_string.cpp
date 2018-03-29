@@ -317,7 +317,7 @@ namespace	cl3
 				{
 					for(usys_t n_times = 0, idx_start = 0; n_times < n_times_max && idx_start < this->Count(); idx_start += str_replace.Count(), n_times++)
 					{
-						idx_start = this->Find(str_find, idx_start, DIRECTION_FORWARD);
+						idx_start = this->Find(str_find, idx_start, ESearchDirection::FORWARD);
 						if(idx_start == (usys_t)-1)
 							return n_times;
 						this->Replace(idx_start, str_find.Count(), str_replace);
@@ -327,10 +327,10 @@ namespace	cl3
 
 				usys_t		TString::Find		(const TString& str_find) const
 				{
-					return this->Find(str_find, 0, DIRECTION_FORWARD);
+					return this->Find(str_find, 0, ESearchDirection::FORWARD);
 				}
 
-				usys_t		TString::Find		(const TString& str_find, usys_t idx_start, collection::EDirection direction) const
+				usys_t		TString::Find		(const TString& str_find, usys_t idx_start, collection::ESearchDirection direction) const
 				{
 					if(this->Count() < str_find.Count())
 						return (usys_t)-1;
@@ -342,7 +342,7 @@ namespace	cl3
 
 					switch(direction)
 					{
-						case DIRECTION_FORWARD:
+						case ESearchDirection::FORWARD:
 						{
 							const usys_t n = this->Count() - str_find.Count();
 							for(usys_t i = idx_start; i <= n; i++)
@@ -351,7 +351,7 @@ namespace	cl3
 							return (usys_t)-1;
 						}
 
-						case DIRECTION_BACKWARD:
+						case ESearchDirection::BACKWARD:
 						{
 							idx_start -= (str_find.Count() - 1);
 							for(usys_t i = idx_start; i != (usys_t)-1 ; i--)

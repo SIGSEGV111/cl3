@@ -162,7 +162,7 @@ namespace	cl3
 
 						//	find substring
 						CL3PUBF	usys_t		Find		(const TString& str_find) const CL3_GETTER;
-						CL3PUBF	usys_t		Find		(const TString& str_find, usys_t idx_start, collection::EDirection direction = collection::DIRECTION_FORWARD) const CL3_GETTER;
+						CL3PUBF	usys_t		Find		(const TString& str_find, usys_t idx_start, collection::ESearchDirection direction = collection::ESearchDirection::FORWARD) const CL3_GETTER;
 
 						inline	bool		Contains	(const TString& str_contains) const { return this->Find(str_contains) != (usys_t)-1; }
 

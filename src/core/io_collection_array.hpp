@@ -44,13 +44,13 @@ namespace	cl3
 					template<class T>
 					struct TIndexOf_impl<T, true>
 					{
-						static	usys_t	IndexOf	(const T* arr_items, usys_t n_items, const T& item_find, usys_t idx_start, EDirection dir, bool is_sorted) CL3_GETTER;
+						static	usys_t	IndexOf	(const T* arr_items, usys_t n_items, const T& item_find, usys_t idx_start, ESearchDirection dir, bool is_sorted) CL3_GETTER;
 					};
 
 					template<class T>
 					struct TIndexOf_impl<T, false>
 					{
-						static	usys_t	IndexOf	(const T* arr_items, usys_t n_items, const T& item_find, usys_t idx_start, EDirection dir, bool is_sorted) CL3_GETTER;
+						static	usys_t	IndexOf	(const T* arr_items, usys_t n_items, const T& item_find, usys_t idx_start, ESearchDirection dir, bool is_sorted) CL3_GETTER;
 					};
 
 					template<class T, bool is_assignable>
@@ -148,8 +148,8 @@ namespace	cl3
 					virtual	const T&	operator[]	(ssys_t index) const CL3_GETTER = 0;	// FIXME: new version should have inline oeprator[] based on and virtual ItemPtr(0) CL3_GETTER function (to improve tight loop calls to operator[])
 					virtual	const T*	ItemPtr		(ssys_t index) const CL3_GETTER = 0;
 
-					virtual	usys_t		IndexOf		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) const CL3_GETTER;
-					virtual	const T*	Find		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) const CL3_GETTER;
+					virtual	usys_t		IndexOf		(const T& item_find, usys_t idx_start = 0, ESearchDirection dir = ESearchDirection::FORWARD) const CL3_GETTER;
+					virtual	const T*	Find		(const T& item_find, usys_t idx_start = 0, ESearchDirection dir = ESearchDirection::FORWARD) const CL3_GETTER;
 				};
 
 				template<class T>
@@ -164,7 +164,7 @@ namespace	cl3
 					virtual	T&		operator[]	(ssys_t index) CL3_GETTER = 0;
 					virtual	T*		ItemPtr		(ssys_t index) CL3_GETTER = 0;
 
-					virtual	T*		Find		(const T& item_find, usys_t idx_start = 0, EDirection dir = DIRECTION_FORWARD) CL3_GETTER;
+					virtual	T*		Find		(const T& item_find, usys_t idx_start = 0, ESearchDirection dir = ESearchDirection::FORWARD) CL3_GETTER;
 				};
 
 				/************************************************************************/
@@ -562,7 +562,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				usys_t		IArray<const T>::IndexOf	(const T& item_find, usys_t idx_start, EDirection dir) const
+				usys_t		IArray<const T>::IndexOf	(const T& item_find, usys_t idx_start, ESearchDirection dir) const
 				{
 					return _::TIndexOf_impl<T, typeinfo::features::is_comparable_biggerthan<T>::value>::IndexOf(this->ItemPtr(0), this->Count(), item_find, idx_start, dir, this->IsSorted());
 				}
@@ -570,7 +570,7 @@ namespace	cl3
 				namespace _
 				{
 					template<class T>
-					usys_t	TIndexOf_impl<T, true>::IndexOf	(const T* arr_items, usys_t n_items, const T& item_find, usys_t idx_start, EDirection dir, bool is_sorted)
+					usys_t	TIndexOf_impl<T, true>::IndexOf	(const T* arr_items, usys_t n_items, const T& item_find, usys_t idx_start, ESearchDirection dir, bool is_sorted)
 					{
 						usys_t high = n_items;
 						usys_t low = idx_start;
@@ -589,10 +589,10 @@ namespace	cl3
 								else if(item_find == arr_items[m])
 									switch(dir)
 									{
-										case DIRECTION_FORWARD:
+										case ESearchDirection::FORWARD:
 											n += 2;
 											break;
-										case DIRECTION_BACKWARD:
+										case ESearchDirection::BACKWARD:
 											low = m;
 											break;
 									}
@@ -604,13 +604,13 @@ namespace	cl3
 
 						switch(dir)
 						{
-							case DIRECTION_FORWARD:
+							case ESearchDirection::FORWARD:
 								for(usys_t i = 0; i < high-low; i++)
 									if(item_find == arr_items[low+i])
 										return low+i;
 								break;
 
-							case DIRECTION_BACKWARD:
+							case ESearchDirection::BACKWARD:
 								for(usys_t i = 0; i < high-low; i++)
 									if(item_find == arr_items[high-1-i])
 										return high-1-i;
@@ -621,7 +621,7 @@ namespace	cl3
 					}
 
 					template<class T>
-					usys_t	TIndexOf_impl<T, false>::IndexOf	(const T* arr_items, usys_t n_items, const T& item_find, usys_t idx_start, EDirection dir, bool /*is_sorted*/)
+					usys_t	TIndexOf_impl<T, false>::IndexOf	(const T* arr_items, usys_t n_items, const T& item_find, usys_t idx_start, ESearchDirection dir, bool /*is_sorted*/)
 					{
 						usys_t high = n_items;
 						usys_t low = idx_start;
@@ -630,13 +630,13 @@ namespace	cl3
 
 						switch(dir)
 						{
-							case DIRECTION_FORWARD:
+							case ESearchDirection::FORWARD:
 								for(usys_t i = 0; i < high-low; i++)
 									if(item_find == arr_items[low+i])
 										return low+i;
 								break;
 
-							case DIRECTION_BACKWARD:
+							case ESearchDirection::BACKWARD:
 								for(usys_t i = 0; i < high-low; i++)
 									if(item_find == arr_items[high-1-i])
 										return high-1-i;
@@ -648,14 +648,14 @@ namespace	cl3
 				}
 
 				template<class T>
-				const T*	IArray<const T>::Find	(const T& item_find, usys_t idx_start, EDirection dir) const
+				const T*	IArray<const T>::Find	(const T& item_find, usys_t idx_start, ESearchDirection dir) const
 				{
 					const usys_t index = this->IndexOf(item_find, idx_start, dir);
 					return index == (usys_t)-1 ? NULL : this->ItemPtr(0) + index;
 				}
 
 				template<class T>
-				T*			IArray<T>::Find		(const T& item_find, usys_t idx_start, EDirection dir)
+				T*			IArray<T>::Find		(const T& item_find, usys_t idx_start, ESearchDirection dir)
 				{
 					const usys_t index = this->IndexOf(item_find, idx_start, dir);
 					return index == (usys_t)-1 ? NULL : this->ItemPtr(0) + index;

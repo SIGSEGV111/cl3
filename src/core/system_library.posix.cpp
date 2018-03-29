@@ -46,7 +46,7 @@ namespace	cl3
 
 			CLASS	TLibrary::TLibrary		(const TString& libname)
 			{
-				const usys_t pos_slash = libname.Find("/", 0, DIRECTION_BACKWARD);	//	find the last '/' character in libname
+				const usys_t pos_slash = libname.Find("/", 0, ESearchDirection::BACKWARD);	//	find the last '/' character in libname
 
 				TCString cstr(CODEC_CXX_CHAR);
 

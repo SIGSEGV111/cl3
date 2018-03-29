@@ -62,11 +62,11 @@ namespace cl3
 					//                       ^0^                         ^1^              ^2^              ^3^               ^4^
 
 					usys_t p[5];
-					if((p[0] = symbol.Find("(", symbol.Count()-1, DIRECTION_BACKWARD)) != (usys_t)-1)
-					if((p[1] = symbol.Find("+", p[0]+1, DIRECTION_FORWARD)) != (usys_t)-1)
-					if((p[2] = symbol.Find(")", p[1]+1, DIRECTION_FORWARD)) != (usys_t)-1)
-					if((p[3] = symbol.Find("[", p[2]+1, DIRECTION_FORWARD)) != (usys_t)-1)
-					if((p[4] = symbol.Find("]", p[3]+1, DIRECTION_FORWARD)) != (usys_t)-1)
+					if((p[0] = symbol.Find("(", symbol.Count()-1, ESearchDirection::BACKWARD)) != (usys_t)-1)
+					if((p[1] = symbol.Find("+", p[0]+1, ESearchDirection::FORWARD)) != (usys_t)-1)
+					if((p[2] = symbol.Find(")", p[1]+1, ESearchDirection::FORWARD)) != (usys_t)-1)
+					if((p[3] = symbol.Find("[", p[2]+1, ESearchDirection::FORWARD)) != (usys_t)-1)
+					if((p[4] = symbol.Find("]", p[3]+1, ESearchDirection::FORWARD)) != (usys_t)-1)
 					{
 						cs.function.binary = symbol.Left(p[0]);
 						cs.function.name_mangled = symbol.Slice(p[0]+1, p[1]-p[0]-1);

@@ -177,9 +177,9 @@ namespace	cl3
 				TStatFile sf;
 				stat >> sf.pid;
 
-				const usys_t p_first_ob = stat.Find("(", 0, io::collection::DIRECTION_FORWARD);
+				const usys_t p_first_ob = stat.Find("(", 0, io::collection::ESearchDirection::FORWARD);
 				CL3_NONCLASS_LOGIC_ERROR(p_first_ob != 0);
-				const usys_t p_last_cb = stat.Find(")", stat.Count()-1, io::collection::DIRECTION_BACKWARD);
+				const usys_t p_last_cb = stat.Find(")", stat.Count()-1, io::collection::ESearchDirection::BACKWARD);
 				sf.comm = stat.Slice(p_first_ob + 1, p_last_cb - p_first_ob - 1);
 				stat.Cut(p_last_cb + 2, 0);
 

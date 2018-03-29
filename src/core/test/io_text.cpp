@@ -267,17 +267,17 @@ namespace
 	TEST(io_text_string_TString, Find_Backward)
 	{
 		TString s = "hello world foo";
-		EXPECT_TRUE(s.Find("hello", -1, DIRECTION_BACKWARD) == 0);
-		EXPECT_TRUE(s.Find("world", -1, DIRECTION_BACKWARD) == 6);
-		EXPECT_TRUE(s.Find("world", s.Count()-5, DIRECTION_BACKWARD) == 6);
-		EXPECT_TRUE(s.Find("world", s.Count()-6, DIRECTION_BACKWARD) == (usys_t)-1);
-		EXPECT_TRUE(s.Find("foo", -1, DIRECTION_BACKWARD) == 12);
-		EXPECT_TRUE(s.Find("hello world foo", -1, DIRECTION_BACKWARD) == 0);
-		EXPECT_TRUE(s.Find("world foo", -1, DIRECTION_BACKWARD) == 6);
-		EXPECT_TRUE(s.Find("world foo", s.Count()-1, DIRECTION_BACKWARD) == 6);
-		EXPECT_TRUE(s.Find("world foo", s.Count()-2, DIRECTION_BACKWARD) == (usys_t)-1);
-		EXPECT_TRUE(s.Find("hello foo", -1, DIRECTION_BACKWARD) == (usys_t)-1);
-		EXPECT_TRUE(s.Find("hello world foo ", -1, DIRECTION_BACKWARD) == (usys_t)-1);
+		EXPECT_TRUE(s.Find("hello", -1, ESearchDirection::BACKWARD) == 0);
+		EXPECT_TRUE(s.Find("world", -1, ESearchDirection::BACKWARD) == 6);
+		EXPECT_TRUE(s.Find("world", s.Count()-5, ESearchDirection::BACKWARD) == 6);
+		EXPECT_TRUE(s.Find("world", s.Count()-6, ESearchDirection::BACKWARD) == (usys_t)-1);
+		EXPECT_TRUE(s.Find("foo", -1, ESearchDirection::BACKWARD) == 12);
+		EXPECT_TRUE(s.Find("hello world foo", -1, ESearchDirection::BACKWARD) == 0);
+		EXPECT_TRUE(s.Find("world foo", -1, ESearchDirection::BACKWARD) == 6);
+		EXPECT_TRUE(s.Find("world foo", s.Count()-1, ESearchDirection::BACKWARD) == 6);
+		EXPECT_TRUE(s.Find("world foo", s.Count()-2, ESearchDirection::BACKWARD) == (usys_t)-1);
+		EXPECT_TRUE(s.Find("hello foo", -1, ESearchDirection::BACKWARD) == (usys_t)-1);
+		EXPECT_TRUE(s.Find("hello world foo ", -1, ESearchDirection::BACKWARD) == (usys_t)-1);
 	};
 
 	TEST(io_text_string_TString, Find_and_Replace)

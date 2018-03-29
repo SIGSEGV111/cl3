@@ -777,16 +777,16 @@ namespace
 				list.Add(i);
 
 			for(usys_t i = 0; i < n; i++)
-				EXPECT_EQ(i, *list.Find(i, 0, DIRECTION_FORWARD));
+				EXPECT_EQ(i, *list.Find(i, 0, ESearchDirection::FORWARD));
 
 			for(usys_t i = 0; i < n; i++)
-				EXPECT_EQ(i, *list.Find(i, i, DIRECTION_FORWARD));
+				EXPECT_EQ(i, *list.Find(i, i, ESearchDirection::FORWARD));
 
 			for(usys_t i = 0; i < n; i++)
-				EXPECT_EQ(i, *list.Find(i, 0, DIRECTION_BACKWARD));
+				EXPECT_EQ(i, *list.Find(i, 0, ESearchDirection::BACKWARD));
 
 			for(usys_t i = 0; i < n; i++)
-				EXPECT_EQ(i, *list.Find(i, i, DIRECTION_BACKWARD));
+				EXPECT_EQ(i, *list.Find(i, i, ESearchDirection::BACKWARD));
 		}
 	}
 
@@ -799,16 +799,16 @@ namespace
 				list.Add(i);
 
 			for(usys_t i = 0; i < n; i++)
-				EXPECT_EQ(i, *list.Find(i, 0, DIRECTION_FORWARD));
+				EXPECT_EQ(i, *list.Find(i, 0, ESearchDirection::FORWARD));
 
 			for(usys_t i = 0; i < n; i++)
-				EXPECT_EQ(i, *list.Find(i, i, DIRECTION_FORWARD));
+				EXPECT_EQ(i, *list.Find(i, i, ESearchDirection::FORWARD));
 
 			for(usys_t i = 0; i < n; i++)
-				EXPECT_EQ(i, *list.Find(i, 0, DIRECTION_BACKWARD));
+				EXPECT_EQ(i, *list.Find(i, 0, ESearchDirection::BACKWARD));
 
 			for(usys_t i = 0; i < n; i++)
-				EXPECT_EQ(i, *list.Find(i, i, DIRECTION_BACKWARD));
+				EXPECT_EQ(i, *list.Find(i, i, ESearchDirection::BACKWARD));
 		}
 	}
 }

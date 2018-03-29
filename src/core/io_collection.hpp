@@ -53,10 +53,10 @@ namespace	cl3
 					virtual	CLASS	~TIndexOutOfBoundsException	();
 			};
 
-			enum	EDirection
+			enum class ESearchDirection
 			{
-				DIRECTION_FORWARD,
-				DIRECTION_BACKWARD
+				FORWARD,
+				BACKWARD
 			};
 
 			template<typename T>	struct	IStaticIterator;
