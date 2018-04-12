@@ -1,4 +1,6 @@
 #ifdef __x86_64__
+
+asm(R"(
 .section .text
 .global __SwapRegisters__
 .type __SwapRegisters__,@function
@@ -33,4 +35,6 @@ movq 48(%rsi), %rsp
 movq 56(%rsi), %rcx
 pushq %rcx
 ret
+)");
+
 #endif

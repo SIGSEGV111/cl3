@@ -170,8 +170,8 @@ for f in "$CL3_GENDIR/include/cl3/llvm/test/"*.cpp; do
 done > "$CL3_WORKDIR/llvm-test.cpp"
 
 cd "$CL3_WORKDIR/core/lib"
-time "$CXX" -o "$CL3_GENDIR/lib/libcl3-core.so" "$CL3_WORKDIR/core-lib.cpp" "$CL3_GENDIR/include/cl3/core/"*.S $OPTS_CL3CORELIB_AMALGAM & p1=$! # "$CL3_ROOT/tmp/musl/build/lib/libc.a"
-time "$CXX" -o "$CL3_GENDIR/lib/libcl3-core_noamalgam.so" "$CL3_GENDIR/include/cl3/core/"*.cpp "$CL3_GENDIR/include/cl3/core/"*.S "$CL3_ROOT/src/extlib/"*.cpp $OPTS_CL3CORELIB_NOAMALGAM &
+time "$CXX" -o "$CL3_GENDIR/lib/libcl3-core.so" "$CL3_WORKDIR/core-lib.cpp" $OPTS_CL3CORELIB_AMALGAM & p1=$! # "$CL3_ROOT/tmp/musl/build/lib/libc.a"
+time "$CXX" -o "$CL3_GENDIR/lib/libcl3-core_noamalgam.so" "$CL3_GENDIR/include/cl3/core/"*.cpp "$CL3_ROOT/src/extlib/"*.cpp $OPTS_CL3CORELIB_NOAMALGAM &
 wait $p1
 
 cd "$CL3_WORKDIR/core/tests"
