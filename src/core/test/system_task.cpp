@@ -115,15 +115,16 @@ namespace
 	{
 		const TTime ts_my_start = TSelfProcess::Self()->StartTime();
 
-		TPipe p_in;
-		TPipe p_cc;
 		TList<TString> args;
-		TChildProcess cp_cat_1("/bin/cat", args, TSelfProcess::Self()->Environment(), &p_in, &p_cc);
-		TLocalThread::Sleep(TTime::ConvertFrom(EUnit::MILLISECONDS, (s64_t)1));
-		TChildProcess cp_cat_2("/bin/cat", args, TSelfProcess::Self()->Environment(), &p_cc);
+		TChildProcess cp_cat_1("/bin/true", args, TSelfProcess::Self()->Environment(), NULL, NULL, NULL);
+		TLocalThread::Sleep(TTime::ConvertFrom(EUnit::MILLISECONDS, (s64_t)100));
+		TChildProcess cp_cat_2("/bin/true", args, TSelfProcess::Self()->Environment(), NULL, NULL, NULL);
 
 		EXPECT_TRUE(cp_cat_1.StartTime() > ts_my_start);
 		EXPECT_TRUE(cp_cat_2.StartTime() > cp_cat_1.StartTime());
+
+		const TTime ts_my_start_2 = TSelfProcess::Self()->StartTime();
+		EXPECT_EQ(ts_my_start, ts_my_start_2);
 	}
 
 	TEST(system_task_TProcess, IsRootProcess)
