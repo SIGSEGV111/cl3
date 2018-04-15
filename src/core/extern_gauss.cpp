@@ -148,7 +148,7 @@ static const double wtab[128] = {
 	1.83813550477e-07, 1.92166040885e-07, 2.05295471952e-07, 2.22600839893e-07
 };
 
-#include "../core/system_random.hpp"
+#include <cl3/core/../core/system_random.hpp>
 
 using namespace cl3::system::types;
 using namespace cl3::system::random;

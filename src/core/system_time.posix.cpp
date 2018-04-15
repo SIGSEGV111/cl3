@@ -16,17 +16,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3CORE
-#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
-#endif
-
-#include "system_os.hpp"
+#include <cl3/core/system_os.hpp>
 
 #if (CL3_OS == CL3_OS_POSIX)
 
-#include "system_time.hpp"
-#include "error.hpp"
-#include "system_types_typeinfo.hpp"
+#include <cl3/core/system_time.hpp>
+#include <cl3/core/error.hpp>
+#include <cl3/core/system_types_typeinfo.hpp>
 
 #include <sys/time.h>
 #include <sys/resource.h>

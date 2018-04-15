@@ -16,18 +16,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3CORE
-#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
-#endif
-
 #define _FILE_OFFSET_BITS 64
 
-#include "system_os.hpp"
+#include <cl3/core/system_os.hpp>
 
 #if (CL3_OS_DERIVATIVE == CL3_OS_DERIVATIVE_POSIX_LINUX)
 
-#include "io_file.hpp"
-#include "system_types_typeinfo.hpp"
+#include <cl3/core/io_file.hpp>
+#include <cl3/core/system_types_typeinfo.hpp>
 
 #include <sys/types.h>
 #include <sys/stat.h>

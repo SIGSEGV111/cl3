@@ -16,12 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3CORE
-#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
-#endif
-
-#include "system_memory.hpp"
-#include "system_types_typeinfo.hpp"
+#include <cl3/core/system_memory.hpp>
+#include <cl3/core/system_types_typeinfo.hpp>
 
 #include <sys/mman.h>
 #include <string.h>
@@ -251,26 +247,26 @@ namespace	cl3
 
 extern "C"
 {
-	void* malloc(usys_t sz_bytes) throw()
+	CL3_CXX_EXPORT_FUNC void* malloc(usys_t sz_bytes) throw()
 	{
 		void* v = NULL;
 		try { v = cl3::system::memory::Alloc(sz_bytes, NULL); } catch(...) {}
 		return v;
 	}
 
-	void* realloc(void* p, usys_t sz_bytes_new) throw()
+	CL3_CXX_EXPORT_FUNC void* realloc(void* p, usys_t sz_bytes_new) throw()
 	{
 		void* v = NULL;
 		try { v = cl3::system::memory::Realloc(p, sz_bytes_new, NULL, false); } catch(...) {}
 		return v;
 	}
 
-	void free(void* p) throw()
+	CL3_CXX_EXPORT_FUNC void free(void* p) throw()
 	{
 		try { cl3::system::memory::Free(p); } catch(...) {}
 	}
 
-	void *calloc(usys_t n_items, size_t sz_item) throw()
+	CL3_CXX_EXPORT_FUNC void *calloc(usys_t n_items, size_t sz_item) throw()
 	{
 		const usys_t sz_bytes = n_items * sz_item;
 		void* v = malloc(sz_bytes);
@@ -280,37 +276,37 @@ extern "C"
 	}
 };
 
-void* operator new(size_t sz)
+CL3_CXX_EXPORT_FUNC void* operator new(size_t sz)
 {
 	return cl3::system::memory::Alloc(sz, NULL);
 }
 
-void* operator new[](size_t sz)
+CL3_CXX_EXPORT_FUNC void* operator new[](size_t sz)
 {
 	return cl3::system::memory::Alloc(sz, NULL);
 }
 
-void* operator new(size_t, void* p) throw()
+CL3_CXX_EXPORT_FUNC void* operator new(size_t, void* p) throw()
 {
 	return p;
 }
 
-void* operator new(size_t sz, const std::nothrow_t&) throw()
+CL3_CXX_EXPORT_FUNC void* operator new(size_t sz, const std::nothrow_t&) throw()
 {
 	return cl3::system::memory::Alloc(sz, NULL);
 }
 
-void* operator new[](size_t sz, const std::nothrow_t&) throw()
+CL3_CXX_EXPORT_FUNC void* operator new[](size_t sz, const std::nothrow_t&) throw()
 {
 	return cl3::system::memory::Alloc(sz, NULL);
 }
 
-void operator delete(void* p) throw()
+CL3_CXX_EXPORT_FUNC void operator delete(void* p) throw()
 {
 	cl3::system::memory::Free(p);
 }
 
-void operator delete[](void* p) throw()
+CL3_CXX_EXPORT_FUNC void operator delete[](void* p) throw()
 {
 	cl3::system::memory::Free(p);
 }

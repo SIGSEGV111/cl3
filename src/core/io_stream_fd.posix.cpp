@@ -16,17 +16,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3CORE
-#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
-#endif
-
 #define _FILE_OFFSET_BITS 64
 
-#include "system_os.hpp"
+#include <cl3/core/system_os.hpp>
 
 #if (CL3_OS == CL3_OS_POSIX)
 
-#include "io_stream_fd.hpp"
+#include <cl3/core/io_stream_fd.hpp>
 
 #include <sys/types.h>
 #include <unistd.h>

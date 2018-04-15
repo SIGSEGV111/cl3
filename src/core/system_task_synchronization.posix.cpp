@@ -16,19 +16,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3CORE
-#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
-#endif
-
-#include "system_os.hpp"
+#include <cl3/core/system_os.hpp>
 
 #if (CL3_OS == CL3_OS_POSIX)
 
 #include <poll.h>
 
-#include "error.hpp"
-#include "system_task_synchronization.hpp"
-#include "system_task.hpp"
+#include <cl3/core/error.hpp>
+#include <cl3/core/system_task_synchronization.hpp>
+#include <cl3/core/system_task.hpp>
 
 namespace	cl3
 {

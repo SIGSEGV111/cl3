@@ -40,7 +40,16 @@ namespace	cl3
 			struct TValue
 			{
 				const system::types::typeinfo::TRTTI* type;
-				byte_t data[CL3_MAX(8, sizeof(void*))];
+
+				union
+				{
+					u8_t u8;
+					u16_t u16;
+					u32_t u32;
+					u64_t u64;
+					f32_t f32;
+					f64_t f64;
+				};
 			};
 
 			namespace	node

@@ -331,14 +331,20 @@ namespace	cl3
 				#undef SendMessage
 			#endif
 
-			#ifdef	INSIDE_CL3CORE
-				#define	CL3PUBF CL3_CXX_EXPORT_FUNC
-				#define	CL3PUBT CL3_CXX_EXPORT_TYPE
-				#define	CL3PUBV extern CL3_CXX_EXPORT_FUNC
+			#ifdef CL3_SOURCE_BUNDLE
+				#define	CL3PUBF
+				#define	CL3PUBT
+				#define	CL3PUBV extern
 			#else
-				#define	CL3PUBF CL3_CXX_IMPORT_FUNC
-				#define	CL3PUBT CL3_CXX_IMPORT_TYPE
-				#define	CL3PUBV extern CL3_CXX_IMPORT_FUNC
+				#ifdef	INSIDE_CL3CORE
+					#define	CL3PUBF CL3_CXX_EXPORT_FUNC
+					#define	CL3PUBT CL3_CXX_EXPORT_TYPE
+					#define	CL3PUBV extern CL3_CXX_EXPORT_FUNC
+				#else
+					#define	CL3PUBF CL3_CXX_IMPORT_FUNC
+					#define	CL3PUBT CL3_CXX_IMPORT_TYPE
+					#define	CL3PUBV extern CL3_CXX_IMPORT_FUNC
+				#endif
 			#endif
 
 			#ifndef CL3_CXX

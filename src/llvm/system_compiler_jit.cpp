@@ -16,11 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3LLVM
-#error "compiling cl3 source code but macro INSIDE_CL3LLVM is not defined"
-#endif
-
-#include "system_compiler_jit.hpp"
+#include <cl3/llvm/system_compiler_jit.hpp>
 
 #include <memory>
 

@@ -16,14 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3CORE
-#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
-#endif
-
-#include "system_task.hpp"
-#include "system_memory.hpp"
-#include "error.hpp"
-#include "io_collection_list.hpp"
+#include <cl3/core/system_task.hpp>
+#include <cl3/core/system_memory.hpp>
+#include <cl3/core/error.hpp>
+#include <cl3/core/io_collection_list.hpp>
 
 namespace	cl3
 {

@@ -1,16 +1,12 @@
 #ifdef __GNUC__
 
-#ifndef INSIDE_CL3CORE
-#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
-#endif
-
 #include <execinfo.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <cxxabi.h>
 
-#include "error_diag.hpp"
-#include "system_memory.hpp"
+#include <cl3/core/error_diag.hpp>
+#include <cl3/core/system_memory.hpp>
 
 // int backtrace(void **buffer, int size);
 // char **backtrace_symbols(void *const *buffer, int size);

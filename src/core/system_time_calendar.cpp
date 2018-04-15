@@ -1,10 +1,6 @@
-#ifndef INSIDE_CL3CORE
-#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
-#endif
-
-#include "system_time_calendar.hpp"
-#include "error.hpp"
-#include "io_text_string.hpp"
+#include <cl3/core/system_time_calendar.hpp>
+#include <cl3/core/error.hpp>
+#include <cl3/core/io_text_string.hpp>
 
 namespace cl3
 {

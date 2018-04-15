@@ -16,8 +16,8 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "system_time_timer.hpp"
-#include "error.hpp"
+#include <cl3/core/system_time_timer.hpp>
+#include <cl3/core/error.hpp>
 #include <sys/timerfd.h>
 
 namespace	cl3

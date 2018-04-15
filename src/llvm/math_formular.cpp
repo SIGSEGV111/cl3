@@ -16,11 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3LLVM
-#error "compiling cl3 source code but macro INSIDE_CL3LLVM is not defined"
-#endif
-
-#include "math_formular.hpp"
+#include <cl3/llvm/math_formular.hpp>
 
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/LLVMContext.h>
@@ -146,16 +142,16 @@ namespace	cl3
 					if(this->value.type->is_integer || this->value.type->is_bool)
 						switch(this->value.type->sz_bytes)
 						{
-							case 1: c = ConstantInt::get(type_return, (u64_t)*reinterpret_cast<const u8_t*>(this->value.data), this->value.type->is_signed); break;
-							case 2: c = ConstantInt::get(type_return, (u64_t)*reinterpret_cast<const u16_t*>(this->value.data), this->value.type->is_signed); break;
-							case 4: c = ConstantInt::get(type_return, (u64_t)*reinterpret_cast<const u32_t*>(this->value.data), this->value.type->is_signed); break;
-							case 8: c = ConstantInt::get(type_return, (u64_t)*reinterpret_cast<const u64_t*>(this->value.data), this->value.type->is_signed); break;
+							case 1: c = ConstantInt::get(type_return, (u64_t)this->value.u8, this->value.type->is_signed); break;
+							case 2: c = ConstantInt::get(type_return, (u64_t)this->value.u16, this->value.type->is_signed); break;
+							case 4: c = ConstantInt::get(type_return, (u64_t)this->value.u32, this->value.type->is_signed); break;
+							case 8: c = ConstantInt::get(type_return, (u64_t)this->value.u64, this->value.type->is_signed); break;
 						}
 					else if(this->value.type->is_float)
 						switch(this->value.type->sz_bytes)
 						{
-							case 4: c = ConstantFP::get(type_return, *reinterpret_cast<const f32_t*>(this->value.data)); break;
-							case 8: c = ConstantFP::get(type_return, *reinterpret_cast<const f64_t*>(this->value.data)); break;
+							case 4: c = ConstantFP::get(type_return, this->value.f32); break;
+							case 8: c = ConstantFP::get(type_return, this->value.f64); break;
 						}
 
 					CL3_CLASS_ERROR(c == NULL, TException, "unsupported datatype");
@@ -171,10 +167,11 @@ namespace	cl3
 				CLASS	TConstantNode::TConstantNode				(const TRTTI* type, const void* data)
 				{
 // 					printf("%p: TConstantNode()\n", this);
-					CL3_CLASS_ERROR(type->sz_bytes > sizeof(this->value.data), TException, "requested datatype too big");
+					CL3_CLASS_ERROR(type->sz_bytes > 8, TException, "requested datatype too big");
 					this->value.type = type;
-					memcpy(this->value.data, data, type->sz_bytes);
-					memset(this->value.data + type->sz_bytes, 0, sizeof(this->value.data) - type->sz_bytes);
+
+					this->value.u64 = 0;
+					memcpy(&this->value.u64, data, type->sz_bytes);
 				}
 
 				CLASS	TConstantNode::~TConstantNode				()

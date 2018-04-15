@@ -16,11 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3CORE
-#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
-#endif
-
-#include "math.hpp"
+#include <cl3/core/math.hpp>
 
 #if (CL3_CXX == CL3_CXX_MSVC)
 	long	lround	(double x)		{ return (long)((x) > 0 ? (x) + 0.5  : ceil((x)  - 0.5)); }

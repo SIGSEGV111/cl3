@@ -16,12 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef INSIDE_CL3CORE
-#error "compiling cl3 source code but macro INSIDE_CL3CORE is not defined"
-#endif
-
-#include "system_compiler.hpp"
-// #include "system_memory.hpp"
+#include <cl3/core/system_compiler.hpp>
+// #include <cl3/core/system_memory.hpp>
 //
 // #include <unistd.h>
 // #include <malloc.h>

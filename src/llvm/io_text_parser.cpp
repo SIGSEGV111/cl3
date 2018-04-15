@@ -22,7 +22,7 @@
 
 #include <cl3/core/error.hpp>
 #include <cl3/core/io_collection.hpp>
-#include "io_text_parser.hpp"
+#include <cl3/llvm/io_text_parser.hpp>
 
 namespace	cl3
 {
