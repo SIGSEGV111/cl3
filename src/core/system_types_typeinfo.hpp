@@ -441,12 +441,6 @@ namespace	cl3
 
 					template<typename T>
 					const bool is_boolean<T>::value;
-
-					template<typename T>
-					struct pass_by
-					{
-						using type = type_iif<sizeof(T) <= sizeof(void*) && is_copy_constructible<T>::value && is_move_constructible<T>::value, const T, const T&>;
-					};
 				}
 
 				struct	CL3PUBT	TRTTI
