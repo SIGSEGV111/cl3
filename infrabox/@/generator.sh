@@ -13,7 +13,7 @@ function generate_jobs()
 		cat << EOF
 	{
 		"type":"docker",
-		"resources":{"limits":{"cpu":1,"memory":2048}},
+		"resources":{"limits":{"cpu":1,"memory":3072}},
 		"docker_file":"infrabox/$n/Dockerfile.compile",
 		"name":"$n-compile",
 		"build_only":false,
