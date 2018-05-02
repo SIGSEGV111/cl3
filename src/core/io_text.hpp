@@ -236,7 +236,7 @@ namespace	cl3
 					CL3PUBF	IOut<byte_t>*
 									Sink	() const final override CL3_GETTER;
 
-					CL3PUBF	CLASS	TTextWriter	(const encoding::ICodec* codec = encoding::CODEC_CXX_CHAR);
+					CL3PUBF	CLASS	TTextWriter	(const encoding::ICodec* target_encoding);
 			};
 		}
 	}

@@ -401,7 +401,7 @@ namespace	cl3
 // 				const s64_t e = (s64_t)bits.e - 1023;
 // 				const u64_t i = 1 + bits.m / (2 * 52);
 
-				wchar_t buffer[128];
+				wchar_t buffer[128] = {};
 				swprintf(buffer, 128, L"%f", num);
 				os << buffer;
 			}
@@ -575,17 +575,17 @@ namespace	cl3
 				return this->encoder->Sink();
 			}
 
-			CLASS	TTextWriter::TTextWriter	(const encoding::ICodec* codec)
+			CLASS	TTextWriter::TTextWriter	(const encoding::ICodec* target_encoding)
 			{
-				this->encoder = codec->CreateEncoder();
+				this->encoder = target_encoding->CreateEncoder();
 
-				if(codec != encoding::CODEC_CXX_CHAR)
+				if(target_encoding != encoding::CODEC_CXX_CHAR)
 				{
 					this->decoder_char = encoding::CODEC_CXX_CHAR->CreateDecoder();
 					this->decoder_char->Sink(this->encoder.Object());
 				}
 
-				if(codec != encoding::CODEC_CXX_WCHAR)
+				if(target_encoding != encoding::CODEC_CXX_WCHAR)
 				{
 					this->decoder_wchar = encoding::CODEC_CXX_WCHAR->CreateDecoder();
 					this->decoder_wchar->Sink(this->encoder.Object());

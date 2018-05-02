@@ -1017,4 +1017,35 @@ namespace
 // 		Terminal()<<"\""<<s<<"\"\n";
 
 	}
+
+	TEST(io_text_TTextWriter, basics)
+	{
+		{
+			TList<byte_t> buffer;
+			TTextWriter tw(CODEC_CXX_CHAR);
+			tw.Sink(&buffer);
+			tw<<"hello world";
+			buffer.Append(0);
+			EXPECT_TRUE(strcmp((const char*)buffer.ItemPtr(0), "hello world") == 0);
+		}
+
+		{
+			TList<byte_t> buffer;
+			TTextWriter tw(CODEC_CXX_CHAR);
+			tw.Sink(&buffer);
+			tw<<123;
+			buffer.Append(0);
+			EXPECT_TRUE(strcmp((const char*)buffer.ItemPtr(0), "123") == 0);
+		}
+
+		{
+			TList<byte_t> buffer;
+			TTextWriter tw(CODEC_CXX_CHAR);
+			tw.Sink(&buffer);
+			tw<<1.5;
+			buffer.Append(0);
+			EXPECT_TRUE(strcmp((const char*)buffer.ItemPtr(0), "1.500000") == 0);
+// 			Terminal()<<'\"'<<(const char*)buffer.ItemPtr(0)<<'\"'<<'\n';
+		}
+	}
 }
