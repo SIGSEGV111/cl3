@@ -6,7 +6,7 @@ set +x
 set -e
 set -u
 set -o pipefail
-trap 'code=$?; set +x; echo "ERROR code $code at line $LINENO"; wait || true; exit $code' ERR
+trap 'code=$?; set +x; echo "ERROR code $code at line $LINENO" 1>&2; wait || true; exit $code' ERR
 
 set +u
 if test -z "$CXX"; then
