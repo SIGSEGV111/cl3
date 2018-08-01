@@ -97,6 +97,94 @@ namespace cl3
 						this->second == rhs.second;
 				}
 
+				bool TGregorian::operator> (const TGregorian& rhs) const
+				{
+					if(this->year > rhs.year)
+						return true;
+					else if(this->year < rhs.year)
+						return false;
+
+					if(this->month > rhs.month)
+						return true;
+					else if(this->month < rhs.month)
+						return false;
+
+					if(this->day > rhs.day)
+						return true;
+					else if(this->day < rhs.day)
+						return false;
+
+					if(this->hour > rhs.hour)
+						return true;
+					else if(this->hour < rhs.hour)
+						return false;
+
+					if(this->minute > rhs.minute)
+						return true;
+					else if(this->minute < rhs.minute)
+						return false;
+
+					if(this->second > rhs.second)
+						return true;
+					else if(this->second < rhs.second)
+						return false;
+
+					if(this->attoseconds > rhs.attoseconds)
+						return true;
+					else
+						return false;
+				}
+
+				bool TGregorian::operator>=(const TGregorian& rhs) const
+				{
+					if(this->year > rhs.year)
+						return true;
+					else if(this->year < rhs.year)
+						return false;
+
+					if(this->month > rhs.month)
+						return true;
+					else if(this->month < rhs.month)
+						return false;
+
+					if(this->day > rhs.day)
+						return true;
+					else if(this->day < rhs.day)
+						return false;
+
+					if(this->hour > rhs.hour)
+						return true;
+					else if(this->hour < rhs.hour)
+						return false;
+
+					if(this->minute > rhs.minute)
+						return true;
+					else if(this->minute < rhs.minute)
+						return false;
+
+					if(this->second > rhs.second)
+						return true;
+					else if(this->second < rhs.second)
+						return false;
+
+					if(this->attoseconds > rhs.attoseconds)
+						return true;
+					else if(this->attoseconds < rhs.attoseconds)
+						return false;
+
+					return true;
+				}
+
+				bool TGregorian::operator< (const TGregorian& rhs) const
+				{
+					return !(*this >= rhs);
+				}
+
+				bool TGregorian::operator<=(const TGregorian& rhs) const
+				{
+					return !(*this > rhs);
+				}
+
 				void TGregorian::Normalize()
 				{
 					NormalizeSingle(attoseconds, (s64_t)1000000000000000000LL, second);

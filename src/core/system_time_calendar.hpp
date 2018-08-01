@@ -43,6 +43,11 @@ namespace cl3
 					CL3PUBF bool operator==(const TGregorian&) const CL3_GETTER;
 					inline bool operator!=(const TGregorian& rhs) const CL3_GETTER { return !(*this == rhs); }
 
+					CL3PUBF bool operator> (const TGregorian&) const CL3_GETTER;
+					CL3PUBF bool operator>=(const TGregorian&) const CL3_GETTER;
+					CL3PUBF bool operator< (const TGregorian&) const CL3_GETTER;
+					CL3PUBF bool operator<=(const TGregorian&) const CL3_GETTER;
+
 					CL3PUBF void Normalize();
 
 					CL3PUBF static u16_t NumDaysInYear(const s32_t year) CL3_GETTER;

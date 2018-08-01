@@ -209,6 +209,48 @@ namespace
 		EXPECT_EQ(TGregorian(2018, 3, 14, 17, 12, 11) - TGregorian(2, 1, 3, 1, 2, 1), TGregorian(2016,  2, 11, 16, 10, 10));
 		EXPECT_EQ(TGregorian(2018, 3, 14, 17, 12, 11) - TGregorian(2, 3, 3, 1, 2, 1), TGregorian(2015, 12, 11, 16, 10, 10));
 	}
+
+	TEST(system_time_calendar_TGregorian, Compare)
+	{
+		EXPECT_TRUE(TGregorian(2018, 3, 14, 10, 17, 12) >  TGregorian(2018, 3, 14, 10, 17, 11));
+		EXPECT_TRUE(TGregorian(2018, 3, 14, 10, 17, 12) >= TGregorian(2018, 3, 14, 10, 17, 12));
+		EXPECT_FALSE(TGregorian(2018, 3, 14, 10, 17, 12) <  TGregorian(2018, 3, 14, 10, 17, 11));
+		EXPECT_TRUE(TGregorian(2018, 3, 14, 10, 17, 12) <= TGregorian(2018, 3, 14, 10, 17, 12));
+
+
+		EXPECT_TRUE(TGregorian(2019, 2, 2, 2, 2, 2, 2) > TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_TRUE(TGregorian(2018, 3, 2, 2, 2, 2, 2) > TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_TRUE(TGregorian(2018, 2, 3, 2, 2, 2, 2) > TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_TRUE(TGregorian(2018, 2, 2, 3, 2, 2, 2) > TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_TRUE(TGregorian(2018, 2, 2, 2, 3, 2, 2) > TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_TRUE(TGregorian(2018, 2, 2, 2, 2, 3, 2) > TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_TRUE(TGregorian(2018, 2, 2, 2, 2, 2, 3) > TGregorian(2018, 2, 2, 2, 2, 2, 2));
+
+		EXPECT_FALSE(TGregorian(2017, 2, 2, 2, 2, 2, 2) > TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_FALSE(TGregorian(2018, 1, 2, 2, 2, 2, 2) > TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_FALSE(TGregorian(2018, 2, 1, 2, 2, 2, 2) > TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_FALSE(TGregorian(2018, 2, 2, 1, 2, 2, 2) > TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_FALSE(TGregorian(2018, 2, 2, 2, 1, 2, 2) > TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_FALSE(TGregorian(2018, 2, 2, 2, 2, 1, 2) > TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_FALSE(TGregorian(2018, 2, 2, 2, 2, 2, 1) > TGregorian(2018, 2, 2, 2, 2, 2, 2));
+
+		EXPECT_TRUE(TGregorian(2019, 2, 2, 2, 2, 2, 2) >= TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_TRUE(TGregorian(2018, 3, 2, 2, 2, 2, 2) >= TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_TRUE(TGregorian(2018, 2, 3, 2, 2, 2, 2) >= TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_TRUE(TGregorian(2018, 2, 2, 3, 2, 2, 2) >= TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_TRUE(TGregorian(2018, 2, 2, 2, 3, 2, 2) >= TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_TRUE(TGregorian(2018, 2, 2, 2, 2, 3, 2) >= TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_TRUE(TGregorian(2018, 2, 2, 2, 2, 2, 3) >= TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_TRUE(TGregorian(2018, 2, 2, 2, 2, 2, 2) >= TGregorian(2018, 2, 2, 2, 2, 2, 2));
+
+		EXPECT_FALSE(TGregorian(2017, 2, 2, 2, 2, 2, 2) >= TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_FALSE(TGregorian(2018, 1, 2, 2, 2, 2, 2) >= TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_FALSE(TGregorian(2018, 2, 1, 2, 2, 2, 2) >= TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_FALSE(TGregorian(2018, 2, 2, 1, 2, 2, 2) >= TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_FALSE(TGregorian(2018, 2, 2, 2, 1, 2, 2) >= TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_FALSE(TGregorian(2018, 2, 2, 2, 2, 1, 2) >= TGregorian(2018, 2, 2, 2, 2, 2, 2));
+		EXPECT_FALSE(TGregorian(2018, 2, 2, 2, 2, 2, 1) >= TGregorian(2018, 2, 2, 2, 2, 2, 2));
+	}
 }
 
 namespace
