@@ -537,7 +537,12 @@ namespace	cl3
 			{
 				if(n_items_write_min == (usys_t)-1) n_items_write_min = n_items_write_max;
 				usys_t n;
-				CL3_CLASS_LOGIC_ERROR( ((n = this->decoder_wchar->Write((const byte_t*)arr_items_write, n_items_write_max * sizeof(char), n_items_write_min * sizeof(char))) % sizeof(char)) != 0 );
+
+				if(this->decoder_char != NULL)
+					CL3_CLASS_LOGIC_ERROR( ((n = this->decoder_char->Write((const byte_t*)arr_items_write, n_items_write_max * sizeof(char), n_items_write_min * sizeof(char))) % sizeof(char)) != 0 );
+				else
+					n = this->Sink()->Write((const byte_t*)arr_items_write, n_items_write_max, n_items_write_min);
+
 				return n;
 			}
 
@@ -545,7 +550,12 @@ namespace	cl3
 			{
 				if(n_items_write_min == (usys_t)-1) n_items_write_min = n_items_write_max;
 				usys_t n;
-				CL3_CLASS_LOGIC_ERROR( ((n = this->decoder_wchar->Write((const byte_t*)arr_items_write, n_items_write_max * sizeof(wchar_t), n_items_write_min * sizeof(wchar_t))) % sizeof(wchar_t)) != 0 );
+
+				if(this->decoder_wchar != NULL)
+					CL3_CLASS_LOGIC_ERROR( ((n = this->decoder_wchar->Write((const byte_t*)arr_items_write, n_items_write_max * sizeof(wchar_t), n_items_write_min * sizeof(wchar_t))) % sizeof(wchar_t)) != 0 );
+				else
+					n = this->Sink()->Write((const byte_t*)arr_items_write, n_items_write_max, n_items_write_min);
+
 				return n;
 			}
 
