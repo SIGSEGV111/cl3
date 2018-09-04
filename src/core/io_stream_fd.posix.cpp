@@ -18,11 +18,11 @@
 
 #define _FILE_OFFSET_BITS 64
 
-#include <cl3/core/system_os.hpp>
+#include "system_os.hpp"
 
 #if (CL3_OS == CL3_OS_POSIX)
 
-#include <cl3/core/io_stream_fd.hpp>
+#include "io_stream_fd.hpp"
 
 #include <sys/types.h>
 #include <unistd.h>

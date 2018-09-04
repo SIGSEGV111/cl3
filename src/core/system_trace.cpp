@@ -1,7 +1,7 @@
-#include <cl3/core/system_trace.hpp>
-#include <cl3/core/system_task.hpp>
-#include <cl3/core/system_memory.hpp>
-#include <cl3/core/io_network.hpp>
+#include "system_trace.hpp"
+#include "system_task.hpp"
+#include "system_memory.hpp"
+#include "io_network.hpp"
 
 namespace cl3
 {

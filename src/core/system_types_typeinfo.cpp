@@ -16,11 +16,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/system_types.hpp>
-#include <cl3/core/system_types_typeinfo.hpp>
-#include <cl3/core/util.hpp>
-#include <cl3/core/io_text_string.hpp>
-#include <cl3/core/io_text_encoding_utf8.hpp>
+#include "system_types.hpp"
+#include "system_types_typeinfo.hpp"
+#include "util.hpp"
+#include "io_text_string.hpp"
+#include "io_text_encoding_utf8.hpp"
 #include <string.h>
 
 namespace	cl3

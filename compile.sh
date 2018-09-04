@@ -148,7 +148,7 @@ function GenerateHeaderBundle()
 	(
 		cd "$dst_dir"
 		for file in *.hpp; do
-			echo "#include \"$file\""
+			echo "#include \"$1/$file\""
 		done
 	) > "$CL3_GENDIR/include/cl3/$1.hpp"
 }
@@ -160,14 +160,21 @@ function GenerateSourceBundle()
 
 	cp "$CL3_ROOT/src/$1/"*.cpp "$dst_dir"
 
+	for f in "$CL3_ROOT/src/$1/"*.hpp; do
+		ln -snf "$f" "$dst_dir/"
+	done
+
 	(
 		cd "$dst_dir"
-		echo "#pragma once"
+		echo "#ifndef _include_cl3_core_bundle_"
+		echo "#define _include_cl3_core_bundle_"
 		echo "#define CL3_SOURCE_BUNDLE"
 
 		for file in *.cpp; do
 			echo "#include \"../../src/cl3/$1/$file\""
 		done
+
+		echo "#endif"
 	) > "$CL3_GENDIR/include/cl3/$1.cpp"
 }
 

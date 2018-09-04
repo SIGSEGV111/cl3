@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/io_text_encoding_utf8.hpp>
-#include <cl3/core/io_text_string.hpp>
+#include "io_text_encoding_utf8.hpp"
+#include "io_text_string.hpp"
 
 extern "C" void* memcpy(void* dest, const void* src, size_t n) throw();
 extern "C" void* memmove(void* dest, const void* src, size_t n) throw();

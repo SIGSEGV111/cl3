@@ -18,13 +18,13 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <cl3/core/error.hpp>
-#include <cl3/core/util.hpp>
-#include <cl3/core/system_memory.hpp>
-#include <cl3/core/io_text.hpp>
-#include <cl3/core/io_text_string.hpp>
-#include <cl3/core/io_text_terminal.hpp>
-#include <cl3/core/error_diag.hpp>
+#include "error.hpp"
+#include "util.hpp"
+#include "system_memory.hpp"
+#include "io_text.hpp"
+#include "io_text_string.hpp"
+#include "io_text_terminal.hpp"
+#include "error_diag.hpp"
 
 namespace	cl3
 {

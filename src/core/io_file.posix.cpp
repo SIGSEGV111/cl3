@@ -18,13 +18,13 @@
 
 #define _FILE_OFFSET_BITS 64
 
-#include <cl3/core/system_os.hpp>
+#include "system_os.hpp"
 
 #if (CL3_OS == CL3_OS_POSIX)
 
-#include <cl3/core/io_file.hpp>
-#include <cl3/core/io_collection_list.hpp>
-#include <cl3/core/system_task.hpp>
+#include "io_file.hpp"
+#include "io_collection_list.hpp"
+#include "system_task.hpp"
 
 #include <sys/types.h>
 #include <sys/mman.h>

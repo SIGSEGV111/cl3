@@ -16,12 +16,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/system_os.hpp>
+#include "system_os.hpp"
 
 #if (CL3_OS == CL3_OS_POSIX)
 
 #include <signal.h>
-#include <cl3/core/system_compiler.hpp>
+#include "system_compiler.hpp"
 
 namespace cl3
 {

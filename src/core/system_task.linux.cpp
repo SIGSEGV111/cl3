@@ -16,17 +16,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/system_os.hpp>
+#include "system_os.hpp"
 
 #if (CL3_OS_DERIVATIVE == CL3_OS_DERIVATIVE_POSIX_LINUX)
 
-#include <cl3/core/system_task.hpp>
-#include <cl3/core/io_text_string.hpp>
-#include <cl3/core/io_collection_list.hpp>
-#include <cl3/core/io_text_encoding.hpp>
-#include <cl3/core/io_file.hpp>
-#include <cl3/core/util.hpp>
-#include <cl3/core/error.hpp>
+#include "system_task.hpp"
+#include "io_text_string.hpp"
+#include "io_collection_list.hpp"
+#include "io_text_encoding.hpp"
+#include "io_file.hpp"
+#include "util.hpp"
+#include "error.hpp"
 
 // #include <string.h>
 #include <unistd.h>

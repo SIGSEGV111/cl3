@@ -16,10 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/io_text_terminal.hpp>
-#include <cl3/core/error.hpp>
-#include <cl3/core/system_memory.hpp>
-#include <cl3/core/system_task.hpp>
+#include "io_text_terminal.hpp"
+#include "error.hpp"
+#include "system_memory.hpp"
+#include "system_task.hpp"
 
 namespace	cl3
 {

@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/system_memory.hpp>
-#include <cl3/core/system_types_typeinfo.hpp>
+#include "system_memory.hpp"
+#include "system_types_typeinfo.hpp"
 
 #include <sys/mman.h>
 #include <string.h>

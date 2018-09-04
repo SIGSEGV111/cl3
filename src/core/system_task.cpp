@@ -16,10 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/system_task.hpp>
-#include <cl3/core/system_memory.hpp>
-#include <cl3/core/error.hpp>
-#include <cl3/core/io_collection_list.hpp>
+#include "system_task.hpp"
+#include "system_memory.hpp"
+#include "error.hpp"
+#include "io_collection_list.hpp"
 
 namespace	cl3
 {

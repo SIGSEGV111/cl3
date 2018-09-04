@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/llvm/math_formular.hpp>
+#include "math_formular.hpp"
 
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/LLVMContext.h>

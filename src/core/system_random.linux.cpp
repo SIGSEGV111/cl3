@@ -19,7 +19,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <cl3/core/system_random.hpp>
+#include "system_random.hpp"
 
 namespace cl3
 {

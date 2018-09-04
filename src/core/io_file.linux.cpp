@@ -18,12 +18,12 @@
 
 #define _FILE_OFFSET_BITS 64
 
-#include <cl3/core/system_os.hpp>
+#include "system_os.hpp"
 
 #if (CL3_OS_DERIVATIVE == CL3_OS_DERIVATIVE_POSIX_LINUX)
 
-#include <cl3/core/io_file.hpp>
-#include <cl3/core/system_types_typeinfo.hpp>
+#include "io_file.hpp"
+#include "system_types_typeinfo.hpp"
 
 #include <sys/types.h>
 #include <sys/stat.h>

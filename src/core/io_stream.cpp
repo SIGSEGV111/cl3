@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/io_stream.hpp>
+#include "io_stream.hpp"
 
 namespace	cl3
 {
