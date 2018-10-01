@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/io_format_json.hpp>
+#include "io_format_json.hpp"
 
 namespace	cl3
 {

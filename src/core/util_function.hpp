@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _include_cl3_core_util_function_hpp_
+#define _include_cl3_core_util_function_hpp_
 
 #include "system_memory.hpp"
 
@@ -84,3 +85,5 @@ namespace cl3
 		}
 	}
 }
+
+#endif

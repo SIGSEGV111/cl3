@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/io_hash.hpp>
+#include "io_hash.hpp"
 
 #include <string.h>
 

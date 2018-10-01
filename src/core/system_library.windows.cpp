@@ -16,10 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/system_os.hpp>
+#include "system_os.hpp"
 #if	(CL3_OS == CL3_OS_WINDOWS)
 
-#include <cl3/core/system_library.hpp>
+#include "system_library.hpp"
 
 namespace	cl3
 {

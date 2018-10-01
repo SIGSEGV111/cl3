@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/io_serialization.hpp>
+#include "io_serialization.hpp"
 
 namespace	cl3
 {

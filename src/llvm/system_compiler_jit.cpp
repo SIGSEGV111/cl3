@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/llvm/system_compiler_jit.hpp>
+#include "system_compiler_jit.hpp"
 
 #include <memory>
 

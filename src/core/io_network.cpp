@@ -19,11 +19,11 @@
 #include <stdio.h>
 #include <arpa/inet.h>
 
-#include <cl3/core/io_network.hpp>
-#include <cl3/core/error.hpp>
-#include <cl3/core/io_text_string.hpp>
-#include <cl3/core/io_text_encoding.hpp>
-#include <cl3/core/system_endian.hpp>
+#include "io_network.hpp"
+#include "error.hpp"
+#include "io_text_string.hpp"
+#include "io_text_encoding.hpp"
+#include "system_endian.hpp"
 
 namespace cl3
 {

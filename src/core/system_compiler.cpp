@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/system_compiler.hpp>
+#include "system_compiler.hpp"
 // #include <cl3/core/system_memory.hpp>
 //
 // #include <unistd.h>

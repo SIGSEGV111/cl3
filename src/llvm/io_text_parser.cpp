@@ -20,9 +20,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/error.hpp>
-#include <cl3/core/io_collection.hpp>
-#include <cl3/llvm/io_text_parser.hpp>
+#include "../core/error.hpp"
+#include "../core/io_collection.hpp"
+#include "io_text_parser.hpp"
 
 namespace	cl3
 {

@@ -20,11 +20,11 @@
 #include <stdarg.h>
 #include <string.h>
 #include <stdint.h>
-#include <cl3/core/util.hpp>
-#include <cl3/core/system_memory.hpp>
-#include <cl3/core/system_types_typeinfo.hpp>
-#include <cl3/core/error.hpp>
-#include <cl3/core/io_text.hpp>
+#include "util.hpp"
+#include "system_memory.hpp"
+#include "system_types_typeinfo.hpp"
+#include "error.hpp"
+#include "io_text.hpp"
 
 namespace	cl3
 {

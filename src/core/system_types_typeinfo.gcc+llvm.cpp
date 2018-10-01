@@ -16,13 +16,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/system_compiler.hpp>
+#include "system_compiler.hpp"
 
 #if (CL3_CXX == CL3_CXX_GCC || CL3_CXX == CL3_CXX_CLANG)
 
-#include <cl3/core/system_types_typeinfo.hpp>
-#include <cl3/core/error.hpp>
-#include <cl3/core/io_text_string.hpp>
+#include "system_types_typeinfo.hpp"
+#include "error.hpp"
+#include "io_text_string.hpp"
 
 #include <cxxabi.h>
 

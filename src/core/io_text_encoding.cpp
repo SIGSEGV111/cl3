@@ -16,9 +16,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <cl3/core/io_text_encoding.hpp>
-#include <cl3/core/io_text_encoding_utf8.hpp>
-#include <cl3/core/io_text_string.hpp>
+#include "io_text_encoding.hpp"
+#include "io_text_encoding_utf8.hpp"
+#include "io_text_string.hpp"
 
 namespace	cl3
 {

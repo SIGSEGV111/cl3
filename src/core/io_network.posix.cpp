@@ -22,9 +22,9 @@
 #include <string.h>
 #include <errno.h>
 
-#include <cl3/core/error.hpp>
-#include <cl3/core/io_network.hpp>
-#include <cl3/core/system_endian.hpp>
+#include "error.hpp"
+#include "io_network.hpp"
+#include "system_endian.hpp"
 
 namespace cl3
 {
