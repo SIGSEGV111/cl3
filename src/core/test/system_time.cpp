@@ -139,6 +139,8 @@ namespace
 		EXPECT_TRUE((g = TGregorian(2018, 3, 16, 9, 32, 01, 921867452 * 1000000000ULL)) == (t = TTime(1521192721, 921867452ULL * 1000000000ULL)));
 		EXPECT_TRUE((g = TGregorian(2018, 3, 16, 9, 32, 02, 426581072 * 1000000000ULL)) == (t = TTime(1521192722, 426581072ULL * 1000000000ULL)));
 		EXPECT_TRUE((g = TGregorian(2018, 3, 16, 9, 32, 02, 931404298 * 1000000000ULL)) == (t = TTime(1521192722, 931404298ULL * 1000000000ULL)));
+
+		EXPECT_TRUE((g = TGregorian(1970, 1, 1, 0, 0, 0, 0)) == (t = TTime(0, 0)));
 // 		Terminal()<<"g: "<<(TString)g<<" == t: "<<(TString)(TGregorian)t<<"\n";
 	}
 
@@ -191,11 +193,21 @@ namespace
 		EXPECT_EQ((int)TGregorian::NumDaysInYear(2020), 366);
 		EXPECT_EQ((int)TGregorian::NumDaysInYear(2000), 366);
 		EXPECT_EQ((int)TGregorian::NumDaysInYear(2100), 365);
+		EXPECT_EQ((int)TGregorian::NumDaysInYear(1583), 355);
+		EXPECT_EQ((int)TGregorian::NumDaysInYear(1582), 365);
+		EXPECT_EQ((int)TGregorian::NumDaysInYear(1580), 366);
+		EXPECT_EQ((int)TGregorian::NumDaysInYear(  17), 365);
+		EXPECT_EQ((int)TGregorian::NumDaysInYear(  16), 366);
+		EXPECT_EQ((int)TGregorian::NumDaysInYear(   4), 366);
+
+// 		EXPECT_THROW((int)TGregorian::NumDaysInYear(0));
 	}
 
 	TEST(system_time_calendar_TGregorian, Math)
 	{
-		EXPECT_EQ(TGregorian(2018, 3, 14, 17, 12, 11) + TGregorian(2, 1, 3, 1, 2, 1), TGregorian(2020, 4, 17, 18, 14, 12));
+		EXPECT_EQ(TGregorian(2018, 3, 14, 17, 12, 11) + TGregorian(2, 1, 3, 1, 2, 1), TGregorian(2020,  4, 17, 18, 14, 12));
+		EXPECT_EQ(TGregorian(2018, 3, 14, 17, 12, 11) - TGregorian(2, 1, 3, 1, 2, 1), TGregorian(2016,  2, 11, 16, 10, 10));
+		EXPECT_EQ(TGregorian(2018, 3, 14, 17, 12, 11) - TGregorian(2, 3, 3, 1, 2, 1), TGregorian(2015, 12, 11, 16, 10, 10));
 	}
 }
 

@@ -123,7 +123,7 @@ namespace cl3
 
 				u16_t TGregorian::NumDaysInYear(const s32_t year)
 				{
-					return 365 - 28 + NumDaysInMonth(year, 2);
+					return 365 - 28 - 31 + NumDaysInMonth(year, 2) + NumDaysInMonth(year, 10);
 				}
 
 				static const u8_t ARR_DAYS_PER_MONTH[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
@@ -220,7 +220,7 @@ namespace cl3
 				CLASS TGregorian::TGregorian(const TTime time) : attoseconds(time.Attoseconds()), year(1970), month(1), day(1), hour(0), minute(0), second(0)
 				{
 					// TTime is in seconds since 1970-01-01
-					if(time.Seconds() > 0)
+					if(time.Seconds() >= 0)
 					{
 						const u64_t seconds_per_day = 24 * 60 * 60;
 						this->day += time.Seconds() / seconds_per_day;
