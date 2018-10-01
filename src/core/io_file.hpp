@@ -113,7 +113,7 @@ namespace	cl3
 					hidden : 1,		// posix: filename starts with a dot / windows: hidden flag
 					offline : 1,	// posix: currently not mounted auto-mounted directory / windows: offline flag
 					system : 1,		// posix: not mapped (yet) / windows: system flag
-					mountpoint : 1,	// posix: directory is a mount point / windows: directory is a mount point
+					mountpoint : 1,	// posix: directory is a mount point / windows: directory is a mount point NOTE: only valid when using TDirectoryBrowser::GetFileInfo()
 
 					append_only : 1,		// linux: FS_APPEND_FL / windows: not mapped (yet)
 					compressed : 1,			// linux: FS_COMPR_FL / windows: compressed flag
