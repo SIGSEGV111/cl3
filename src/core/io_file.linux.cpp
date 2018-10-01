@@ -29,10 +29,13 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <sys/ioctl.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <linux/fs.h>
 #include <sys/syscall.h>
+#include <string.h>
 
 namespace	cl3
 {
@@ -44,6 +47,7 @@ namespace	cl3
 			using namespace text::string;
 			using namespace system::memory;
 			using namespace system::types::typeinfo;
+			using namespace system::time;
 			using namespace collection::list;
 			using namespace error;
 
@@ -106,7 +110,7 @@ namespace	cl3
 				static const usys_t GETDENTS_BUFFER_SIZE = 4000;
 			#endif
 
-			usys_t	TDirectoryBrowser::EnumEntries	(collection::IDynamicCollection<text::string::TString>& collection) const
+			usys_t	TDirectoryBrowser::EnumEntries	(util::function::TFunction<bool, const TDirectoryBrowser&, const text::string::TString&> func) const
 			{
 				usys_t n = 0;
 				int n_bytes_used;
@@ -138,13 +142,137 @@ namespace	cl3
 
 						if(!TestStdDirs(d->d_name))
 						{
-							collection.Add(TString(d->d_name));
 							n++;
+							if(!func(*this, TString(d->d_name)))
+								return n;
 						}
 					}
 				}
 
 				return n;
+			}
+
+			static TString Readlink(const int fd_dir, const TString linkname)
+			{
+				char buffer[256];
+				ssize_t r;
+				CL3_NONCLASS_SYSERR(r = readlinkat(fd_dir, TCString(linkname, CODEC_CXX_CHAR).Chars(), buffer, sizeof(buffer)));
+				return TString(buffer, r);
+			}
+
+			static TFileInfo MakeFileInfo(const TString& filename, const struct stat& st, const int iflags, dev_t devid_parent, const int fd_dir)
+			{
+				TFileInfo fi;
+
+				if(S_ISREG(st.st_mode))
+					fi.type = EEntryType::FILE;
+				else if(S_ISDIR(st.st_mode))
+					fi.type = EEntryType::DIRECTORY;
+				else if(S_ISCHR(st.st_mode))
+					fi.type = EEntryType::DEVICE_CHAR;
+				else if(S_ISBLK(st.st_mode))
+					fi.type = EEntryType::DEVICE_BLOCK;
+				else if(S_ISFIFO(st.st_mode))
+					fi.type = EEntryType::PIPE;
+				else if(S_ISLNK(st.st_mode))
+					fi.type = EEntryType::SYMBOLIC_LINK;
+				else if(S_ISSOCK(st.st_mode))
+					fi.type = EEntryType::SOCKET;
+				else
+					fi.type = EEntryType::UNKNOWN;
+
+				fi.n_hardlink = st.st_nlink;
+
+				fi.setuid = (st.st_mode & S_ISUID) ? 1 : 0;
+				fi.setgid = (st.st_mode & S_ISGID) ? 1 : 0;
+				fi.sticky = (st.st_mode & S_ISVTX) ? 1 : 0;
+				fi.executable = ((st.st_mode & S_IXUSR) || (st.st_mode & S_IXGRP) || (st.st_mode & S_IXOTH)) ? 1 : 0;
+				fi.archive = (iflags & FS_NODUMP_FL) ? 0 : 1;
+				fi.encrypted  = 0;
+				fi.hidden = (filename.Count() >= 1 && filename.Left(1) == '.') ? 1 : 0;
+				fi.offline = 0;	// FIXME TODO posix: currently not mounted auto-mounted directory / windows: offline flag
+				fi.system = 0;
+				fi.mountpoint = st.st_dev != devid_parent ? 1 : 0;
+				fi.append_only = (iflags & FS_APPEND_FL) ? 1 : 0;
+				fi.compressed = (iflags & FS_COMPR_FL) ? 1 : 0;
+				fi.dirsync = (iflags & FS_DIRSYNC_FL) ? 1 : 0;
+				fi.immutable = (iflags & FS_IMMUTABLE_FL) ? 1 : 0;
+				fi.inherit_project_id = (iflags & FS_PROJINHERIT_FL) ? 1 : 0;
+				fi.journaled = (iflags & FS_JOURNAL_DATA_FL) ? 1 : 0;
+				fi.no_atime = (iflags & FS_NOATIME_FL) ? 1 : 0;
+				fi.no_cow = (iflags & FS_NOCOW_FL) ? 1 : 0;
+				fi.no_tail_merge = (iflags & FS_NOTAIL_FL) ? 1 : 0;
+				fi.secure_delete = (iflags & FS_SECRM_FL) ? 1 : 0;
+				fi.sync = (iflags & FS_SYNC_FL) ? 1 : 0;
+				fi.topdir = (iflags & FS_TOPDIR_FL) ? 1 : 0;
+				fi.undeleteable = (iflags & FS_UNRM_FL) ? 1 : 0;
+
+				fi.sz_virtual = st.st_size;
+				fi.sz_physical = st.st_blksize * st.st_blocks;
+				fi.ts_create = TTime(0,0);
+				fi.ts_status = TTime(st.st_ctime);
+				fi.ts_access = TTime(st.st_atime);
+				fi.ts_write = TTime(st.st_mtime);
+
+				if(fi.type == EEntryType::SYMBOLIC_LINK)
+					fi.link_target = Readlink(fd_dir, filename);
+
+				return fi;
+			}
+
+			usys_t	TDirectoryBrowser::EnumEntries	(collection::IDynamicCollection<text::string::TString>& collection) const
+			{
+				return this->EnumEntries([&collection](const TDirectoryBrowser&, const text::string::TString& filename) -> bool { collection.Add(filename); return true; });
+			}
+
+			TFileInfo TFile::Info	() const
+			{
+				struct stat st;
+				memset(&st, 0, sizeof(st));
+				CL3_CLASS_SYSERR(fstat(this->fd, &st));
+				int iflags = 0;
+				CL3_CLASS_SYSERR(ioctl(this->fd, FS_IOC_GETFLAGS, &iflags));
+				return MakeFileInfo(TString(), st, iflags, st.st_dev, AT_FDCWD);
+			}
+
+			TFileInfo TDirectoryBrowser::GetFileInfo		(const text::string::TString& name) const
+			{
+				struct stat st;
+				memset(&st, 0, sizeof(st));
+				const int ret = fstatat(this->fd, TCString(name, CODEC_CXX_CHAR).Chars(), &st, AT_NO_AUTOMOUNT|AT_SYMLINK_NOFOLLOW);
+				if(ret == -1)
+				{
+					if(errno == ENOENT)
+					{
+						TFileInfo fi;
+						fi.type = EEntryType::NOT_EXIST;
+						return fi;
+					}
+					else
+						CL3_CLASS_FAIL(TSyscallException, errno);
+				}
+
+				return MakeFileInfo(name, st, 0, this->st_dir.st_dev, this->fd);
+			}
+
+			void	TDirectoryBrowser::CreateDirectory		(const text::string::TString& name, const bool ignore_existing)
+			{
+				const int ret = mkdirat(this->fd, TCString(name, CODEC_CXX_CHAR).Chars(), 0755);
+				const int e = errno;
+
+				if(ret == -1)
+				{
+					if(e == EEXIST && ignore_existing)
+					{
+						struct stat st;
+						memset(&st, 0, sizeof(st));
+						CL3_CLASS_SYSERR(fstatat(this->fd, TCString(name, CODEC_CXX_CHAR).Chars(), &st, AT_NO_AUTOMOUNT|AT_SYMLINK_NOFOLLOW));
+						if(S_ISDIR(st.st_mode))
+							return;
+					}
+
+					CL3_CLASS_FAIL(TSyscallException, e);
+				}
 			}
 
 			text::string::TString

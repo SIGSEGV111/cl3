@@ -313,19 +313,60 @@ namespace	cl3
 				return TFile(name, access, create, *this, flags);
 			}
 
+			void	TDirectoryBrowser::Delete				(const text::string::TString& name, const bool file_ok, const bool dir_ok, const bool ignore_not_exist, const bool recursive) const
+			{
+				int ret = -1;
+
+				CL3_CLASS_ERROR(!dir_ok && !file_ok, TException, "at least one of file_ok or dir_ok must be true");
+
+				if(recursive && this->GetFileInfo(name).type == EEntryType::DIRECTORY)
+				{
+					CL3_CLASS_ERROR(!dir_ok, TException, "requested to recursively delete, but did not allow to remove directories");
+					TDirectoryBrowser(*this, name).EnumEntries( [ignore_not_exist, file_ok](const TDirectoryBrowser& dir, const text::string::TString& name) -> bool {
+						dir.Delete(name, file_ok, true, ignore_not_exist, true);
+						return true;
+					});
+				}
+
+				if(file_ok)
+					ret = unlinkat(this->fd, TCString(name, CODEC_CXX_CHAR).Chars(), 0);
+
+				if(!file_ok || (dir_ok && file_ok && ret == -1 && errno == EISDIR))
+					ret = unlinkat(this->fd, TCString(name, CODEC_CXX_CHAR).Chars(), AT_REMOVEDIR);
+
+				if(ret == -1)
+				{
+					if(errno == ENOENT && ignore_not_exist)
+						return;
+
+					CL3_CLASS_FAIL(TSyscallException, errno);
+				}
+			}
+
 			CLASS	TDirectoryBrowser::TDirectoryBrowser	()
 			{
 				CL3_CLASS_SYSERR(this->fd = open(".", DIRECTORY_BROWSER_FLAGS));
+				CL3_CLASS_SYSERR(fstat(this->fd, &this->st_dir));
 			}
 
 			CLASS	TDirectoryBrowser::TDirectoryBrowser	(const text::string::TString& path)
 			{
 				CL3_CLASS_SYSERR(this->fd = open(TCString(path, CODEC_CXX_CHAR).Chars(), DIRECTORY_BROWSER_FLAGS, 0));
+				CL3_CLASS_SYSERR(::fstat(this->fd, &this->st_dir));
 
 				#if (CL3_OS_DERIVATIVE != CL3_OS_DERIVATIVE_POSIX_LINUX)
-					struct ::stat st;
-					CL3_CLASS_SYSERR(::fstat(this->fd, &st));
-					if(!S_ISDIR(st.st_mode))
+					if(!S_ISDIR(this->st_dir.st_mode))
+						CL3_CLASS_FAIL(TException, "the specified file-system object is not a directory");
+				#endif
+			}
+
+			CLASS	TDirectoryBrowser::TDirectoryBrowser	(const TDirectoryBrowser& dir_parent, const text::string::TString& path)
+			{
+				CL3_CLASS_SYSERR(this->fd = openat(dir_parent.fd, TCString(path, CODEC_CXX_CHAR).Chars(), DIRECTORY_BROWSER_FLAGS, 0));
+				CL3_CLASS_SYSERR(::fstat(this->fd, &this->st_dir));
+
+				#if (CL3_OS_DERIVATIVE != CL3_OS_DERIVATIVE_POSIX_LINUX)
+					if(!S_ISDIR(this->st_dir.st_mode))
 						CL3_CLASS_FAIL(TException, "the specified file-system object is not a directory");
 				#endif
 			}
@@ -334,6 +375,7 @@ namespace	cl3
 			{
 				CL3_CLASS_LOGIC_ERROR(other.fd < 0);
 				CL3_CLASS_SYSERR(this->fd = openat(other.fd, ".", DIRECTORY_BROWSER_FLAGS));
+				CL3_CLASS_SYSERR(::fstat(this->fd, &this->st_dir));
 			}
 
 			CLASS	TDirectoryBrowser::TDirectoryBrowser	(TDirectoryBrowser&& other) : fd(system::def::move(other.fd))

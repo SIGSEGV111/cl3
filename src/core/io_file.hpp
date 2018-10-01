@@ -28,6 +28,10 @@
 #include "io_collection_array.hpp"
 #include "system_time.hpp"
 
+#if (CL3_OS == CL3_OS_POSIX)
+	#include <sys/stat.h>
+#endif
+
 namespace	cl3
 {
 	using namespace system::types;
@@ -80,26 +84,58 @@ namespace	cl3
 				CAN		//	only create if the file does not yet exist
 			};
 
-			enum class EEntryType
+			enum class EEntryType : u8_t
 			{
-				UNKNOWN = 0,
+				UNKNOWN,
+				NOT_EXIST,	// all fields in TFileInfo will have undefined value
 				FILE,
 				DIRECTORY,
 				PIPE,
 				SOCKET,
 				DEVICE_CHAR,
-				DEVICE_BLOCK
+				DEVICE_BLOCK,
+				SYMBOLIC_LINK
 			};
 
 			struct	TFileInfo
 			{
-				text::string::TString name;
 				EEntryType type;
+
+				u16_t n_hardlink;		// posix: number of hardlinks to this inode / windows: not mapped (yet)
+
+				u32_t
+					setuid : 1,		// posix: setuid permission bit / windows: not mapped (yet)
+					setgid : 1,		// posix: setgid permission bit / windows: not mapped (yet)
+					sticky : 1,		// posix: sticky flag / windows: not mapped (yet)
+					executable : 1,	// posix: any executable bit set / windows: file-extension is ".exe"
+					archive : 1,	// posix: inverse FS_NODUMP_FL / windows: archive flag
+					encrypted : 1,	// posix: not mapped (yet) / windows: encrypted flag
+					hidden : 1,		// posix: filename starts with a dot / windows: hidden flag
+					offline : 1,	// posix: currently not mounted auto-mounted directory / windows: offline flag
+					system : 1,		// posix: not mapped (yet) / windows: system flag
+					mountpoint : 1,	// posix: directory is a mount point / windows: directory is a mount point
+
+					append_only : 1,		// linux: FS_APPEND_FL / windows: not mapped (yet)
+					compressed : 1,			// linux: FS_COMPR_FL / windows: compressed flag
+					dirsync : 1,			// linux: FS_DIRSYNC_FL / windows: not mapped (yet)
+					immutable : 1,			// linux: FS_IMMUTABLE_FL / windows: readonly flag
+					inherit_project_id : 1,	// linux: FS_PROJINHERIT_FL / windows: not mapped (yet)
+					journaled : 1,			// linux: FS_JOURNAL_DATA_FL / windows: not mapped (yet)
+					no_atime : 1,			// linux: FS_NOATIME_FL / windows: not mapped (yet)
+					no_cow : 1,				// linux: FS_NOCOW_FL / windows: not mapped (yet)
+					no_tail_merge : 1,		// linux: FS_NOTAIL_FL / windows: not mapped (yet)
+					secure_delete : 1,		// linux: FS_SECRM_FL / windows: not mapped (yet)
+					sync : 1,				// linux: FS_SYNC_FL / windows: not mapped (yet)
+					topdir : 1,				// linux: FS_TOPDIR_FL / windows: not mapped (yet)
+					undeleteable : 1;		// linux: FS_UNRM_FL / windows: not mapped (yet)
+
 				uoff_t sz_virtual;	//	virtual file size, or "apparent" file size
 				uoff_t sz_physical;	//	physical file size, or "actual disk usage"
-				system::time::TTime ts_create;
-				system::time::TTime ts_change;
-				system::time::TTime ts_access;
+				system::time::TTime ts_create;	// => TTime(0,0), ftCreationTime
+				system::time::TTime ts_status;	// => ctime,
+				system::time::TTime ts_access;	// => atime, ftLastAccessTime
+				system::time::TTime ts_write;	// => mtime, ftLastWriteTime
+				text::string::TString link_target;	// only valid if type is SYMBOLIC_LINK
 			};
 
 			static const usys_t MAP_COUNT_FULLFILE = (usys_t)-1;
@@ -180,18 +216,29 @@ namespace	cl3
 				private:
 					stream::fd::TFDStream fd;
 
+					#if (CL3_OS == CL3_OS_POSIX)
+						struct stat st_dir;
+					#endif
+
 				public:
 					CL3PUBF	fd_t	Handle				() const CL3_GETTER;
 					CL3PUBF	text::string::TString
 									AbsolutePath		() const;
 					CL3PUBF	void	EnterDirectory		(const text::string::TString& name);	//	use ".." to go to the parent directory
 					CL3PUBF	usys_t	EnumEntries			(collection::IDynamicCollection<text::string::TString>&) const;
+					CL3PUBF	usys_t	EnumEntries			(util::function::TFunction<bool, const TDirectoryBrowser&, const text::string::TString&>) const;
 					CL3PUBF	bool	IsRoot				() const CL3_GETTER;
 					CL3PUBF collection::list::TList<text::string::TString> Entries() const CL3_GETTER;
-					CL3PUBF TFile	OpenFile			(const text::string::TString& name, TAccess access = TAccess::READ, ECreate create = ECreate::NEVER, TIOFlags flags = TIOFlags::NONE);
+					CL3PUBF	TFile	OpenFile			(const text::string::TString& name, TAccess access = TAccess::READ, ECreate create = ECreate::NEVER, TIOFlags flags = TIOFlags::NONE);
+					CL3PUBF	TFileInfo GetFileInfo		(const text::string::TString& name) const CL3_GETTER;
+
+					CL3PUBF	void	Delete				(const text::string::TString& name, const bool file_ok = true, const bool dir_ok = true, const bool ignore_not_exist = true, const bool recursive = false) const;
+
+					CL3PUBF	void	CreateDirectory		(const text::string::TString& name, const bool ignore_existing = false);
 
 					CL3PUBF	CLASS	TDirectoryBrowser	();	//	starts in current working directory
 					CL3PUBF	explicit TDirectoryBrowser	(const text::string::TString& path);
+					CL3PUBF	CLASS	TDirectoryBrowser	(const TDirectoryBrowser&, const text::string::TString& path);
 					CL3PUBF	CLASS	TDirectoryBrowser	(const TDirectoryBrowser&);
 					CL3PUBF	CLASS	TDirectoryBrowser	(TDirectoryBrowser&&);
 					CL3PUBF	CLASS	~TDirectoryBrowser	();
@@ -210,6 +257,8 @@ namespace	cl3
 				public:
 					inline const stream::fd::TFDStream& FD() const { return this->fd; }
 					inline stream::fd::TFDStream& FD() { return this->fd; }
+
+					CL3PUBF TFileInfo Info	() const CL3_GETTER;
 
 					CL3PUBF usys_t	Read	(u64_t pos, byte_t* arr_items_read, usys_t n_items_read_max);
 					CL3PUBF usys_t	Write	(u64_t pos, const byte_t* arr_items_write, usys_t n_items_write_max);

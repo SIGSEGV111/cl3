@@ -29,6 +29,7 @@ namespace
 {
 	using namespace cl3::system::types;
 	using namespace cl3::system::memory;
+	using namespace cl3::system::time;
 	using namespace cl3::io::file;
 	using namespace cl3::io::text::string;
 	using namespace cl3::io::collection::list;
@@ -164,6 +165,88 @@ namespace
 
 		TFile file = browser.OpenFile("random_data_128.bin");
 		EXPECT_TRUE(file.Size() == 128);
+	}
+
+	TEST(io_file_TDirectoryBrowser, GetFileInfo)
+	{
+		TDirectoryBrowser browser = cl3::unittest_support::TestDataDirectory();
+		browser.EnterDirectory("folder_with_mixed_files");
+
+		const TFileInfo fi_browser = browser.GetFileInfo("random_data_128.bin");
+		const TFileInfo fi_file = browser.OpenFile("random_data_128.bin").Info();
+
+		EXPECT_EQ(128U, fi_browser.sz_virtual);
+		EXPECT_EQ(EEntryType::FILE, fi_browser.type);
+		EXPECT_EQ(1U, fi_browser.n_hardlink);
+		EXPECT_TRUE(fi_browser.ts_create < TTime::Now(EClock::REALTIME));
+		EXPECT_TRUE(fi_browser.ts_status < TTime::Now(EClock::REALTIME));
+		EXPECT_TRUE(fi_browser.ts_write < TTime::Now(EClock::REALTIME));
+		EXPECT_EQ(0U, fi_browser.setuid);
+		EXPECT_EQ(0U, fi_browser.setgid);
+		EXPECT_EQ(0U, fi_browser.sticky);
+		EXPECT_EQ(0U, fi_browser.executable);
+		EXPECT_EQ(0U, fi_browser.hidden);
+		EXPECT_EQ(0U, fi_browser.system);
+		EXPECT_EQ(0U, fi_browser.mountpoint);
+		EXPECT_EQ(0U, fi_browser.append_only);
+		EXPECT_EQ(0U, fi_browser.immutable);
+		EXPECT_EQ(0U, fi_browser.mountpoint);
+		EXPECT_EQ(0U, fi_browser.topdir);
+		EXPECT_EQ(0U, fi_browser.undeleteable);
+
+		EXPECT_EQ(128U, fi_file.sz_virtual);
+		EXPECT_EQ(EEntryType::FILE, fi_file.type);
+		EXPECT_EQ(1U, fi_file.n_hardlink);
+		EXPECT_TRUE(fi_file.ts_create < TTime::Now(EClock::REALTIME));
+		EXPECT_TRUE(fi_file.ts_status < TTime::Now(EClock::REALTIME));
+		EXPECT_TRUE(fi_file.ts_write < TTime::Now(EClock::REALTIME));
+		EXPECT_EQ(0U, fi_file.setuid);
+		EXPECT_EQ(0U, fi_file.setgid);
+		EXPECT_EQ(0U, fi_file.sticky);
+		EXPECT_EQ(0U, fi_file.executable);
+		EXPECT_EQ(0U, fi_file.hidden);
+		EXPECT_EQ(0U, fi_file.system);
+		EXPECT_EQ(0U, fi_file.mountpoint);
+		EXPECT_EQ(0U, fi_file.append_only);
+		EXPECT_EQ(0U, fi_file.immutable);
+		EXPECT_EQ(0U, fi_file.mountpoint);
+		EXPECT_EQ(0U, fi_file.topdir);
+		EXPECT_EQ(0U, fi_file.undeleteable);
+	}
+
+	TEST(io_file_TDirectoryBrowser, DeleteFile)
+	{
+		const char* const filename = "io_file_TDirectoryBrowser_DeleteFile.tmp";
+		TDirectoryBrowser browser;
+		browser.OpenFile(filename, TAccess::READ | TAccess::WRITE, ECreate::ALWAYS);
+		browser.Delete(filename, true, false, false, false);
+	}
+
+	TEST(io_file_TDirectoryBrowser, CreateDirectory)
+	{
+		const char* const filename = "io_file_TDirectoryBrowser_CreateDirectory.tmp";
+		TDirectoryBrowser root;
+		root.Delete(filename, true, true, true, true);
+
+		{
+			root.CreateDirectory(filename, false);
+			root.CreateDirectory(filename, true);
+
+			TDirectoryBrowser tmp(root, filename);
+			tmp.CreateDirectory("a", false);
+			tmp.CreateDirectory("b", false);
+			tmp.CreateDirectory("c", false);
+			tmp.OpenFile("a/1.tmp", TAccess::READ | TAccess::WRITE, ECreate::ALWAYS);
+			tmp.OpenFile("a/2.tmp", TAccess::READ | TAccess::WRITE, ECreate::ALWAYS);
+			tmp.OpenFile("a/3.tmp", TAccess::READ | TAccess::WRITE, ECreate::ALWAYS);
+			tmp.OpenFile("b/1.tmp", TAccess::READ | TAccess::WRITE, ECreate::ALWAYS);
+			tmp.OpenFile("b/2.tmp", TAccess::READ | TAccess::WRITE, ECreate::ALWAYS);
+			tmp.OpenFile("b/3.tmp", TAccess::READ | TAccess::WRITE, ECreate::ALWAYS);
+		}
+
+		root.Delete(filename, true, true, false, true);
+
+		EXPECT_EQ(EEntryType::NOT_EXIST, root.GetFileInfo(filename).type);
 	}
 
 	TEST(io_file_TFile, NoCache)
