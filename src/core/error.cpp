@@ -99,7 +99,7 @@ namespace	cl3
 		{
 			tw<<"ERROR:"
 					<<"\n\tmessage: "<<ex.message
-					<<"\n\tfile: "<<ex.codefile<<":"<<ex.codeline
+					<<"\n\tfile: "<<ex.codefile<<":"<<&TNumberFormat::DECIMAL_SIMPLE<<ex.codeline
 					<<"\n\texpression: "<<(ex.expression == NULL ? "<none>" : ex.expression)
 					<<"\n\tbacktrace:";
 
