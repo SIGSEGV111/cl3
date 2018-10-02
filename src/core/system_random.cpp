@@ -18,6 +18,7 @@
 
 #include <math.h>
 #include "system_random.hpp"
+#include "system_memory.hpp"
 
 // from "extlib/gauss.cpp"
 double gaussian_ziggurat(cl3::system::random::IRandomNumberGenerator& rng, double sigma);

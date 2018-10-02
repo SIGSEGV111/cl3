@@ -30,10 +30,10 @@ namespace	cl3
 			{
 				using namespace io::stream::fd;
 
-				system::task::synchronization::waitinfo_t TTimer::WaitInfo() const
-				{
-					return this->fds.OnInputReady().WaitInfo();
-				}
+// 				system::task::synchronization::waitinfo_t TTimer::WaitInfo() const
+// 				{
+// 					return this->fds.OnInputReady().WaitInfo();
+// 				}
 
 				void TTimer::Start(TTime interval)
 				{

@@ -24,7 +24,6 @@
 
 #include "io_file.hpp"
 #include "io_collection_list.hpp"
-#include "system_task.hpp"
 
 #include <sys/types.h>
 #include <sys/mman.h>

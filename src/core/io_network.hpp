@@ -21,6 +21,7 @@
 #include "system_types.hpp"
 #include "system_compiler.hpp"
 #include "io_stream_fd.hpp"
+#include "io_collection_list.hpp"
 
 namespace cl3
 {

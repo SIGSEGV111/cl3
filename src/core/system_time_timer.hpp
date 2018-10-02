@@ -21,7 +21,6 @@
 
 #include "system_time.hpp"
 #include "io_stream_fd.hpp"
-#include "system_task_synchronization.hpp"
 
 namespace	cl3
 {
@@ -33,12 +32,12 @@ namespace	cl3
 		{
 			namespace	timer
 			{
-				class CL3PUBT TTimer : public virtual task::synchronization::IWaitable
+				class CL3PUBT TTimer //: public virtual task::synchronization::IWaitable
 				{
 					protected:
 						io::stream::fd::TFDStream fds;
 
-						CL3PUBF system::task::synchronization::waitinfo_t WaitInfo() const final override CL3_GETTER;
+// 						CL3PUBF system::task::synchronization::waitinfo_t WaitInfo() const final override CL3_GETTER;
 
 					public:
 						CL3PUBF void Start(TTime interval);

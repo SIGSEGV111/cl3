@@ -82,6 +82,8 @@ namespace	cl3
 					{
 						if(b_would_block)
 						{
+							// FIXME Task
+
 							//	we already know that the next read-syscall would block (if it weren't marked as O_NONBLOCK)
 							//	instead of busy-waiting for more data, we use poll() to actually block until more data is available
 							struct ::pollfd pfd = { this->fd, POLLIN, 0 };
@@ -286,19 +288,19 @@ namespace	cl3
 				{
 				}
 
-				system::task::synchronization::waitinfo_t TWaitable::WaitInfo() const
-				{
-					system::task::synchronization::waitinfo_t wi = {
-						this->fd,
-						(short)(
-							(this->input ? (POLLIN|POLLPRI) : 0) |
-							(this->output ? POLLOUT : 0) |
-							(this->error ? POLLERR : 0)
-						),
-						0
-					};
-					return wi;
-				}
+// 				system::task::synchronization::waitinfo_t TWaitable::WaitInfo() const
+// 				{
+// 					system::task::synchronization::waitinfo_t wi = {
+// 						this->fd,
+// 						(short)(
+// 							(this->input ? (POLLIN|POLLPRI) : 0) |
+// 							(this->output ? POLLOUT : 0) |
+// 							(this->error ? POLLERR : 0)
+// 						),
+// 						0
+// 					};
+// 					return wi;
+// 				}
 
 				/******************************************************************/
 

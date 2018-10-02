@@ -23,7 +23,6 @@
 #include "system_os.hpp"
 #include "system_types.hpp"
 #include "io_stream.hpp"
-#include "system_task_synchronization.hpp"
 
 namespace	cl3
 {
@@ -35,7 +34,7 @@ namespace	cl3
 		{
 			namespace	fd
 			{
-				class CL3PUBT TWaitable : public system::task::synchronization::IWaitable
+				class CL3PUBT TWaitable //: public system::task::synchronization::IWaitable
 				{
 					protected:
 						fd_t fd;
@@ -44,7 +43,7 @@ namespace	cl3
 						bool error;
 
 					public:
-						system::task::synchronization::waitinfo_t WaitInfo() const final override CL3_GETTER;
+// 						system::task::synchronization::waitinfo_t WaitInfo() const final override CL3_GETTER;
 
 						CL3PUBF CLASS TWaitable();
 						CL3PUBF CLASS TWaitable(fd_t fd, bool input, bool output, bool error);

@@ -759,31 +759,31 @@ namespace
 				EXPECT_TRUE(td_out < td_max);
 			}
 
-			static void TestTimerWait(TTimer& timer)
-			{
-				const TTime ts_start = TTime::Now(EClock::MONOTONIC);
-				timer.Start(TTime(0.01));
-				EXPECT_TRUE(timer.WaitFor(1));
-				EXPECT_TRUE(timer.WaitFor(0));
-				const TTime ts_end = TTime::Now(EClock::MONOTONIC);
-				const TTime ts_diff = ts_end - ts_start;
-				EXPECT_TRUE(ts_diff >= TTime(0.01));
-				EXPECT_TRUE(ts_diff <= TTime(1));
-				EXPECT_TRUE(timer.WaitFor(0));
-				timer.Stop();
-				EXPECT_FALSE(timer.WaitFor(0.1));
-				timer.Start(TTime(0.01));
-				EXPECT_TRUE(timer.WaitFor(1));
-			}
-
-			TEST(system_time_timer_TTimer, Basics)
-			{
-				TTimer tmr_realtime(EClock::REALTIME);
-				TTimer tmr_monotonic(EClock::MONOTONIC);
-
-				TestTimerWait(tmr_realtime);
-				TestTimerWait(tmr_monotonic);
-			}
+// 			static void TestTimerWait(TTimer& timer)
+// 			{
+// 				const TTime ts_start = TTime::Now(EClock::MONOTONIC);
+// 				timer.Start(TTime(0.01));
+// 				EXPECT_TRUE(timer.WaitFor(1));
+// 				EXPECT_TRUE(timer.WaitFor(0));
+// 				const TTime ts_end = TTime::Now(EClock::MONOTONIC);
+// 				const TTime ts_diff = ts_end - ts_start;
+// 				EXPECT_TRUE(ts_diff >= TTime(0.01));
+// 				EXPECT_TRUE(ts_diff <= TTime(1));
+// 				EXPECT_TRUE(timer.WaitFor(0));
+// 				timer.Stop();
+// 				EXPECT_FALSE(timer.WaitFor(0.1));
+// 				timer.Start(TTime(0.01));
+// 				EXPECT_TRUE(timer.WaitFor(1));
+// 			}
+//
+// 			TEST(system_time_timer_TTimer, Basics)
+// 			{
+// 				TTimer tmr_realtime(EClock::REALTIME);
+// 				TTimer tmr_monotonic(EClock::MONOTONIC);
+//
+// 				TestTimerWait(tmr_realtime);
+// 				TestTimerWait(tmr_monotonic);
+// 			}
 		}
 	}
 }
