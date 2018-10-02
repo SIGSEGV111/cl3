@@ -225,7 +225,7 @@ namespace cl3
 
 				private:
 					usys_t sz_stack;
-					memory::TUniquePtr<byte_t,memory::UPTR_ALLOC> p_stack;
+					memory::TUniquePtr<byte_t,memory::UPTR_MALLOC> p_stack;
 					memory::TUniquePtr<const error::TException> e;
 
 					TLocalThread* volatile thread;

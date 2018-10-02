@@ -33,14 +33,10 @@ namespace	cl3
 		using namespace system::memory;
 		using namespace system::types;
 
-		TUniquePtr<char,UPTR_ALLOC> MakeCStringCopy(const char* str, system::memory::IDynamicAllocator* local_allocator)
+		TUniquePtr<char,UPTR_MALLOC> MakeCStringCopy(const char* str)
 		{
-			if(local_allocator == NULL)
-				local_allocator = allocator_generic();
-			CL3_CONTEXT_VARIABLE_PUSH(allocator_generic, local_allocator);
-
 			usys_t l = ::strlen(str) + 1;
-			auto cpy = MakeUniquePtr<UPTR_ALLOC>((char*)Alloc(l, NULL));
+			auto cpy = MakeUniquePtr<UPTR_MALLOC>((char*)malloc(l));
 			::memcpy(cpy.Object(), str, l);
 			return cpy;
 		}

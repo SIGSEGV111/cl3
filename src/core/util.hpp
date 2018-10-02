@@ -35,7 +35,7 @@ namespace	cl3
 
 	namespace	util
 	{
-		CL3PUBF	system::memory::TUniquePtr<char,system::memory::UPTR_ALLOC> MakeCStringCopy(const char* str, system::memory::IDynamicAllocator* allocator = NULL);
+		CL3PUBF	system::memory::TUniquePtr<char,system::memory::UPTR_MALLOC> MakeCStringCopy(const char* str);
 
 		CL3PUBF	void	Hexdump	(const void* p_mem, system::types::usys_t sz_mem, io::text::ITextWriter&);
 	}

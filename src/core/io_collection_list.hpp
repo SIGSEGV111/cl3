@@ -542,7 +542,7 @@ namespace	cl3
 
 						if(!arr_items_new)
 						{
-							arr_items_new = (T*)system::memory::Alloc((n_items_current + n_items_prealloc_ideal + n_items_prealloc_min) * sizeof(T), NULL);
+							arr_items_new = (T*)malloc((n_items_current + n_items_prealloc_ideal + n_items_prealloc_min) * sizeof(T));
 
 							usys_t n_items_copied = 0;
 							try
@@ -554,13 +554,13 @@ namespace	cl3
 							{
 								for(usys_t i = 0; i < n_items_current; i++)
 									arr_items_new[i].~T();
-								system::memory::Free(arr_items_new);
+								free(arr_items_new);
 								throw;
 							}
 
 							for(usys_t i = 0; i < n_items_current; i++)
 								arr_items[i].~T();
-							system::memory::Free(arr_items);
+							free(arr_items);
 						}
 						arr_items = arr_items_new;
 						n_items_prealloc = n_items_prealloc_ideal;
@@ -839,7 +839,7 @@ namespace	cl3
 						arr_items[i].~T();
 					n_items_prealloc += n_items_current;
 					n_items_current = 0;
-					system::memory::Free(arr_items);
+					free(arr_items);
 					arr_items = NULL;
 					n_items_prealloc = 0;
 				}

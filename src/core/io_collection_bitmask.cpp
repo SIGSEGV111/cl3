@@ -160,7 +160,7 @@ namespace	cl3
 
 				void		TBitmask::Count		(usys_t new_count)
 				{
-					arr_bits = (byte_t*)Realloc(arr_bits, new_count / 8U + (((new_count % 8U) != 0U) ? 1U : 0U), NULL, false);
+					arr_bits = (byte_t*)realloc(arr_bits, new_count / 8U + (((new_count % 8U) != 0U) ? 1U : 0U));
 					n_bits = new_count;
 				}
 
@@ -208,13 +208,13 @@ namespace	cl3
 
 				CLASS		TBitmask::TBitmask	(const TBitmask& other)
 				{
-					arr_bits = reinterpret_cast<byte_t*>(Alloc(other.n_bits / 8U + (((other.n_bits % 8U) != 0U) ? 1U : 0U), NULL));
+					arr_bits = reinterpret_cast<byte_t*>(malloc(other.n_bits / 8U + (((other.n_bits % 8U) != 0U) ? 1U : 0U)));
 					n_bits = other.n_bits;
 				}
 
 				CLASS		TBitmask::~TBitmask	()
 				{
-					Free(arr_bits);
+					free(arr_bits);
 				}
 			}
 		}

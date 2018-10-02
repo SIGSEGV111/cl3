@@ -281,7 +281,7 @@ namespace	cl3
 						struct ::stat st;
 						snprintf(name_link, 32, "/proc/self/fd/%d", this->fd.FD());
 						CL3_CLASS_SYSERR(::lstat(name_link, &st));
-						auto name_target = MakeUniquePtr<UPTR_ALLOC>((char*)Alloc(st.st_size + 1, &TCTTI<char>::rtti));
+						auto name_target = MakeUniquePtr<UPTR_MALLOC>((char*)malloc(st.st_size + 1));
 						ssize_t r;
 						CL3_CLASS_SYSERR(r = ::readlink(name_link, name_target.Object(), st.st_size));
 						CL3_CLASS_LOGIC_ERROR(r > st.st_size);

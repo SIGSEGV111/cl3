@@ -525,7 +525,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TArray<const T>::TArray		(usys_t n_items) : arr_items((T*)system::memory::Alloc(n_items, &system::types::typeinfo::TCTTI<T>::rtti)), n_items(n_items), b_claim(true), is_sorted(false)
+				CLASS		TArray<const T>::TArray		(usys_t n_items) : arr_items((T*)malloc(n_items * sizeof(T))), n_items(n_items), b_claim(true), is_sorted(false)
 				{
 					for(usys_t i = 0; i < n_items; i++)
 						new (arr_items + i) T();
@@ -537,7 +537,7 @@ namespace	cl3
 				}
 
 				template<class T>
-				CLASS		TArray<const T>::TArray		(const TArray& other) : arr_items((T*)system::memory::Alloc(other.n_items, &system::types::typeinfo::TCTTI<T>::rtti)), n_items(other.n_items), is_sorted(other.is_sorted)
+				CLASS		TArray<const T>::TArray		(const TArray& other) : arr_items((T*)malloc(other.n_items * sizeof(T))), n_items(other.n_items), is_sorted(other.is_sorted)
 				{
 					for(usys_t i = 0; i < n_items; i++)
 						new (arr_items + i) T(other.arr_items[i]);
@@ -557,7 +557,7 @@ namespace	cl3
 					{
 						for(usys_t i = 0; i < n_items; i++)
 							arr_items[i].~T();
-						system::memory::Free(arr_items);
+						free(arr_items);
 					}
 				}
 

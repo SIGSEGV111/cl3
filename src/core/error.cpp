@@ -25,6 +25,7 @@
 #include "io_text_string.hpp"
 #include "io_text_terminal.hpp"
 #include "error_diag.hpp"
+#include <malloc.h>
 
 namespace	cl3
 {
@@ -37,8 +38,6 @@ namespace	cl3
 
 		CLASS	TException::TException	(const char* format, ...) : message(NULL), object(NULL), codefile(NULL), function(NULL), expression(NULL), inner(NULL), codeline(0)
 		{
-			CL3_CONTEXT_VARIABLE_PUSH(allocator_generic, allocator_exception.Value());
-
 			if(format)
 			{
 				va_list list;
@@ -48,7 +47,7 @@ namespace	cl3
 				if(l <= 0) throw "TException: printf format error (ctor)";
 
 				va_start(list, format);
-				message = (char*)Alloc(l, NULL);
+				message = (char*)malloc(l);
  				if(message == NULL) { va_end(list); throw "TException: out of memory (ctor)"; }
 				vsnprintf(message, l, format, list);
 				va_end(list);
@@ -65,14 +64,13 @@ namespace	cl3
 
 		CLASS	TException::TException	(const TException& e) : message(NULL), object(e.object), codefile(e.codefile), function(e.function), expression(e.expression), inner(e.inner), codeline(e.codeline)
 		{
-			CL3_CONTEXT_VARIABLE_PUSH(allocator_generic, allocator_exception.Value());
 			this->message = util::MakeCStringCopy(e.message).Claim();
 			this->backtrace = new TBacktrace(*e.backtrace);
 		}
 
 		CLASS	TException::~TException	()
 		{
-			Free(message);
+			free(message);
 			delete this->backtrace;
 		}
 
@@ -162,7 +160,7 @@ namespace	cl3
 
 		CLASS TInvalidArgumentException::~TInvalidArgumentException	()
 		{
-			Free(this->argname);
+			free(this->argname);
 		}
 	}
 }

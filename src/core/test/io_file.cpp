@@ -253,10 +253,10 @@ namespace
 	{
 		const usys_t SZ = 512;
 		byte_t write_buffer_[SZ + NO_CACHE_MEMORY_ALIGNMENT];
-		byte_t read_buffer_[SZ + NO_CACHE_MEMORY_ALIGNMENT];
+		byte_t read_buffer_ [SZ + NO_CACHE_MEMORY_ALIGNMENT];
 
 		byte_t* write_buffer = AlignMemory(write_buffer_, NO_CACHE_MEMORY_ALIGNMENT);
-		byte_t* read_buffer = AlignMemory(read_buffer_, NO_CACHE_MEMORY_ALIGNMENT);
+		byte_t* read_buffer  = AlignMemory(read_buffer_,  NO_CACHE_MEMORY_ALIGNMENT);
 
 		memset(write_buffer, 0xff, SZ);
 		memset(read_buffer,  0x00, SZ);

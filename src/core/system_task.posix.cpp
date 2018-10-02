@@ -205,7 +205,7 @@ namespace	cl3
 				this->registers = TContextRegisters(this->p_stack.Object(), this->sz_stack, &IFiber::Boot);
 			}
 
-			CLASS IFiber::IFiber(usys_t sz_stack) : sz_stack(this == &fib_main ? 0 : sz_stack), p_stack(MakeUniquePtr<UPTR_ALLOC,byte_t>((byte_t*)(this == &fib_main ? NULL : memory::Alloc(sz_stack, NULL)))), thread(this == &fib_main ? &th_main : NULL), caller(NULL)
+			CLASS IFiber::IFiber(usys_t sz_stack) : sz_stack(this == &fib_main ? 0 : sz_stack), p_stack(MakeUniquePtr<UPTR_MALLOC,byte_t>((byte_t*)(this == &fib_main ? NULL : malloc(sz_stack)))), thread(this == &fib_main ? &th_main : NULL), caller(NULL)
 			{
 				if(this != &fib_main)
 				{

@@ -24,50 +24,13 @@
 #include "system_types.hpp"
 #include "error.hpp"
 #include "context.hpp"
-
-extern "C"
-{
-	CL3PUBF void* malloc(cl3::system::types::usys_t sz_bytes) throw();
-	CL3PUBF void* realloc(void* p, cl3::system::types::usys_t sz_bytes_new) throw();
-	CL3PUBF void free(void* p) throw();
-	CL3PUBF void *calloc(cl3::system::types::usys_t n_items, cl3::system::types::usys_t sz_item) throw();
-};
-
-namespace std
-{
-	struct nothrow_t;
-}
-
-CL3PUBF void* operator new(size_t sz);
-CL3PUBF void* operator new[](size_t sz);
-CL3PUBF void* operator new(size_t sz, void* p) throw();
-CL3PUBF void* operator new(size_t sz, const std::nothrow_t&) throw();
-CL3PUBF void* operator new[](size_t sz, const std::nothrow_t&) throw();
-
-CL3PUBF void* operator new(unsigned long sz);
-CL3PUBF void* operator new[](unsigned long sz);
-CL3PUBF void* operator new(unsigned long sz, void* p) throw();
-CL3PUBF void* operator new(unsigned long sz, const std::nothrow_t&) throw();
-CL3PUBF void* operator new[](unsigned long sz, const std::nothrow_t&) throw();
-
-CL3PUBF void operator delete(void* p) throw();
-CL3PUBF void operator delete[](void* p) throw();
+#include <malloc.h>
+#include <new>
 
 namespace	cl3
 {
 	namespace	system
 	{
-		namespace	types
-		{
-			namespace	typeinfo
-			{
-				struct	TRTTI;
-
-				template<typename T>
-				struct	TCTTI;
-			}
-		}
-
 		namespace	memory
 		{
 			using namespace types;
@@ -86,31 +49,10 @@ namespace	cl3
 				virtual bool BeforeDispose() = 0;
 			};
 
-			CL3PUBF	void	Free	(void*);
-			CL3PUBF	void*	Alloc	(usys_t, const typeinfo::TRTTI*) CL3_WARN_UNUSED_RESULT;	//	FIXME: Alloc() should return a TUniquePtr
-			CL3PUBF	void*	Realloc	(void* p_mem, usys_t n_items_new, const typeinfo::TRTTI* rtti, bool inplace) CL3_WARN_UNUSED_RESULT;
-			CL3PUBF	usys_t	SizeOf	(void*) CL3_GETTER;
-
-			template<typename T>
-			T* AlignMemory(T* p, const usys_t alignment)
-			{
-				const usys_t d = alignment - (((usys_t)p) % alignment);
-				if(d == alignment)
-					return p;
-				return (T*)((usys_t)p + d);
-			}
-
-			template<typename T>
-			T*	Alloc	(usys_t n_items)
-			{
-				return reinterpret_cast<T*>(Alloc(n_items, &types::typeinfo::TCTTI<T>::rtti));
-			}
-
 			enum	EUnqiuePtrType
 			{
 				UPTR_OBJECT,
 				UPTR_ARRAY,
-				UPTR_ALLOC,
 				UPTR_MALLOC
 			};
 
@@ -134,9 +76,6 @@ namespace	cl3
 								break;
 							case UPTR_ARRAY:
 								delete[] object;
-								break;
-							case UPTR_ALLOC:
-								cl3::system::memory::Free((void*)object);
 								break;
 							case UPTR_MALLOC:
 								::free((void*)object);
@@ -216,12 +155,6 @@ namespace	cl3
 			{
 				TUniquePtr<T, type> uptr; uptr.Object(object); return uptr;
 			}
-
-			enum	EThreading
-			{
-				THREADING_SINGLE,
-				THREADING_MULTI
-			};
 
 			struct TSharedInfo
 			{
@@ -357,56 +290,19 @@ namespace	cl3
 				return TSharedPtr<T>(obj, new TSharedInfo(obj, &_::Delete<T>));
 			}
 
-			class	CL3PUBT	TBadAllocException : public error::TException
-			{
-				protected:
-					usys_t sz_bytes;
-
-				public:
-					CL3PUBF	CLASS	TBadAllocException	(usys_t sz_bytes);
-					CL3PUBF	CLASS	TBadAllocException	(TBadAllocException&&);
-					CL3PUBF	virtual	~TBadAllocException	();
-			};
-
-			struct	CL3PUBT	IDynamicAllocator
-			{
-				virtual	void*	Alloc	(usys_t sz_bytes) CL3_WARN_UNUSED_RESULT = 0;
-				virtual	void	Free	(void* p_mem) = 0;
-				virtual	void*	Realloc	(void* p_mem, usys_t sz_bytes_new, bool inplace) CL3_WARN_UNUSED_RESULT = 0;
-				virtual	usys_t	SizeOf	(void* p_mem) const CL3_GETTER = 0;
-			};
-
-			class	CL3PUBT	TRestrictAllocator : public IDynamicAllocator
-			{
-				private:
-					CLASS	TRestrictAllocator	(const TRestrictAllocator&);
-
-				protected:
-					IDynamicAllocator* allocator;
-					usys_t sz_limit;
-					usys_t sz_current;
-
-				public:
-					CL3PUBF	void*	Alloc	(usys_t sz_bytes) CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	void	Free	(void* p_mem);
-					CL3PUBF	void*	Realloc	(void* p_mem, usys_t sz_bytes_new, bool inplace) CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	usys_t	SizeOf	(void* p_mem) const CL3_GETTER;
-					CL3PUBF	usys_t	BytesAllocated	() const CL3_GETTER;
-					CL3PUBF	usys_t	BytesLimit		() const CL3_GETTER;
-
-					CL3PUBF	CLASS	TRestrictAllocator	(IDynamicAllocator* allocator, usys_t sz_limit);
-					CL3PUBF	CLASS	~TRestrictAllocator	();
-			};
-
-			CL3_CONTEXT_VARIABLE_DECL(IDynamicAllocator*, allocator_generic);
-			CL3_CONTEXT_VARIABLE_DECL(IDynamicAllocator*, allocator_exception);
-
-
-
 			template<typename T, typename ...Args>
 			TUniquePtr<T> New(Args... args)
 			{
 				return MakeUniquePtr<T>(new T(def::forward<Args>(args)...));
+			}
+
+			template<typename T>
+			T* AlignMemory(T* p, const usys_t alignment)
+			{
+				const usys_t d = alignment - (((usys_t)p) % alignment);
+				if(d == alignment)
+					return p;
+				return (T*)((usys_t)p + d);
 			}
 		}
 	}

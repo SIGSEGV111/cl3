@@ -123,7 +123,7 @@ namespace
 		}
 
 		{
-			int* arr_ints_claimable = (int*)cl3::system::memory::Alloc(n_ints * sizeof(int), NULL);
+			int* arr_ints_claimable = (int*)malloc(n_ints * sizeof(int));
 			memcpy(arr_ints_claimable, arr_ints, n_ints * sizeof(int));
 
 			TList<int> list(arr_ints_claimable, n_ints, true);
@@ -154,7 +154,7 @@ namespace
 		}
 
 		{
-			int* arr_ints_claimable = (int*)cl3::system::memory::Alloc(n_ints * sizeof(int), NULL);
+			int* arr_ints_claimable = (int*)malloc(n_ints * sizeof(int));
 			memcpy(arr_ints_claimable, arr_ints, n_ints * sizeof(int));
 
 			TList<int> list(arr_ints_claimable, n_ints, false);
@@ -183,7 +183,7 @@ namespace
 			EXPECT_TRUE(list[5] == 5);
 			EXPECT_TRUE(list[6] == 6);
 
-			cl3::system::memory::Free(arr_ints_claimable);
+			free(arr_ints_claimable);
 		}
 
 		{
