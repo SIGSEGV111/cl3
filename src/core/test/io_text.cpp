@@ -231,6 +231,20 @@ namespace
 
 		s = "spe world";
 		EXPECT_TRUE(s != "special world");
+
+		const TString s1 = "abc";
+		const TString s2 = "abd";
+		const TString s3 = "1zz";
+
+		EXPECT_TRUE(s2 >  s1);
+		EXPECT_TRUE(s2 >= s1);
+		EXPECT_TRUE(s1 <  s2);
+		EXPECT_TRUE(s1 <= s2);
+
+		EXPECT_TRUE(s1 >  s3);
+		EXPECT_TRUE(s1 >= s3);
+		EXPECT_TRUE(s3 <  s1);
+		EXPECT_TRUE(s3 <= s1);
 	}
 
 	TEST(io_text_string_TString, Replace_by_Index)
