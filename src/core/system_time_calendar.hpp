@@ -44,8 +44,9 @@ namespace cl3
 					inline bool operator!=(const TGregorian& rhs) const CL3_GETTER { return !(*this == rhs); }
 
 					CL3PUBF void Normalize();
+
 					CL3PUBF static u16_t NumDaysInYear(const s32_t year) CL3_GETTER;
-					CL3PUBF static u8_t NumDaysInMonth(const s32_t year, const u8_t month) CL3_GETTER;
+					CL3PUBF static u8_t  NumDaysInMonth(const s32_t year, const u8_t month) CL3_GETTER;
 
 					CL3PUBF operator TTime() const CL3_GETTER;
 					CL3PUBF explicit operator io::text::string::TString() const CL3_GETTER;
