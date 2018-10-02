@@ -1,9 +1,12 @@
 #!/bin/bash
 
-P="$(dirname "$(readlink -f "$0")")"
-
+set -e
 set -x
 set -u
+set -o pipefail
+export -p
+
+P="$(dirname "$(readlink -f "$0")")"
 cd "$P/.."
 
-infrabox run
+exec infrabox run
