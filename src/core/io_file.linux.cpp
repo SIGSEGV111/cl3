@@ -197,7 +197,6 @@ namespace	cl3
 				fi.compressed = (iflags & FS_COMPR_FL) ? 1 : 0;
 				fi.dirsync = (iflags & FS_DIRSYNC_FL) ? 1 : 0;
 				fi.immutable = (iflags & FS_IMMUTABLE_FL) ? 1 : 0;
-				fi.inherit_project_id = (iflags & FS_PROJINHERIT_FL) ? 1 : 0;
 				fi.journaled = (iflags & FS_JOURNAL_DATA_FL) ? 1 : 0;
 				fi.no_atime = (iflags & FS_NOATIME_FL) ? 1 : 0;
 				fi.no_cow = (iflags & FS_NOCOW_FL) ? 1 : 0;

@@ -118,8 +118,7 @@ namespace	cl3
 					append_only : 1,		// linux: FS_APPEND_FL / windows: not mapped (yet)
 					compressed : 1,			// linux: FS_COMPR_FL / windows: compressed flag
 					dirsync : 1,			// linux: FS_DIRSYNC_FL / windows: not mapped (yet)
-					immutable : 1,			// linux: FS_IMMUTABLE_FL / windows: readonly flag
-					inherit_project_id : 1,	// linux: FS_PROJINHERIT_FL / windows: not mapped (yet)
+ 					immutable : 1,			// linux: FS_IMMUTABLE_FL / windows: readonly flag
 					journaled : 1,			// linux: FS_JOURNAL_DATA_FL / windows: not mapped (yet)
 					no_atime : 1,			// linux: FS_NOATIME_FL / windows: not mapped (yet)
 					no_cow : 1,				// linux: FS_NOCOW_FL / windows: not mapped (yet)
