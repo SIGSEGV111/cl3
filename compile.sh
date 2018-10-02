@@ -276,4 +276,8 @@ else
 	wait
 fi
 
+ln -vsnf "$CL3_GENDIR" "$CL3_ROOT/gen/last-build" || true
+
+make -C "$CL3_ROOT/examples/how-to-use-source-bundle" run
+
 echo "Build successful"
