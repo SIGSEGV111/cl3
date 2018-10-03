@@ -1,5 +1,10 @@
 #!/bin/bash
 
+set +x
+set -e
+set -u
+set -o pipefail
+
 function generate_jobs()
 {
 	cd "$1/infrabox"
@@ -45,6 +50,5 @@ generate_jobs "$1" "$ts"
 echo '	],
 	"version":1
 }'
-) >"/infrabox/output/infrabox.json"
+) | tee "/infrabox/output/infrabox.json"
 
-cat < "/infrabox/output/infrabox.json"

@@ -1,5 +1,10 @@
 #!/bin/bash
 
+set +x
+set -e
+set -u
+set -o pipefail
+
 function generate_jobs()
 {
 	cd "$1/infrabox"
@@ -30,18 +35,4 @@ generate_jobs "$1"
 echo '	],
 	"version":1
 }'
-) >"/infrabox/output/infrabox.json"
-
-cat < "/infrabox/output/infrabox.json"
-
-# ,
-# 	{
-# 		"type":"docker",
-# 		"resources":{"limits":{"cpu":1,"memory":2048}},
-# 		"docker_file":"infrabox/$n/Dockerfile.tests",
-# 		"name":"$n-tests",
-# 		"build_only":false,
-# 		"build_context":"../..",
-# 		"environment":{"COMPILE_CONTAINER":"$n-compile"},
-# 		"depends_on": ["$n-compile"]
-# 	}
+) | tee "/infrabox/output/infrabox.json"
