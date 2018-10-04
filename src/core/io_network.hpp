@@ -38,6 +38,11 @@ namespace cl3
 
 		namespace network
 		{
+			struct TMAC
+			{
+				u8_t octet[6];
+			};
+
 			struct TIPv4
 			{
 				union
