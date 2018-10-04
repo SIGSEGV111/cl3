@@ -42,6 +42,7 @@ export -p > "tmp/env.log"
 
 echo "Building gtest ... "
 (
+	set -x
 	mkdir -p "tmp/gtest/build"
 	cd "tmp/gtest/build"
 	cmake "$CL3_ROOT/util/gtest"
@@ -246,6 +247,7 @@ RunValgrind "$CL3_GENDIR/bin/cl3-llvm-tests" --gtest_output=xml:gtest.xml
 
 if test "$BUILD_TYPE" == "debug" && ((INFRABOX==0)); then
 	(
+		set -x
 		mkdir -p "$CL3_GENDIR/coverage"
 		lcov --capture --rc lcov_branch_coverage=1 --rc geninfo_auto_base=1 \
 			--directory "$CL3_WORKDIR/core/lib" --directory "$CL3_WORKDIR/core/tests" \

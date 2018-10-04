@@ -50,7 +50,7 @@ namespace	cl3
 
 		void	Hexdump	(const void* p_mem_, usys_t sz_mem, io::text::ITextWriter& w)
 		{
-			const char* const p_mem = (const char* const)p_mem_;
+			const char* const p_mem = (const char*)p_mem_;
 			const usys_t base = (usys_t)p_mem_;
 
 			char line[] = "[    ]                 :                                                 |                |\n";

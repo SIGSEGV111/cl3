@@ -72,7 +72,6 @@ namespace	cl3
 
 				CL3PUBF	static	usys_t	strlen	(const TUTF32*);
 
-				inline	TUTF32&	operator=	(const TUTF32& rhs) { this->code = rhs.code; return *this; }
 				inline	bool	operator==	(TUTF32 rhs) const { return code == rhs.code; }
 				inline	bool	operator!=	(TUTF32 rhs) const { return code != rhs.code; }
 				inline	bool	operator>	(TUTF32 rhs) const { return code >  rhs.code; }
