@@ -291,7 +291,7 @@ namespace	cl3
 			}
 
 			template<typename T, typename ...Args>
-			TUniquePtr<T> New(Args... args)
+			TUniquePtr<T, UPTR_OBJECT> New(Args... args)
 			{
 				return MakeUniquePtr<T>(new T(def::forward<Args>(args)...));
 			}
