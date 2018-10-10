@@ -51,48 +51,6 @@ namespace	cl3
 								public virtual encoding::AWCharDecoder,
 								public virtual encoding::AWCharEncoder
 				{
-					private:
-						template<typename T>
-						inline static void Format(TString& s, T a0)
-						{
-							TString tmp;
-							tmp.number_format = s.number_format;
-							tmp<<a0;
-							s.Replace("§", tmp, 1);
-						}
-
-						inline static void Format(TString& s, const TString& a0)
-						{
-							s.Replace("§", a0, 1);
-						}
-
-						inline static void Format(TString& s, TNumberFormat* a0)
-						{
-							s.number_format = a0;
-						}
-
-						inline static void Format(TString& s, const TNumberFormat* a0)
-						{
-							s.number_format = a0;
-						}
-
-						inline static void Format(TString& s, TNumberFormat& a0)
-						{
-							s.number_format = &a0;
-						}
-
-						inline static void Format(TString& s, const TNumberFormat& a0)
-						{
-							s.number_format = &a0;
-						}
-
-						template<typename T, typename... TArg>
-						inline static void Format(TString& s, T a0, TArg... args)
-						{
-							TString::Format(s, a0);
-							TString::Format(s, args...);
-						}
-
 					public:
 						using collection::list::TList<TUTF32>::Prepend;
 						using collection::list::TList<TUTF32>::Append;
@@ -217,13 +175,56 @@ namespace	cl3
 						CL3PUBF	CLASS	TString	(TString&&);
 						CL3PUBF	virtual	~TString();
 
-						template<typename... TArg>
-						static TString Format(const char* format, TArg... args)
+
+						TString& Format(const TString& a)
 						{
-							TString s = format;
-							TString::Format(s, args...);
-							s.number_format = NULL;
-							return s;
+							this->Replace("§", a, 1);
+							return *this;
+						}
+
+						TString& Format(const TNumberFormat* a)
+						{
+							this->number_format = a;
+							return *this;
+						}
+
+						TString& Format(TNumberFormat* a)
+						{
+							this->number_format = a;
+							return *this;
+						}
+
+						template<typename A>
+						TString& Format(A a)
+						{
+							this->Format(TString(a, this->number_format));
+							return *this;
+						}
+
+						template<typename A0, typename... TArg>
+						TString& Format(A0 a0, TArg... args)
+						{
+							const TNumberFormat* const nf = this->number_format;
+							this->Format(system::def::forward<A0>(a0));
+							this->Format(system::def::forward<TArg>(args)...);
+							this->number_format = nf;
+							return *this;
+						}
+
+						TString& Format()
+						{
+							return *this;
+						}
+
+						template<typename... TArg>
+						static TString Formatted(const char* format, TArg... args)
+						{
+							return TString(format).Format(system::def::forward<TArg>(args)...);
+						}
+
+						static TString Formatted(const char* format)
+						{
+							return TString(format);
 						}
 				};
 

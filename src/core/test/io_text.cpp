@@ -1013,7 +1013,7 @@ namespace
 		nf_std.integer_length_min = 2;
 
 		TString s;
-		EXPECT_TRUE((s = TString::Format("§-§-§ §:§:§", &nf_year, 513, &nf_std, 2, 30, 17, 2, 13)) == " 513-02-30 17:02:13");
+		EXPECT_TRUE((s = TString::Formatted("§-§-§ §:§:§", &nf_year, 513, &nf_std, 2, 30, 17, 2, 13)) == " 513-02-30 17:02:13");
 // 		Terminal()<<"\""<<s<<"\"\n";
 
 	}

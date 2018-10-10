@@ -285,7 +285,7 @@ namespace cl3
 					nf_std.integer_padding = '0';
 					nf_std.integer_length_min = 2;
 
-					return TString::Format("§-§-§ §:§:§",
+					return TString::Formatted("§-§-§ §:§:§",
 										   TString(this->year, &nf_year),
 										   TString(this->month, &nf_std),
 										   TString(this->day, &nf_std),
