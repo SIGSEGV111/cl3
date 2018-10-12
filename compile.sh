@@ -114,7 +114,7 @@ echo "Using LLVM version: $LLVM_VER"
 ln -vsnf "$CL3_GENDIR" "$CL3_ROOT/gen/last-build" || true
 
 OPTS_ARCH="-march=native"
-OPTS_BASE="$OPTS_ARCH -fvisibility-inlines-hidden -fvisibility=hidden -std=c++11 -fdata-sections -ffunction-sections -flto=4 -lpthread -Wno-multichar -I $CL3_GENDIR/include -L $CL3_GENDIR/lib"
+OPTS_BASE="$OPTS_ARCH -fvisibility-inlines-hidden -fvisibility=hidden -std=c++11 -fdata-sections -ffunction-sections -flto -lpthread -Wno-multichar -I $CL3_GENDIR/include -L $CL3_GENDIR/lib"
 OPTS_QA="-Wno-unused-parameter -Wno-deprecated-declarations -Wno-unused-function -Wall -Wextra -Werror"
 
 OPTS_DEBUG="-g -O0 -DCL3_DEBUG --coverage -rdynamic"

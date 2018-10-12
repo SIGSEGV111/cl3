@@ -78,14 +78,14 @@ namespace	cl3
 				if(my_state) *my_state = last;
 			}
 
-			TStateTracker& operator=(const TStateTracker& rhs)
+			TStateTracker& operator=(const TStateTracker&)
 			{
 				last = EState::COPY_ASSIGNED;
 				if(my_state) *my_state = last;
 				return *this;
 			}
 
-			TStateTracker& operator=(TStateTracker&& rhs)
+			TStateTracker& operator=(TStateTracker&&)
 			{
 				last = EState::MOVE_ASSIGNED;
 				if(my_state) *my_state = last;

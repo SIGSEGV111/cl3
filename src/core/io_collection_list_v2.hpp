@@ -2,7 +2,7 @@
 #define	_include_cl3_core_io_collection_list_v2_hpp_
 
 #include "error.hpp"
-#include <type_traits>
+// #include <type_traits>
 
 namespace cl3
 {
@@ -12,16 +12,14 @@ namespace cl3
 		{
 			namespace list_v2
 			{
-				template<typename T>
-				void MoveItems(T* const arr_source, T* const arr_dest, const usys_t n_move);
-
 				// NOTE: only accepts datatypes which are trivially moveable!
 
 				template<typename T>
 				class TList2
 				{
 					public:
-						using valuearg_t = typename std::conditional<(sizeof(T) <= sizeof(void*) && std::is_trivially_copyable<T>::value), const T, const T&>::type;
+// 						using valuearg_t = typename std::conditional<(sizeof(T) <= sizeof(void*) && std::is_trivially_copyable<T>::value), (const T), (const T&)>::type;	// missing compiler/libstdc++ support in gcc48
+						using valuearg_t = const T&;
 
 					protected:
 						T* arr_items;
