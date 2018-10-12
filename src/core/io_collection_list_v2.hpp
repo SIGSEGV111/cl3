@@ -147,12 +147,12 @@ namespace cl3
 				TList2<T>& TList2<T>::operator=(const TList2& rhs)
 				{
 					this->Clear();
-					this->Prealloc(rhs.Count());
+					this->Prealloc(rhs.n_items);
 
 					usys_t i = 0;
 					try
 					{
-						for(; i < rhs.Count(); i++)
+						for(; i < rhs.n_items; i++)
 							new (this->arr_items + i) T(rhs.arr_items[i]);
 					}
 					catch(...)
@@ -166,6 +166,7 @@ namespace cl3
 					}
 
 					this->n_items = rhs.n_items;
+					this->n_prealloc_current -= rhs.n_items;
 					return *this;
 				}
 
@@ -193,31 +194,13 @@ namespace cl3
 				}
 
 				template<typename T>
-				CLASS TList2<T>::TList2(const TList2& other) : arr_items(nullptr), n_items(0), n_prealloc_current(0)
+				CLASS TList2<T>::TList2(const TList2& other) : arr_items(nullptr), n_items(0), n_prealloc_current(0), n_prealloc_static(other.n_prealloc_static), div_prealloc(other.div_prealloc), preserve_order(other.preserve_order)
 				{
-					Prealloc(other.n_items);
-
-					for(usys_t i = 0; i < other.n_items; i++)
-						try
-						{
-							new (this->arr_items + this->n_items + i) T(system::def::move(other.arr_items[i]));
-						}
-						catch(...)
-						{
-							// TODO: add annotation to error
-
-							// rollback
-							for(usys_t j = i-1; j != (usys_t)-1; j--)
-								this->arr_items[j].~T();
-							throw;
-						}
-
-					this->n_items += other.n_items;
-					this->n_prealloc_current -=  other.n_items;
+					*this = other;
 				}
 
 				template<typename T>
-				CLASS TList2<T>::TList2(TList2&& other) : arr_items(other.arr_items), n_items(other.n_items), n_prealloc_current(other.n_prealloc_current)
+				CLASS TList2<T>::TList2(TList2&& other) : arr_items(other.arr_items), n_items(other.n_items), n_prealloc_current(other.n_prealloc_current), n_prealloc_static(other.n_prealloc_static), div_prealloc(other.div_prealloc), preserve_order(other.preserve_order)
 				{
 					other.arr_items = nullptr;
 					other.n_items = 0;
