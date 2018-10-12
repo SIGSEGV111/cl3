@@ -201,7 +201,7 @@ namespace	cl3
 
 			CLASS	TFile::TFile	(const text::string::TString& name, TAccess access, ECreate create, const TDirectoryBrowser& directory, TIOFlags ioflags) : access(access)
 			{
-				int flags = O_LARGEFILE | O_NOCTTY | O_CLOEXEC | (ioflags.disable_cache ? O_DIRECT : 0) | (ioflags.synchronous_io ? O_DSYNC : 0);
+				int flags = O_NONBLOCK | O_LARGEFILE | O_NOCTTY | O_CLOEXEC | (ioflags.disable_cache ? O_DIRECT : 0) | (ioflags.synchronous_io ? O_DSYNC : 0);
 				const int mode = (access & TAccess::EXECUTE) ? 0777 : 0666;
 
 				CL3_CLASS_ERROR( (access & TAccess::READ) == 0 && (access & TAccess::WRITE) == 0, TException, "file access mode is invalid");
