@@ -111,8 +111,10 @@ LLVM_SYSLIBS="$(llvm-config --system-libs)"
 
 echo "Using LLVM version: $LLVM_VER"
 
+ln -vsnf "$CL3_GENDIR" "$CL3_ROOT/gen/last-build" || true
+
 OPTS_ARCH="-march=native"
-OPTS_BASE="$OPTS_ARCH -fvisibility-inlines-hidden -fvisibility=hidden -std=c++11 -lpthread -Wno-multichar -I $CL3_GENDIR/include -L $CL3_GENDIR/lib"
+OPTS_BASE="$OPTS_ARCH -fvisibility-inlines-hidden -fvisibility=hidden -std=c++11 -fdata-sections -ffunction-sections -flto=4 -lpthread -Wno-multichar -I $CL3_GENDIR/include -L $CL3_GENDIR/lib"
 OPTS_QA="-Wno-unused-parameter -Wno-deprecated-declarations -Wno-unused-function -Wall -Wextra -Werror"
 
 OPTS_DEBUG="-g -O0 -DCL3_DEBUG --coverage -rdynamic"
@@ -217,6 +219,9 @@ GenerateLibAmalgam llvm
 GenerateTestAmalgam core
 GenerateTestAmalgam llvm
 
+make -C "$CL3_ROOT/examples/how-to-use-source-bundle" clean
+time make -C "$CL3_ROOT/examples/how-to-use-source-bundle" example & p3=$!
+
 cd "$CL3_WORKDIR/core/lib"
 time "$CXX" -o "$CL3_GENDIR/lib/libcl3-core.so" "$CL3_WORKDIR/core-lib.cpp" $OPTS_CL3CORELIB & p1=$! # "$CL3_ROOT/tmp/musl/build/lib/libc.a"
 time "$CXX" -o "$CL3_GENDIR/lib/libcl3-core_noamalgam.so" "$CL3_GENDIR/src/cl3/core/"*.cpp $OPTS_CL3CORELIB &
@@ -242,8 +247,11 @@ RunValgrind "$CL3_GENDIR/bin/cl3-core-tests" '--gtest_filter=-system_memory*' --
 time "$CL3_GENDIR/bin/cl3-core-tests" '--gtest_filter=system_memory*' --gtest_output=xml:gtest.xml dummy1 dummy2 dummy3
 
 wait $p1
+wait $p3
 
 RunValgrind "$CL3_GENDIR/bin/cl3-llvm-tests" --gtest_output=xml:gtest.xml
+
+time make -C "$CL3_ROOT/examples/how-to-use-source-bundle" run
 
 if test "$BUILD_TYPE" == "debug" && ((INFRABOX==0)); then
 	(
@@ -277,9 +285,5 @@ if ((${BASH_VERSINFO[0]} > 4 || (${BASH_VERSINFO[0]} == 4 && ${BASH_VERSINFO[1]}
 else
 	wait
 fi
-
-ln -vsnf "$CL3_GENDIR" "$CL3_ROOT/gen/last-build" || true
-
-make -C "$CL3_ROOT/examples/how-to-use-source-bundle" run
 
 echo "Build successful"
