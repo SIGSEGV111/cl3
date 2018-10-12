@@ -149,7 +149,7 @@ namespace	cl3
 			{
 				friend class TStream;
 				protected:
-					TFile* file;
+					const TFile* file;
 					uoff_t index;
 
 				public:
@@ -160,7 +160,7 @@ namespace	cl3
 					CL3PUBF	void	Index		(uoff_t) CL3_SETTER;
 					CL3PUBF	uoff_t	Index		() const CL3_GETTER;
 
-					CL3PUBF	CLASS	TMapping	(TFile* file, uoff_t index = 0, usys_t count = (usys_t)-1);
+					CL3PUBF	CLASS	TMapping	(const TFile* file, uoff_t index = 0, usys_t count = (usys_t)-1);
 					CL3PUBF	CLASS	TMapping	(TMapping&&);
 					CL3PUBF	CLASS	~TMapping	();
 			};
@@ -230,6 +230,7 @@ namespace	cl3
 					CL3PUBF collection::list::TList<text::string::TString> Entries() const CL3_GETTER;
 					CL3PUBF	TFile	OpenFile			(const text::string::TString& name, TAccess access = TAccess::READ, ECreate create = ECreate::NEVER, TIOFlags flags = TIOFlags::NONE);
 					CL3PUBF	TFileInfo GetFileInfo		(const text::string::TString& name) const CL3_GETTER;
+					inline	bool	FileExists			(const text::string::TString& name, const EEntryType type = EEntryType::FILE) const CL3_GETTER;
 
 					CL3PUBF	void	Delete				(const text::string::TString& name, const bool file_ok = true, const bool dir_ok = true, const bool ignore_not_exist = true, const bool recursive = false) const;
 
@@ -270,6 +271,13 @@ namespace	cl3
 					CL3PUBF	CLASS	TFile	(TFile&&);
 					CL3PUBF	CLASS	~TFile	();
 			};
+
+			/************************************************************************/
+
+			inline bool TDirectoryBrowser::FileExists(const text::string::TString& name, const EEntryType type) const
+			{
+				return this->GetFileInfo(name).type == type;
+			}
 		}
 	}
 }

@@ -94,7 +94,7 @@ namespace	cl3
 				return index;
 			}
 
-			CLASS	TMapping::TMapping	(TFile* file, uoff_t index, usys_t count) : TArray<const byte_t>(NULL,0), TArray<byte_t>(NULL,0), file(file), index(index)
+			CLASS	TMapping::TMapping	(const TFile* file, uoff_t index, usys_t count) : TArray<const byte_t>(NULL,0), TArray<byte_t>(NULL,0), file(file), index(index)
 			{
 				this->Remap(index, count);
 			}
