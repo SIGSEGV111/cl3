@@ -86,6 +86,11 @@ namespace	cl3
 					}
 
 				public:
+					static TUniquePtr Null()
+					{
+						return TUniquePtr();
+					}
+
 					TUniquePtr&	operator=	(TUniquePtr&& rhs)
 					{
 						CL3_CLASS_LOGIC_ERROR(this == &rhs);
