@@ -113,7 +113,7 @@ namespace cl3
 					this->n_partial += n_unprocessed;
 				}
 
-				return n_processed;
+				return n_items_write_max;
 			}
 
 			u32_t	TMurMur32Hash::Hash() const

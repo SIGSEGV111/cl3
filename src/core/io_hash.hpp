@@ -46,6 +46,7 @@ namespace cl3
 					byte_t arr_partial[4];
 
 				public:
+					using IOut<byte_t>::Write;
 					CL3PUBF	void	Flush	() final override;
 					CL3PUBF	usys_t	Write	(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) final override CL3_WARN_UNUSED_RESULT;
 					CL3PUBF	u32_t	Hash	() const final override CL3_GETTER;
