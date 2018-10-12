@@ -182,6 +182,30 @@ namespace	cl3
 							return *this;
 						}
 
+						TString& Format(const char* const a)
+						{
+							this->Format(TString(a));
+							return *this;
+						}
+
+						TString& Format(const wchar_t* const a)
+						{
+							this->Format(TString(a));
+							return *this;
+						}
+
+						TString& Format(char* const a)
+						{
+							this->Format(TString(a));
+							return *this;
+						}
+
+						TString& Format(wchar_t* const a)
+						{
+							this->Format(TString(a));
+							return *this;
+						}
+
 						TString& Format(const TNumberFormat* a)
 						{
 							this->number_format = a;
