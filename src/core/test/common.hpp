@@ -50,6 +50,75 @@ namespace	cl3
 			}
 		};
 
+		enum class EState : u8_t
+		{
+			UNDEFINED,
+			DEFAULT_CONTRUCTED,
+			COPY_CONSTRUCTED,
+			MOVE_CONSTRUCTED,
+			COPY_ASSIGNED,
+			MOVE_ASSIGNED,
+			DESTRUCTED
+		};
+
+		struct TStateTracker
+		{
+			static EState last;
+
+			EState* my_state;
+
+			static void Reset()
+			{
+				last = EState::UNDEFINED;
+			}
+
+			void SetTracking(EState* p)
+			{
+				my_state = p;
+				if(my_state) *my_state = last;
+			}
+
+			TStateTracker& operator=(const TStateTracker& rhs)
+			{
+				last = EState::COPY_ASSIGNED;
+				if(my_state) *my_state = last;
+				return *this;
+			}
+
+			TStateTracker& operator=(TStateTracker&& rhs)
+			{
+				last = EState::MOVE_ASSIGNED;
+				if(my_state) *my_state = last;
+				return *this;
+			}
+
+			TStateTracker() : my_state(nullptr)
+			{
+				last = EState::DEFAULT_CONTRUCTED;
+				if(my_state) *my_state = last;
+			}
+
+			TStateTracker(const TStateTracker&)
+			{
+				last = EState::COPY_CONSTRUCTED;
+				if(my_state) *my_state = last;
+			}
+
+			TStateTracker(TStateTracker&&)
+			{
+				last = EState::MOVE_CONSTRUCTED;
+				if(my_state) *my_state = last;
+			}
+
+			~TStateTracker()
+			{
+				last = EState::DESTRUCTED;
+				if(my_state) *my_state = last;
+			}
+		};
+
+		EState TStateTracker::last = EState::UNDEFINED;
+
 		static TDirectoryBrowser TestDataDirectory()
 		{
 			TDirectoryBrowser b;
