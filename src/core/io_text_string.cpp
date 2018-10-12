@@ -393,12 +393,13 @@ namespace	cl3
 					return r;
 				}
 
-				io::collection::list::TList<TString> TString::Split(const TString& delimiter) const
+				io::collection::list::TList<TString> TString::Split(const TString& delimiter, const usys_t n_max_split) const
 				{
+					CL3_CLASS_ERROR(n_max_split < 1, TException, "n_max_split must be >= 1");
 					io::collection::list::TList<TString> list;
 					usys_t start = 0;
 
-					while(start < this->Count())
+					while(start < this->Count() && list.Count() < n_max_split-1)
 					{
 						const usys_t end = this->Find(delimiter, start);
 						if(end != (usys_t)-1)
@@ -555,39 +556,46 @@ namespace	cl3
 					this->Append(chr);
 				}
 
-				CLASS	TString::TString	(f32_t /*num*/, const TNumberFormat* /*format*/)
+				CLASS	TString::TString	(f32_t num, const TNumberFormat* nf)
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->number_format = nf;
+					(*this) << num;
 				}
 
-				CLASS	TString::TString	(f64_t /*num*/, const TNumberFormat* /*format*/)
+				CLASS	TString::TString	(f64_t num, const TNumberFormat* nf)
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->number_format = nf;
+					(*this) << num;
 				}
 
-				CLASS	TString::TString	(u8_t /*num*/, const TNumberFormat* /*format*/)
+				CLASS	TString::TString	(u8_t num, const TNumberFormat* nf)
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->number_format = nf;
+					(*this) << num;
 				}
 
-				CLASS	TString::TString	(s8_t /*num*/, const TNumberFormat* /*format*/)
+				CLASS	TString::TString	(s8_t num, const TNumberFormat* nf)
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->number_format = nf;
+					(*this) << num;
 				}
 
-				CLASS	TString::TString	(u16_t /*num*/, const TNumberFormat* /*format*/)
+				CLASS	TString::TString	(u16_t num, const TNumberFormat* nf)
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->number_format = nf;
+					(*this) << num;
 				}
 
-				CLASS	TString::TString	(s16_t /*num*/, const TNumberFormat* /*format*/)
+				CLASS	TString::TString	(s16_t num, const TNumberFormat* nf)
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->number_format = nf;
+					(*this) << num;
 				}
 
-				CLASS	TString::TString	(u32_t /*num*/, const TNumberFormat* /*format*/)
+				CLASS	TString::TString	(u32_t num, const TNumberFormat* nf)
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->number_format = nf;
+					(*this) << num;
 				}
 
 				CLASS	TString::TString	(s32_t num, const TNumberFormat* nf)
@@ -596,14 +604,16 @@ namespace	cl3
 					(*this) << num;
 				}
 
-				CLASS	TString::TString	(u64_t /*num*/, const TNumberFormat* /*format*/)
+				CLASS	TString::TString	(u64_t num, const TNumberFormat* nf)
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->number_format = nf;
+					(*this) << num;
 				}
 
-				CLASS	TString::TString	(s64_t /*num*/, const TNumberFormat* /*format*/)
+				CLASS	TString::TString	(s64_t num, const TNumberFormat* nf)
 				{
-					CL3_NOT_IMPLEMENTED;
+					this->number_format = nf;
+					(*this) << num;
 				}
 
 				CLASS	TString::TString	(const char*    str, usys_t maxlen) : TList<TUTF32>()

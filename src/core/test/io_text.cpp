@@ -891,6 +891,15 @@ namespace
 		EXPECT_EQ(0UL, buffer.Count());
 	}
 
+	TEST(io_text_string_TString, Split_limited)
+	{
+		TString str = "hello;world;foo;bar;123";
+		auto fields = str.Split(";", 2);
+		EXPECT_EQ(2U, fields.Count());
+		EXPECT_EQ(TString("hello"), fields[0]);
+		EXPECT_EQ(TString("world;foo;bar;123"), fields[1]);
+	}
+
 	TEST(io_text_string_TString, Split_csv)
 	{
 		TString str = "hello;world;foo;bar;123";

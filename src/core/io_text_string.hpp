@@ -131,7 +131,7 @@ namespace	cl3
 
 						//	split / combine strings
 						CL3PUBF	io::collection::list::TList<TString>
-											Split		(const TString& delimiter) const CL3_GETTER;
+											Split		(const TString& delimiter, const usys_t n_max_split = (usys_t)-1) const CL3_GETTER;
 
 						CL3PUBF static TString Join		(const io::collection::IStaticCollection<const TString>& collection, const TString& delimiter) CL3_GETTER;
 
