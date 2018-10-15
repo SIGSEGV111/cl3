@@ -43,54 +43,25 @@ namespace
 		CLASS TNoDefaultConstruct(const char*, int, long, bool) {}
 	};
 
-	struct TNoTrivialMoveable
-	{
-		TNoTrivialMoveable* myself;
-
-		static bool fail;
-
-		CLASS TNoTrivialMoveable() : myself(this) {}
-		CLASS TNoTrivialMoveable(TNoTrivialMoveable&&) : myself(this) {}
-		CLASS TNoTrivialMoveable(const TNoTrivialMoveable&) : myself(this) {}
-		CLASS ~TNoTrivialMoveable()
-		{
-			if(this != myself)
-			{
-				StdErr()<<"TEST ERROR: TNoTrivialMoveable was moved without going through constructors; this = "<<(void*)this<<"; myself = "<<(void*)myself<<"\n";
-				fail = true;
-			}
-		}
-	};
-
-	bool TNoTrivialMoveable::fail = false;
-
 	TEST(io_collection_list_v2_TList2, EvilStructs)
 	{
 		TList2<TSimple> ls_simple;
 		TList2<TNoMove> ls_no_move;
 		TList2<TNoCopy> ls_no_copy;
 		TList2<TNoDefaultConstruct> ls_no_default_construct;
-		TList2<TNoTrivialMoveable> ls_not_trivial_moveable;
 
+		TSimple a;
+		ls_simple.Append(a);
 		ls_simple.Append(TSimple());
-		ls_simple.MoveAppend(TSimple());
+		ls_simple.Append(move(TSimple()));
 
 		TNoMove no_move;
 		ls_no_move.Append(no_move);
 
-		ls_no_copy.MoveAppend(TNoCopy());
+		ls_no_copy.Append(move(TNoCopy()));
 
+		TNoDefaultConstruct b("",0,0L,true);
+		ls_no_default_construct.Append(b);
 		ls_no_default_construct.Append(TNoDefaultConstruct("",0,0L,true));
-		ls_no_default_construct.MoveAppend(TNoDefaultConstruct("",0,0L,true));
-
-		ls_not_trivial_moveable.Append(TNoTrivialMoveable());
-		ls_not_trivial_moveable.Append(TNoTrivialMoveable());
-		ls_not_trivial_moveable.Append(TNoTrivialMoveable());
-		ls_not_trivial_moveable.Append(TNoTrivialMoveable());
-		ls_not_trivial_moveable.Append(TNoTrivialMoveable());
-		ls_not_trivial_moveable.Append(TNoTrivialMoveable());
-		ls_not_trivial_moveable.Append(TNoTrivialMoveable());
-		ls_not_trivial_moveable.Append(TNoTrivialMoveable());
-		ls_not_trivial_moveable.Append(TNoTrivialMoveable());
 	}
 }

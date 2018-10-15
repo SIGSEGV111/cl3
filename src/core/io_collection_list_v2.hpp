@@ -33,8 +33,9 @@ namespace cl3
 
 					public:
 						void Prealloc(const usys_t n_want);
-						void MoveAppend(T&& item_append);
-						void Append(valuearg_t item_append);
+
+						template<typename A>
+						void Append(A item_append);
 						void Append(const usys_t n_items_append, const T* const arr_items_append);
 						void Clear();
 
@@ -42,11 +43,14 @@ namespace cl3
 						inline T& operator[](const ssys_t index) CL3_GETTER;
 						inline valuearg_t operator[](const ssys_t index) const CL3_GETTER;
 
-						TList2& operator=(const TList2&);
+						template<typename A>
+						TList2& operator=(const TList2<A>&);
 						TList2& operator=(TList2&&);
 
 						CLASS TList2(const usys_t n_prealloc = 0, const u16_t n_prealloc_static = 128U / sizeof(T), const u8_t div_prealloc = 64U, const bool preserve_order = true);
-						CLASS TList2(const TList2&);
+
+						template<typename A>
+						CLASS TList2(const TList2<A>&);
 						CLASS TList2(TList2&&);
 						CLASS ~TList2();
 				};
@@ -76,19 +80,11 @@ namespace cl3
 				}
 
 				template<typename T>
-				void TList2<T>::MoveAppend(T&& item_append)
+				template<typename A>
+				void TList2<T>::Append(A item_append)
 				{
 					this->Prealloc(1);
-					new (this->arr_items + this->n_items) T(system::def::move(item_append));
-					this->n_items++;
-					this->n_prealloc_current--;
-				}
-
-				template<typename T>
-				void TList2<T>::Append(valuearg_t item_append)
-				{
-					this->Prealloc(1);
-					new (this->arr_items + this->n_items) T(system::def::move(item_append));
+					new (this->arr_items + this->n_items) T(std::move_if_noexcept(item_append));
 					this->n_items++;
 					this->n_prealloc_current--;
 				}
@@ -142,7 +138,8 @@ namespace cl3
 				}
 
 				template<typename T>
-				TList2<T>& TList2<T>::operator=(const TList2& rhs)
+				template<typename A>
+				TList2<T>& TList2<T>::operator=(const TList2<A>& rhs)
 				{
 					this->Clear();
 					this->Prealloc(rhs.n_items);
@@ -192,7 +189,8 @@ namespace cl3
 				}
 
 				template<typename T>
-				CLASS TList2<T>::TList2(const TList2& other) : arr_items(nullptr), n_items(0), n_prealloc_current(0), n_prealloc_static(other.n_prealloc_static), div_prealloc(other.div_prealloc), preserve_order(other.preserve_order)
+				template<typename A>
+				CLASS TList2<T>::TList2(const TList2<A>& other) : arr_items(nullptr), n_items(0), n_prealloc_current(0), n_prealloc_static(other.n_prealloc_static), div_prealloc(other.div_prealloc), preserve_order(other.preserve_order)
 				{
 					*this = other;
 				}
