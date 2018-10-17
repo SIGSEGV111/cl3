@@ -1,0 +1,45 @@
+Logging:
+	- to diagnose errors or problems after they happend
+	- to report errors / warnings to admins in unattended programs
+	- content targeted at sysadmins not developers
+	- low traffic / high-level
+
+	- configureable log level:
+		0 dead silence (nothing is logged at all)
+		1 fatal errors (program termnination)
+		2 non-fatal errors (program, continues but cannot perform requested action)
+		3 security events (anything related to security)
+		4 warnings (limited functionality, abnormal input)
+		5 info (sessions, peers, files requested, ...)
+		6 stats (metrics and statistics, bytes transfered/processed, response times, ... in context to the other logging information)
+
+	- designed to quickly narrow down source of problem
+	- should only output details when something failed
+	- log is always recorded with highest deatil level
+	- filter is applied afterwards by the UI
+	- log to syslog, CSV or relational database
+
+Tracing:
+	- to disgnose errors / problems as they happen (while a developer/sysadmin is debugging the program)
+	- content targeted at developers (funnction call trace, call arguments, results of calculations, ...)
+	- low level / high-traffic
+	- must be switchable on-demand
+	- must have low performance impact when switched off
+
+Metrics:
+	- general statistics about program without context
+	- see current or past resource usage
+	- see peaks in resource usage
+	- be reasonably accurate, but does not need to be 100% accurate
+	- log in batches to influx or relational database
+
+
+
+
+
+
+
+
+Alexander Runge (SuSE Support Engineer)
+
+Mike Unruh @ dell.com
