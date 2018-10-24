@@ -21,7 +21,6 @@
 
 #include <sys/mman.h>
 #include <string.h>
-#include <valgrind/valgrind.h>
 #include <stdio.h>
 
 using namespace cl3::system::types;
