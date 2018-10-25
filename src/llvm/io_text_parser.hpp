@@ -48,7 +48,7 @@ namespace	cl3
 				struct INode
 				{
 					virtual EStatus Parse(const TUTF32*& pos, usys_t length) CL3_WARN_UNUSED_RESULT = 0;
-					CL3PUBF CLASS virtual ~INode();
+					LL3PUBF CLASS virtual ~INode();
 				};
 
 				struct TDisjunction : INode
@@ -56,10 +56,10 @@ namespace	cl3
 					system::memory::TSharedPtr<INode> lhs;
 					system::memory::TSharedPtr<INode> rhs;
 
-					CL3PUBF EStatus Parse(const TUTF32*& pos, usys_t length) final override CL3_WARN_UNUSED_RESULT;
+					LL3PUBF EStatus Parse(const TUTF32*& pos, usys_t length) final override CL3_WARN_UNUSED_RESULT;
 
-					CL3PUBF CLASS TDisjunction(system::memory::TSharedPtr<INode> lhs, system::memory::TSharedPtr<INode> rhs);
-					CL3PUBF CLASS ~TDisjunction();
+					LL3PUBF CLASS TDisjunction(system::memory::TSharedPtr<INode> lhs, system::memory::TSharedPtr<INode> rhs);
+					LL3PUBF CLASS ~TDisjunction();
 				};
 
 				struct TConjunction : INode
@@ -67,10 +67,10 @@ namespace	cl3
 					system::memory::TSharedPtr<INode> lhs;
 					system::memory::TSharedPtr<INode> rhs;
 
-					CL3PUBF EStatus Parse(const TUTF32*& pos, usys_t length) final override CL3_WARN_UNUSED_RESULT;
+					LL3PUBF EStatus Parse(const TUTF32*& pos, usys_t length) final override CL3_WARN_UNUSED_RESULT;
 
-					CL3PUBF CLASS TConjunction(system::memory::TSharedPtr<INode> lhs, system::memory::TSharedPtr<INode> rhs);
-					CL3PUBF CLASS ~TConjunction();
+					LL3PUBF CLASS TConjunction(system::memory::TSharedPtr<INode> lhs, system::memory::TSharedPtr<INode> rhs);
+					LL3PUBF CLASS ~TConjunction();
 				};
 
 				struct TRepetition : INode
@@ -79,10 +79,10 @@ namespace	cl3
 					unsigned n_rep_min;
 					unsigned n_rep_max;
 
-					CL3PUBF EStatus Parse(const TUTF32*& pos, usys_t length) final override CL3_WARN_UNUSED_RESULT;
+					LL3PUBF EStatus Parse(const TUTF32*& pos, usys_t length) final override CL3_WARN_UNUSED_RESULT;
 
-					CL3PUBF CLASS TRepetition(system::memory::TSharedPtr<INode> node, unsigned n_rep_min, unsigned n_rep_max);
-					CL3PUBF CLASS ~TRepetition();
+					LL3PUBF CLASS TRepetition(system::memory::TSharedPtr<INode> node, unsigned n_rep_min, unsigned n_rep_max);
+					LL3PUBF CLASS ~TRepetition();
 				};
 
 				struct TSequence : INode
@@ -90,30 +90,30 @@ namespace	cl3
 					system::memory::TSharedPtr<INode> lhs;
 					system::memory::TSharedPtr<INode> rhs;
 
-					CL3PUBF EStatus Parse(const TUTF32*& pos, usys_t length) final override CL3_WARN_UNUSED_RESULT;
+					LL3PUBF EStatus Parse(const TUTF32*& pos, usys_t length) final override CL3_WARN_UNUSED_RESULT;
 
-					CL3PUBF CLASS TSequence(system::memory::TSharedPtr<INode> lhs, system::memory::TSharedPtr<INode> rhs);
-					CL3PUBF CLASS ~TSequence();
+					LL3PUBF CLASS TSequence(system::memory::TSharedPtr<INode> lhs, system::memory::TSharedPtr<INode> rhs);
+					LL3PUBF CLASS ~TSequence();
 				};
 
 				struct TNegation : INode
 				{
 					system::memory::TSharedPtr<INode> node;
 
-					CL3PUBF EStatus Parse(const TUTF32*& pos, usys_t length) final override CL3_WARN_UNUSED_RESULT;
+					LL3PUBF EStatus Parse(const TUTF32*& pos, usys_t length) final override CL3_WARN_UNUSED_RESULT;
 
-					CL3PUBF CLASS TNegation(system::memory::TSharedPtr<INode> node);
-					CL3PUBF CLASS ~TNegation();
+					LL3PUBF CLASS TNegation(system::memory::TSharedPtr<INode> node);
+					LL3PUBF CLASS ~TNegation();
 				};
 
 				struct TLiteralMatcher : INode
 				{
 					const string::TString literal;
 
-					CL3PUBF EStatus Parse(const TUTF32*& pos, usys_t length) final override CL3_WARN_UNUSED_RESULT;
+					LL3PUBF EStatus Parse(const TUTF32*& pos, usys_t length) final override CL3_WARN_UNUSED_RESULT;
 
-					CL3PUBF CLASS TLiteralMatcher(const string::TString&);
-					CL3PUBF CLASS ~TLiteralMatcher();
+					LL3PUBF CLASS TLiteralMatcher(const string::TString&);
+					LL3PUBF CLASS ~TLiteralMatcher();
 				};
 
 				struct TRangeMatcher : INode
@@ -121,10 +121,10 @@ namespace	cl3
 					TUTF32 range_start;
 					TUTF32 range_end;
 
-					CL3PUBF EStatus Parse(const TUTF32*& pos, usys_t length) final override CL3_WARN_UNUSED_RESULT;
+					LL3PUBF EStatus Parse(const TUTF32*& pos, usys_t length) final override CL3_WARN_UNUSED_RESULT;
 
-					CL3PUBF CLASS TRangeMatcher(TUTF32 range_start, TUTF32 range_end);
-					CL3PUBF CLASS ~TRangeMatcher();
+					LL3PUBF CLASS TRangeMatcher(TUTF32 range_start, TUTF32 range_end);
+					LL3PUBF CLASS ~TRangeMatcher();
 				};
 
 				class TParserSpec
@@ -135,18 +135,18 @@ namespace	cl3
 					public:
 						inline system::memory::TSharedPtr<INode> Node() const CL3_GETTER { return this->node; }
 
-						CL3PUBF TParserSpec operator||(const TParserSpec& rhs) const;
-						CL3PUBF TParserSpec operator&&(const TParserSpec& rhs) const;
-						CL3PUBF TParserSpec operator+(const TParserSpec& rhs) const;
-						CL3PUBF TParserSpec operator!() const;
+						LL3PUBF TParserSpec operator||(const TParserSpec& rhs) const;
+						LL3PUBF TParserSpec operator&&(const TParserSpec& rhs) const;
+						LL3PUBF TParserSpec operator+(const TParserSpec& rhs) const;
+						LL3PUBF TParserSpec operator!() const;
 
-						CL3PUBF CLASS TParserSpec(system::memory::TSharedPtr<INode>);
-						CL3PUBF CLASS TParserSpec(const TParserSpec&);
-						CL3PUBF CLASS ~TParserSpec();
+						LL3PUBF CLASS TParserSpec(system::memory::TSharedPtr<INode>);
+						LL3PUBF CLASS TParserSpec(const TParserSpec&);
+						LL3PUBF CLASS ~TParserSpec();
 
-						CL3PUBF TParserSpec& operator=(TParserSpec&&);
+						LL3PUBF TParserSpec& operator=(TParserSpec&&);
 
-// 						CL3PUBF llvm::Function* GenerateCode(system::compiler::jit::TJIT&) const CL3_WARN_UNUSED_RESULT;
+// 						LL3PUBF llvm::Function* GenerateCode(system::compiler::jit::TJIT&) const CL3_WARN_UNUSED_RESULT;
 				};
 
 				class TParser : public stream::IOut<TUTF32>
@@ -164,21 +164,21 @@ namespace	cl3
 					public:
 						//	from IOut
 						using stream::IOut<TUTF32>::Write;
-						CL3PUBF void	Flush	();
-						CL3PUBF usys_t	Space	() const CL3_GETTER;
-						CL3PUBF usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
+						LL3PUBF void	Flush	();
+						LL3PUBF usys_t	Space	() const CL3_GETTER;
+						LL3PUBF usys_t	Write	(const TUTF32* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min) CL3_WARN_UNUSED_RESULT;
 
-						CL3PUBF CLASS TParser(const TParser&);
-						CL3PUBF explicit CLASS TParser(const TParserSpec& def);
-						CL3PUBF CLASS ~TParser();
+						LL3PUBF CLASS TParser(const TParser&);
+						LL3PUBF explicit CLASS TParser(const TParserSpec& def);
+						LL3PUBF CLASS ~TParser();
 				};
 
 				static const unsigned INFINITE = (unsigned)-1;
 
-				CL3PUBF TParserSpec Literal(const string::TString&) CL3_GETTER;
-				CL3PUBF TParserSpec Range(TUTF32 range_start, TUTF32 range_end) CL3_GETTER;
-				CL3PUBF TParserSpec Repetition(const TParserSpec&, unsigned rep_min, unsigned rep_max) CL3_GETTER;
-				CL3PUBF TParserSpec Optional(const TParserSpec&) CL3_GETTER;
+				LL3PUBF TParserSpec Literal(const string::TString&) CL3_GETTER;
+				LL3PUBF TParserSpec Range(TUTF32 range_start, TUTF32 range_end) CL3_GETTER;
+				LL3PUBF TParserSpec Repetition(const TParserSpec&, unsigned rep_min, unsigned rep_max) CL3_GETTER;
+				LL3PUBF TParserSpec Optional(const TParserSpec&) CL3_GETTER;
 			}
 		}
 	}

@@ -21,6 +21,7 @@
 #include <cl3/core/system_types.hpp>
 #include <cl3/core/system_types_typeinfo.hpp>
 #include <gtest/gtest.h>
+#include "common.hpp"
 
 using namespace ::testing;
 
@@ -37,6 +38,7 @@ namespace
 	using namespace cl3::io::text;
 	using namespace cl3::io::text::string;
 	using namespace cl3::io::text::encoding;
+	using namespace cl3::unittest_support;
 
 	struct	TT_POD
 	{

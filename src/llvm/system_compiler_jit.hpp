@@ -50,15 +50,15 @@ namespace	cl3
 						llvm::ExecutionEngine* ee;
 
 						CLASS TBinary(const TBinary&) = delete;
-						CL3PUBF CLASS TBinary(llvm::LLVMContext* context, llvm::Module* module, u8_t optlvl);
+						LL3PUBF CLASS TBinary(llvm::LLVMContext* context, llvm::Module* module, u8_t optlvl);
 
 					public:
-						CL3PUBF void* ResolveSymbol(const io::text::string::TString& name) final override CL3_WARN_UNUSED_RESULT;
-						CL3PUBF void* ResolveSymbol(const char* name) final override CL3_WARN_UNUSED_RESULT;
-						CL3PUBF void* ResolveSymbol(llvm::Function*) CL3_WARN_UNUSED_RESULT;
+						LL3PUBF void* ResolveSymbol(const io::text::string::TString& name) final override CL3_WARN_UNUSED_RESULT;
+						LL3PUBF void* ResolveSymbol(const char* name) final override CL3_WARN_UNUSED_RESULT;
+						LL3PUBF void* ResolveSymbol(llvm::Function*) CL3_WARN_UNUSED_RESULT;
 
 
-						CL3PUBF CLASS ~TBinary();
+						LL3PUBF CLASS ~TBinary();
 				};
 
 				class	TJIT
@@ -71,10 +71,10 @@ namespace	cl3
 					public:
 						inline llvm::Module& Module() CL3_GETTER { return *this->module; }
 
-						CL3PUBF	system::memory::TUniquePtr<TBinary> Compile(u8_t optlvl = 0) CL3_WARN_UNUSED_RESULT;
+						LL3PUBF	system::memory::TUniquePtr<TBinary> Compile(u8_t optlvl = 0) CL3_WARN_UNUSED_RESULT;
 
-						CL3PUBF	CLASS	TJIT	();
-						CL3PUBF	CLASS	~TJIT	();
+						LL3PUBF	CLASS	TJIT	();
+						LL3PUBF	CLASS	~TJIT	();
 				};
 			}
 		}

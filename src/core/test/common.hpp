@@ -117,8 +117,6 @@ namespace	cl3
 			}
 		};
 
-		EState TStateTracker::last = EState::UNDEFINED;
-
 		static TDirectoryBrowser TestDataDirectory()
 		{
 			TDirectoryBrowser b;
