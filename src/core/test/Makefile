@@ -2,7 +2,7 @@
 
 GTEST_DIR=$(CURDIR)/../gtest
 CXX?=$(shell which clang)
-CXX_OPT=-std=c++11 -g -O0 -Wall -Wextra -Werror -Winvalid-pch -I../include -Wno-unused-parameter -Wno-attributes -fvisibility-inlines-hidden -fPIC $(CXX_USR_OPT_EXE)
+CXX_OPT=-std=c++11 -g -O0 -Wall -Wextra -Werror -Winvalid-pch -I../include -Wno-unused-parameter -Wno-attributes -fvisibility-inlines-hidden -fPIC $(CXX_USR_OPT_EXE) -Wno-deprecated-copy
 OBJS=$(shell ls -1 *.cpp | sed 's/\.cpp/\.o/' -)
 
 all: run
