@@ -201,48 +201,58 @@ namespace	cl3
 
 			CLASS	TFile::TFile	(const text::string::TString& name, TAccess access, ECreate create, const TDirectoryBrowser& directory, TIOFlags ioflags) : access(access)
 			{
-				int flags = O_NONBLOCK | O_LARGEFILE | O_NOCTTY | O_CLOEXEC | (ioflags.disable_cache ? O_DIRECT : 0) | (ioflags.synchronous_io ? O_DSYNC : 0);
-				const int mode = (access & TAccess::EXECUTE) ? 0777 : 0666;
-
-				CL3_CLASS_ERROR( (access & TAccess::READ) == 0 && (access & TAccess::WRITE) == 0, TException, "file access mode is invalid");
-
-				if( (access & TAccess::READ) != 0 && (access & TAccess::WRITE) != 0 )
-					flags |= O_RDWR;
-				else if( (access & TAccess::READ) != 0)
-					flags |= O_RDONLY;
-				else if( (access & TAccess::WRITE) != 0)
-					flags |= O_WRONLY;
-
-				switch(create)
+				try
 				{
-					case ECreate::ALWAYS:
-						flags |= (O_CREAT | O_EXCL);
-						break;
-					case ECreate::NEVER:
-						break;
-					case ECreate::CAN:
-						flags |= O_CREAT;
-						break;
-				}
+					int flags = O_NONBLOCK | O_LARGEFILE | O_NOCTTY | O_CLOEXEC | (ioflags.disable_cache ? O_DIRECT : 0) | (ioflags.synchronous_io ? O_DSYNC : 0);
+					const int mode = (access & TAccess::EXECUTE) ? 0777 : 0666;
 
-				const TCString cstr(name, CODEC_CXX_CHAR);
+					CL3_CLASS_ERROR( (access & TAccess::READ) == 0 && (access & TAccess::WRITE) == 0, TException, "file access mode is invalid");
 
-				if(flags & O_EXCL)
-				{
-					for(;;)
+					if( (access & TAccess::READ) != 0 && (access & TAccess::WRITE) != 0 )
+						flags |= O_RDWR;
+					else if( (access & TAccess::READ) != 0)
+						flags |= O_RDONLY;
+					else if( (access & TAccess::WRITE) != 0)
+						flags |= O_WRONLY;
+
+					switch(create)
 					{
-						this->fd = ::openat(directory.Handle(), cstr.Chars(), flags, mode);
-						if(this->fd != -1)
+						case ECreate::ALWAYS:
+							flags |= (O_CREAT | O_EXCL);
 							break;
-
-						if(errno == EEXIST)
-							CL3_CLASS_SYSERR(::unlinkat(directory.Handle(), cstr.Chars(), 0));
-						else
-							CL3_CLASS_SYSERR(-1);
+						case ECreate::NEVER:
+							break;
+						case ECreate::CAN:
+							flags |= O_CREAT;
+							break;
 					}
+
+					const TCString cstr(name, CODEC_CXX_CHAR);
+
+					if(flags & O_EXCL)
+					{
+						for(;;)
+						{
+							this->fd = ::openat(directory.Handle(), cstr.Chars(), flags, mode);
+							if(this->fd != -1)
+								break;
+
+							if(errno == EEXIST)
+								CL3_CLASS_SYSERR(::unlinkat(directory.Handle(), cstr.Chars(), 0));
+							else
+								CL3_CLASS_SYSERR(-1);
+						}
+					}
+					else
+						CL3_CLASS_SYSERR(this->fd = ::openat(directory.Handle(), cstr.Chars(), flags, mode));
 				}
-				else
-					CL3_CLASS_SYSERR(this->fd = ::openat(directory.Handle(), cstr.Chars(), flags, mode));
+				catch(const error::TException& e)
+				{
+					const char* const c = (create == ECreate::NEVER ? "open" : (create == ECreate::CAN ? "open/create" : "create"));
+					const char* const a =	(access & TAccess::READ) && (access & TAccess::WRITE) ? "RW" :
+											(access & TAccess::READ) ? "read" : "write";
+					CL3_CLASS_FORWARD_ERROR(new error::TException(e), error::TException, "unable to %s file '%s' with %s-access", c, TCString(name, CODEC_CXX_CHAR).Chars(), a);
+				}
 			}
 
 			usys_t	TFile::Read		(u64_t pos, byte_t* arr_items_read, usys_t n_items_read_max)
