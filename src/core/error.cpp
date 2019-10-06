@@ -60,18 +60,21 @@ namespace	cl3
 		{
 			e.message = NULL;
 			e.backtrace = NULL;
+			e.inner = NULL;
 		}
 
-		CLASS	TException::TException	(const TException& e) : message(NULL), object(e.object), codefile(e.codefile), function(e.function), expression(e.expression), inner(e.inner), codeline(e.codeline)
+		CLASS	TException::TException	(const TException& e) : message(NULL), object(e.object), codefile(e.codefile), function(e.function), expression(e.expression), codeline(e.codeline)
 		{
 			this->message = util::MakeCStringCopy(e.message).Claim();
 			this->backtrace = new TBacktrace(*e.backtrace);
+			this->inner = e.inner != NULL ? new TException(*e.inner) : NULL;
 		}
 
 		CLASS	TException::~TException	()
 		{
 			free(message);
 			delete this->backtrace;
+			delete this->inner;
 		}
 
 		void	TException::Set		(const void* object, const char* codefile, const char* function, const char* expression, const TException* inner, unsigned codeline)
