@@ -42,13 +42,16 @@ namespace	cl3
 
 			/******************************** Constants and Variables ******************************************************/
 
+			static const TUTF32 ARR_WHITESPACE_DIGITS[] = { ' ', '\t', '\n' };
+			static const collection::array::TArray<const TUTF32> COLLECTION_WHITESPACE_DIGITS(ARR_WHITESPACE_DIGITS, sizeof(ARR_WHITESPACE_DIGITS) / sizeof(TUTF32), false);
+
 			static const TUTF32 ARR_OCTAL_DIGITS[] = { '0', '1', '2', '3', '4', '5', '6', '7' };
 			static const collection::array::TArray<const TUTF32> COLLECTION_OCTAL_DIGITS(ARR_OCTAL_DIGITS, sizeof(ARR_OCTAL_DIGITS) / sizeof(TUTF32), false);
 
 			static const TUTF32 ARR_DECIMAL_DIGITS[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 			static const collection::array::TArray<const TUTF32> COLLECTION_DECIMAL_DIGITS(ARR_DECIMAL_DIGITS, sizeof(ARR_DECIMAL_DIGITS) / sizeof(TUTF32), false);
 
-			static const TUTF32 ARR_HEX_DIGITS[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+			static const TUTF32 ARR_HEX_DIGITS[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 			static const collection::array::TArray<const TUTF32> COLLECTION_HEX_DIGITS(ARR_HEX_DIGITS, sizeof(ARR_HEX_DIGITS) / sizeof(TUTF32), false);
 
 			CL3_CONTEXT_VARIABLE_IMPL(const TCollationSequence*, default_collation_sequence, NULL);
@@ -89,7 +92,7 @@ namespace	cl3
 
 			/******************************** TNumberFormat ******************************************************/
 
-			CLASS	TNumberFormat::TNumberFormat	() : prefix(NULL), prefix_sign(NULL), prefix_digits(NULL), prefix_decimal(NULL), postfix(NULL), postfix_digits(NULL), postfix_sign(NULL), postfix_decimal(NULL), digits(&COLLECTION_DECIMAL_DIGITS), positive_mark(TUTF32::TERMINATOR), negative_mark('-'), zero_mark(TUTF32::TERMINATOR), decimal_mark('.'), grouping_mark(TUTF32::TERMINATOR), integer_padding(TUTF32::TERMINATOR), fractional_padding(TUTF32::TERMINATOR), exponential_mark('e'), positive_mark_placement(TNumberFormat::ESymbolPlacement::BEFORE), negative_mark_placement(TNumberFormat::ESymbolPlacement::BEFORE), zero_mark_placement(TNumberFormat::ESymbolPlacement::BEFORE), grouping_length(0), integer_length_min(0), fractional_length_min(0), fractional_length_max((u16_t)-1)
+			CLASS	TNumberFormat::TNumberFormat	() : prefix(NULL), prefix_sign(NULL), prefix_digits(NULL), prefix_decimal(NULL), postfix(NULL), postfix_digits(NULL), postfix_sign(NULL), postfix_decimal(NULL), digits(&COLLECTION_DECIMAL_DIGITS), whitespace(&COLLECTION_WHITESPACE_DIGITS), positive_mark(TUTF32::TERMINATOR), negative_mark('-'), zero_mark(TUTF32::TERMINATOR), decimal_mark('.'), grouping_mark(TUTF32::TERMINATOR), integer_padding(TUTF32::TERMINATOR), fractional_padding(TUTF32::TERMINATOR), exponential_mark('e'), positive_mark_placement(TNumberFormat::ESymbolPlacement::BEFORE), negative_mark_placement(TNumberFormat::ESymbolPlacement::BEFORE), zero_mark_placement(TNumberFormat::ESymbolPlacement::BEFORE), grouping_length(0), integer_length_min(0), fractional_length_min(0), fractional_length_max((u16_t)-1)
 			{
 			}
 
@@ -107,14 +110,14 @@ namespace	cl3
 
 			/******************************** TTextIOCommon ******************************************************/
 
-			CLASS	TTextIOCommon::TTextIOCommon	() : number_format(NULL) {}
+			CLASS	TTextIOCommon::TTextIOCommon	() : number_format(TNumberFormat::default_format) {}
 
 			/******************************** ITextReader ******************************************************/
 
 			template<bool b_signed, class T>
-			static	void	ParseInteger	(IIn<TUTF32>& s, const TNumberFormat*, T& v)
+			static	void	ParseInteger	(IIn<TUTF32>& s, const TNumberFormat* nf, T& v)
 			{
-				// FIXME make use of TNumberFormat
+				CL3_NONCLASS_LOGIC_ERROR(nf == NULL || nf->digits == NULL || nf->whitespace == NULL);
 
 				v = (T)0;
 				TUTF32 chr;
@@ -128,25 +131,24 @@ namespace	cl3
 						break;
 				}
 
-				CL3_NONCLASS_ERROR(!((chr >= '0' && chr <= '9') || chr == '-'), TException, "unable to parse integer");
+				CL3_NONCLASS_ERROR(! ( chr == nf->negative_mark || chr == nf->positive_mark || nf->digits->Contains(chr)), TException, "unable to parse integer - character ('%lc') not recognized", chr);
 
 				bool negative = false;
-				if(chr == '-')
+				if(chr == nf->negative_mark)
 				{
 					negative = true;
 					s.Read(&chr, 1);
-					CL3_NONCLASS_ERROR(!(chr >= '0' && chr <= '9'), TException, "unable to parse integer");
 				}
 
 				do
 				{
-					if(chr >= '0' && chr <= '9')
-					{
-						v *= 10;
-						v += (chr.code - '0');
-					}
-					else
-						break;
+					const usys_t index = nf->digits->IndexOf(chr);
+					if(index == (usys_t)-1 || chr == TUTF32::TERMINATOR || nf->whitespace->Contains(chr)) break;
+
+// 					CL3_NONCLASS_ERROR(index == (usys_t)-1, TException, "unable to parse integer - character ('%lc') not allowed here", chr);
+
+					v *= nf->digits->Count();
+					v += index;
 				}
 				while(s.Read(&chr, 1, 0) == 1);
 

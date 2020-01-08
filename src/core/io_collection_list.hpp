@@ -70,13 +70,12 @@ namespace	cl3
 				struct	CL3PUBT	IList<const T> : virtual IDynamicCollection<const T>, virtual array::IArray<const T>
 				{
 					inline	IList<const T>&	operator+=	(const IStaticCollection<const T>& rhs) { Append(rhs); return *this; }
-// 					inline	IList<const T>&	operator+=	(std::initializer_list<T> l)
-// 					{
-// // 						this->Prealloc(l.size());
-// 						for(usys_t i = 0; i < l.size(); i++)
-// 							this->Append(l.begin()[i]);
-// 						return *this;
-// 					}
+					inline	IList<const T>&	operator+=	(std::initializer_list<T> l)
+					{
+						for(usys_t i = 0; i < l.size(); i++)
+							this->Append(l.begin()[i]);
+						return *this;
+					}
 
 					virtual	void	Grow		(usys_t n_items_grow, const T& item_init) = 0;
 

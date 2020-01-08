@@ -175,7 +175,6 @@ namespace	cl3
 						CL3PUBF	CLASS	TString	(TString&&);
 						CL3PUBF	virtual	~TString();
 
-
 						TString& Format(const TString& a)
 						{
 							this->Replace("§", a, 1);
@@ -268,8 +267,11 @@ namespace	cl3
 						CL3PUBF	TCString&	operator=	(const TCString&);
 						CL3PUBF	TCString&	operator=	(TCString&&);
 
+						inline bool operator==(const TCString& rhs) const { return &rhs == this; }
+
 						using collection::list::TList<byte_t>::Claim;
 
+						inline CLASS TCString() {}
 						CL3PUBF	CLASS explicit TCString	(const encoding::ICodec*);
 						CL3PUBF	CLASS explicit TCString	(const TString&, const encoding::ICodec*);
 						CL3PUBF	CLASS explicit TCString	(const TCString&);

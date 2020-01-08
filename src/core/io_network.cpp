@@ -35,6 +35,17 @@ namespace cl3
 			using namespace error;
 			using namespace system::endian;
 
+			TIPv4& TIPv4::operator&=(const TIPv4 rhs)
+			{
+				this->u32 &= rhs.u32;
+				return *this;
+			}
+
+			TIPv4  TIPv4::operator&(const TIPv4 rhs) const
+			{
+				return TIPv4(*this) &= rhs;
+			}
+
 			TIPv4::TIPv4()
 			{
 				this->u32 = 0;
@@ -63,6 +74,18 @@ namespace cl3
 				this->u32 = v;
 			}
 
+			TIPv6& TIPv6::operator&=(const TIPv6 rhs)
+			{
+				this->u64[0] &= rhs.u64[0];
+				this->u64[1] &= rhs.u64[1];
+				return *this;
+			}
+
+			TIPv6 TIPv6::operator&(const TIPv6 rhs) const
+			{
+				return TIPv6(*this) &= rhs;
+			}
+
 			u8_t TIPv4::MaskToCIDR(const TIPv4 mask)
 			{
 				return system::compiler::CountLeadingZeroes(~ConvertBigEndianToNative(mask.u32));
@@ -81,6 +104,61 @@ namespace cl3
 				return w;
 			}
 
+			text::ITextWriter& operator<<(text::ITextWriter& w, const TIPv6 ip)
+			{
+// 				if(ip.IsIPv4())
+// 					w<<((TIPv4)ip);
+// 				else
+// 				{
+					cl3::io::text::TNumberFormat nf_group = cl3::io::text::TNumberFormat::HEX;
+					nf_group.integer_length_min = 4;
+
+					w<<TString(ip.group[0], &nf_group);
+					for(unsigned i = 1; i < 8; i++)
+						w<<":"<<TString(ConvertBigEndianToNative(ip.group[i]), &nf_group);
+// 				}
+
+				return w;
+			}
+
+			u8_t  TIPv6::MaskToCIDR(const TIPv6 mask)
+			{
+				const u8_t f = system::compiler::CountLeadingZeroes(~ConvertBigEndianToNative(mask.u64[0]));
+				if(f == 64)
+					return 64 + system::compiler::CountLeadingZeroes(~ConvertBigEndianToNative(mask.u64[1]));
+				else
+					return f;
+			}
+
+			static const u64_t U64_MAX = 0xffffffffffffffff;
+
+			TIPv6 TIPv6::CIDRToMask(const u8_t cidr)
+			{
+				TIPv6 mask;
+
+				if(cidr == 0)
+				{
+					mask.u64[0] = 0x0;
+					mask.u64[1] = 0x0;
+				}
+				else if(cidr > 64)
+				{
+					mask.u64[0] = U64_MAX;
+					mask.u64[1] = ConvertNativeToBigEndian( (U64_MAX << (128-cidr)) );
+				}
+				else if(cidr < 64)
+				{
+					mask.u64[0] = ConvertNativeToBigEndian( (U64_MAX << (64-cidr)) );
+					mask.u64[1] = 0x0;
+				}
+				else
+				{
+					mask.u64[0] = U64_MAX;
+					mask.u64[1] = 0x0;
+				}
+
+				return mask;
+			}
 
 			TIPv6::TIPv6()
 			{
@@ -109,10 +187,42 @@ namespace cl3
 
 			TIPv6::TIPv6(const char* ipstr)
 			{
-				CL3_CLASS_ERROR(::sscanf(ipstr, "%hx:%hx:%hx:%hx:%hx:%hx:%hx:%hx", this->group + 0, this->group + 1, this->group + 2, this->group + 3, this->group + 4, this->group + 5, this->group + 6, this->group + 7) != 8, TException, "unable to parse IPv6 address from string");
+// 				collection::list::TList<TString> l = TString(ipstr).Split(":");
+// 				CL3_CLASS_ERROR(l.Count() < 3 || l.Count() > 8, TException, "unable to parse IPv6 address from string '%s' (too many/too few ':')", ipstr);
+//
+// 				const usys_t i = l.IndexOf("");
+// 				if(i != (usys_t)-1)
+// 				{
+// 					l.Remove(i, 1);
+//
+// 					while( l.Count() < 8 )
+// 						l.Insert(i, TString("0"));
+// 				}
+//
+// 				CL3_CLASS_ERROR(l.Find("") != NULL, TException, "unable to parse IPv6 address from string '%s' (contains more than one '::')", ipstr);
+//
+// 				for(unsigned i = 0; i < 8; i++)
+// 				{
+// 					l[i].number_format = &text::TNumberFormat::HEX;
+// 					l[i] >> this->group[i];
+// 					this->group[i] = ConvertNativeToBigEndian(this->group[i]);
+// 				}
 
-				for(unsigned i = 0; i < 16; i++)
-					this->group[i] = ConvertNativeToBigEndian(this->group[i]);
+				CL3_CLASS_ERROR(inet_pton(AF_INET6, ipstr, this->octet) != 1, TException, "unable to parse IPv6 address '%s'", ipstr);
+			}
+
+			TIPv4::operator text::string::TString() const
+			{
+				TString s;
+				s << *this;
+				return s;
+			}
+
+			TIPv6::operator text::string::TString() const
+			{
+				TString s;
+				s << *this;
+				return s;
 			}
 
 			TIPv6::TIPv6(const text::string::TString& ipstr) : TIPv6(TCString(ipstr, text::encoding::CODEC_CXX_CHAR).Chars())
@@ -145,6 +255,24 @@ namespace cl3
 			{
 				return !this->IsIPv4();
 			}
+
+
+			CLASS TMAC::TMAC()
+			{
+				::memset(this->octet, 0, sizeof(this->octet));
+			}
+
+			CLASS TMAC::TMAC(const char* const s)
+			{
+				CL3_CLASS_ERROR(sscanf(s, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", octet+0, octet+1, octet+2, octet+3, octet+4, octet+5) != 6, TException, "cannot parse MAC address");
+			}
+
+			CLASS TMAC::TMAC(const cl3::io::text::string::TString& s)
+			{
+				const TCString cstr(s, text::encoding::CODEC_CXX_CHAR);
+				CL3_CLASS_ERROR(sscanf(cstr.Chars(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", octet+0, octet+1, octet+2, octet+3, octet+4, octet+5) != 6, TException, "cannot parse MAC address");
+			}
+
 
 			TIPv6 TTCPClient::LocalIP() const
 			{

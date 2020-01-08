@@ -187,6 +187,13 @@ namespace	cl3
 
 			/**********************************************************************/
 
+			TFile&	TFile::operator=(TFile&& rhs)
+			{
+				this->fd = system::def::move(rhs.fd);
+				this->access = rhs.access;
+				return *this;
+			}
+
 			usys_t	TFile::Size		() const
 			{
 				off_t sz;

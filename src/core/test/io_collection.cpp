@@ -811,6 +811,21 @@ namespace
 				EXPECT_EQ(i, *list.Find(i, i, ESearchDirection::BACKWARD));
 		}
 	}
+
+	TEST(io_collection_list_TList, Contains)
+	{
+		TList<int> list;
+		EXPECT_FALSE(list.Contains(17));
+		list.Add(17);
+		EXPECT_TRUE(list.Contains(17));
+		list.Add(17);
+		EXPECT_TRUE(list.Contains(17));
+		list.Add(18);
+		list.Add(19);
+		list.Add(20);
+		EXPECT_TRUE(list.Contains(19));
+		EXPECT_FALSE(list.Contains(21));
+	}
 }
 
 namespace

@@ -178,9 +178,9 @@ namespace	cl3
 
 			class	CL3PUBT	ITextWriter : public virtual TTextIOCommon, public virtual stream::IOut<TUTF32>, public virtual stream::IOut<wchar_t>, public virtual stream::IOut<char>
 			{
-				private:
-					ITextWriter& operator=(ITextWriter&&) = delete;
-					ITextWriter& operator=(const ITextWriter&) = delete;
+// 				private:
+// 					ITextWriter& operator=(ITextWriter&&) = delete;
+// 					ITextWriter& operator=(const ITextWriter&) = delete;
 
 				public:
 					using stream::IOut<TUTF32>::Write;

@@ -564,6 +564,7 @@ namespace	cl3
 				template<class T>
 				usys_t		IArray<const T>::IndexOf	(const T& item_find, usys_t idx_start, ESearchDirection dir) const
 				{
+					if(this->Count() == 0) return (usys_t)-1;
 					return _::TIndexOf_impl<T, typeinfo::features::is_comparable_biggerthan<T>::value>::IndexOf(this->ItemPtr(0), this->Count(), item_find, idx_start, dir, this->IsSorted());
 				}
 

@@ -258,6 +258,8 @@ namespace	cl3
 					inline const stream::fd::TFDStream& FD() const { return this->fd; }
 					inline stream::fd::TFDStream& FD() { return this->fd; }
 
+					CL3PUBF TFile& operator=(TFile&&);
+
 					CL3PUBF TFileInfo Info	() const CL3_GETTER;
 
 					CL3PUBF usys_t	Read	(u64_t pos, byte_t* arr_items_read, usys_t n_items_read_max);

@@ -57,6 +57,8 @@ namespace cl3
 					// <full path to binary> "(" <mangled function name> "+" <offset hex> ")" <whitespace> "[" <address hex> "]"
 					//                       ^0^                         ^1^              ^2^              ^3^               ^4^
 
+					// FIXME: use dladdr() instead
+
 					usys_t p[5];
 					if((p[0] = symbol.Find("(", symbol.Count()-1, ESearchDirection::BACKWARD)) != (usys_t)-1)
 					if((p[1] = symbol.Find("+", p[0]+1, ESearchDirection::FORWARD)) != (usys_t)-1)

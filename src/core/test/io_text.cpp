@@ -853,31 +853,31 @@ namespace
 		{
 			TString buffer;
 			buffer<<0x2A;
-			EXPECT_TRUE(buffer == "2A");
+			EXPECT_TRUE(buffer == "2a");
 		}
 
 		{
 			TString buffer;
 			buffer<<0x7FFFFFFF;
-			EXPECT_TRUE(buffer == "7FFFFFFF");
+			EXPECT_TRUE(buffer == "7fffffff");
 		}
 
 		{
 			TString buffer;
 			buffer<<-0x7FFFFFFF;
-			EXPECT_TRUE(buffer == "-7FFFFFFF");
+			EXPECT_TRUE(buffer == "-7fffffff");
 		}
 
 		{
 			TString buffer;
 			buffer<<0x7FFFFFFFFFFFFFFF;
-			EXPECT_TRUE(buffer == "7FFFFFFFFFFFFFFF");
+			EXPECT_TRUE(buffer == "7fffffffffffffff");
 		}
 
 		{
 			TString buffer;
 			buffer<<-0x7FFFFFFFFFFFFFFF;
-			EXPECT_TRUE(buffer == "-7FFFFFFFFFFFFFFF");
+			EXPECT_TRUE(buffer == "-7fffffffffffffff");
 		}
 		TNumberFormat::default_format = &TNumberFormat::DECIMAL_SIMPLE;
 	}

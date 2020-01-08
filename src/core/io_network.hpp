@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <string.h>
 #include "system_types.hpp"
 #include "system_compiler.hpp"
 #include "io_stream_fd.hpp"
@@ -39,11 +40,6 @@ namespace cl3
 
 		namespace network
 		{
-			struct TMAC
-			{
-				u8_t octet[6];
-			};
-
 			struct TIPv4
 			{
 				union
@@ -66,8 +62,13 @@ namespace cl3
 				inline bool operator> (const TIPv4& rhs) const { return this->u32 >  rhs.u32; }
 				inline bool operator< (const TIPv4& rhs) const { return this->u32 <  rhs.u32; }
 
+				CL3PUBF TIPv4& operator&=(const TIPv4);
+				CL3PUBF TIPv4 operator&(const TIPv4) const CL3_GETTER;
+
 				CL3PUBF static u8_t MaskToCIDR(const TIPv4);
 				CL3PUBF static TIPv4 CIDRToMask(const u8_t);
+
+				CL3PUBF explicit operator text::string::TString() const CL3_GETTER;
 			};
 
 			CL3PUBF text::ITextWriter& operator<<(text::ITextWriter&, const TIPv4);
@@ -79,6 +80,7 @@ namespace cl3
 					u8_t octet[16];
 					u16_t group[8];
 					u32_t u32[4];
+					u64_t u64[2];
 				};
 
 				CL3PUBF bool IsIPv4() const CL3_GETTER;
@@ -86,12 +88,38 @@ namespace cl3
 
 				CL3PUBF TIPv4 IPv4() const CL3_GETTER;
 
+				inline bool operator!=(const TIPv6& rhs) const { return ::memcmp(this->octet, rhs.octet, 16) != 0; }
+				inline bool operator==(const TIPv6& rhs) const { return ::memcmp(this->octet, rhs.octet, 16) == 0; }
+				inline bool operator>=(const TIPv6& rhs) const { return ::memcmp(this->octet, rhs.octet, 16) >= 0; }
+				inline bool operator<=(const TIPv6& rhs) const { return ::memcmp(this->octet, rhs.octet, 16) <= 0; }
+				inline bool operator> (const TIPv6& rhs) const { return ::memcmp(this->octet, rhs.octet, 16) >  0; }
+				inline bool operator< (const TIPv6& rhs) const { return ::memcmp(this->octet, rhs.octet, 16) <  0; }
+
+				CL3PUBF TIPv6& operator&=(const TIPv6);
+				CL3PUBF TIPv6 operator&(const TIPv6) const CL3_GETTER;
+
+				CL3PUBF static u8_t MaskToCIDR(const TIPv6);
+				CL3PUBF static TIPv6 CIDRToMask(const u8_t);
+
+				CL3PUBF explicit operator text::string::TString() const CL3_GETTER;
+
 				CL3PUBF TIPv6();
 				CL3PUBF TIPv6(TIPv4);
 				CL3PUBF explicit TIPv6(const byte_t octet[16]);
 				CL3PUBF explicit TIPv6(const char*);
 				CL3PUBF explicit TIPv6(const text::string::TString&);
 				TIPv6(const TIPv6&) = default;
+			};
+
+			CL3PUBF text::ITextWriter& operator<<(text::ITextWriter&, const TIPv6);
+
+			struct TMAC
+			{
+				byte_t octet[6];
+
+				CL3PUBF CLASS TMAC();
+				CL3PUBF CLASS explicit TMAC(const char* const s);
+				CL3PUBF CLASS explicit TMAC(const cl3::io::text::string::TString& s);
 			};
 
 			CL3PUBF collection::list::TList<TIPv6> ResolveHostname(const text::string::TString&);
