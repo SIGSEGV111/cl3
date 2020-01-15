@@ -230,7 +230,7 @@ namespace	cl3
 				memset(&st, 0, sizeof(st));
 				CL3_CLASS_SYSERR(fstat(this->fd, &st));
 				int iflags = 0;
-				CL3_CLASS_SYSERR(ioctl(this->fd, FS_IOC_GETFLAGS, &iflags));
+				CL3_CLASS_ERROR(ioctl(this->fd, FS_IOC_GETFLAGS, &iflags) == -1 && errno != ENOTTY, TSyscallException, errno);
 				return MakeFileInfo(TString(), st, iflags, st.st_dev, AT_FDCWD);
 			}
 
