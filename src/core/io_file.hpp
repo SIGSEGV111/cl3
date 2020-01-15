@@ -244,6 +244,13 @@ namespace	cl3
 					CL3PUBF	CLASS	~TDirectoryBrowser	();
 			};
 
+			CL3PUBF	TFileInfo	GetFileInfo	(const text::string::TString& name);
+
+			inline	bool		FileExists	(const text::string::TString& name, const EEntryType type = EEntryType::FILE)
+			{
+				return GetFileInfo(name).type == type;
+			}
+
 			/************************************************************************/
 
 			class	CL3PUBT	TFile

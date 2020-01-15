@@ -234,6 +234,26 @@ namespace	cl3
 				return MakeFileInfo(TString(), st, iflags, st.st_dev, AT_FDCWD);
 			}
 
+			TFileInfo	GetFileInfo	(const text::string::TString& name)
+			{
+				struct stat st;
+				memset(&st, 0, sizeof(st));
+				const int ret = fstatat(AT_FDCWD, TCString(name, CODEC_CXX_CHAR).Chars(), &st, AT_NO_AUTOMOUNT|AT_SYMLINK_NOFOLLOW);
+				if(ret == -1)
+				{
+					if(errno == ENOENT)
+					{
+						TFileInfo fi;
+						fi.type = EEntryType::NOT_EXIST;
+						return fi;
+					}
+					else
+						CL3_NONCLASS_FAIL(TSyscallException, errno);
+				}
+
+				return MakeFileInfo(name, st, 0, st.st_dev, AT_FDCWD);
+			}
+
 			TFileInfo TDirectoryBrowser::GetFileInfo		(const text::string::TString& name) const
 			{
 				struct stat st;
