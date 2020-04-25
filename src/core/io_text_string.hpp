@@ -274,9 +274,9 @@ namespace	cl3
 
 						inline CLASS TCString() {}
 						CL3PUBF	CLASS explicit TCString	(const encoding::ICodec*);
-						CL3PUBF	CLASS explicit TCString	(const TString&, const encoding::ICodec*);
-						CL3PUBF	CLASS explicit TCString	(const TCString&);
-						CL3PUBF	CLASS explicit TCString	(TCString&&);
+						CL3PUBF	CLASS TCString	(const TString&, const encoding::ICodec*);
+						CL3PUBF	CLASS TCString	(const TCString&);
+						CL3PUBF	CLASS TCString	(TCString&&);
 				};
 			}
 		}
