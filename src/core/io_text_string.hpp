@@ -137,6 +137,7 @@ namespace	cl3
 
 						//	remove/append whitespace (or other characters)
 						CL3PUBF	void		Trim		(const IStaticCollection<const TUTF32>& collection = TString::WHITESPACE_DEFAULT, int position = POSITION_HEAD | POSITION_TAIL);
+						CL3PUBF	TString		Trimmed		(const IStaticCollection<const TUTF32>& collection = TString::WHITESPACE_DEFAULT, int position = POSITION_HEAD | POSITION_TAIL);
 						CL3PUBF	void		Pad			(EPosition position, usys_t n_pad, TUTF32 chr_pad = ' ');
 						CL3PUBF	void		PadTo		(EPosition position, usys_t n_target_length, TUTF32 chr_pad = ' ');
 						CL3PUBF	TString		Padded		(EPosition position, usys_t n_pad, TUTF32 chr_pad = ' ') const CL3_GETTER;

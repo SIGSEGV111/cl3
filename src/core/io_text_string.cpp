@@ -472,6 +472,13 @@ namespace	cl3
 					this->Cut(n_head, n_tail);
 				}
 
+				TString		TString::Trimmed		(const IStaticCollection<const TUTF32>& collection, int position)
+				{
+					TString tmp = *this;
+					tmp.Trim(collection, position);
+					return tmp;
+				}
+
 				void		TString::Pad			(EPosition position, usys_t n_pad, TUTF32 chr_pad)
 				{
 					switch(position)
