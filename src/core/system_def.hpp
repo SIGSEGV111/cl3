@@ -50,9 +50,9 @@ namespace	cl3
 			template<class T>
 			inline static void swap(T& a, T& b)
 			{
-				T tmp = a;
-				a = b;
-				b = tmp;
+				T tmp = move(a);
+				a = move(b);
+				b = move(tmp);
 			}
 
 			namespace	_
