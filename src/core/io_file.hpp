@@ -172,6 +172,7 @@ namespace	cl3
 				protected:
 					TFile* file;
 					uoff_t pos;
+					bool ro;
 
 				public:
 					//	from IIn<byte_t>
@@ -187,6 +188,7 @@ namespace	cl3
 					CL3PUBF	uoff_t	Position() const CL3_GETTER { return this->pos; }
 
 					CL3PUBF	CLASS	TStream	(TFile*);
+					CL3PUBF	CLASS	TStream	(const TFile*);
 					CL3PUBF	CLASS	TStream	(const TStream&);
 			};
 

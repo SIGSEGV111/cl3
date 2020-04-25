@@ -148,6 +148,8 @@ namespace	cl3
 
 			usys_t	TStream::Write		(const byte_t* arr_items_write, usys_t n_items_write_max, usys_t n_items_write_min)
 			{
+				CL3_CLASS_ERROR(this->ro, TException, "stream is marked as read-only - check if the TFile is qualified as 'const'");
+
 				if(n_items_write_min == (usys_t)-1)
 					n_items_write_min = n_items_write_max;
 
@@ -175,7 +177,12 @@ namespace	cl3
 				return n_items_written;
 			}
 
-			CLASS	TStream::TStream	(TFile* file) : file(file), pos(0)
+			CLASS	TStream::TStream	(TFile* file) : file(file), pos(0), ro(false)
+			{
+				//	nothing else to do
+			}
+
+			CLASS	TStream::TStream	(const TFile* file) : file(const_cast<TFile*>(file)), pos(0), ro(true)
 			{
 				//	nothing else to do
 			}
