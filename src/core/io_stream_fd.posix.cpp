@@ -244,13 +244,14 @@ namespace	cl3
 
 				CLASS	TFDStream::TFDStream	(fd_t fd) : fd(fd)
 				{
-					CL3_CLASS_ERROR(fd == -1, TException, "file-descriptor is invalid");
+// 					CL3_CLASS_ERROR(fd == -1, TException, "file-descriptor is invalid");
 				}
 
-				CLASS	TFDStream::TFDStream	(const TFDStream& other)
+				CLASS	TFDStream::TFDStream	(const TFDStream& other) : fd(-1)
 				{
 					//	duplicate the file-descriptor and while doing so, atomically set O_CLOEXEC flag
-					CL3_CLASS_SYSERR(this->fd = ::fcntl(other.fd, F_DUPFD_CLOEXEC, 0));
+					if(other.fd != -1)
+						CL3_CLASS_SYSERR(this->fd = ::fcntl(other.fd, F_DUPFD_CLOEXEC, 0));
 				}
 
 				CLASS	TFDStream::TFDStream	(TFDStream&& other) : fd(other.fd)

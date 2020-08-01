@@ -331,7 +331,7 @@ namespace	cl3
 				#undef SendMessage
 			#endif
 
-			#ifdef CL3_SOURCE_BUNDLE
+			#if (defined CL3_CORE_SOURCE_BUNDLE && !defined CL3_CORE_AMALGAM)
 				#define	CL3PUBF
 				#define	CL3PUBT
 				#define	CL3PUBV extern

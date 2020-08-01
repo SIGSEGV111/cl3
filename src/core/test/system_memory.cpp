@@ -23,6 +23,7 @@
 #include <cl3/core/io_text_terminal.hpp>
 #include <cl3/core/util.hpp>
 #include <gtest/gtest.h>
+#include "common.hpp"
 
 using namespace ::testing;
 
@@ -30,6 +31,7 @@ namespace
 {
 	using namespace cl3::system::types;
 	using namespace cl3::system::memory;
+	using namespace cl3::unittest_support;
 
 	enum	ELastOp
 	{

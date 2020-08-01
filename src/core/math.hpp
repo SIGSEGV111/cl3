@@ -478,7 +478,7 @@ namespace	cl3
 
 				inline	TMatrix<T, nR, nR>	RotationMatrix	()	const
 				{
-					CL3_CLASS_LOGIC_ERROR(nR < 3);
+					CL3_CLASS_LOGIC_ERROR(nR != 3);
 					if((v[0] == 0.0) && (v[1] == 0.0) && (v[2] == 0.0))
 						return	TMatrix<T, nR, nR>::Identity();
 					T r[nR][nR];
@@ -492,7 +492,7 @@ namespace	cl3
 
 				inline	TMatrix<T, nR, nR>	SkewSymmetric	()	const
 				{
-					CL3_CLASS_LOGIC_ERROR(nR < 3);
+					CL3_CLASS_LOGIC_ERROR(nR != 3);
 					T r[nR][nR];
 					r[0][0] = (T)0 ;	r[1][0] = -v[2];	r[2][0] =  v[1];
 					r[0][1] =  v[2];	r[1][1] = (T)0 ;	r[2][1] = -v[0];
@@ -597,6 +597,12 @@ namespace	cl3
 				{
 					for(unsigned int i = 0; i < nR; i++)
 						v[i] = vi[i];
+				}
+
+				inline	CLASS	TVector	(const TVector& rhs)
+				{
+					for(unsigned int i = 0; i < nR; i++)
+						v[i] = rhs.v[i];
 				}
 		};
 

@@ -19,6 +19,8 @@
 #ifndef	_include_cl3_core_math_formular_hpp_
 #define	_include_cl3_core_math_formular_hpp_
 
+#include "config.hpp"
+
 #include <cl3/core/io_text_string.hpp>
 #include <cl3/core/system_memory.hpp>
 
@@ -63,7 +65,7 @@ namespace	cl3
 					virtual llvm::Value* GenerateCode(llvm::IRBuilder<>&) const CL3_WARN_UNUSED_RESULT = 0;
 					virtual const system::types::typeinfo::TRTTI* Decltype() const CL3_WARN_UNUSED_RESULT = 0;
 
-					CL3PUBF virtual ~INode();
+					LL3PUBF virtual ~INode();
 				};
 
 				struct TReferenceNode : INode
@@ -71,22 +73,22 @@ namespace	cl3
 					const system::types::typeinfo::TRTTI* type;
 					const void* ptr;
 
-					CL3PUBF	llvm::Value* GenerateCode(llvm::IRBuilder<>&) const final override CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	const system::types::typeinfo::TRTTI* Decltype() const final override CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	llvm::Value* GenerateCode(llvm::IRBuilder<>&) const final override CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	const system::types::typeinfo::TRTTI* Decltype() const final override CL3_WARN_UNUSED_RESULT;
 
-					CL3PUBF	CLASS	TReferenceNode	(const system::types::typeinfo::TRTTI* type, const void* ptr);
-					CL3PUBF	CLASS	~TReferenceNode	();
+					LL3PUBF	CLASS	TReferenceNode	(const system::types::typeinfo::TRTTI* type, const void* ptr);
+					LL3PUBF	CLASS	~TReferenceNode	();
 				};
 
 				struct TConstantNode : INode
 				{
 					TValue value;
 
-					CL3PUBF	llvm::Value* GenerateCode(llvm::IRBuilder<>&) const final override CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	const system::types::typeinfo::TRTTI* Decltype() const final override CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	llvm::Value* GenerateCode(llvm::IRBuilder<>&) const final override CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	const system::types::typeinfo::TRTTI* Decltype() const final override CL3_WARN_UNUSED_RESULT;
 
-					CL3PUBF	CLASS	TConstantNode	(const system::types::typeinfo::TRTTI* type, const void* data);
-					CL3PUBF	CLASS	~TConstantNode	();
+					LL3PUBF	CLASS	TConstantNode	(const system::types::typeinfo::TRTTI* type, const void* data);
+					LL3PUBF	CLASS	~TConstantNode	();
 				};
 
 				struct TBinaryOperatorNode : INode
@@ -100,11 +102,11 @@ namespace	cl3
 					TSharedPtr<INode> lhs;
 					TSharedPtr<INode> rhs;
 
-					CL3PUBF	llvm::Value* GenerateCode(llvm::IRBuilder<>&) const final override CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	const system::types::typeinfo::TRTTI* Decltype() const final override CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	llvm::Value* GenerateCode(llvm::IRBuilder<>&) const final override CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	const system::types::typeinfo::TRTTI* Decltype() const final override CL3_WARN_UNUSED_RESULT;
 
-					CL3PUBF	CLASS	TBinaryOperatorNode	(EOperation op, TSharedPtr<INode> lhs, TSharedPtr<INode> rhs);
-					CL3PUBF	CLASS	~TBinaryOperatorNode();
+					LL3PUBF	CLASS	TBinaryOperatorNode	(EOperation op, TSharedPtr<INode> lhs, TSharedPtr<INode> rhs);
+					LL3PUBF	CLASS	~TBinaryOperatorNode();
 				};
 
 				struct TFunctionCallNode : INode
@@ -114,15 +116,15 @@ namespace	cl3
 					const system::types::typeinfo::TRTTI* type_arg;
 					TSharedPtr<INode*> arg;
 
-					CL3PUBF	llvm::Value* GenerateCode(llvm::IRBuilder<>&) const final override CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	const system::types::typeinfo::TRTTI* Decltype() const final override CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	llvm::Value* GenerateCode(llvm::IRBuilder<>&) const final override CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	const system::types::typeinfo::TRTTI* Decltype() const final override CL3_WARN_UNUSED_RESULT;
 
-					CL3PUBF	CLASS	TFunctionCallNode	(void* func, const system::types::typeinfo::TRTTI* type_return , const system::types::typeinfo::TRTTI* type_arg, TSharedPtr<INode*> arg);
-					CL3PUBF	CLASS	~TFunctionCallNode	();
+					LL3PUBF	CLASS	TFunctionCallNode	(void* func, const system::types::typeinfo::TRTTI* type_return , const system::types::typeinfo::TRTTI* type_arg, TSharedPtr<INode*> arg);
+					LL3PUBF	CLASS	~TFunctionCallNode	();
 				};
 			}
 
-			class CL3PUBT TFormular
+			class LL3PUBT TFormular
 			{
 				protected:
 					CLASS TFormular(system::memory::TSharedPtr<node::INode>);
@@ -130,64 +132,64 @@ namespace	cl3
 				public:
 					system::memory::TSharedPtr<node::INode> node_root;
 
-					CL3PUBF	TFormular	operator+	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	TFormular	operator-	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	TFormular	operator*	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	TFormular	operator/	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	TFormular	operator%	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	TFormular	operator^	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	TFormular	operator>	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	TFormular	operator<	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	TFormular	operator>=	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	TFormular	operator<=	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	TFormular	operator==	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	TFormular	operator!=	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	TFormular	operator+	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	TFormular	operator-	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	TFormular	operator*	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	TFormular	operator/	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	TFormular	operator%	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	TFormular	operator^	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	TFormular	operator>	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	TFormular	operator<	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	TFormular	operator>=	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	TFormular	operator<=	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	TFormular	operator==	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	TFormular	operator!=	(const TFormular& rhs) const CL3_WARN_UNUSED_RESULT;
 
 					//	appends to the current formular object
-					CL3PUBF	TFormular&	operator+=	(const TFormular& rhs);
-					CL3PUBF	TFormular&	operator-=	(const TFormular& rhs);
-					CL3PUBF	TFormular&	operator*=	(const TFormular& rhs);
-					CL3PUBF	TFormular&	operator/=	(const TFormular& rhs);
-					CL3PUBF	TFormular&	operator%=	(const TFormular& rhs);
-					CL3PUBF	TFormular&	operator^=	(const TFormular& rhs);
+					LL3PUBF	TFormular&	operator+=	(const TFormular& rhs);
+					LL3PUBF	TFormular&	operator-=	(const TFormular& rhs);
+					LL3PUBF	TFormular&	operator*=	(const TFormular& rhs);
+					LL3PUBF	TFormular&	operator/=	(const TFormular& rhs);
+					LL3PUBF	TFormular&	operator%=	(const TFormular& rhs);
+					LL3PUBF	TFormular&	operator^=	(const TFormular& rhs);
 
-					CL3PUBF	TFormular&	operator=	(const TFormular&);
-					CL3PUBF	TFormular&	operator=	(TFormular&&);
+					LL3PUBF	TFormular&	operator=	(const TFormular&);
+					LL3PUBF	TFormular&	operator=	(TFormular&&);
 
 					//	creates a new sub-expression which refers to the pointed-to variable
-					CL3PUBF	CLASS		TFormular	(const f32_t*);
-					CL3PUBF	CLASS		TFormular	(const f64_t*);
-					CL3PUBF	CLASS		TFormular	(const u8_t*);
-					CL3PUBF	CLASS		TFormular	(const s8_t*);
-					CL3PUBF	CLASS		TFormular	(const u16_t*);
-					CL3PUBF	CLASS		TFormular	(const s16_t*);
-					CL3PUBF	CLASS		TFormular	(const u32_t*);
-					CL3PUBF	CLASS		TFormular	(const s32_t*);
-					CL3PUBF	CLASS		TFormular	(const u64_t*);
-					CL3PUBF	CLASS		TFormular	(const s64_t*);
-					CL3PUBF	CLASS		TFormular	(const bool*);
+					LL3PUBF	CLASS		TFormular	(const f32_t*);
+					LL3PUBF	CLASS		TFormular	(const f64_t*);
+					LL3PUBF	CLASS		TFormular	(const u8_t*);
+					LL3PUBF	CLASS		TFormular	(const s8_t*);
+					LL3PUBF	CLASS		TFormular	(const u16_t*);
+					LL3PUBF	CLASS		TFormular	(const s16_t*);
+					LL3PUBF	CLASS		TFormular	(const u32_t*);
+					LL3PUBF	CLASS		TFormular	(const s32_t*);
+					LL3PUBF	CLASS		TFormular	(const u64_t*);
+					LL3PUBF	CLASS		TFormular	(const s64_t*);
+					LL3PUBF	CLASS		TFormular	(const bool*);
 
 					//	creates a new sub-expression which holds a copy of the variable
-					CL3PUBF	CLASS		TFormular	(const f32_t);
-					CL3PUBF	CLASS		TFormular	(const f64_t);
-					CL3PUBF	CLASS		TFormular	(const u8_t);
-					CL3PUBF	CLASS		TFormular	(const s8_t);
-					CL3PUBF	CLASS		TFormular	(const u16_t);
-					CL3PUBF	CLASS		TFormular	(const s16_t);
-					CL3PUBF	CLASS		TFormular	(const u32_t);
-					CL3PUBF	CLASS		TFormular	(const s32_t);
-					CL3PUBF	CLASS		TFormular	(const u64_t);
-					CL3PUBF	CLASS		TFormular	(const s64_t);
-					CL3PUBF	CLASS		TFormular	(const bool);
+					LL3PUBF	CLASS		TFormular	(const f32_t);
+					LL3PUBF	CLASS		TFormular	(const f64_t);
+					LL3PUBF	CLASS		TFormular	(const u8_t);
+					LL3PUBF	CLASS		TFormular	(const s8_t);
+					LL3PUBF	CLASS		TFormular	(const u16_t);
+					LL3PUBF	CLASS		TFormular	(const s16_t);
+					LL3PUBF	CLASS		TFormular	(const u32_t);
+					LL3PUBF	CLASS		TFormular	(const s32_t);
+					LL3PUBF	CLASS		TFormular	(const u64_t);
+					LL3PUBF	CLASS		TFormular	(const s64_t);
+					LL3PUBF	CLASS		TFormular	(const bool);
 
-					CL3PUBF	CLASS		TFormular	(const TFormular&);
-					CL3PUBF	CLASS		TFormular	(TFormular&&);
-					CL3PUBF	CLASS		TFormular	(const io::text::string::TString&);
+					LL3PUBF	CLASS		TFormular	(const TFormular&);
+					LL3PUBF	CLASS		TFormular	(TFormular&&);
+					LL3PUBF	CLASS		TFormular	(const io::text::string::TString&);
 
-					CL3PUBF	llvm::Function* GenerateCode(llvm::Module&) const CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	llvm::Function* GenerateCode(llvm::Module&, const io::text::string::TString& name) const CL3_WARN_UNUSED_RESULT;
-					CL3PUBF	const system::types::typeinfo::TRTTI* Decltype() const CL3_WARN_UNUSED_RESULT;
-					CL3PUBF io::text::string::TString ToString() const CL3_GETTER;
+					LL3PUBF	llvm::Function* GenerateCode(llvm::Module&) const CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	llvm::Function* GenerateCode(llvm::Module&, const io::text::string::TString& name) const CL3_WARN_UNUSED_RESULT;
+					LL3PUBF	const system::types::typeinfo::TRTTI* Decltype() const CL3_WARN_UNUSED_RESULT;
+					LL3PUBF io::text::string::TString ToString() const CL3_GETTER;
 			};
 		}
 	}

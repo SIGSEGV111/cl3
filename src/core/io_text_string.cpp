@@ -208,7 +208,7 @@ namespace	cl3
 				TString		TString::operator+	(TString&& rhs) const
 				{
 					rhs.Insert(0, *this);
-					return rhs;
+					return system::def::move(rhs);
 				}
 
 				/*
