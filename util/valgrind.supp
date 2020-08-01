@@ -17,38 +17,8 @@
 	fun:llvm_gcda_end_file
 }
 {
-	llvm/3
-	Memcheck:Cond
-	obj:/usr/lib64/libLLVMCodeGen.so.3.7.0
-	fun:_ZN4llvm19MachineFunctionPass13runOnFunctionERNS_8FunctionE
-}
-{
-	llvm/4
-	Memcheck:Cond
-	obj:/usr/lib64/libLLVMCodeGen.so.3.8.0
-	fun:_ZN4llvm19MachineFunctionPass13runOnFunctionERNS_8FunctionE
-}
-{
-	llvm/5
-	Memcheck:Cond
-	obj:/usr/lib64/libLLVM.so.4.0.1
-	fun:_ZN4llvm19MachineFunctionPass13runOnFunctionERNS_8FunctionE
-}
-{
-	llvm/6
-	Memcheck:Cond
-	obj:/usr/lib64/libLLVM.so.5.0.1
-	fun:_ZN4llvm19MachineFunctionPass13runOnFunctionERNS_8FunctionE
-}
-{
-	llvm/7
-	Memcheck:Cond
-	obj:/usr/lib64/libLLVM.so.6.0.0
-	fun:_ZN4llvm19MachineFunctionPass13runOnFunctionERNS_8FunctionE
-}
-{
-   llvm/8
+   llvm/3
    Memcheck:Cond
-   obj:/usr/lib64/libLLVM.so.6.0.1
+   obj:/usr/lib64/libLLVM.so.*
    fun:_ZN4llvm19MachineFunctionPass13runOnFunctionERNS_8FunctionE
 }

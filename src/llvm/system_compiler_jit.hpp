@@ -19,6 +19,7 @@
 #ifndef	_include_cl3_core_system_compiler_jit_hpp_
 #define	_include_cl3_core_system_compiler_jit_hpp_
 
+#include <cl3/llvm/config.hpp>
 #include <cl3/core/system_compiler.hpp>
 #include <cl3/core/system_memory.hpp>
 #include <cl3/core/system_library.hpp>

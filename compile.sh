@@ -66,7 +66,7 @@ for m in dbg rel; do
 
 	ln -nfs "$CL3_ROOT/util/gtest/googletest/include/gtest" "gen/$m/include/gtest"
 
-	for f in tmp/gtest/build/googlemock/gtest/*.a; do
+	for f in tmp/gtest/build/lib/*.a; do
 		ln -nfs "../../../$f" "gen/$m/lib/"
 	done
 done

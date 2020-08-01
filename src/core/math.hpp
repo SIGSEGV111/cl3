@@ -598,6 +598,12 @@ namespace	cl3
 					for(unsigned int i = 0; i < nR; i++)
 						v[i] = vi[i];
 				}
+
+				inline	CLASS	TVector	(const TVector& rhs)
+				{
+					for(unsigned int i = 0; i < nR; i++)
+						v[i] = rhs.v[i];
+				}
 		};
 
 		template<class T, unsigned int nC, unsigned int nR>
